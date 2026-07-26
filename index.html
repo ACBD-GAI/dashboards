@@ -520,7 +520,7 @@ const SESSION_KEY = "inventorySession";
  
 
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwoWLF1pv_zvvB5YWD8M3boxA-6cjYsXid7ukkr3WlVeX84X1cGtVLYaI3FOS5W1tqqHw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwrjjWeDdDpCRIwAaIuY_dOqITFLLcyBmg0E0k01pyDOuSUKUnTvv5N7IMcSLLtxd9AeQ/exec";
 let allRows = [];
 let currentPage = 1;
 const rowsPerPage = 20;
@@ -1009,9 +1009,9 @@ allRows.slice(start,end);
 <td>${r.branch}</td>
 <td>${r.lenstype}</td>
 <td>${r.description}</td>
-<td>${r.tag}</td>
-<td>${r.si}</td>
-<td>${r.date}</td>
+<td>${r.ntagn}</td>
+<td>${r["SI NO."]}</td>
+<td>${r["DATE AND TIME"]}</td>
 
 <td>
 
@@ -1067,7 +1067,7 @@ onclick="deleteItem('${r.branch}',${r.row})">
 
 };
 
-document.getElementById("searchBtn").onclick = loadDashboard;
+document.getElementById("searchBtn").onclick = searchStocks;
 
 document.getElementById("refreshBtn").onclick = loadDashboard;
 

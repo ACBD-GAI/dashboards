@@ -520,7 +520,7 @@ const SESSION_KEY = "inventorySession";
  
 
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxo3hV8dqPZFCR5YTCHUpIYvMPEfj3Mjr6yyzC1RlyKDQ0NWC81pjdXrbnGfxLCUR1vzg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzgH7oi9_Djah3h2KhMEHFCGYiUNOUpnDkUS2z2NPHlvY6ONpcF7ZlwH3sM4Tr-1HzPbA/exec";
 let allRows = [];
 let currentPage = 1;
 const rowsPerPage = 20;
@@ -883,12 +883,13 @@ document.getElementById("searchBox").value.trim();
 
 
 const url =
-API_URL+
-"?action=summary"+
-"&branch="+encodeURIComponent(branch)+
-"&sheet="+encodeURIComponent(sheet)+
-"&search="+encodeURIComponent(search)+
-"&load=1"+
+API_URL +
+"?action=summary" +
+"&branch=" + encodeURIComponent(branch) +
+"&sheet=" + encodeURIComponent(sheet) +
+"&search=" + encodeURIComponent(search) +
+"&load=1" +
+"&page=" + currentPage +
 getSessionParams();
 
 console.log("REQUEST URL:", url);
@@ -900,8 +901,16 @@ const res = await fetch(url);
         console.log("SERVER RESPONSE:", text);
 
         const data = JSON.parse(text);
+     
+console.log("SUMMARY RESPONSE", data);
+
+console.log("availableTotal =", data.availableTotal);
+console.log("soldTotal =", data.soldTotal);
+console.log("auditTotal =", data.auditTotal);
+console.log("rows =", data.data.length);
 
 
+     
         if(data.status !== "OK"){
 
             console.error(data.message || "Server error");
@@ -925,12 +934,19 @@ document.getElementById("soldCount").textContent =
 
 document.getElementById("auditCount").textContent =
     data.auditTotal;
+     
+     console.log("AVAILABLE CARD =", document.getElementById("availableCount").textContent);
+     
+console.log("SOLD CARD =", document.getElementById("soldCount").textContent);
 
 document.getElementById("showingCount").textContent =
     allRows.length;
 
 
-    }catch(err){
+    }
+    
+    
+    catch(err){
 
         console.error("DASHBOARD ERROR:",err);
 
@@ -977,14 +993,7 @@ function renderTable(){
     if(currentPage<1) currentPage=1;
     if(currentPage>totalPages) currentPage=totalPages;
 
-    const start =
-    (currentPage-1)*rowsPerPage;
-
-    const end =
-    start+rowsPerPage;
-
-    const rows =
-    allRows.slice(start,end);
+  const rows = allRows;
 
     body.innerHTML = rows.map((r)=>`
 
@@ -1352,28 +1361,21 @@ function closeDialog(){
 }
 
 
- document.getElementById("nextBtn").onclick=function(){
+document.getElementById("nextBtn").onclick = async function () {
 
-    const totalPages =
-    Math.ceil(allRows.length/rowsPerPage);
+    currentPage++;
 
-    if(currentPage<totalPages){
-
-        currentPage++;
-
-        renderTable();
-
-    }
+    await loadDashboard();
 
 };
 
-document.getElementById("prevBtn").onclick=function(){
+document.getElementById("prevBtn").onclick = async function () {
 
-    if(currentPage>1){
+    if (currentPage > 1) {
 
         currentPage--;
 
-        renderTable();
+        await loadDashboard();
 
     }
 

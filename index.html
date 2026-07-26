@@ -520,7 +520,7 @@ const SESSION_KEY = "inventorySession";
  
 
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwrjjWeDdDpCRIwAaIuY_dOqITFLLcyBmg0E0k01pyDOuSUKUnTvv5N7IMcSLLtxd9AeQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxCjjcfVusL1PwMwBT4LsalxHFSCnRlEV9bTHTlqwqt9lowaimyA7HvkMirVmwShNWG8A/exec";
 let allRows = [];
 let currentPage = 1;
 const rowsPerPage = 20;
@@ -1914,6 +1914,54 @@ status.innerHTML="Export failed.";
 
 }
  
+
+
+async function searchStocks(){
+
+const branch =
+document.getElementById("branchSelect").value;
+
+const search =
+document.getElementById("searchBox").value.trim();
+
+
+const res = await fetch(
+SUPABASE_URL +
+"/rest/v1/rpc/search_stocks",
+{
+method:"POST",
+
+headers:{
+"apikey":SUPABASE_KEY,
+"Authorization":"Bearer "+SUPABASE_KEY,
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+search_branch:
+branch==="ALL"?null:branch,
+
+search_text:
+search || null
+})
+
+});
+
+
+const data = await res.json();
+
+console.log(data);
+
+allRows=data;
+
+renderTable();
+
+document.getElementById("showingCount").textContent=data.length;
+
+}
+
+
+
 
 
  

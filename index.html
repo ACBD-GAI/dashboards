@@ -520,7 +520,7 @@ const SESSION_KEY = "inventorySession";
  
 
 
-const API_URL = "https://script.google.com/macros/s/AKfycby6ul02kV-RQEuZ-OxsI_LAWzkvm5FKb3xPIOhoJ8k0eeUptZL0H21egRYibJNnPPdifA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwXP0mkYF_ZXxwRE19RkkNHyAR_EZKXcb0V_8ax244w0otNplgfDIrhiqQ-7Rrt9YGAuw/exec";
 let allRows = [];
 let currentPage = 1;
 const rowsPerPage = 20;
@@ -993,7 +993,14 @@ function renderTable(){
     if(currentPage<1) currentPage=1;
     if(currentPage>totalPages) currentPage=totalPages;
 
-  const rows = allRows;
+  const start =
+(currentPage - 1) * rowsPerPage;
+
+const end =
+start + rowsPerPage;
+
+const rows =
+allRows.slice(start,end);
 
     body.innerHTML = rows.map((r)=>`
 
@@ -1361,21 +1368,28 @@ function closeDialog(){
 }
 
 
-document.getElementById("nextBtn").onclick = async function () {
+document.getElementById("nextBtn").onclick=function(){
 
-    currentPage++;
+    const totalPages =
+    Math.ceil(allRows.length/rowsPerPage);
 
-    await loadDashboard();
+    if(currentPage < totalPages){
+
+        currentPage++;
+
+        renderTable();
+
+    }
 
 };
 
-document.getElementById("prevBtn").onclick = async function () {
+document.getElementById("prevBtn").onclick=function(){
 
-    if (currentPage > 1) {
+    if(currentPage>1){
 
         currentPage--;
 
-        await loadDashboard();
+        renderTable();
 
     }
 

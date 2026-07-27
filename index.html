@@ -864,107 +864,7 @@ function resetDashboard(){
 
  
 
-async function loadDashboard(){
 
-    const branch =
-    document.getElementById("branchSelect").value;
-
-    const sheet =
-    document.getElementById("sheetSelect").value;
-
-    document.getElementById("loading").style.display="flex";
-
-    try{
-
-
-
-const search =
-document.getElementById("searchBox").value.trim();
-
-
-const url =
-API_URL +
-"?action=summary" +
-"&branch=" + encodeURIComponent(branch) +
-"&sheet=" + encodeURIComponent(sheet) +
-"&search=" + encodeURIComponent(search) +
-"&load=1" +
-"&page=" + currentPage +
-getSessionParams();
-
-console.log("REQUEST URL:", url);
-
-const res = await fetch(url);
-
-        const text = await res.text();
-
-        console.log("SERVER RESPONSE:", text);
-
-        const data = JSON.parse(text);
-     
-console.log("SUMMARY RESPONSE", data);
-
-console.log("availableTotal =", data.availableTotal);
-console.log("soldTotal =", data.soldTotal);
-console.log("auditTotal =", data.auditTotal);
-console.log("rows =", data.data.length);
-
-
-     
-        if(data.status !== "OK"){
-
-            console.error(data.message || "Server error");
-
-            return;
-        }
-
-
-     allRows = data.data;
-currentPage = 1;
-renderTable();
-
-
-   
-
-document.getElementById("availableCount").textContent =
-    data.availableTotal;
-
-document.getElementById("soldCount").textContent =
-    data.soldTotal;
-
-document.getElementById("auditCount").textContent =
-    data.auditTotal;
-     
-     console.log("AVAILABLE CARD =", document.getElementById("availableCount").textContent);
-     
-console.log("SOLD CARD =", document.getElementById("soldCount").textContent);
-
-document.getElementById("showingCount").textContent =
-    allRows.length;
-
-
-    }
-    
-    
-    catch(err){
-
-        console.error("DASHBOARD ERROR:",err);
-
-      console.error(err);
-     
-    }
-    
-    
-    
-    finally{
-
-     document.getElementById("loading").style.display = "none";
-
-        
-
-    }
-
-}
 
 function renderTable(){
 
@@ -1181,7 +1081,7 @@ if(data.status=="OK"){
 
     closeDialog();
 
-    await loadDashboard();
+    await loadStocksPage();
 
     showDialog(
         "Deleted",
@@ -1281,7 +1181,7 @@ if(data.status=="OK"){
 
     closeEditModal();
 
-    await loadDashboard();
+    await loadStocksPage();
 
     showDialog(
         "Updated",

@@ -1921,31 +1921,61 @@ async function searchStocks(){
     const branch = document.getElementById("branchSelect").value;
     const search = document.getElementById("searchBox").value.trim();
 
-    console.log("Searching...");
-    console.log("Branch:", branch);
-    console.log("Search:", search);
+    document.getElementById("loading").style.display = "flex";
 
-    const res = await fetch(
-        SUPABASE_URL + "/rest/v1/rpc/search_stocks",
-        {
-            method: "POST",
-            headers:{
-                "apikey": SUPABASE_KEY,
-                "Authorization":"Bearer " + SUPABASE_KEY,
-                "Content-Type":"application/json"
-            },
-            body: JSON.stringify({
-                branch_filter: branch === "ALL" ? null : branch,
-                search_text: search
-            })
+    try{
+
+        const res = await fetch(
+            SUPABASE_URL + "/rest/v1/rpc/search_stocks",
+            {
+                method:"POST",
+                headers:{
+                    "apikey":SUPABASE_KEY,
+                    "Authorization":"Bearer " + SUPABASE_KEY,
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    branch_filter: branch === "ALL" ? null : branch,
+                    search_text: search
+                })
+            }
+        );
+
+        if(!res.ok){
+            throw new Error(await res.text());
         }
-    );
 
-    console.log("Status:", res.status);
+        const rows = await res.json();
 
-    const text = await res.text();
+        console.log(rows);
 
-    console.log("Response:", text);
+       allRows = rows.map(r => ({
+    row: r.id,
+    branch: r.branch,
+    description: r.description,
+    lenstype: r.lenstype,
+    tag: r.ntagn,
+    si: r["SI NO."],
+    date: r["DATE AND TIME"]
+}));
+
+        currentPage = 1;
+
+        renderTable();
+
+        document.getElementById("showingCount").textContent = rows.length;
+
+    }catch(err){
+
+        console.error(err);
+        alert(err.message);
+
+    }finally{
+
+        document.getElementById("loading").style.display="none";
+
+    }
+
 }
 
 

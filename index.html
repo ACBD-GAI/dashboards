@@ -1836,7 +1836,7 @@ const search = document.getElementById("searchBox").value.trim();
     try{
 
         const res = await fetch(
-            SUPABASE_URL + "/rest/v1/rpc/search_inventory",
+            SUPABASE_URL + "/rest/v1/rpc/search_inventory"
             {
                 method:"POST",
                 headers:{
@@ -1846,10 +1846,16 @@ const search = document.getElementById("searchBox").value.trim();
                 },
 
              
-      body:JSON.stringify({
-    report_type: sheet,
-    search_branch: branch === "ALL" ? null : branch,
+body:JSON.stringify({
+
+    report_type:
+    document.getElementById("sheetSelect").value,
+
+    search_branch:
+    branch === "ALL" ? null : branch,
+
     search_text: search
+
 })
        
             }

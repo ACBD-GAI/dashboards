@@ -1069,7 +1069,7 @@ onclick="deleteItem('${r.branch}',${r.row})">
 
 document.getElementById("searchBtn").onclick = searchStocks;
 
-document.getElementById("refreshBtn").onclick = loadDashboard;
+document.getElementById("refreshBtn").onclick = loadStocksPage;
 
 document.getElementById("exportBtn").onclick=function(){
 
@@ -1097,13 +1097,11 @@ console.log("Sheet changed. Click SEARCH.");
 
 // ENTER key still performs SEARCH
 document.getElementById("searchBox")
-.addEventListener("keydown",function(e){
+.addEventListener("keydown", function(e){
 
-if(e.key==="Enter"){
-
-loadDashboard();
-
-}
+    if(e.key === "Enter"){
+        loadStocksPage();
+    }
 
 });
 
@@ -1949,14 +1947,14 @@ async function searchStocks(){
 
         console.log(rows);
 
-       allRows = rows.map(r => ({
+allRows = rows.map(r => ({
     row: r.id,
     branch: r.branch,
     description: r.description,
     lenstype: r.lenstype,
-    tag: r.ntagn,
-    si: r["SI NO."],
-    date: r["DATE AND TIME"]
+    tag: r.tag,
+    si: r.si,
+    date: r.sdate
 }));
 
         currentPage = 1;
@@ -1978,7 +1976,66 @@ async function searchStocks(){
 
 }
 
+async function loadStocksPage(){
 
+    const branch = document.getElementById("branchSelect").value;
+
+    document.getElementById("loading").style.display = "flex";
+
+    try{
+
+        const res = await fetch(
+            SUPABASE_URL + "/rest/v1/rpc/get_stocks_page",
+            {
+                method:"POST",
+                headers:{
+                    "apikey":SUPABASE_KEY,
+                    "Authorization":"Bearer " + SUPABASE_KEY,
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    branch_filter: branch,
+                    page_number: currentPage,
+                    page_size: rowsPerPage
+                })
+            }
+        );
+
+        if(!res.ok){
+            throw new Error(await res.text());
+        }
+
+        const rows = await res.json();
+
+        allRows = rows.map(r=>({
+            row:r.id,
+            branch:r.branch,
+            description:r.description,
+            lenstype:r.lenstype,
+            tag:r.tag,
+            si:r.si,
+            date:r.sdate
+        }));
+
+        renderTable();
+
+        document.getElementById("showingCount").textContent = rows.length;
+
+    }catch(err){
+
+        console.error(err);
+        alert(err.message);
+
+    }finally{
+
+        document.getElementById("loading").style.display="none";
+
+    }
+
+}
+
+
+ 
 
 
  

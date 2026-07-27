@@ -521,7 +521,7 @@ const SESSION_KEY = "inventorySession";
 
 
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwWFYmSnaBfKiZq6kOgirjcZViRNf1oxxXbe5E8kh3UJD_sv1su06PJlwNzR1_WZMhR3Q/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzSEpZEufiG3B3eVc1iwdcEwQJb4VmQpaPaXNE33Gs3AMt9hCmmMpz42xHuMZB9ZbZFDg/exec";
 const SUPABASE_URL = "https://hvurhnarllvfinpdkfkp.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDg3NjE3MSwiZXhwIjoyMTAwNDUyMTcxfQ.RfKJxtV06KMMNGHAqG0BhrYsjtee_eUq0m2ktrgUcxA";
  
@@ -1820,8 +1820,9 @@ status.innerHTML="Export failed.";
 
 async function searchStocks(){
 
- const branch = document.getElementById("branchSelect").value;
-    const search = document.getElementById("searchBox").value.trim();
+const branch = document.getElementById("branchSelect").value;
+const sheet = document.getElementById("sheetSelect").value;
+const search = document.getElementById("searchBox").value.trim();
 
     console.log("BRANCH SENT:", branch);
     console.log("SEARCH SENT:", search);
@@ -1843,7 +1844,8 @@ async function searchStocks(){
                 },
 
              
-               body:JSON.stringify({
+      body:JSON.stringify({
+    report_type: sheet,
     search_branch: branch === "ALL" ? null : branch,
     search_text: search
 })

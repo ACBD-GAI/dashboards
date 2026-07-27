@@ -1836,10 +1836,13 @@ async function searchStocks(){
                     "Authorization":"Bearer " + SUPABASE_KEY,
                     "Content-Type":"application/json"
                 },
-                body:JSON.stringify({
-                    branch_filter: branch === "ALL" ? null : branch,
-                    search_text: search
-                })
+
+             
+               body:JSON.stringify({
+    search_branch: branch === "ALL" ? null : branch,
+    search_text: search
+})
+       
             }
         );
 

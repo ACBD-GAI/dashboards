@@ -1003,9 +1003,9 @@ console.log("Sheet changed. Click SEARCH.");
 document.getElementById("searchBox")
 .addEventListener("keydown", function(e){
 
-    if(e.key === "Enter"){
-        loadStocksPage();
-    }
+  if(e.key === "Enter"){
+    searchStocks();
+}
 
 });
 
@@ -1820,8 +1820,13 @@ status.innerHTML="Export failed.";
 
 async function searchStocks(){
 
-    const branch = document.getElementById("branchSelect").value;
+ const branch = document.getElementById("branchSelect").value;
     const search = document.getElementById("searchBox").value.trim();
+
+    console.log("BRANCH SENT:", branch);
+    console.log("SEARCH SENT:", search);
+
+ 
 
     document.getElementById("loading").style.display = "flex";
 

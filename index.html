@@ -875,79 +875,139 @@ async function loadDashboard(){
     const sheet =
     document.getElementById("sheetSelect").value;
 
+    const search =
+    document.getElementById("searchBox").value.trim().toLowerCase();
+
+
     document.getElementById("loading").style.display="flex";
+
 
     try{
 
 
-
-const search =
-document.getElementById("searchBox").value.trim();
+        let tableName="stocks";
 
 
-const url =
-API_URL+
-"?action=summary"+
-"&branch="+encodeURIComponent(branch)+
-"&sheet="+encodeURIComponent(sheet)+
-"&search="+encodeURIComponent(search)+
-"&load=1"+
-getSessionParams();
-
-console.log("REQUEST URL:", url);
-
-const res = await fetch(url);
-
-        const text = await res.text();
-
-        console.log("SERVER RESPONSE:", text);
-
-        const data = JSON.parse(text);
-
-
-        if(data.status !== "OK"){
-
-            console.error(data.message || "Server error");
-
-            return;
+        if(sheet==="SCANRESULTS"){
+            tableName="scanresults";
         }
 
 
-     allRows = data.data;
-currentPage = 1;
-renderTable();
+        if(sheet==="AUDIT"){
+            tableName="audit";
+        }
 
 
-   
 
-document.getElementById("availableCount").textContent =
-    data.availableTotal;
-
-document.getElementById("soldCount").textContent =
-    data.soldTotal;
-
-document.getElementById("auditCount").textContent =
-    data.auditTotal;
-
-document.getElementById("showingCount").textContent =
-    allRows.length;
+        let url =
+        SUPABASE_URL+
+        "/rest/v1/"+
+        tableName+
+        "?select=*";
 
 
-    }catch(err){
+        if(branch!=="ALL"){
 
-        console.error("DASHBOARD ERROR:",err);
+            url +=
+            "&branch=eq."+encodeURIComponent(branch);
 
-      console.error(err);
-     
+        }
+
+
+
+        const res = await fetch(url,{
+
+            headers:{
+                "apikey":SUPABASE_KEY,
+                "Authorization":
+                "Bearer "+SUPABASE_KEY
+            }
+
+        });
+
+
+
+        const rows = await res.json();
+
+
+
+        console.log("SUPABASE DATA:",rows);
+
+
+
+        if(!Array.isArray(rows)){
+
+            console.error(rows);
+            return;
+
+        }
+
+
+
+        allRows = rows.map(r=>({
+
+            row:r.id || 0,
+
+            branch:r.branch || "",
+
+            lenstype:
+            r.lenstype || "",
+
+            description:
+            r.description || "",
+
+            tag:
+            r.tag || "",
+
+            si:
+            r.si || "",
+
+            date:
+            r.date || ""
+
+        }));
+
+
+        if(search){
+
+            allRows =
+            allRows.filter(r=>
+
+                JSON.stringify(r)
+                .toLowerCase()
+                .includes(search)
+
+            );
+
+        }
+
+
+
+        currentPage=1;
+
+        renderTable();
+
+
+
+        document.getElementById("showingCount")
+        .textContent =
+        allRows.length;
+
+
+
     }
-    
-    
-    
+    catch(err){
+
+        console.error(
+            "SUPABASE ERROR:",
+            err
+        );
+
+    }
     finally{
 
-     document.getElementById("loading").style.display = "none";
-
-        
+        document.getElementById("loading")
+        .style.display="none";
 
     }
 

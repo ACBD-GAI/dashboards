@@ -520,7 +520,7 @@ const SESSION_KEY = "inventorySession";
  
 
 
-const API_URL = "https://script.google.com/macros/s/AKfycbz9NryUcrTrPIa9gdO2EVL9UOP2IU9ZyiPG3jvUdO5rItNdCCcfRPRXWyjWPx5sC_K3UA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwoQV3GKkezi5l0q_5SzFBtFdEnwayB8y-weeM4BGZRCcAGFvBOmneY1a-MziyYUhHeJg/exec";
 let allRows = [];
 let currentPage = 1;
 const rowsPerPage = 20;
@@ -661,33 +661,34 @@ const data = JSON.parse(text);
         verifyBtn.disabled=false;
         verifyBtn.textContent="VERIFY OTP";
 
-        if(data.status==="OK"){
+      if(data.status==="OK"){
 
-            status.style.color="#28a745";
-            status.innerHTML="✅ Login successful.";
+    status.style.color="#28a745";
+    status.innerHTML="✅ Login successful.";
 
-            localStorage.setItem(
-                SESSION_KEY,
-                JSON.stringify({
-                    email:email,
-                    sessionId:data.sessionId
-                })
-            );
+    localStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({
+            email:email,
+            sessionId:data.sessionId
+        })
+    );
 
-            localStorage.setItem("loginTime",Date.now());
+    localStorage.setItem("loginTime",Date.now());
 
-            document.getElementById("loginScreen").style.display="none";
-            document.getElementById("app").style.display="block";
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="block";
 
-            resetDashboard();
+    resetDashboard();
 
-        }else{
+}else{
 
-            status.style.color="#dc3545";
-            status.innerHTML="❌ Invalid or expired OTP.";
+    console.log(data);
 
-        }
+    status.style.color="#dc3545";
+    status.innerHTML="❌ " + (data.message || data.status);
 
+}
     }catch(err){
 
         verifyBtn.disabled=false;

@@ -944,42 +944,42 @@ async function loadDashboard(){
 
 
 
-        allRows = rows.map(r=>({
+        allRows = rows.map((r, index) => ({
 
-            row:r.id || 0,
+    row: r.id || index + 1,
 
-            branch:r.branch || "",
+    branch: r.branch || r.BR || "",
 
-            lenstype:
-            r.lenstype || "",
+    lenstype: r.lenstype || r.LENSTYPE || "",
 
-            description:
-            r.description || "",
+    description: r.description || r.DESCRIPTION || "",
 
-            tag:
-            r.tag || "",
+    tag: r.tag || r.TAG || "",
 
-            si:
-            r.si || "",
+    si: r.si || r.SI || "",
 
-            date:
-            r.date || ""
+    date: r.date || r.DATE || ""
 
-        }));
+}));
 
 
-        if(search){
+  if (search) {
 
-            allRows =
-            allRows.filter(r=>
+    allRows = allRows.filter(r =>
 
-                JSON.stringify(r)
-                .toLowerCase()
-                .includes(search)
+        String(r.tag).toLowerCase().includes(search) ||
 
-            );
+        String(r.si).toLowerCase().includes(search) ||
 
-        }
+        String(r.description).toLowerCase().includes(search) ||
+
+        String(r.branch).toLowerCase().includes(search) ||
+
+        String(r.lenstype).toLowerCase().includes(search)
+
+    );
+
+}
 
 
 

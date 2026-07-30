@@ -899,11 +899,17 @@ async function loadDashboard(){
 
 
 
-        let url =
-        SUPABASE_URL+
-        "/rest/v1/"+
-        tableName+
-        "?select=*";
+      let url =
+    SUPABASE_URL +
+    "/rest/v1/" +
+    tableName +
+    "?select=*";
+
+if (branch && branch !== "ALL") {
+    url += "&br=eq." + branch;
+}
+
+console.log(url);
 
 
 if (branch !== "ALL") {
@@ -925,7 +931,11 @@ const res = await fetch(url,{
 });
 
 
-        const rows = await res.json();
+      const rows = await res.json();
+
+console.log("Returned rows:", rows.length);
+console.log(rows);
+     
      console.log("FIRST ROW:", rows[0]);
 console.log("ALL KEYS:", Object.keys(rows[0]));
 

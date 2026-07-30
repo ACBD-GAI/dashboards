@@ -920,16 +920,18 @@ if (branch !== "ALL") {
 
 
 
-        const res = await fetch(url,{
+      console.log("Branch =", branch);
+console.log("Table =", tableName);
+console.log("URL =", url);
 
-            headers:{
-                "apikey":SUPABASE_KEY,
-                "Authorization":
-                "Bearer "+SUPABASE_KEY
-            }
+const res = await fetch(url,{
 
-        });
+    headers:{
+        "apikey":SUPABASE_KEY,
+        "Authorization":"Bearer "+SUPABASE_KEY
+    }
 
+});
 
 
         const rows = await res.json();

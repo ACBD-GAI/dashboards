@@ -907,17 +907,8 @@ async function loadDashboard(){
 
 
 if (branch !== "ALL") {
-
-    const branchColumn =
-        tableName === "scanresults"
-            ? "branch"
-            : "br";
-
-    url +=
-        "&" + branchColumn + "=eq." + encodeURIComponent(branch);
-
+    url += "&br=eq." + encodeURIComponent(branch);
 }
-
 
 
       console.log("Branch =", branch);
@@ -955,22 +946,23 @@ console.log("ALL KEYS:", Object.keys(rows[0]));
 
         allRows = rows.map((r, index) => ({
 
-    row: r.id || index + 1,
+    row: index + 1,
 
-    branch: r.br || r.branch || r.BR || "",
+    branch: r.br || "",
 
-    lenstype: r.lenstype || r.LENSTYPE || "",
+    lenstype: r.lenstype || "",
 
-    description: r.description || r.DESCRIPTION || "",
+    description: r.description || "",
 
-    tag: r.tag || r.TAG || "",
+    tag: r.ntagn || "",
 
-    si: r.si || r.SI || "",
+    si: r.si_no || "",
 
-    date: r.date || r.DATE || ""
+    date: r.date_time || ""
 
 }));
 
+     
 
   if (search) {
 

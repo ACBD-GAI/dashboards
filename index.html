@@ -1329,13 +1329,13 @@ async function saveEdit(){
 
     try{
 
-        const res = await fetch(
-           SUPABASE_URL +
-"/rest/v1/scanresults?ntagn=eq." +
-encodeURIComponent(tag) +
-"&br=eq." +
-encodeURIComponent(branch)
-            {
+      const res = await fetch(
+    SUPABASE_URL +
+    "/rest/v1/scanresults?ntagn=eq." +
+    encodeURIComponent(tag) +
+    "&br=eq." +
+    encodeURIComponent(branch),
+    {
                 method:"PATCH",
 
                 headers:{

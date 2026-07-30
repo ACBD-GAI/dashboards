@@ -906,10 +906,15 @@ async function loadDashboard(){
         "?select=*";
 
 
-     if(branch !== "ALL"){
+if (branch !== "ALL") {
+
+    const branchColumn =
+        tableName === "scanresults"
+            ? "branch"
+            : "br";
 
     url +=
-    "&br=eq."+encodeURIComponent(branch);
+        "&" + branchColumn + "=eq." + encodeURIComponent(branch);
 
 }
 

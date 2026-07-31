@@ -1325,6 +1325,9 @@ async function saveEdit(){
 
     }
 
+    // CLOSE IMMEDIATELY
+    closeEditModal();
+
     try{
 
         const session =
@@ -1348,12 +1351,8 @@ async function saveEdit(){
         console.log("EDIT RESULT:", data);
 
         if(!res.ok || data.status !== "OK"){
-
             throw new Error(data.message || data.status || "Update failed");
-
         }
-
-        closeEditModal();
 
         await loadDashboard();
 

@@ -1200,51 +1200,40 @@ async function editItem(branch,tag,si){
 
 
 
-async function deleteItem(branch,tag){
+async function deleteItem(branch, tag){
 
+    showDialog(
+        "Delete Record?",
+        "Are you sure you want to permanently delete this item?",
+        "🗑️",
+        async function(){
 
-showDialog(
-    "Delete Record?",
-    "Are you sure you want to permanently delete this item?",
-    "🗑️",
-    async function(){
+            try{
 
+                const session =
+                    JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
 
-        try{
+                const url =
+                    API_URL +
+                    "?action=deleteRecord" +
+                    "&branch=" + encodeURIComponent(branch) +
+                    "&tag=" + encodeURIComponent(tag) +
+                    "&email=" + encodeURIComponent(session.email) +
+                    "&sessionId=" + encodeURIComponent(session.sessionId);
 
+                console.log(url);
 
-            const res = await fetch(
+                const res = await fetch(url);
 
-                SUPABASE_URL +
-                "/rest/v1/scanresults?ntagn=eq."+
-                encodeURIComponent(tag),
+                const data = await res.json();
 
-                {
+                console.log("DELETE RESULT:", data);
 
-                method:"DELETE",
-
-                headers:{
-                    "apikey":SUPABASE_KEY,
-                    "Authorization":"Bearer "+SUPABASE_KEY,
-                    "Prefer":"return=representation"
+                if(data.status != "OK"){
+                    throw new Error(data.message || data.status);
                 }
-
-                }
-
-            );
-
-
-            const data = await res.json();
-
-
-            console.log("DELETE RESULT:",data);
-
-
-            if(res.ok){
-
 
                 await loadDashboard();
-
 
                 showDialog(
                     "Deleted",
@@ -1254,44 +1243,22 @@ showDialog(
                     true
                 );
 
-
-            }else{
-
+            }catch(err){
 
                 showDialog(
                     "Error",
-                    JSON.stringify(data),
+                    err.message,
                     "❌",
                     null,
                     true
                 );
 
-
             }
 
-
-
-        }catch(err){
-
-
-            showDialog(
-                "Error",
-                err.message,
-                "❌",
-                null,
-                true
-            );
-
-
         }
-
-
-    }
-);
-
+    );
 
 }
-
 
  
 function closeEditModal(){

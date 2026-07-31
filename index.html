@@ -1355,55 +1355,37 @@ if(data.status != "OK"){
 
 }
 
-        const data = await res.json();
+const data = await res.json();
 
-        console.log("EDIT RESULT:",data);
-
-
-        if(res.ok){
-
-            closeEditModal();
-
-            await loadDashboard();
-
-            showDialog(
-                "Updated",
-                "SI number updated successfully.",
-                "✅",
-                null,
-                true
-            );
-
-        }
-        else{
-
-            showDialog(
-                "Error",
-                JSON.stringify(data),
-                "❌",
-                null,
-                true
-            );
-
-        }
+console.log("EDIT RESULT:",data);
 
 
-    }catch(err){
+if(res.ok){
 
-        showDialog(
-            "Error",
-            err.message,
-            "❌",
-            null,
-            true
-        );
+    closeEditModal();
 
-    }
+    await loadDashboard();
+
+    showDialog(
+        "Updated",
+        "SI number updated successfully.",
+        "✅",
+        null,
+        true
+    );
 
 }
+else{
 
- 
- 
+    showDialog(
+        "Error",
+        JSON.stringify(data),
+        "❌",
+        null,
+        true
+    );
+
+}
 
   
   

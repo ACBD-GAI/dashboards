@@ -1329,29 +1329,31 @@ async function saveEdit(){
 
     try{
 
-      const res = await fetch(
-    SUPABASE_URL +
-    "/rest/v1/scanresults?ntagn=eq." +
-    encodeURIComponent(tag) +
-    "&br=eq." +
-    encodeURIComponent(branch),
-    {
-                method:"PATCH",
+     const session =
+JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
 
-                headers:{
-                    "apikey":SUPABASE_KEY,
-                    "Authorization":"Bearer "+SUPABASE_KEY,
-                    "Content-Type":"application/json",
-                    "Prefer":"return=representation"
-                },
+const url =
+API_URL +
+"?action=updateSI" +
+"&branch=" + encodeURIComponent(branch) +
+"&tag=" + encodeURIComponent(tag) +
+"&si=" + encodeURIComponent(si) +
+"&email=" + encodeURIComponent(session.email) +
+"&sessionId=" + encodeURIComponent(session.sessionId);
 
-                body:JSON.stringify({
-                    si_no:si
-                })
+console.log(url);
 
-            }
-        );
+const res = await fetch(url);
 
+const data = await res.json();
+
+console.log(data);
+
+if(data.status != "OK"){
+
+    throw new Error(data.message || data.status);
+
+}
 
         const data = await res.json();
 

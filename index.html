@@ -1311,7 +1311,6 @@ async function saveEdit(){
     const si =
     document.getElementById("editSI").value.trim();
 
-
     if(!si){
 
         showDialog(
@@ -1326,67 +1325,62 @@ async function saveEdit(){
 
     }
 
-
     try{
 
-     const session =
-JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
+        const session =
+        JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
 
-const url =
-API_URL +
-"?action=updateSI" +
-"&branch=" + encodeURIComponent(branch) +
-"&tag=" + encodeURIComponent(tag) +
-"&si=" + encodeURIComponent(si) +
-"&email=" + encodeURIComponent(session.email) +
-"&sessionId=" + encodeURIComponent(session.sessionId);
+        const url =
+        API_URL +
+        "?action=updateSI" +
+        "&branch=" + encodeURIComponent(branch) +
+        "&tag=" + encodeURIComponent(tag) +
+        "&si=" + encodeURIComponent(si) +
+        "&email=" + encodeURIComponent(session.email) +
+        "&sessionId=" + encodeURIComponent(session.sessionId);
 
-console.log(url);
+        console.log(url);
 
-const res = await fetch(url);
+        const res = await fetch(url);
 
-const data = await res.json();
+        const data = await res.json();
 
-console.log(data);
+        console.log("EDIT RESULT:", data);
 
-if(data.status != "OK"){
+        if(!res.ok || data.status !== "OK"){
 
-    throw new Error(data.message || data.status);
+            throw new Error(data.message || data.status || "Update failed");
 
-}
+        }
 
-const data = await res.json();
+        closeEditModal();
 
-console.log("EDIT RESULT:",data);
+        await loadDashboard();
 
+        showDialog(
+            "Updated",
+            "SI number updated successfully.",
+            "✅",
+            null,
+            true
+        );
 
-if(res.ok){
+    }
+    catch(err){
 
-    closeEditModal();
+        console.error(err);
 
-    await loadDashboard();
+        showDialog(
+            "Error",
+            err.message,
+            "❌",
+            null,
+            true
+        );
 
-    showDialog(
-        "Updated",
-        "SI number updated successfully.",
-        "✅",
-        null,
-        true
-    );
-
-}
-else{
-
-    showDialog(
-        "Error",
-        JSON.stringify(data),
-        "❌",
-        null,
-        true
-    );
+    }
 
 }
-
   
   
 

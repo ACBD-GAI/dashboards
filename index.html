@@ -900,29 +900,27 @@ async function loadDashboard(){
     try{
 
 
-        let tableName="stocks";
+const branchCode = branch.toLowerCase();
 
+let tableName = "";
 
-        if(sheet==="SCANRESULTS"){
-            tableName="scanresults";
-        }
-
-
-        if(sheet==="AUDIT"){
-            tableName="audit";
-        }
-
-
-
-      let url =
-    SUPABASE_URL +
-    "/rest/v1/" +
-    tableName +
-    "?select=*";
-
-if (branch && branch !== "ALL") {
-    url += "&br=eq." + branch;
+if(sheet === "stocks"){
+    tableName = branchCode + "_stocks";
 }
+else if(sheet === "SCANRESULTS"){
+    tableName = branchCode + "_scanresults";
+}
+else if(sheet === "AUDIT"){
+    tableName = branchCode + "_audit";
+}
+
+
+
+let url =
+SUPABASE_URL +
+"/rest/v1/" +
+tableName +
+"?select=*";
 
 console.log(url);
 

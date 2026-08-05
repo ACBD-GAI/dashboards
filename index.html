@@ -884,17 +884,29 @@ function resetDashboard(){
 
 async function loadDashboard(){
 
-    const branch =
-    document.getElementById("branchSelect").value;
+   const branch =
+document.getElementById("branchSelect").value;
 
-    const sheet =
-    document.getElementById("sheetSelect").value;
+const sheet =
+document.getElementById("sheetSelect").value;
 
-    const search =
-    document.getElementById("searchBox").value.trim().toLowerCase();
+const search =
+document.getElementById("searchBox").value.trim().toLowerCase();
 
+if(!branch){
 
-    document.getElementById("loading").style.display="flex";
+    showDialog(
+        "Branch Required",
+        "Please select a branch.",
+        "⚠️",
+        null,
+        true
+    );
+
+    return;
+}
+
+document.getElementById("loading").style.display="flex";
 
 
     try{
@@ -968,21 +980,21 @@ if (rows.length > 0) {
 
 
 
-        allRows = rows.map((r, index) => ({
+allRows = rows.map((r, index) => ({
 
-    row: r.row || index + 1,
+    row: index + 1,
 
-    branch: r.br || "",
+    branch: r["BR"] || "",
 
-    lenstype: r.lenstype || "",
+    lenstype: r["LENSTYPE"] || "",
 
-    description: r.description || "",
+    description: r["DESCRIPTION"] || "",
 
-    tag: r.ntagn || "",
+    tag: r["NTAGN"] || "",
 
-    si: r.si_no || "",
+    si: r["SI NO."] || "",
 
-    date: r.date_time || ""
+    date: r["DATE AND TIME"] || ""
 
 }));
 
@@ -1247,19 +1259,23 @@ async function deleteItem(branch, tag){
                 // -----------------------------
                 // DELETE FROM SUPABASE
                 // -----------------------------
-                const sbRes = await fetch(
-                    SUPABASE_URL +
-                    "/rest/v1/scanresults?ntagn=eq." +
-                    encodeURIComponent(tag),
-                    {
-                        method: "DELETE",
-                        headers:{
-                            "apikey": SUPABASE_KEY,
-                            "Authorization":"Bearer " + SUPABASE_KEY,
-                            "Prefer":"return=representation"
-                        }
-                    }
-                );
+            const tableName = branch.toLowerCase() + "_scanresults";
+
+const sbRes = await fetch(
+    SUPABASE_URL +
+    "/rest/v1/" +
+    tableName +
+    "?NTAGN=eq." +
+    encodeURIComponent(tag),
+    {
+        method: "DELETE",
+        headers:{
+            "apikey": SUPABASE_KEY,
+            "Authorization":"Bearer " + SUPABASE_KEY,
+            "Prefer":"return=representation"
+        }
+    }
+);
 
                 const sbData = await sbRes.json();
 

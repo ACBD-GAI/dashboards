@@ -533,7 +533,7 @@ No data loaded.
 const BRANCH = "DASHBOARD";
 const SESSION_KEY = "inventorySession";
  
-const API_URL ="https://script.google.com/macros/s/AKfycbzNXwY6h7xsqCRS-6EmQLvB-6hK8LzPFcUyCsfvoP2N-NIjSwsB_-bmFPJzy6-23HHGqQ/exec"
+const API_URL ="https://script.google.com/macros/s/AKfycbx94r5lONmmB1Ud_20bKRQ9QE6kDmBbatmIaG7QZJ-Jb5ABccv-MyOkPeC3jBn0j0Hn4w/exec"
 
 const SUPABASE_URL = "https://hvurhnarllvfinpdkfkp.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDg3NjE3MSwiZXhwIjoyMTAwNDUyMTcxfQ.RfKJxtV06KMMNGHAqG0BhrYsjtee_eUq0m2ktrgUcxA";
@@ -1505,7 +1505,6 @@ document.getElementById("prevBtn").onclick=function(){
     const sheet = document.getElementById("clearSheet").value;
 
     if(!branch){
-
         showDialog(
             "Branch Required",
             "Please select a branch.",
@@ -1513,13 +1512,10 @@ document.getElementById("prevBtn").onclick=function(){
             null,
             true
         );
-
         return;
-
     }
 
     if(!sheet){
-
         showDialog(
             "Report Required",
             "Please select a report.",
@@ -1527,56 +1523,80 @@ document.getElementById("prevBtn").onclick=function(){
             null,
             true
         );
-
         return;
-
     }
 
-   showDialog(
-    "Confirm Clear",
-    "This will permanently clear all data of the selected report.\n\nContinue?",
-    "⚠️",
-    async function(){
+    showDialog(
+        "Confirm Clear",
+        "This will permanently clear all data of the selected report.\n\nContinue?",
+        "⚠️",
+        async function(){
 
-        closeDialog();          // <-- ADD THIS
-        closeClearModal();
+            closeClearModal();
 
-        const res = await fetch(
-            API_URL +
-            "?action=clearSheet" +
-            "&branch=" + encodeURIComponent(branch) +
-            "&sheet=" + encodeURIComponent(sheet) +
-            getSessionParams()
-        );
+            try{
 
-        const data = await res.json();
+                const res = await fetch(
+                    API_URL +
+                    "?action=clearSheet" +
+                    "&branch=" + encodeURIComponent(branch) +
+                    "&sheet=" + encodeURIComponent(sheet) +
+                    getSessionParams()
+                );
 
-        if(data.status=="OK"){
+                const text = await res.text();
+                console.log("CLEAR RESPONSE:", text);
 
-            showDialog(
-                "Success",
-                "Report cleared successfully.",
-                "✅",
-                null,
-                true
-            );
+                let data;
 
-        }else{
+                try{
+                    data = JSON.parse(text);
+                }catch(e){
+                    throw new Error("Invalid server response:\n" + text);
+                }
 
-            showDialog(
-                "Error",
-                data.message,
-                "❌",
-                null,
-                true
-            );
+                if(data.status === "OK"){
+
+                    showDialog(
+                        "Success",
+                        "Report cleared successfully.",
+                        "✅",
+                        async function(){
+                            await loadDashboard();
+                        },
+                        true
+                    );
+
+                }else{
+
+                    showDialog(
+                        "Error",
+                        data.message || data.status,
+                        "❌",
+                        null,
+                        true
+                    );
+
+                }
+
+            }catch(err){
+
+                console.error(err);
+
+                showDialog(
+                    "Error",
+                    err.message,
+                    "❌",
+                    null,
+                    true
+                );
+
+            }
 
         }
+    );
 
-    }
-);
-  
- }
+}
 async function startExport(){
 
     const branch = document.getElementById("exportBranch").value;

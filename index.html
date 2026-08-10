@@ -900,65 +900,50 @@ td button {
     class="modalOverlay"
 >
 
-    <div class="modal">
+   <div class="modal">
 
-        <h3>
-            Edit Sold Record
-        </h3>
+    <h3>
+        Edit Sold Record
+    </h3>
 
+    <input
+        type="hidden"
+        id="editBranch"
+    >
 
-        <input
-            type="hidden"
-            id="editBranch"
+    <input
+        type="hidden"
+        id="editTag"
+    >
+
+    <label>
+        SI Number
+    </label>
+
+    <input
+        id="editSI"
+        type="text"
+        placeholder="Enter SI Number"
+    >
+
+    <div class="modalButtons">
+
+        <button
+            onclick="closeEditModal()"
         >
+            Cancel
+        </button>
 
-
-        <input
-            type="hidden"
-            id="editTag"
+        <button
+            class="primaryBtn"
+            onclick="saveEdit()"
         >
-
-
-        <label>
-            Tag
-        </label>
-
-
-        <input
-            id="editTagDisplay"
-            readonly
-        >
-
-
-        <label>
-            SI Number
-        </label>
-
-
-        <input
-            id="editSI"
-        >
-
-
-        <div class="modalButtons">
-
-            <button
-                onclick="closeEditModal()"
-            >
-                Cancel
-            </button>
-
-
-            <button
-                class="primaryBtn"
-                onclick="saveEdit()"
-            >
-                Save
-            </button>
-
-        </div>
+            Save
+        </button>
 
     </div>
+
+</div>
 
 </div>
 

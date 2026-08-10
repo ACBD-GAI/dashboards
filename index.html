@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,493 +6,451 @@
 <meta charset="UTF-8">
 
 <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
+  name="viewport"
+  content="width=device-width,initial-scale=1"
 >
 
 <title>ACEBEDO OPTICAL INVENTORY</title>
 
+
+<!-- XLSX READER -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+
 <style>
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
+
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #eef2f7;
-    color: #333;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef2f7;
+  color: #333;
 }
 
 
-/* ============================================================
-   LOGIN
-============================================================ */
-
-#loginScreen {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+button,
+input,
+select {
+  font: inherit;
 }
 
-.loginBox {
-    width: 100%;
-    max-width: 400px;
-    background: white;
-    padding: 30px;
-    border-radius: 14px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.12);
-    text-align: center;
-}
-
-.loginBox h2 {
-    margin-top: 0;
-}
-
-.loginBox input {
-    width: 100%;
-    padding: 12px;
-    margin: 7px 0;
-    border: 1px solid #ccc;
-    border-radius: 7px;
-    font-size: 15px;
-}
-
-
-/* ============================================================
-   BUTTONS
-============================================================ */
 
 button {
-    border: 0;
-    border-radius: 7px;
-    padding: 10px 14px;
-    cursor: pointer;
-    background: #e7eaf0;
-    font-weight: bold;
+  cursor: pointer;
 }
 
-button:hover {
-    opacity: .88;
-}
-
-.primaryBtn {
-    background: #1769aa;
-    color: white;
-}
-
-.dangerBtn {
-    background: #d93025;
-    color: white;
-}
-
-.editBtn {
-    background: #f0ad00;
-    color: white;
-    margin: 2px;
-}
-
-.deleteBtn {
-    background: #d93025;
-    color: white;
-    margin: 2px;
-}
-
-.searchBtn {
-    background: #1769aa;
-    color: white;
-    height: 42px;
-}
-
-
-/* ============================================================
-   HEADER
-============================================================ */
-
-#dashboardScreen {
-    display: none;
-}
 
 .header {
-    background: #173b63;
-    color: white;
-    min-height: 75px;
-    padding: 12px 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 20px;
+  background: #172033;
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
 }
+
 
 .headerLeft {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
+
 
 .headerLeft img {
-    width: 55px;
-    height: 55px;
-    object-fit: contain;
-    border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  background: white;
+  border-radius: 8px;
 }
+
 
 .headerLeft h2 {
-    margin: 0;
-    font-size: 20px;
+  margin: 0;
+  font-size: 20px;
 }
+
 
 .headerLeft small {
-    opacity: .8;
+  opacity: .8;
 }
+
 
 .headerButtons {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
 }
+
 
 .headerButtons button {
-    background: white;
-    color: #173b63;
+  border: 0;
+  padding: 9px 12px;
+  border-radius: 7px;
+  background: white;
+  color: #222;
 }
 
-
-/* ============================================================
-   MAIN
-============================================================ */
 
 .main {
-    padding: 20px;
-    max-width: 1800px;
-    margin: auto;
+  padding: 20px;
 }
 
-
-/* ============================================================
-   FILTERS
-============================================================ */
 
 .filters {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-
-    display: flex;
-    align-items: end;
-    gap: 12px;
-    flex-wrap: wrap;
-
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
+
 
 .field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
+
 .field label {
-    font-size: 13px;
-    font-weight: bold;
+  font-size: 13px;
+  font-weight: bold;
 }
+
 
 .field select,
 .field input {
-    height: 42px;
-    min-width: 190px;
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 7px;
-    background: white;
-}
-
-#searchBox {
-    min-width: 260px;
+  height: 40px;
+  min-width: 190px;
+  border: 1px solid #ccd3dd;
+  border-radius: 6px;
+  padding: 0 10px;
 }
 
 
-/* ============================================================
-   CARDS
-============================================================ */
+.searchBtn {
+  height: 40px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 18px;
+  background: #1976d2;
+  color: white;
+  font-weight: bold;
+}
+
 
 .cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    margin: 20px 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin: 18px 0;
 }
+
 
 .card {
-    background: white;
-    border-radius: 10px;
-    padding: 18px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.07);
 }
+
 
 .card h3 {
-    margin: 0;
-    font-size: 14px;
-    color: #777;
+  margin: 0 0 5px;
+  font-size: 14px;
+  color: #666;
 }
+
 
 .card h1 {
-    margin: 8px 0 0;
-    font-size: 30px;
+  margin: 0;
+  font-size: 28px;
 }
 
-
-/* ============================================================
-   TABLE
-============================================================ */
 
 .tableWrap {
-    background: white;
-    border-radius: 10px;
-    overflow-x: auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  background: white;
+  border-radius: 10px;
+  overflow: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
+
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 900px;
+  width: 100%;
+  border-collapse: collapse;
 }
 
-thead {
-    background: #173b63;
-    color: white;
-}
 
 th,
 td {
-    padding: 11px 10px;
-    border-bottom: 1px solid #e5e5e5;
-    text-align: left;
-    font-size: 13px;
-}
-
-tbody tr:hover {
-    background: #f6f9fc;
+  padding: 11px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  white-space: nowrap;
 }
 
 
-/* ============================================================
-   PAGINATION
-============================================================ */
+th {
+  background: #f5f7fa;
+  font-size: 13px;
+}
+
+
+td {
+  font-size: 13px;
+}
+
+
+.actionBtn {
+  border: 0;
+  border-radius: 5px;
+  padding: 6px 9px;
+  margin-right: 4px;
+}
+
+
+.editBtn {
+  background: #1976d2;
+  color: white;
+}
+
+
+.deleteBtn {
+  background: #d32f2f;
+  color: white;
+}
+
 
 .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
 }
 
 
-/* ============================================================
-   MODAL
-============================================================ */
+.pagination button {
+  border: 1px solid #ccd3dd;
+  background: white;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+
+.loginScreen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+
+.loginBox {
+  background: white;
+  width: 100%;
+  max-width: 380px;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+}
+
+
+.loginBox h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+
+.loginBox input {
+  width: 100%;
+  height: 42px;
+  margin-bottom: 8px;
+  padding: 0 10px;
+  border: 1px solid #ccd3dd;
+  border-radius: 6px;
+}
+
+
+.primaryBtn {
+  background: #1976d2 !important;
+  color: white !important;
+  border: 0 !important;
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+
+
+.dangerBtn {
+  background: #d32f2f !important;
+  color: white !important;
+  border: 0 !important;
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+
+
+.status {
+  min-height: 20px;
+  font-size: 13px;
+}
+
+
+.hidden {
+  display: none !important;
+}
+
 
 .modalOverlay {
-    position: fixed;
-    inset: 0;
-
-    background: rgba(0,0,0,.55);
-
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 20px;
-
-    z-index: 5000;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
 }
+
+
+.modalOverlay.show {
+  display: flex;
+}
+
 
 .modal {
-    width: 100%;
-    max-width: 500px;
-
-    background: white;
-
-    border-radius: 12px;
-
-    padding: 25px;
-
-    box-shadow: 0 10px 40px rgba(0,0,0,.25);
+  background: white;
+  width: 100%;
+  max-width: 450px;
+  padding: 22px;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.25);
 }
+
 
 .modal h3 {
-    margin-top: 0;
+  margin-top: 0;
 }
 
+
 .modal label {
-    display: block;
-    margin-top: 12px;
-    margin-bottom: 5px;
-    font-weight: bold;
+  display: block;
+  margin: 12px 0 5px;
+  font-weight: bold;
+  font-size: 13px;
 }
+
 
 .modal input,
 .modal select {
-    width: 100%;
-    padding: 11px;
-    border: 1px solid #ccc;
-    border-radius: 7px;
-}
-
-.modalButtons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 20px;
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ccd3dd;
+  border-radius: 6px;
+  padding: 0 10px;
 }
 
 
-/* ============================================================
-   DIALOG
-============================================================ */
+.modalButtons,
+.dialogButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+
+.modalButtons button,
+.dialogButtons button {
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 14px;
+}
+
 
 .dialogIcon {
-    font-size: 40px;
-    text-align: center;
+  font-size: 35px;
+  text-align: center;
 }
+
 
 .dialogTitle {
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-    margin: 10px 0;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 5px;
 }
+
 
 .dialogMessage {
-    text-align: center;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-top: 10px;
+  white-space: pre-wrap;
 }
 
-.dialogButtons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-
-/* ============================================================
-   LOADING
-============================================================ */
-
-#loadingOverlay {
-    position: fixed;
-    inset: 0;
-
-    background: rgba(0,0,0,.45);
-
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
-    z-index: 10000;
-}
 
 .loadingBox {
-    background: white;
-    border-radius: 12px;
-    padding: 25px 35px;
-    text-align: center;
-    box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 220px;
 }
+
 
 .loadingIcon {
-    font-size: 35px;
-    margin-bottom: 10px;
+  font-size: 30px;
+  margin-bottom: 10px;
 }
 
 
-/* ============================================================
-   STATUS
-============================================================ */
+@media (max-width: 800px) {
 
-.status {
-    min-height: 20px;
-    font-size: 14px;
-}
-
-.status.error {
-    color: #d93025;
-}
-
-.status.success {
-    color: #188038;
-}
-
-
-/* ============================================================
-   MOBILE
-============================================================ */
-
-@media (max-width: 900px) {
-
-    .header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .headerButtons {
-        width: 100%;
-    }
-
-    .headerButtons button {
-        flex: 1;
-    }
-
-    .cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
 }
 
-@media (max-width: 600px) {
 
-    .main {
-        padding: 10px;
-    }
+@media (max-width: 500px) {
 
-    .cards {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-    }
+  .main {
+    padding: 10px;
+  }
 
-    .card {
-        padding: 12px;
-    }
+  .cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
 
-    .filters {
-        display: block;
-    }
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .field {
-        margin-bottom: 10px;
-    }
-
-    .field select,
-    .field input,
-    #searchBox {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .searchBtn {
-        width: 100%;
-    }
+  .field select,
+  .field input,
+  .searchBtn {
+    width: 100%;
+  }
 
 }
+
 
 </style>
 
@@ -503,1179 +460,1152 @@ tbody tr:hover {
 <body>
 
 
-<!-- ============================================================
-     LOGIN SCREEN
-============================================================ -->
+<!-- ========================================================
+     LOGIN
+========================================================= -->
 
-<div id="loginScreen">
+<div
+  id="loginScreen"
+  class="loginScreen"
+>
 
-    <div class="loginBox">
+  <div class="loginBox">
+
+    <h2>
+      🔐 ADMIN LOGIN
+    </h2>
+
+    <p>
+      Dashboard Access
+    </p>
+
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Enter Gmail"
+      autocomplete="email"
+    >
+
+
+    <button
+      id="sendOtpBtn"
+      class="primaryBtn"
+      onclick="sendOTP()"
+      style="width:100%;"
+    >
+      SEND OTP
+    </button>
+
+
+    <input
+      id="otp"
+      placeholder="Enter OTP"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      style="display:none;"
+    >
+
+
+    <button
+      id="verifyBtn"
+      class="primaryBtn"
+      onclick="verifyOTP()"
+      style="
+        display:none;
+        width:100%;
+        margin-top:5px;
+      "
+    >
+      VERIFY OTP
+    </button>
+
+
+    <p
+      id="loginStatus"
+      class="status"
+    ></p>
+
+  </div>
+
+</div>
+
+
+<!-- ========================================================
+     DASHBOARD
+========================================================= -->
+
+<div
+  id="dashboardScreen"
+  style="display:none;"
+>
+
+
+  <!-- HEADER -->
+
+  <div class="header">
+
+    <div class="headerLeft">
+
+      <img
+        src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200"
+        alt="Acebedo Optical"
+      >
+
+      <div>
 
         <h2>
-            🔐 ADMIN LOGIN
+          ACEBEDO OPTICAL INVENTORY
         </h2>
 
-        <p>
-            Dashboard Access
-        </p>
+        <small>
+          Central Inventory Management
+        </small>
 
-
-        <input
-            id="email"
-            type="email"
-            placeholder="Enter Gmail"
-            autocomplete="email"
-        >
-
-
-        <button
-            id="sendOtpBtn"
-            class="primaryBtn"
-            onclick="sendOTP()"
-            style="width:100%;"
-        >
-            SEND OTP
-        </button>
-
-
-        <input
-            id="otp"
-            placeholder="Enter OTP"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            style="display:none;"
-        >
-
-
-        <button
-            id="verifyBtn"
-            class="primaryBtn"
-            onclick="verifyOTP()"
-            style="
-                display:none;
-                width:100%;
-                margin-top:5px;
-            "
-        >
-            VERIFY OTP
-        </button>
-
-
-        <p
-            id="loginStatus"
-            class="status"
-        ></p>
+      </div>
 
     </div>
+
+
+    <div class="headerButtons">
+
+      <button
+        onclick="refreshDashboard()"
+      >
+        🔄 Refresh
+      </button>
+
+
+      <button
+        onclick="openUpdateStockModal()"
+      >
+        📤 Update Stocks
+      </button>
+
+
+      <button
+        onclick="openClearModal()"
+      >
+        🗑 Clear Report
+      </button>
+
+
+      <button
+        onclick="openExportModal()"
+      >
+        📥 Export
+      </button>
+
+
+      <button
+        onclick="logoutUser()"
+      >
+        Logout
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="main">
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+
+      <div class="field">
+
+        <label>
+          Branch
+        </label>
+
+
+        <select id="branchSelect">
+
+          <option value="">
+            -- Select Branch --
+          </option>
+
+          <option value="GAI">🏢 Gaisano Iloilo</option>
+          <option value="CAS">🏢 Casa Plaza</option>
+          <option value="BAC">🏢 Bacolod</option>
+          <option value="BIN">🏢 Binalbagan</option>
+          <option value="BIS">🏢 Bislig</option>
+          <option value="CAD">🏢 Cadiz</option>
+          <option value="DGT">🏢 Dumaguete</option>
+          <option value="KAB">🏢 Kabankalan</option>
+          <option value="KAL">🏢 Kalibo</option>
+          <option value="PAS">🏢 Passi</option>
+          <option value="POT">🏢 Pototan</option>
+          <option value="SAN">🏢 San Carlos</option>
+          <option value="TAB">🏢 Tabunok</option>
+          <option value="TAN">🏢 Tandag</option>
+          <option value="TIS">🏢 Tisa</option>
+          <option value="TOL">🏢 Toledo</option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Select Report
+        </label>
+
+
+        <select id="sheetSelect">
+
+          <option value="stocks">
+            📦 Stocks
+          </option>
+
+          <option value="SCANRESULTS">
+            💰 Sold Out
+          </option>
+
+          <option value="AUDIT">
+            🔄 Re-Inventory
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Search
+        </label>
+
+
+        <input
+          id="searchBox"
+          placeholder="Tag, SI, Description"
+          onkeydown="searchKeyDown(event)"
+        >
+
+      </div>
+
+
+      <button
+        class="searchBtn"
+        onclick="searchDashboard()"
+      >
+        🔍 Search
+      </button>
+
+    </div>
+
+
+    <!-- CARDS -->
+
+    <div class="cards">
+
+
+      <div class="card">
+
+        <h3>
+          Available
+        </h3>
+
+        <h1 id="availableCount">
+          0
+        </h1>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Sold Out
+        </h3>
+
+        <h1 id="soldCount">
+          0
+        </h1>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Audited
+        </h3>
+
+        <h1 id="auditCount">
+          0
+        </h1>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Showing
+        </h3>
+
+        <h1 id="showingCount">
+          0
+        </h1>
+
+      </div>
+
+
+    </div>
+
+
+    <!-- TABLE -->
+
+    <div class="tableWrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Branch
+            </th>
+
+            <th>
+              Lenstype
+            </th>
+
+            <th>
+              Description
+            </th>
+
+            <th>
+              Tag
+            </th>
+
+            <th>
+              SI
+            </th>
+
+            <th>
+              Date
+            </th>
+
+            <th>
+              Actions
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="tableBody">
+
+          <tr>
+
+            <td
+              colspan="7"
+              style="
+                text-align:center;
+                padding:40px;
+              "
+            >
+              Select a branch and click SEARCH.
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- PAGINATION -->
+
+    <div class="pagination">
+
+      <button
+        id="prevBtn"
+        onclick="previousPage()"
+      >
+        ◀ Previous
+      </button>
+
+
+      <span id="pageInfo">
+        Page 0 / 0
+      </span>
+
+
+      <button
+        id="nextBtn"
+        onclick="nextPage()"
+      >
+        Next ▶
+      </button>
+
+    </div>
+
+
+  </div>
 
 </div>
 
 
-
-<!-- ============================================================
-     DASHBOARD
-============================================================ -->
-
-<div id="dashboardScreen">
-
-
-    <!-- HEADER -->
-
-    <div class="header">
-
-        <div class="headerLeft">
-
-            <img
-                src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200"
-                alt="Acebedo Optical"
-            >
-
-            <div>
-
-                <h2>
-                    ACEBEDO OPTICAL INVENTORY
-                </h2>
-
-                <small>
-                    Central Inventory Management
-                </small>
-
-            </div>
-
-        </div>
-
-
-        <div class="headerButtons">
-
-            <button
-                onclick="refreshDashboard()"
-            >
-                🔄 Refresh
-            </button>
-
-
-            <button
-                onclick="openUpdateStockModal()"
-            >
-                📤 Update Stocks
-            </button>
-
-
-            <button
-                onclick="openClearModal()"
-            >
-                🗑 Clear Report
-            </button>
-
-
-            <button
-                onclick="openExportModal()"
-            >
-                📥 Export
-            </button>
-
-
-            <button
-                onclick="logoutUser()"
-            >
-                Logout
-            </button>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="main">
-
-
-        <!-- FILTERS -->
-
-        <div class="filters">
-
-
-            <div class="field">
-
-                <label>
-                    Branch
-                </label>
-
-
-                <select id="branchSelect">
-
-                    <option value="">
-                        -- Select Branch --
-                    </option>
-
-                    <option value="GAI">
-                        🏢 Gaisano Iloilo
-                    </option>
-
-                    <option value="CAS">
-                        🏢 Casa Plaza
-                    </option>
-
-                    <option value="BAC">
-                        🏢 Bacolod
-                    </option>
-
-                    <option value="BIN">
-                        🏢 Binalbagan
-                    </option>
-
-                    <option value="BIS">
-                        🏢 Bislig
-                    </option>
-
-                    <option value="CAD">
-                        🏢 Cadiz
-                    </option>
-
-                    <option value="DGT">
-                        🏢 Dumaguete
-                    </option>
-
-                    <option value="KAB">
-                        🏢 Kabankalan
-                    </option>
-
-                    <option value="KAL">
-                        🏢 Kalibo
-                    </option>
-
-                    <option value="PAS">
-                        🏢 Passi
-                    </option>
-
-                    <option value="POT">
-                        🏢 Pototan
-                    </option>
-
-                    <option value="SAN">
-                        🏢 San Carlos
-                    </option>
-
-                    <option value="TAB">
-                        🏢 Tabunok
-                    </option>
-
-                    <option value="TAN">
-                        🏢 Tandag
-                    </option>
-
-                    <option value="TIS">
-                        🏢 Tisa
-                    </option>
-
-                    <option value="TOL">
-                        🏢 Toledo
-                    </option>
-
-                </select>
-
-            </div>
-
-
-
-            <div class="field">
-
-                <label>
-                    Select Report
-                </label>
-
-
-                <select id="sheetSelect">
-
-                    <option value="stocks">
-                        📦 Stocks
-                    </option>
-
-                    <option value="SCANRESULTS">
-                        💰 Sold Out
-                    </option>
-
-                    <option value="AUDIT">
-                        🔄 Re-Inventory
-                    </option>
-
-                </select>
-
-            </div>
-
-
-
-            <div class="field">
-
-                <label>
-                    Search
-                </label>
-
-
-                <input
-                    id="searchBox"
-                    placeholder="Tag, SI, Description"
-                    onkeydown="searchKeyDown(event)"
-                >
-
-            </div>
-
-
-            <button
-                class="searchBtn"
-                onclick="searchDashboard()"
-            >
-                🔍 Search
-            </button>
-
-        </div>
-
-
-
-        <!-- CARDS -->
-
-        <div class="cards">
-
-            <div class="card">
-
-                <h3>
-                    Available
-                </h3>
-
-                <h1 id="availableCount">
-                    0
-                </h1>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    Sold Out
-                </h3>
-
-                <h1 id="soldCount">
-                    0
-                </h1>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    Audited
-                </h3>
-
-                <h1 id="auditCount">
-                    0
-                </h1>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    Showing
-                </h3>
-
-                <h1 id="showingCount">
-                    0
-                </h1>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- TABLE -->
-
-        <div class="tableWrap">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Branch
-                        </th>
-
-                        <th>
-                            Lenstype
-                        </th>
-
-                        <th>
-                            Description
-                        </th>
-
-                        <th>
-                            Tag
-                        </th>
-
-                        <th>
-                            SI
-                        </th>
-
-                        <th>
-                            Date
-                        </th>
-
-                        <th>
-                            Actions
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody id="tableBody">
-
-                    <tr>
-
-                        <td
-                            colspan="7"
-                            style="
-                                text-align:center;
-                                padding:40px;
-                            "
-                        >
-                            Select a branch and click SEARCH.
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-
-        <!-- PAGINATION -->
-
-        <div class="pagination">
-
-            <button
-                id="prevBtn"
-                onclick="previousPage()"
-            >
-                ◀ Previous
-            </button>
-
-
-            <span id="pageInfo">
-                Page 0 / 0
-            </span>
-
-
-            <button
-                id="nextBtn"
-                onclick="nextPage()"
-            >
-                Next ▶
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-<!-- ============================================================
+<!-- ========================================================
      EDIT MODAL
-============================================================ -->
+========================================================= -->
 
 <div
-    id="editModal"
-    class="modalOverlay"
+  id="editModalOverlay"
+  class="modalOverlay"
 >
 
-    <div class="modal">
+  <div class="modal">
 
-        <h3>
-            ✏️ Edit Sold Record
-        </h3>
-
-
-        <!--
-            TAG IS HIDDEN.
-
-            It is ONLY used to locate the record.
-            It is NEVER edited.
-        -->
-
-        <input
-            type="hidden"
-            id="editBranch"
-        >
+    <h3>
+      Edit Sold Record
+    </h3>
 
 
-        <input
-            type="hidden"
-            id="editTag"
-        >
+    <input
+      type="hidden"
+      id="editBranch"
+    >
 
 
-        <label>
-            SI Number
-        </label>
+    <!--
+      TAG IS ONLY STORED SO THE SERVER KNOWS
+      WHICH RECORD TO UPDATE.
+
+      TAG WILL NEVER BE MODIFIED.
+    -->
+
+    <input
+      type="hidden"
+      id="editTag"
+    >
 
 
-        <input
-            id="editSI"
-            type="text"
-            placeholder="Enter SI Number"
-        >
+    <label>
+      SI Number
+    </label>
 
 
-        <div class="modalButtons">
-
-            <button
-                onclick="closeEditModal()"
-            >
-                Cancel
-            </button>
+    <input
+      id="editSI"
+      type="text"
+      placeholder="Enter SI Number"
+    >
 
 
-            <button
-                class="primaryBtn"
-                onclick="saveEdit()"
-            >
-                Save
-            </button>
+    <div class="modalButtons">
 
-        </div>
+      <button
+        onclick="closeEditModal()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        class="primaryBtn"
+        onclick="saveEdit()"
+      >
+        Save
+      </button>
 
     </div>
+
+  </div>
 
 </div>
 
 
-
-<!-- ============================================================
+<!-- ========================================================
      UPDATE STOCKS MODAL
-============================================================ -->
+========================================================= -->
 
 <div
-    id="updateStockModal"
-    class="modalOverlay"
+  id="updateModalOverlay"
+  class="modalOverlay"
 >
 
-    <div class="modal">
+  <div class="modal">
 
-        <h3>
-            📤 Update Stocks
-        </h3>
-
-
-        <label>
-            Select Branch
-        </label>
+    <h3>
+      Update Stocks
+    </h3>
 
 
-        <select id="updateBranch">
-
-            <option value="">
-                -- Select Branch --
-            </option>
-
-            <option value="GAI">🏢 Gaisano Iloilo</option>
-            <option value="CAS">🏢 Casa Plaza</option>
-            <option value="BAC">🏢 Bacolod</option>
-            <option value="BIN">🏢 Binalbagan</option>
-            <option value="BIS">🏢 Bislig</option>
-            <option value="CAD">🏢 Cadiz</option>
-            <option value="DGT">🏢 Dumaguete</option>
-            <option value="KAB">🏢 Kabankalan</option>
-            <option value="KAL">🏢 Kalibo</option>
-            <option value="PAS">🏢 Passi</option>
-            <option value="POT">🏢 Pototan</option>
-            <option value="SAN">🏢 San Carlos</option>
-            <option value="TAB">🏢 Tabunok</option>
-            <option value="TAN">🏢 Tandag</option>
-            <option value="TIS">🏢 Tisa</option>
-            <option value="TOL">🏢 Toledo</option>
-
-        </select>
+    <label>
+      Select Branch
+    </label>
 
 
-        <label>
-            Select Excel File
-        </label>
+    <select id="updateBranch">
+
+      <option value="">
+        -- Select Branch --
+      </option>
+
+      <option value="GAI">🏢 Gaisano Iloilo</option>
+      <option value="CAS">🏢 Casa Plaza</option>
+      <option value="BAC">🏢 Bacolod</option>
+      <option value="BIN">🏢 Binalbagan</option>
+      <option value="BIS">🏢 Bislig</option>
+      <option value="CAD">🏢 Cadiz</option>
+      <option value="DGT">🏢 Dumaguete</option>
+      <option value="KAB">🏢 Kabankalan</option>
+      <option value="KAL">🏢 Kalibo</option>
+      <option value="PAS">🏢 Passi</option>
+      <option value="POT">🏢 Pototan</option>
+      <option value="SAN">🏢 San Carlos</option>
+      <option value="TAB">🏢 Tabunok</option>
+      <option value="TAN">🏢 Tandag</option>
+      <option value="TIS">🏢 Tisa</option>
+      <option value="TOL">🏢 Toledo</option>
+
+    </select>
 
 
-        <input
-            type="file"
-            id="stockFile"
-            accept=".xlsx,.xls"
-        >
+    <label>
+      Select Excel File
+    </label>
 
 
-        <div class="modalButtons">
-
-            <button
-                onclick="closeUpdateStockModal()"
-            >
-                Cancel
-            </button>
+    <input
+      type="file"
+      id="stockFile"
+      accept=".xlsx,.xls"
+    >
 
 
-            <button
-                class="primaryBtn"
-                onclick="updateStocks()"
-            >
-                Update
-            </button>
+    <div class="modalButtons">
 
-        </div>
+      <button
+        onclick="closeUpdateStockModal()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        class="primaryBtn"
+        onclick="updateStocks()"
+      >
+        Update
+      </button>
 
     </div>
+
+  </div>
 
 </div>
 
 
-
-<!-- ============================================================
+<!-- ========================================================
      CLEAR MODAL
-============================================================ -->
+========================================================= -->
 
 <div
-    id="clearModal"
-    class="modalOverlay"
+  id="clearModalOverlay"
+  class="modalOverlay"
 >
 
-    <div class="modal">
+  <div class="modal">
 
-        <h3>
-            🗑 Clear Report
-        </h3>
-
-
-        <label>
-            Select Branch
-        </label>
+    <h3>
+      Clear Report
+    </h3>
 
 
-        <select id="clearBranch">
-
-            <option value="">
-                -- Select Branch --
-            </option>
-
-            <option value="GAI">🏢 Gaisano Iloilo</option>
-            <option value="CAS">🏢 Casa Plaza</option>
-            <option value="BAC">🏢 Bacolod</option>
-            <option value="BIN">🏢 Binalbagan</option>
-            <option value="BIS">🏢 Bislig</option>
-            <option value="CAD">🏢 Cadiz</option>
-            <option value="DGT">🏢 Dumaguete</option>
-            <option value="KAB">🏢 Kabankalan</option>
-            <option value="KAL">🏢 Kalibo</option>
-            <option value="PAS">🏢 Passi</option>
-            <option value="POT">🏢 Pototan</option>
-            <option value="SAN">🏢 San Carlos</option>
-            <option value="TAB">🏢 Tabunok</option>
-            <option value="TAN">🏢 Tandag</option>
-            <option value="TIS">🏢 Tisa</option>
-            <option value="TOL">🏢 Toledo</option>
-
-        </select>
+    <label>
+      Select Branch
+    </label>
 
 
-        <label>
-            Select Report
-        </label>
+    <select id="clearBranch">
+
+      <option value="">
+        -- Select Branch --
+      </option>
+
+      <option value="GAI">🏢 Gaisano Iloilo</option>
+      <option value="CAS">🏢 Casa Plaza</option>
+      <option value="BAC">🏢 Bacolod</option>
+      <option value="BIN">🏢 Binalbagan</option>
+      <option value="BIS">🏢 Bislig</option>
+      <option value="CAD">🏢 Cadiz</option>
+      <option value="DGT">🏢 Dumaguete</option>
+      <option value="KAB">🏢 Kabankalan</option>
+      <option value="KAL">🏢 Kalibo</option>
+      <option value="PAS">🏢 Passi</option>
+      <option value="POT">🏢 Pototan</option>
+      <option value="SAN">🏢 San Carlos</option>
+      <option value="TAB">🏢 Tabunok</option>
+      <option value="TAN">🏢 Tandag</option>
+      <option value="TIS">🏢 Tisa</option>
+      <option value="TOL">🏢 Toledo</option>
+
+    </select>
 
 
-        <select id="clearSheet">
-
-            <option value="">
-                -- Select Report --
-            </option>
-
-            <option value="stocks">
-                📦 Stocks
-            </option>
-
-            <option value="SCANRESULTS">
-                💰 Sold Out
-            </option>
-
-            <option value="AUDIT">
-                🔄 Re-Inventory
-            </option>
-
-        </select>
+    <label>
+      Select Report
+    </label>
 
 
-        <div class="modalButtons">
+    <select id="clearSheet">
 
-            <button
-                onclick="closeClearModal()"
-            >
-                Cancel
-            </button>
+      <option value="">
+        -- Select Report --
+      </option>
+
+      <option value="stocks">
+        📦 Stocks
+      </option>
+
+      <option value="SCANRESULTS">
+        💰 Sold Out
+      </option>
+
+      <option value="AUDIT">
+        🔄 Re-Inventory
+      </option>
+
+    </select>
 
 
-            <button
-                class="dangerBtn"
-                onclick="clearReportAction()"
-            >
-                Clear
-            </button>
+    <div class="modalButtons">
 
-        </div>
+      <button
+        onclick="closeClearModal()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        class="dangerBtn"
+        onclick="clearReportAction()"
+      >
+        Clear
+      </button>
 
     </div>
+
+  </div>
 
 </div>
 
 
-
-<!-- ============================================================
+<!-- ========================================================
      EXPORT MODAL
-============================================================ -->
+========================================================= -->
 
 <div
-    id="exportModal"
-    class="modalOverlay"
+  id="exportModalOverlay"
+  class="modalOverlay"
 >
 
-    <div class="modal">
+  <div class="modal">
 
-        <h3>
-            📥 Export Inventory
-        </h3>
-
-
-        <label>
-            Select Branch
-        </label>
+    <h3>
+      Export Inventory
+    </h3>
 
 
-        <select id="exportBranch">
-
-            <option value="">
-                -- Select Branch --
-            </option>
-
-            <option value="GAI">🏢 Gaisano Iloilo</option>
-            <option value="CAS">🏢 Casa Plaza</option>
-            <option value="BAC">🏢 Bacolod</option>
-            <option value="BIN">🏢 Binalbagan</option>
-            <option value="BIS">🏢 Bislig</option>
-            <option value="CAD">🏢 Cadiz</option>
-            <option value="DGT">🏢 Dumaguete</option>
-            <option value="KAB">🏢 Kabankalan</option>
-            <option value="KAL">🏢 Kalibo</option>
-            <option value="PAS">🏢 Passi</option>
-            <option value="POT">🏢 Pototan</option>
-            <option value="SAN">🏢 San Carlos</option>
-            <option value="TAB">🏢 Tabunok</option>
-            <option value="TAN">🏢 Tandag</option>
-            <option value="TIS">🏢 Tisa</option>
-            <option value="TOL">🏢 Toledo</option>
-
-        </select>
+    <label>
+      Select Branch
+    </label>
 
 
-        <div class="modalButtons">
+    <select id="exportBranch">
 
-            <button
-                onclick="closeExportModal()"
-            >
-                Cancel
-            </button>
+      <option value="">
+        -- Select Branch --
+      </option>
+
+      <option value="GAI">🏢 Gaisano Iloilo</option>
+      <option value="CAS">🏢 Casa Plaza</option>
+      <option value="BAC">🏢 Bacolod</option>
+      <option value="BIN">🏢 Binalbagan</option>
+      <option value="BIS">🏢 Bislig</option>
+      <option value="CAD">🏢 Cadiz</option>
+      <option value="DGT">🏢 Dumaguete</option>
+      <option value="KAB">🏢 Kabankalan</option>
+      <option value="KAL">🏢 Kalibo</option>
+      <option value="PAS">🏢 Passi</option>
+      <option value="POT">🏢 Pototan</option>
+      <option value="SAN">🏢 San Carlos</option>
+      <option value="TAB">🏢 Tabunok</option>
+      <option value="TAN">🏢 Tandag</option>
+      <option value="TIS">🏢 Tisa</option>
+      <option value="TOL">🏢 Toledo</option>
+
+    </select>
 
 
-            <button
-                class="primaryBtn"
-                onclick="startExport()"
-            >
-                Export
-            </button>
+    <div class="modalButtons">
 
-        </div>
+      <button
+        onclick="closeExportModal()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        class="primaryBtn"
+        onclick="startExport()"
+      >
+        Export
+      </button>
 
     </div>
+
+  </div>
 
 </div>
 
 
-
-<!-- ============================================================
-     CONFIRMATION DIALOG
-============================================================ -->
+<!-- ========================================================
+     CONFIRM DIALOG
+========================================================= -->
 
 <div
-    id="dialogModal"
-    class="modalOverlay"
+  id="dialogOverlay"
+  class="modalOverlay"
 >
 
-    <div class="modal">
+  <div class="modal">
 
-        <div
-            id="dialogIcon"
-            class="dialogIcon"
-        >
-            ⚠️
-        </div>
-
-
-        <div
-            id="dialogTitle"
-            class="dialogTitle"
-        >
-            Confirm
-        </div>
+    <div
+      id="dialogIcon"
+      class="dialogIcon"
+    >
+      ⚠️
+    </div>
 
 
-        <div
-            id="dialogMessage"
-            class="dialogMessage"
-        >
-            Message
-        </div>
+    <div
+      id="dialogTitle"
+      class="dialogTitle"
+    >
+      Confirm
+    </div>
 
 
-        <div class="dialogButtons">
+    <div
+      id="dialogMessage"
+      class="dialogMessage"
+    >
+      Message
+    </div>
 
-            <button
-                onclick="closeDialog(false)"
-            >
-                Cancel
-            </button>
+
+    <div class="dialogButtons">
+
+      <button
+        onclick="closeDialog(false)"
+      >
+        Cancel
+      </button>
 
 
-            <button
-                id="dialogOK"
-                class="primaryBtn"
-                onclick="dialogOKClick()"
-            >
-                OK
-            </button>
-
-        </div>
+      <button
+        id="dialogOK"
+        class="primaryBtn"
+        onclick="dialogOKClick()"
+      >
+        OK
+      </button>
 
     </div>
+
+  </div>
 
 </div>
 
 
-
-<!-- ============================================================
+<!-- ========================================================
      LOADING
-============================================================ -->
+========================================================= -->
 
 <div
-    id="loadingOverlay"
+  id="loadingOverlay"
+  class="modalOverlay"
 >
 
-    <div class="loadingBox">
+  <div class="loadingBox">
 
-        <div class="loadingIcon">
-            ⏳
-        </div>
-
-
-        <div id="loadingText">
-            Please wait...
-        </div>
-
+    <div class="loadingIcon">
+      ⏳
     </div>
 
+
+    <div id="loadingText">
+      Please wait...
+    </div>
+
+  </div>
+
 </div>
-
-
-
-<!-- ============================================================
-     XLSX LIBRARY
-============================================================ -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
-></script>
-
 
 
 <script>
 
 /* ============================================================
-   APPS SCRIPT WEB APP URL
-
-   IMPORTANT:
-   Replace this with your deployed Apps Script Web App URL.
-
-   Example:
-   https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+   APPS SCRIPT URL
 ============================================================ */
 
-const API_URL =
-    "https://script.google.com/macros/s/AKfycbw7_gRciuqdXfO_W-wdLWFErVbkwqWE5XY_7oDFg4ppNdbgd3nojcAXOUCApP5Hk32UzA/exec";
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbw0Qhl_5AWQOIjbbQwm2VV_PSaHNnBDoNa8SvB-OKihAotVqy7mmZhsarSKvykTz4iAwA/exec";
 
 
 /* ============================================================
-   SESSION
+   STATE
 ============================================================ */
 
 let session =
-    localStorage.getItem(
-        "inventorySession"
-    ) || "";
+  localStorage.getItem(
+    "inventorySession"
+  ) || "";
 
 
-/* ============================================================
-   DASHBOARD DATA
-============================================================ */
+let currentData = [];
 
-let dashboardRows = [];
 
 let currentPage = 1;
+
 
 const rowsPerPage = 20;
 
 
-/* ============================================================
-   DIALOG CALLBACK
-============================================================ */
-
-let dialogCallback = null;
+let dialogCallback =
+  null;
 
 
 /* ============================================================
-   API REQUEST
-
-   Apps Script returns JSONP.
-
-   We use JSONP so GitHub Pages can communicate
-   with the Apps Script Web App without CORS problems.
+   JSONP REQUEST
 ============================================================ */
 
-function apiRequest(
-    action,
-    params = {}
+function api(
+  params
 ) {
 
-    return new Promise(
-        function(resolve, reject) {
+  return new Promise(
+    function(resolve, reject) {
 
-            const callbackName =
-                "apiCallback_" +
-                Date.now() +
-                "_" +
-                Math.floor(
-                    Math.random() * 100000
-                );
-
-
-            const script =
-                document.createElement("script");
+      const callbackName =
+        "apiCallback_" +
+        Date.now() +
+        "_" +
+        Math.floor(
+          Math.random() * 100000
+        );
 
 
-            const query =
-                new URLSearchParams();
+      const script =
+        document.createElement(
+          "script"
+        );
 
 
-            query.set(
-                "action",
-                action
-            );
+      const query =
+        new URLSearchParams(
+          params
+        );
 
 
-            query.set(
-                "callback",
-                callbackName
-            );
+      query.set(
+        "callback",
+        callbackName
+      );
 
 
-            Object.keys(params).forEach(
-                function(key) {
-
-                    if (
-                        params[key] !== undefined &&
-                        params[key] !== null
-                    ) {
-
-                        query.set(
-                            key,
-                            String(params[key])
-                        );
-
-                    }
-
-                }
-            );
+      const url =
+        APPS_SCRIPT_URL +
+        "?" +
+        query.toString();
 
 
-            const timeout =
-                setTimeout(
-                    function() {
-
-                        cleanup();
-
-                        reject(
-                            new Error(
-                                "Request timed out."
-                            )
-                        );
-
-                    },
-                    30000
-                );
+      let finished = false;
 
 
-            window[callbackName] =
-                function(data) {
+      const timeout =
+        setTimeout(
+          function() {
 
-                    clearTimeout(timeout);
-
-                    cleanup();
-
-                    resolve(data);
-
-                };
-
-
-            script.onerror =
-                function() {
-
-                    clearTimeout(timeout);
-
-                    cleanup();
-
-                    reject(
-                        new Error(
-                            "Failed to fetch Apps Script API."
-                        )
-                    );
-
-                };
-
-
-            function cleanup() {
-
-                try {
-
-                    delete window[
-                        callbackName
-                    ];
-
-                }
-                catch (e) {}
-
-                if (
-                    script.parentNode
-                ) {
-
-                    script.parentNode.removeChild(
-                        script
-                    );
-
-                }
-
+            if (finished) {
+              return;
             }
 
+            finished = true;
 
-            script.src =
-                API_URL +
-                "?" +
-                query.toString();
+            cleanup();
 
-
-            document.body.appendChild(
-                script
+            reject(
+              new Error(
+                "Request timed out."
+              )
             );
 
+          },
+          30000
+        );
+
+
+      function cleanup() {
+
+        clearTimeout(
+          timeout
+        );
+
+        try {
+          delete window[
+            callbackName
+          ];
         }
-    );
+        catch (e) {}
+
+        if (
+          script.parentNode
+        ) {
+
+          script.parentNode.removeChild(
+            script
+          );
+
+        }
+
+      }
+
+
+      window[
+        callbackName
+      ] =
+        function(data) {
+
+          if (finished) {
+            return;
+          }
+
+          finished = true;
+
+          cleanup();
+
+          resolve(
+            data
+          );
+
+        };
+
+
+      script.onerror =
+        function() {
+
+          if (finished) {
+            return;
+          }
+
+          finished = true;
+
+          cleanup();
+
+          reject(
+            new Error(
+              "Failed to fetch Apps Script."
+            )
+          );
+
+        };
+
+
+      script.src =
+        url;
+
+
+      document.body.appendChild(
+        script
+      );
+
+    }
+  );
 
 }
 
 
 /* ============================================================
-   LOGIN
+   LOADING
+============================================================ */
+
+function showLoading(
+  text
+) {
+
+  document.getElementById(
+    "loadingText"
+  ).textContent =
+    text || "Please wait...";
+
+
+  document.getElementById(
+    "loadingOverlay"
+  ).classList.add(
+    "show"
+  );
+
+}
+
+
+function hideLoading() {
+
+  document.getElementById(
+    "loadingOverlay"
+  ).classList.remove(
+    "show"
+  );
+
+}
+
+
+/* ============================================================
+   INITIALIZATION
+============================================================ */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    if (!APPS_SCRIPT_URL ||
+        APPS_SCRIPT_URL.indexOf(
+          "PASTE_"
+        ) === 0) {
+
+      console.error(
+        "Set APPS_SCRIPT_URL first."
+      );
+
+      return;
+
+    }
+
+
+    if (session) {
+
+      checkExistingSession();
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   OTP
 ============================================================ */
 
 async function sendOTP() {
 
-    const email =
-        document
-            .getElementById("email")
-            .value
-            .trim();
+  const email =
+    document.getElementById(
+      "email"
+    ).value.trim();
 
 
-    const status =
-        document.getElementById(
-            "loginStatus"
-        );
+  if (!email) {
+
+    setLoginStatus(
+      "Please enter your Gmail address."
+    );
+
+    return;
+
+  }
 
 
-    if (!email) {
+  const button =
+    document.getElementById(
+      "sendOtpBtn"
+    );
 
-        status.className =
-            "status error";
 
-        status.textContent =
-            "Please enter your Gmail address.";
+  button.disabled = true;
 
-        return;
+  button.textContent =
+    "SENDING...";
+
+
+  try {
+
+    const result =
+      await api({
+
+        action:
+          "sendOTP",
+
+        email:
+          email
+
+      });
+
+
+    if (!result.ok) {
+
+      throw new Error(
+        result.error ||
+        "OTP failed."
+      );
 
     }
 
 
-    const button =
-        document.getElementById(
-            "sendOtpBtn"
-        );
+    document.getElementById(
+      "otp"
+    ).style.display =
+      "block";
 
 
-    button.disabled = true;
+    document.getElementById(
+      "verifyBtn"
+    ).style.display =
+      "block";
+
+
+    setLoginStatus(
+      "OTP sent to your Gmail."
+    );
+
+  }
+
+  catch (err) {
+
+    setLoginStatus(
+      err.message
+    );
+
+  }
+
+  finally {
+
+    button.disabled =
+      false;
 
     button.textContent =
-        "SENDING...";
+      "SEND OTP";
 
-
-    status.className =
-        "status";
-
-    status.textContent =
-        "Sending OTP...";
-
-
-    try {
-
-        const result =
-            await apiRequest(
-                "sendOTP",
-                {
-                    email: email
-                }
-            );
-
-
-        if (
-            !result ||
-            !result.ok
-        ) {
-
-            throw new Error(
-                result &&
-                result.error
-                    ? result.error
-                    : "OTP failed."
-            );
-
-        }
-
-
-        document
-            .getElementById("otp")
-            .style.display =
-                "block";
-
-
-        document
-            .getElementById("verifyBtn")
-            .style.display =
-                "block";
-
-
-        status.className =
-            "status success";
-
-        status.textContent =
-            "OTP sent. Check your Gmail.";
-
-
-    }
-    catch (error) {
-
-        status.className =
-            "status error";
-
-        status.textContent =
-            error.message ||
-            "OTP failed to fetch.";
-
-    }
-    finally {
-
-        button.disabled = false;
-
-        button.textContent =
-            "SEND OTP";
-
-    }
+  }
 
 }
 
@@ -1686,181 +1616,151 @@ async function sendOTP() {
 
 async function verifyOTP() {
 
-    const email =
-        document
-            .getElementById("email")
-            .value
-            .trim();
+  const email =
+    document.getElementById(
+      "email"
+    ).value.trim();
 
 
-    const otp =
-        document
-            .getElementById("otp")
-            .value
-            .trim();
+  const otp =
+    document.getElementById(
+      "otp"
+    ).value.trim();
 
 
-    const status =
-        document.getElementById(
-            "loginStatus"
-        );
+  if (!email || !otp) {
+
+    setLoginStatus(
+      "Enter your email and OTP."
+    );
+
+    return;
+
+  }
 
 
-    if (!email || !otp) {
+  const button =
+    document.getElementById(
+      "verifyBtn"
+    );
 
-        status.className =
-            "status error";
 
-        status.textContent =
-            "Enter your email and OTP.";
+  button.disabled =
+    true;
 
-        return;
+  button.textContent =
+    "VERIFYING...";
+
+
+  try {
+
+    const result =
+      await api({
+
+        action:
+          "verifyOTP",
+
+        email:
+          email,
+
+        otp:
+          otp
+
+      });
+
+
+    if (!result.ok) {
+
+      throw new Error(
+        result.error ||
+        "Invalid OTP."
+      );
 
     }
 
 
-    const button =
-        document.getElementById(
-            "verifyBtn"
-        );
+    session =
+      result.session;
 
 
-    button.disabled = true;
+    localStorage.setItem(
+      "inventorySession",
+      session
+    );
+
+
+    showDashboard();
+
+
+    setLoginStatus(
+      ""
+    );
+
+  }
+
+  catch (err) {
+
+    setLoginStatus(
+      err.message
+    );
+
+  }
+
+  finally {
+
+    button.disabled =
+      false;
 
     button.textContent =
-        "VERIFYING...";
+      "VERIFY OTP";
 
-
-    try {
-
-        const result =
-            await apiRequest(
-                "verifyOTP",
-                {
-                    email: email,
-                    otp: otp
-                }
-            );
-
-
-        if (
-            !result ||
-            !result.ok
-        ) {
-
-            throw new Error(
-                result &&
-                result.error
-                    ? result.error
-                    : "Invalid OTP."
-            );
-
-        }
-
-
-        session =
-            result.session;
-
-
-        localStorage.setItem(
-            "inventorySession",
-            session
-        );
-
-
-        showDashboard();
-
-
-    }
-    catch (error) {
-
-        status.className =
-            "status error";
-
-        status.textContent =
-            error.message ||
-            "OTP verification failed.";
-
-    }
-    finally {
-
-        button.disabled = false;
-
-        button.textContent =
-            "VERIFY OTP";
-
-    }
+  }
 
 }
 
 
 /* ============================================================
-   SESSION CHECK
+   CHECK SESSION
 ============================================================ */
 
-async function checkLoginSession() {
+async function checkExistingSession() {
 
-    if (!session) {
+  try {
 
-        showLogin();
+    const result =
+      await api({
 
-        return;
+        action:
+          "checkSession",
 
-    }
+        session:
+          session
 
-
-    try {
-
-        const result =
-            await apiRequest(
-                "checkSession",
-                {
-                    session:
-                        session
-                }
-            );
+      });
 
 
-        if (
-            result &&
-            result.ok
-        ) {
+    if (
+      result &&
+      result.ok
+    ) {
 
-            showDashboard();
-
-        }
-        else {
-
-            logoutLocal();
-
-        }
-
-    }
-    catch (error) {
-
-        logoutLocal();
+      showDashboard();
 
     }
 
-}
+    else {
 
+      logoutLocal();
 
-/* ============================================================
-   SHOW LOGIN
-============================================================ */
+    }
 
-function showLogin() {
+  }
 
-    document
-        .getElementById("loginScreen")
-        .style.display =
-            "flex";
+  catch (err) {
 
+    logoutLocal();
 
-    document
-        .getElementById("dashboardScreen")
-        .style.display =
-            "none";
+  }
 
 }
 
@@ -1871,16 +1771,32 @@ function showLogin() {
 
 function showDashboard() {
 
-    document
-        .getElementById("loginScreen")
-        .style.display =
-            "none";
+  document.getElementById(
+    "loginScreen"
+  ).style.display =
+    "none";
 
 
-    document
-        .getElementById("dashboardScreen")
-        .style.display =
-            "block";
+  document.getElementById(
+    "dashboardScreen"
+  ).style.display =
+    "block";
+
+}
+
+
+/* ============================================================
+   LOGIN STATUS
+============================================================ */
+
+function setLoginStatus(
+  message
+) {
+
+  document.getElementById(
+    "loginStatus"
+  ).textContent =
+    message || "";
 
 }
 
@@ -1891,37 +1807,60 @@ function showDashboard() {
 
 async function logoutUser() {
 
-    try {
+  try {
 
-        if (session) {
+    await api({
 
-            await apiRequest(
-                "logout",
-                {
-                    session:
-                        session
-                }
-            );
+      action:
+        "logout",
 
-        }
+      session:
+        session
 
-    }
-    catch (error) {}
+    });
 
-    logoutLocal();
+  }
+
+  catch (err) {}
+
+
+  logoutLocal();
 
 }
 
 
 function logoutLocal() {
 
-    session = "";
+  session = "";
 
-    localStorage.removeItem(
-        "inventorySession"
-    );
 
-    showLogin();
+  localStorage.removeItem(
+    "inventorySession"
+  );
+
+
+  document.getElementById(
+    "dashboardScreen"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "loginScreen"
+  ).style.display =
+    "flex";
+
+
+  document.getElementById(
+    "otp"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "verifyBtn"
+  ).style.display =
+    "none";
 
 }
 
@@ -1930,152 +1869,158 @@ function logoutLocal() {
    SEARCH
 ============================================================ */
 
-function searchKeyDown(event) {
+function searchKeyDown(
+  event
+) {
 
-    if (
-        event.key === "Enter"
-    ) {
+  if (
+    event.key === "Enter"
+  ) {
 
-        searchDashboard();
+    searchDashboard();
 
-    }
+  }
 
 }
 
 
 async function searchDashboard() {
 
-    const branch =
-        document
-            .getElementById("branchSelect")
-            .value
-            .trim()
-            .toUpperCase();
+  const branch =
+    document.getElementById(
+      "branchSelect"
+    ).value;
 
 
-    const report =
-        document
-            .getElementById("sheetSelect")
-            .value;
+  const report =
+    document.getElementById(
+      "sheetSelect"
+    ).value;
 
 
-    const search =
-        document
-            .getElementById("searchBox")
-            .value
-            .trim();
+  const search =
+    document.getElementById(
+      "searchBox"
+    ).value.trim();
 
 
-    if (!branch) {
+  if (!branch) {
 
-        alert(
-            "Please select a branch."
-        );
-
-        return;
-
-    }
-
-
-    currentPage = 1;
-
-
-    showLoading(
-        "Loading inventory..."
+    showDialog(
+      "⚠️",
+      "Branch Required",
+      "Please select a branch.",
+      null
     );
 
+    return;
 
-    try {
-
-        const result =
-            await apiRequest(
-                "dashboard",
-                {
-                    session:
-                        session,
-
-                    branch:
-                        branch,
-
-                    report:
-                        report,
-
-                    search:
-                        search
-                }
-            );
+  }
 
 
-        if (
-            !result ||
-            !result.ok
-        ) {
-
-            throw new Error(
-                result &&
-                result.error
-                    ? result.error
-                    : "Unable to load dashboard."
-            );
-
-        }
+  showLoading(
+    "Searching..."
+  );
 
 
-        dashboardRows =
-            Array.isArray(
-                result.data
-            )
-                ? result.data
-                : [];
+  try {
+
+    const result =
+      await api({
+
+        action:
+          "dashboard",
+
+        session:
+          session,
+
+        branch:
+          branch,
+
+        report:
+          report,
+
+        search:
+          search
+
+      });
 
 
-        document
-            .getElementById(
-                "availableCount"
-            )
-            .textContent =
-                Number(
-                    result.availableCount || 0
-                ).toLocaleString();
+    if (!result.ok) {
 
+      if (
+        result.error ===
+        "SESSION_EXPIRED"
+      ) {
 
-        document
-            .getElementById(
-                "soldCount"
-            )
-            .textContent =
-                Number(
-                    result.soldCount || 0
-                ).toLocaleString();
+        logoutLocal();
 
+      }
 
-        document
-            .getElementById(
-                "auditCount"
-            )
-            .textContent =
-                Number(
-                    result.auditCount || 0
-                ).toLocaleString();
-
-
-        renderCurrentPage();
-
+      throw new Error(
+        result.error ||
+        "Unable to load dashboard."
+      );
 
     }
-    catch (error) {
 
-        alert(
-            error.message ||
-            "Unable to load dashboard."
-        );
 
-    }
-    finally {
+    currentData =
+      Array.isArray(
+        result.data
+      )
+        ? result.data
+        : [];
 
-        hideLoading();
 
-    }
+    currentPage =
+      1;
+
+
+    document.getElementById(
+      "availableCount"
+    ).textContent =
+      Number(
+        result.availableCount || 0
+      ).toLocaleString();
+
+
+    document.getElementById(
+      "soldCount"
+    ).textContent =
+      Number(
+        result.soldCount || 0
+      ).toLocaleString();
+
+
+    document.getElementById(
+      "auditCount"
+    ).textContent =
+      Number(
+        result.auditCount || 0
+      ).toLocaleString();
+
+
+    renderTable();
+
+  }
+
+  catch (err) {
+
+    showDialog(
+      "❌",
+      "Search Error",
+      err.message,
+      null
+    );
+
+  }
+
+  finally {
+
+    hideLoading();
+
+  }
 
 }
 
@@ -2086,7 +2031,7 @@ async function searchDashboard() {
 
 function refreshDashboard() {
 
-    searchDashboard();
+  searchDashboard();
 
 }
 
@@ -2095,442 +2040,356 @@ function refreshDashboard() {
    RENDER TABLE
 ============================================================ */
 
-function renderCurrentPage() {
-
-    const tbody =
-        document.getElementById(
-            "tableBody"
-        );
-
-
-    tbody.innerHTML = "";
-
-
-    const totalRows =
-        dashboardRows.length;
-
-
-    const totalPages =
-        Math.max(
-            1,
-            Math.ceil(
-                totalRows /
-                rowsPerPage
-            )
-        );
-
-
-    if (
-        currentPage >
-        totalPages
-    ) {
-
-        currentPage =
-            totalPages;
-
-    }
-
-
-    const start =
-        (currentPage - 1) *
-        rowsPerPage;
-
-
-    const end =
-        start +
-        rowsPerPage;
-
-
-    const pageRows =
-        dashboardRows.slice(
-            start,
-            end
-        );
-
-
-    if (!pageRows.length) {
-
-        tbody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="7"
-                    style="
-                        text-align:center;
-                        padding:40px;
-                    "
-                >
-                    No records found.
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-
-
-    pageRows.forEach(
-        function(row) {
-
-            const tr =
-                document.createElement(
-                    "tr"
-                );
-
-
-            const tdBranch =
-                document.createElement(
-                    "td"
-                );
-
-            tdBranch.textContent =
-                row.branchName ||
-                row.branch ||
-                "";
-
-
-
-            const tdLenstype =
-                document.createElement(
-                    "td"
-                );
-
-            tdLenstype.textContent =
-                row.lenstype || "";
-
-
-
-            const tdDescription =
-                document.createElement(
-                    "td"
-                );
-
-            tdDescription.textContent =
-                row.description || "";
-
-
-
-            const tdTag =
-                document.createElement(
-                    "td"
-                );
-
-            tdTag.textContent =
-                row.tag || "";
-
-
-
-            const tdSI =
-                document.createElement(
-                    "td"
-                );
-
-            tdSI.textContent =
-                row.si || "";
-
-
-
-            const tdDate =
-                document.createElement(
-                    "td"
-                );
-
-            tdDate.textContent =
-                row.date || "";
-
-
-
-            const tdActions =
-                document.createElement(
-                    "td"
-                );
-
-
-            /*
-             * EDIT AND DELETE ARE ONLY
-             * FOR SOLD OUT RECORDS.
-             */
-
-            if (
-                row.editable
-            ) {
-
-
-                /* -----------------------------------------
-                   EDIT BUTTON
-                   -----------------------------------------
-
-                   IMPORTANT:
-
-                   branch = tells Apps Script which table
-                   tag    = finds the existing row
-                   si     = NEW SI NUMBER
-
-                   The tag itself is NEVER changed.
-                */
-
-                const editButton =
-                    document.createElement(
-                        "button"
-                    );
-
-
-                editButton.className =
-                    "editBtn";
-
-
-                editButton.textContent =
-                    "✏️ Edit";
-
-
-                editButton.onclick =
-                    function() {
-
-                        openEditModal(
-                            row.branch,
-                            row.tag,
-                            row.si
-                        );
-
-                    };
-
-
-                tdActions.appendChild(
-                    editButton
-                );
-
-
-
-                /* -----------------------------------------
-                   DELETE BUTTON
-                ----------------------------------------- */
-
-                const deleteButton =
-                    document.createElement(
-                        "button"
-                    );
-
-
-                deleteButton.className =
-                    "deleteBtn";
-
-
-                deleteButton.textContent =
-                    "🗑 Delete";
-
-
-                deleteButton.onclick =
-                    function() {
-
-                        deleteSoldRecord(
-                            row.branch,
-                            row.tag
-                        );
-
-                    };
-
-
-                tdActions.appendChild(
-                    deleteButton
-                );
-
-            }
-
-
-            tr.appendChild(
-                tdBranch
-            );
-
-            tr.appendChild(
-                tdLenstype
-            );
-
-            tr.appendChild(
-                tdDescription
-            );
-
-            tr.appendChild(
-                tdTag
-            );
-
-            tr.appendChild(
-                tdSI
-            );
-
-            tr.appendChild(
-                tdDate
-            );
-
-            tr.appendChild(
-                tdActions
-            );
-
-
-            tbody.appendChild(
-                tr
-            );
-
-        }
+function renderTable() {
+
+  const tbody =
+    document.getElementById(
+      "tableBody"
     );
 
 
-    document
-        .getElementById(
-            "showingCount"
-        )
-        .textContent =
-            totalRows.toLocaleString();
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        currentData.length /
+        rowsPerPage
+      )
+    );
 
 
-    document
-        .getElementById(
-            "pageInfo"
-        )
-        .textContent =
-            "Page " +
-            currentPage +
-            " / " +
-            totalPages;
+  if (
+    currentPage >
+    totalPages
+  ) {
+
+    currentPage =
+      totalPages;
+
+  }
 
 
-    document
-        .getElementById(
-            "prevBtn"
-        )
-        .disabled =
-            currentPage <= 1;
+  const start =
+    (
+      currentPage -
+      1
+    ) *
+    rowsPerPage;
 
 
-    document
-        .getElementById(
-            "nextBtn"
-        )
-        .disabled =
-            currentPage >= totalPages;
+  const end =
+    start +
+    rowsPerPage;
+
+
+  const pageRows =
+    currentData.slice(
+      start,
+      end
+    );
+
+
+  tbody.innerHTML =
+    "";
+
+
+  if (!pageRows.length) {
+
+    tbody.innerHTML =
+
+      '<tr>' +
+
+      '<td colspan="7" ' +
+      'style="text-align:center;padding:40px;">' +
+
+      'No results found.' +
+
+      '</td>' +
+
+      '</tr>';
+
+
+  }
+
+  else {
+
+    pageRows.forEach(
+      function(row) {
+
+        const tr =
+          document.createElement(
+            "tr"
+          );
+
+
+        tr.innerHTML =
+
+          "<td>" +
+          escapeHtml(
+            row.branchName ||
+            row.branch ||
+            ""
+          ) +
+          "</td>" +
+
+          "<td>" +
+          escapeHtml(
+            row.lenstype || ""
+          ) +
+          "</td>" +
+
+          "<td>" +
+          escapeHtml(
+            row.description || ""
+          ) +
+          "</td>" +
+
+          "<td>" +
+          escapeHtml(
+            row.tag || ""
+          ) +
+          "</td>" +
+
+          "<td>" +
+          escapeHtml(
+            row.si || ""
+          ) +
+          "</td>" +
+
+          "<td>" +
+          escapeHtml(
+            row.date || ""
+          ) +
+          "</td>" +
+
+          "<td>" +
+          buildActions(
+            row
+          ) +
+          "</td>";
+
+
+        tbody.appendChild(
+          tr
+        );
+
+      }
+    );
+
+  }
+
+
+  document.getElementById(
+    "showingCount"
+  ).textContent =
+    currentData.length
+      .toLocaleString();
+
+
+  document.getElementById(
+    "pageInfo"
+  ).textContent =
+    "Page " +
+    currentPage +
+    " / " +
+    totalPages;
+
+
+  document.getElementById(
+    "prevBtn"
+  ).disabled =
+    currentPage <= 1;
+
+
+  document.getElementById(
+    "nextBtn"
+  ).disabled =
+    currentPage >= totalPages;
 
 }
 
 
 /* ============================================================
-   PAGINATION
+   ACTION BUTTONS
 ============================================================ */
 
-function previousPage() {
+function buildActions(
+  row
+) {
 
-    if (currentPage > 1) {
+  if (
+    !row.editable
+  ) {
 
-        currentPage--;
+    return "";
 
-        renderCurrentPage();
-
-    }
-
-}
-
-
-function nextPage() {
-
-    const totalPages =
-        Math.max(
-            1,
-            Math.ceil(
-                dashboardRows.length /
-                rowsPerPage
-            )
-        );
+  }
 
 
-    if (
-        currentPage <
-        totalPages
-    ) {
+  const branch =
+    encodeURIComponent(
+      row.branch || ""
+    );
 
-        currentPage++;
 
-        renderCurrentPage();
+  const tag =
+    encodeURIComponent(
+      row.tag || ""
+    );
 
-    }
+
+  const si =
+    encodeURIComponent(
+      row.si || ""
+    );
+
+
+  return (
+
+    '<button ' +
+
+    'class="actionBtn editBtn" ' +
+
+    'onclick="openEditModal(' +
+
+    "'" +
+    branch +
+    "'" +
+    "," +
+
+    "'" +
+    tag +
+    "'" +
+    "," +
+
+    "'" +
+    si +
+    "'" +
+
+    ')">' +
+
+    '✏️ Edit' +
+
+    '</button>' +
+
+
+    '<button ' +
+
+    'class="actionBtn deleteBtn" ' +
+
+    'onclick="deleteSoldRecord(' +
+
+    "'" +
+    branch +
+    "'" +
+    "," +
+
+    "'" +
+    tag +
+    "'" +
+
+    ')">' +
+
+    '🗑 Delete' +
+
+    '</button>'
+
+  );
 
 }
 
 
 /* ============================================================
    EDIT MODAL
+   THIS WAS MISSING FROM YOUR HTML.
 ============================================================ */
 
 function openEditModal(
-    branch,
-    tag,
-    si
+  branch,
+  tag,
+  si
 ) {
 
-    /*
-     * Branch and Tag are hidden.
+  /*
+   * decode values because buildActions encoded them.
+   */
 
-     * Tag is ONLY used to identify
-     * the database row.
-
-     * SI is the ONLY editable value.
-     */
-
-    document
-        .getElementById(
-            "editBranch"
-        )
-        .value =
-            branch || "";
-
-
-    document
-        .getElementById(
-            "editTag"
-        )
-        .value =
-            tag || "";
-
-
-    document
-        .getElementById(
-            "editSI"
-        )
-        .value =
-            si || "";
-
-
-    document
-        .getElementById(
-            "editModal"
-        )
-        .style.display =
-            "flex";
-
-
-    setTimeout(
-        function() {
-
-            document
-                .getElementById(
-                    "editSI"
-                )
-                .focus();
-
-        },
-        50
+  branch =
+    decodeURIComponent(
+      branch || ""
     );
+
+
+  tag =
+    decodeURIComponent(
+      tag || ""
+    );
+
+
+  si =
+    decodeURIComponent(
+      si || ""
+    );
+
+
+  document.getElementById(
+    "editBranch"
+  ).value =
+    branch;
+
+
+  /*
+   * TAG IS STORED ONLY AS THE RECORD IDENTIFIER.
+   */
+
+  document.getElementById(
+    "editTag"
+  ).value =
+    tag;
+
+
+  /*
+   * ONLY SI IS DISPLAYED FOR EDITING.
+   */
+
+  document.getElementById(
+    "editSI"
+  ).value =
+    si;
+
+
+  document.getElementById(
+    "editModalOverlay"
+  ).classList.add(
+    "show"
+  );
+
+
+  setTimeout(
+    function() {
+
+      document.getElementById(
+        "editSI"
+      ).focus();
+
+    },
+    100
+  );
 
 }
 
 
+/* ============================================================
+   CLOSE EDIT
+============================================================ */
+
 function closeEditModal() {
 
-    document
-        .getElementById(
-            "editModal"
-        )
-        .style.display =
-            "none";
+  document.getElementById(
+    "editModalOverlay"
+  ).classList.remove(
+    "show"
+  );
 
 }
 
@@ -2541,150 +2400,140 @@ function closeEditModal() {
 
 async function saveEdit() {
 
-    const branch =
-        document
-            .getElementById(
-                "editBranch"
-            )
-            .value
-            .trim()
-            .toUpperCase();
+  const branch =
+    document.getElementById(
+      "editBranch"
+    ).value;
 
 
-    const tag =
-        document
-            .getElementById(
-                "editTag"
-            )
-            .value
-            .trim();
+  const tag =
+    document.getElementById(
+      "editTag"
+    ).value;
 
 
-    const newSI =
-        document
-            .getElementById(
-                "editSI"
-            )
-            .value
-            .trim();
+  const newSI =
+    document.getElementById(
+      "editSI"
+    ).value.trim();
 
 
-    if (!branch) {
+  if (!branch) {
 
-        alert(
-            "Branch is missing."
-        );
+    alert(
+      "Branch is missing."
+    );
 
-        return;
+    return;
 
-    }
-
-
-    if (!tag) {
-
-        alert(
-            "Tag is missing."
-        );
-
-        return;
-
-    }
+  }
 
 
-    if (!newSI) {
+  if (!tag) {
 
-        alert(
-            "Please enter the SI Number."
-        );
+    alert(
+      "Tag identifier is missing."
+    );
 
-        return;
+    return;
+
+  }
+
+
+  if (!newSI) {
+
+    alert(
+      "Please enter the SI Number."
+    );
+
+    return;
+
+  }
+
+
+  closeEditModal();
+
+
+  showLoading(
+    "Updating SI Number..."
+  );
+
+
+  try {
+
+    const result =
+      await api({
+
+        action:
+          "editSold",
+
+        session:
+          session,
+
+        branch:
+          branch,
+
+        /*
+         * TAG IS SENT ONLY SO SERVER
+         * CAN FIND THE RECORD.
+         */
+
+        tag:
+          tag,
+
+        /*
+         * THIS IS THE ONLY VALUE
+         * THAT WILL BE PATCHED.
+         */
+
+        si:
+          newSI
+
+      });
+
+
+    if (!result.ok) {
+
+      throw new Error(
+        result.error ||
+        "Unable to update SI."
+      );
 
     }
 
 
     /*
-     * IMPORTANT:
-
-     * We send:
-     *
-     * branch = branch
-     * tag    = existing tag
-     * si     = NEW SI
-     *
-     * We DO NOT send a new tag.
+     * Refresh the current search.
      */
 
-    showLoading(
-        "Updating SI Number..."
+    await searchDashboard();
+
+
+    showDialog(
+      "✅",
+      "Updated",
+      "SI Number updated successfully.",
+      null
     );
 
+  }
 
-    try {
+  catch (err) {
 
-        const result =
-            await apiRequest(
-                "editSold",
-                {
-                    session:
-                        session,
+    showDialog(
+      "❌",
+      "Update Failed",
+      err.message,
+      null
+    );
 
-                    branch:
-                        branch,
+  }
 
-                    tag:
-                        tag,
+  finally {
 
-                    si:
-                        newSI
-                }
-            );
+    hideLoading();
 
-
-        if (
-            !result ||
-            !result.ok
-        ) {
-
-            throw new Error(
-                result &&
-                result.error
-                    ? result.error
-                    : "Unable to update SI Number."
-            );
-
-        }
-
-
-        closeEditModal();
-
-
-        /*
-         * Refresh the current report
-         * so the new SI immediately appears.
-         */
-
-        await searchDashboard();
-
-
-        alert(
-            "SI Number updated successfully."
-        );
-
-
-    }
-    catch (error) {
-
-        alert(
-            error.message ||
-            "Failed to update SI Number."
-        );
-
-    }
-    finally {
-
-        hideLoading();
-
-    }
+  }
 
 }
 
@@ -2694,106 +2543,154 @@ async function saveEdit() {
 ============================================================ */
 
 function deleteSoldRecord(
-    branch,
-    tag
+  branch,
+  tag
 ) {
 
-    showDialog(
-        "🗑",
-        "Delete Sold Record",
-        "Delete this sold record?",
-        async function() {
-
-            showLoading(
-                "Deleting sold record..."
-            );
-
-
-            try {
-
-                const result =
-                    await apiRequest(
-                        "deleteSold",
-                        {
-                            session:
-                                session,
-
-                            branch:
-                                branch,
-
-                            tag:
-                                tag
-                        }
-                    );
-
-
-                if (
-                    !result ||
-                    !result.ok
-                ) {
-
-                    throw new Error(
-                        result &&
-                        result.error
-                            ? result.error
-                            : "Unable to delete record."
-                    );
-
-                }
-
-
-                await searchDashboard();
-
-
-                alert(
-                    "Sold record deleted successfully."
-                );
-
-            }
-            catch (error) {
-
-                alert(
-                    error.message ||
-                    "Failed to delete record."
-                );
-
-            }
-            finally {
-
-                hideLoading();
-
-            }
-
-        }
+  branch =
+    decodeURIComponent(
+      branch || ""
     );
+
+
+  tag =
+    decodeURIComponent(
+      tag || ""
+    );
+
+
+  showDialog(
+    "⚠️",
+    "Delete Sold Record",
+    "Delete the sold record with tag:\n\n" +
+    tag +
+    "\n\nThis cannot be undone.",
+    function() {
+
+      performDelete(
+        branch,
+        tag
+      );
+
+    }
+  );
+
+}
+
+
+async function performDelete(
+  branch,
+  tag
+) {
+
+  showLoading(
+    "Deleting..."
+  );
+
+
+  try {
+
+    const result =
+      await api({
+
+        action:
+          "deleteSold",
+
+        session:
+          session,
+
+        branch:
+          branch,
+
+        tag:
+          tag
+
+      });
+
+
+    if (!result.ok) {
+
+      throw new Error(
+        result.error ||
+        "Unable to delete."
+      );
+
+    }
+
+
+    await searchDashboard();
+
+
+    showDialog(
+      "✅",
+      "Deleted",
+      "Sold record deleted successfully.",
+      null
+    );
+
+  }
+
+  catch (err) {
+
+    showDialog(
+      "❌",
+      "Delete Failed",
+      err.message,
+      null
+    );
+
+  }
+
+  finally {
+
+    hideLoading();
+
+  }
 
 }
 
 
 /* ============================================================
-   UPDATE STOCK MODAL
+   PAGINATION
 ============================================================ */
 
-function openUpdateStockModal() {
+function previousPage() {
 
-    document
-        .getElementById(
-            "updateStockModal"
-        )
-        .style.display =
-            "flex";
+  if (
+    currentPage > 1
+  ) {
+
+    currentPage--;
+
+    renderTable();
+
+  }
 
 }
 
 
-function closeUpdateStockModal() {
+function nextPage() {
 
-    document
-        .getElementById(
-            "updateStockModal"
-        )
-        .style.display =
-            "none";
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        currentData.length /
+        rowsPerPage
+      )
+    );
+
+
+  if (
+    currentPage <
+    totalPages
+  ) {
+
+    currentPage++;
+
+    renderTable();
+
+  }
 
 }
 
@@ -2802,448 +2699,499 @@ function closeUpdateStockModal() {
    UPDATE STOCKS
 ============================================================ */
 
+function openUpdateStockModal() {
+
+  document.getElementById(
+    "updateModalOverlay"
+  ).classList.add(
+    "show"
+  );
+
+}
+
+
+function closeUpdateStockModal() {
+
+  document.getElementById(
+    "updateModalOverlay"
+  ).classList.remove(
+    "show"
+  );
+
+}
+
+
 async function updateStocks() {
 
-    const branch =
-        document
-            .getElementById(
-                "updateBranch"
-            )
-            .value
-            .trim()
-            .toUpperCase();
+  const branch =
+    document.getElementById(
+      "updateBranch"
+    ).value;
 
 
-    const file =
-        document
-            .getElementById(
-                "stockFile"
-            )
-            .files[0];
+  const file =
+    document.getElementById(
+      "stockFile"
+    ).files[0];
 
 
-    if (!branch) {
+  if (!branch) {
 
-        alert(
-            "Please select a branch."
-        );
-
-        return;
-
-    }
-
-
-    if (!file) {
-
-        alert(
-            "Please select an Excel file."
-        );
-
-        return;
-
-    }
-
-
-    showLoading(
-        "Reading Excel file..."
+    alert(
+      "Please select a branch."
     );
 
+    return;
 
-    try {
-
-        const buffer =
-            await file.arrayBuffer();
+  }
 
 
-        const workbook =
-            XLSX.read(
-                buffer,
-                {
-                    type: "array"
-                }
-            );
+  if (!file) {
+
+    alert(
+      "Please select an Excel file."
+    );
+
+    return;
+
+  }
 
 
-        const firstSheet =
-            workbook.Sheets[
-                workbook.SheetNames[0]
-            ];
+  if (
+    typeof XLSX ===
+    "undefined"
+  ) {
+
+    alert(
+      "Excel reader failed to load."
+    );
+
+    return;
+
+  }
 
 
-        const rows =
-            XLSX.utils.sheet_to_json(
-                firstSheet,
-                {
-                    header: 1,
-                    defval: ""
-                }
-            );
+  closeUpdateStockModal();
 
 
-        if (
-            !rows.length
-        ) {
+  showLoading(
+    "Reading Excel file..."
+  );
 
-            throw new Error(
-                "Excel file is empty."
-            );
 
+  try {
+
+    const buffer =
+      await file.arrayBuffer();
+
+
+    const workbook =
+      XLSX.read(
+        buffer,
+        {
+          type: "array",
+          cellDates: false
         }
+      );
 
 
-        /*
-         * Upload in chunks.
-
-         * This prevents one enormous
-         * request from being sent.
-         */
-
-        const chunkSize =
-            500;
+    const sheetName =
+      workbook.SheetNames[0];
 
 
-        let uploaded =
-            0;
+    const worksheet =
+      workbook.Sheets[
+        sheetName
+      ];
 
 
-        for (
-            let i = 0;
-            i < rows.length;
-            i += chunkSize
-        ) {
-
-            const chunkRows =
-                rows.slice(
-                    i,
-                    i + chunkSize
-                );
+    const rows =
+      XLSX.utils.sheet_to_json(
+        worksheet,
+        {
+          header: 1,
+          defval: ""
+        }
+      );
 
 
-            const json =
-                JSON.stringify(
-                    chunkRows
-                );
+    if (
+      !rows.length
+    ) {
+
+      throw new Error(
+        "The Excel file is empty."
+      );
+
+    }
 
 
-            const encoded =
-                btoa(
-                    unescape(
-                        encodeURIComponent(
-                            json
-                        )
-                    )
-                );
+    /*
+     * Remove completely empty rows.
+     */
 
+    const cleanRows =
+      rows.filter(
+        function(row) {
 
-            document
-                .getElementById(
-                    "loadingText"
-                )
-                .textContent =
-                    "Uploading " +
-                    Math.min(
-                        i + chunkRows.length,
-                        rows.length
-                    ) +
-                    " / " +
-                    rows.length;
+          return row.some(
+            function(value) {
 
-
-            const result =
-                await apiRequest(
-                    "uploadChunk",
-                    {
-                        session:
-                            session,
-
-                        branch:
-                            branch,
-
-                        chunk:
-                            encoded
-                    }
-                );
-
-
-            if (
-                !result ||
-                !result.ok
-            ) {
-
-                throw new Error(
-                    result &&
-                    result.error
-                        ? result.error
-                        : "Upload failed."
-                );
+              return String(
+                value || ""
+              ).trim() !== "";
 
             }
-
-
-            uploaded +=
-                chunkRows.length;
+          );
 
         }
+      );
 
 
-        closeUpdateStockModal();
+    /*
+     * If first row contains the headers,
+     * remove it.
+     *
+     * Your upload expects data in the
+     * exact COLUMNS order.
+     */
+
+    if (
+      cleanRows.length &&
+      String(
+        cleanRows[0][0] ||
+        ""
+      ).trim().toUpperCase()
+      === "SDATE"
+    ) {
+
+      cleanRows.shift();
+
+    }
 
 
-        document
-            .getElementById(
-                "stockFile"
-            )
-            .value =
-                "";
+    if (
+      !cleanRows.length
+    ) {
+
+      throw new Error(
+        "No inventory rows found."
+      );
+
+    }
 
 
-        alert(
-            uploaded.toLocaleString() +
-            " rows uploaded successfully."
+    /*
+     * Upload in small chunks.
+     */
+
+    const chunkSize =
+      40;
+
+
+    const totalChunks =
+      Math.ceil(
+        cleanRows.length /
+        chunkSize
+      );
+
+
+    for (
+      let i = 0;
+      i < cleanRows.length;
+      i += chunkSize
+    ) {
+
+      const chunkRows =
+        cleanRows.slice(
+          i,
+          i + chunkSize
         );
 
+
+      const json =
+        JSON.stringify(
+          chunkRows
+        );
+
+
+      const bytes =
+        new TextEncoder()
+          .encode(
+            json
+          );
+
+
+      const binary =
+        Array.from(
+          bytes,
+          function(byte) {
+
+            return String.fromCharCode(
+              byte
+            );
+
+          }
+        ).join("");
+
+
+      const base64 =
+        btoa(
+          binary
+        );
+
+
+      const chunkNumber =
+        Math.floor(
+          i / chunkSize
+        ) + 1;
+
+
+      document.getElementById(
+        "loadingText"
+      ).textContent =
+        "Uploading " +
+        chunkNumber +
+        " / " +
+        totalChunks;
+
+
+      const result =
+        await api({
+
+          action:
+            "uploadChunk",
+
+          session:
+            session,
+
+          branch:
+            branch,
+
+          chunk:
+            base64
+
+        });
+
+
+      if (!result.ok) {
+
+        throw new Error(
+          result.error ||
+          "Upload failed."
+        );
+
+      }
+
+    }
+
+
+    document.getElementById(
+      "updateBranch"
+    ).value =
+      "";
+
+
+    document.getElementById(
+      "stockFile"
+    ).value =
+      "";
+
+
+    showDialog(
+      "✅",
+      "Update Complete",
+      cleanRows.length.toLocaleString() +
+      " rows uploaded successfully.",
+      function() {
 
         /*
-         * Refresh only if the current
-         * dashboard is showing this branch.
+         * Refresh current dashboard.
          */
 
-        const currentBranch =
-            document
-                .getElementById(
-                    "branchSelect"
-                )
-                .value
-                .trim()
-                .toUpperCase();
+        searchDashboard();
 
+      }
+    );
 
-        if (
-            currentBranch === branch
-        ) {
+  }
 
-            await searchDashboard();
+  catch (err) {
 
-        }
+    showDialog(
+      "❌",
+      "Update Failed",
+      err.message,
+      null
+    );
 
+  }
 
-    }
-    catch (error) {
+  finally {
 
-        alert(
-            error.message ||
-            "Stock update failed."
-        );
+    hideLoading();
 
-    }
-    finally {
-
-        hideLoading();
-
-    }
+  }
 
 }
 
 
 /* ============================================================
-   CLEAR MODAL
+   CLEAR
 ============================================================ */
 
 function openClearModal() {
 
-    document
-        .getElementById(
-            "clearModal"
-        )
-        .style.display =
-            "flex";
+  document.getElementById(
+    "clearModalOverlay"
+  ).classList.add(
+    "show"
+  );
 
 }
 
 
 function closeClearModal() {
 
-    document
-        .getElementById(
-            "clearModal"
-        )
-        .style.display =
-            "none";
+  document.getElementById(
+    "clearModalOverlay"
+  ).classList.remove(
+    "show"
+  );
 
 }
 
 
-/* ============================================================
-   CLEAR REPORT
-============================================================ */
-
 function clearReportAction() {
 
-    const branch =
-        document
-            .getElementById(
-                "clearBranch"
-            )
-            .value
-            .trim()
-            .toUpperCase();
+  const branch =
+    document.getElementById(
+      "clearBranch"
+    ).value;
 
 
-    const report =
-        document
-            .getElementById(
-                "clearSheet"
-            )
-            .value;
+  const report =
+    document.getElementById(
+      "clearSheet"
+    ).value;
 
 
-    if (!branch) {
+  if (!branch) {
 
-        alert(
-            "Please select a branch."
-        );
+    alert(
+      "Please select a branch."
+    );
 
-        return;
+    return;
+
+  }
+
+
+  if (!report) {
+
+    alert(
+      "Please select a report."
+    );
+
+    return;
+
+  }
+
+
+  closeClearModal();
+
+
+  showDialog(
+    "⚠️",
+    "Clear Report",
+    "Are you sure you want to clear " +
+    report +
+    " for " +
+    branch +
+    "?\n\nThis cannot be undone.",
+    function() {
+
+      performClear(
+        branch,
+        report
+      );
 
     }
+  );
+
+}
 
 
-    if (!report) {
+async function performClear(
+  branch,
+  report
+) {
 
-        alert(
-            "Please select a report."
-        );
+  showLoading(
+    "Clearing report..."
+  );
 
-        return;
+
+  try {
+
+    const result =
+      await api({
+
+        action:
+          "clearReport",
+
+        session:
+          session,
+
+        branch:
+          branch,
+
+        report:
+          report
+
+      });
+
+
+    if (!result.ok) {
+
+      throw new Error(
+        result.error ||
+        "Clear failed."
+      );
 
     }
 
 
     showDialog(
-        "⚠️",
-        "Clear Report",
-        "This will permanently delete all records in the selected report. Continue?",
-        async function() {
+      "✅",
+      "Cleared",
+      result.message ||
+      "Report cleared successfully.",
+      function() {
 
-            showLoading(
-                "Clearing report..."
-            );
+        searchDashboard();
 
-
-            try {
-
-                const result =
-                    await apiRequest(
-                        "clearReport",
-                        {
-                            session:
-                                session,
-
-                            branch:
-                                branch,
-
-                            report:
-                                report
-                        }
-                    );
-
-
-                if (
-                    !result ||
-                    !result.ok
-                ) {
-
-                    throw new Error(
-                        result &&
-                        result.error
-                            ? result.error
-                            : "Clear failed."
-                    );
-
-                }
-
-
-                closeClearModal();
-
-
-                alert(
-                    result.message ||
-                    "Report cleared successfully."
-                );
-
-
-                const currentBranch =
-                    document
-                        .getElementById(
-                            "branchSelect"
-                        )
-                        .value
-                        .trim()
-                        .toUpperCase();
-
-
-                const currentReport =
-                    document
-                        .getElementById(
-                            "sheetSelect"
-                        )
-                        .value;
-
-
-                if (
-                    currentBranch === branch &&
-                    currentReport === report
-                ) {
-
-                    await searchDashboard();
-
-                }
-
-            }
-            catch (error) {
-
-                alert(
-                    error.message ||
-                    "Clear failed."
-                );
-
-            }
-            finally {
-
-                hideLoading();
-
-            }
-
-        }
+      }
     );
 
-}
+  }
 
+  catch (err) {
 
-/* ============================================================
-   EXPORT MODAL
-============================================================ */
+    showDialog(
+      "❌",
+      "Clear Failed",
+      err.message,
+      null
+    );
 
-function openExportModal() {
+  }
 
-    document
-        .getElementById(
-            "exportModal"
-        )
-        .style.display =
-            "flex";
+  finally {
 
-}
+    hideLoading();
 
-
-function closeExportModal() {
-
-    document
-        .getElementById(
-            "exportModal"
-        )
-        .style.display =
-            "none";
+  }
 
 }
 
@@ -3252,170 +3200,195 @@ function closeExportModal() {
    EXPORT
 ============================================================ */
 
-async function startExport() {
+function openExportModal() {
 
-    const branch =
-        document
-            .getElementById(
-                "exportBranch"
-            )
-            .value
-            .trim()
-            .toUpperCase();
-
-
-    if (!branch) {
-
-        alert(
-            "Please select a branch."
-        );
-
-        return;
-
-    }
-
-
-    showLoading(
-        "Preparing export..."
-    );
-
-
-    try {
-
-        const result =
-            await apiRequest(
-                "export",
-                {
-                    session:
-                        session,
-
-                    branch:
-                        branch
-                }
-            );
-
-
-        if (
-            !result ||
-            !result.ok
-        ) {
-
-            throw new Error(
-                result &&
-                result.error
-                    ? result.error
-                    : "Export failed."
-            );
-
-        }
-
-
-        closeExportModal();
-
-
-        /*
-         * Apps Script returns CSV contents.
-         * Download each file separately.
-         */
-
-        if (
-            Array.isArray(
-                result.files
-            )
-        ) {
-
-            result.files.forEach(
-                function(file) {
-
-                    downloadTextFile(
-                        file.name,
-                        file.content
-                    );
-
-                }
-            );
-
-        }
-
-
-    }
-    catch (error) {
-
-        alert(
-            error.message ||
-            "Export failed."
-        );
-
-    }
-    finally {
-
-        hideLoading();
-
-    }
+  document.getElementById(
+    "exportModalOverlay"
+  ).classList.add(
+    "show"
+  );
 
 }
 
 
-/* ============================================================
-   DOWNLOAD FILE
-============================================================ */
+function closeExportModal() {
+
+  document.getElementById(
+    "exportModalOverlay"
+  ).classList.remove(
+    "show"
+  );
+
+}
+
+
+async function startExport() {
+
+  const branch =
+    document.getElementById(
+      "exportBranch"
+    ).value;
+
+
+  if (!branch) {
+
+    alert(
+      "Please select a branch."
+    );
+
+    return;
+
+  }
+
+
+  closeExportModal();
+
+
+  showLoading(
+    "Preparing export..."
+  );
+
+
+  try {
+
+    const result =
+      await api({
+
+        action:
+          "export",
+
+        session:
+          session,
+
+        branch:
+          branch
+
+      });
+
+
+    if (!result.ok) {
+
+      throw new Error(
+        result.error ||
+        "Export failed."
+      );
+
+    }
+
+
+    if (
+      !Array.isArray(
+        result.files
+      )
+    ) {
+
+      throw new Error(
+        "No export files returned."
+      );
+
+    }
+
+
+    result.files.forEach(
+      function(file) {
+
+        downloadTextFile(
+          file.name,
+          file.content
+        );
+
+      }
+    );
+
+
+    showDialog(
+      "✅",
+      "Export Complete",
+      "Export files created successfully.",
+      null
+    );
+
+  }
+
+  catch (err) {
+
+    showDialog(
+      "❌",
+      "Export Failed",
+      err.message,
+      null
+    );
+
+  }
+
+  finally {
+
+    hideLoading();
+
+  }
+
+}
+
 
 function downloadTextFile(
-    filename,
-    content
+  filename,
+  content
 ) {
 
-    const blob =
-        new Blob(
-            [content],
-            {
-                type:
-                    "text/csv;charset=utf-8"
-            }
-        );
-
-
-    const url =
-        URL.createObjectURL(
-            blob
-        );
-
-
-    const a =
-        document.createElement(
-            "a"
-        );
-
-
-    a.href =
-        url;
-
-
-    a.download =
-        filename;
-
-
-    document.body.appendChild(
-        a
+  const blob =
+    new Blob(
+      [
+        "\uFEFF" +
+        content
+      ],
+      {
+        type:
+          "text/csv;charset=utf-8"
+      }
     );
 
 
-    a.click();
-
-
-    a.remove();
-
-
-    setTimeout(
-        function() {
-
-            URL.revokeObjectURL(
-                url
-            );
-
-        },
-        1000
+  const url =
+    URL.createObjectURL(
+      blob
     );
+
+
+  const a =
+    document.createElement(
+      "a"
+    );
+
+
+  a.href =
+    url;
+
+
+  a.download =
+    filename;
+
+
+  document.body.appendChild(
+    a
+  );
+
+
+  a.click();
+
+
+  a.remove();
+
+
+  setTimeout(
+    function() {
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    },
+    1000
+  );
 
 }
 
@@ -3425,196 +3398,121 @@ function downloadTextFile(
 ============================================================ */
 
 function showDialog(
-    icon,
-    title,
-    message,
-    callback
+  icon,
+  title,
+  message,
+  callback
 ) {
 
-    document
-        .getElementById(
-            "dialogIcon"
-        )
-        .textContent =
-            icon;
+  document.getElementById(
+    "dialogIcon"
+  ).textContent =
+    icon || "⚠️";
 
 
-    document
-        .getElementById(
-            "dialogTitle"
-        )
-        .textContent =
-            title;
+  document.getElementById(
+    "dialogTitle"
+  ).textContent =
+    title || "Message";
 
 
-    document
-        .getElementById(
-            "dialogMessage"
-        )
-        .textContent =
-            message;
+  document.getElementById(
+    "dialogMessage"
+  ).textContent =
+    message || "";
 
 
-    dialogCallback =
-        callback;
+  dialogCallback =
+    callback || null;
 
 
-    document
-        .getElementById(
-            "dialogModal"
-        )
-        .style.display =
-            "flex";
+  document.getElementById(
+    "dialogOverlay"
+  ).classList.add(
+    "show"
+  );
+
+}
+
+
+function closeDialog(
+  runCallback
+) {
+
+  const callback =
+    dialogCallback;
+
+
+  dialogCallback =
+    null;
+
+
+  document.getElementById(
+    "dialogOverlay"
+  ).classList.remove(
+    "show"
+  );
+
+
+  if (
+    runCallback &&
+    callback
+  ) {
+
+    callback();
+
+  }
 
 }
 
 
 function dialogOKClick() {
 
-    const callback =
-        dialogCallback;
+  closeDialog(
+    true
+  );
+
+}
 
 
-    dialogCallback =
-        null;
+/* ============================================================
+   HTML ESCAPE
+============================================================ */
 
+function escapeHtml(
+  value
+) {
 
-    closeDialog(
-        true
+  return String(
+    value === undefined ||
+    value === null
+      ? ""
+      : value
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
     );
 
-
-    if (
-        typeof callback ===
-        "function"
-    ) {
-
-        callback();
-
-    }
-
 }
-
-
-function closeDialog(
-    result
-) {
-
-    document
-        .getElementById(
-            "dialogModal"
-        )
-        .style.display =
-            "none";
-
-
-    if (!result) {
-
-        dialogCallback =
-            null;
-
-    }
-
-}
-
-
-/* ============================================================
-   LOADING
-============================================================ */
-
-function showLoading(
-    text
-) {
-
-    document
-        .getElementById(
-            "loadingText"
-        )
-        .textContent =
-            text ||
-            "Please wait...";
-
-
-    document
-        .getElementById(
-            "loadingOverlay"
-        )
-        .style.display =
-            "flex";
-
-}
-
-
-function hideLoading() {
-
-    document
-        .getElementById(
-            "loadingOverlay"
-        )
-        .style.display =
-            "none";
-
-}
-
-
-/* ============================================================
-   CLOSE MODALS WHEN CLICKING OUTSIDE
-============================================================ */
-
-document.addEventListener(
-    "click",
-    function(event) {
-
-        const modalIds = [
-            "editModal",
-            "updateStockModal",
-            "clearModal",
-            "exportModal",
-            "dialogModal"
-        ];
-
-
-        modalIds.forEach(
-            function(id) {
-
-                const modal =
-                    document.getElementById(
-                        id
-                    );
-
-
-                if (
-                    event.target ===
-                    modal
-                ) {
-
-                    modal.style.display =
-                        "none";
-
-                }
-
-            }
-        );
-
-    }
-);
-
-
-/* ============================================================
-   START
-============================================================ */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        checkLoginSession();
-
-    }
-);
 
 </script>
 
 </body>
 </html>
-

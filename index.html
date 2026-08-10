@@ -2,535 +2,410 @@
 <html>
 <head>
 
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
 
-<title>ACEBEDO OPTICAL INVENTORY</title>
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
 
-<!-- =========================================================
-     SHEETJS
-     Used only in the browser to read XLSX/XLS/CSV.
-     NO Google Sheets.
-     ========================================================= -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<title>
+  ACEBEDO OPTICAL INVENTORY
+</title>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
 <style>
 
 * {
-  box-sizing: border-box;
+  box-sizing:border-box;
 }
 
 body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f4f6f8;
-  color: #222;
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f5f7fa;
+  color:#222;
 }
 
 button,
 input,
 select {
-  font-family: inherit;
+  font:inherit;
 }
 
 button {
-  cursor: pointer;
+  cursor:pointer;
 }
 
-.hidden {
-  display: none !important;
-}
-
-/* =========================================================
-   LOGIN
-   ========================================================= */
-
-#loginScreen {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
-
-.loginBox {
-  width: 100%;
-  max-width: 420px;
-  background: white;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.12);
-  text-align: center;
-}
-
-.loginBox h2 {
-  margin-top: 0;
-}
-
-.loginBox input {
-  width: 100%;
-  padding: 13px;
-  margin-top: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-/* =========================================================
-   MAIN APP
-   ========================================================= */
-
-#appScreen {
-  display: none;
-  min-height: 100vh;
-}
-
-.appHeader {
-  background: white;
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  border-bottom: 1px solid #ddd;
-  position: sticky;
-  top: 0;
-  z-index: 50;
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  padding:15px 20px;
+  background:#fff;
+  border-bottom:1px solid #ddd;
+  position:sticky;
+  top:0;
+  z-index:50;
 }
 
 .headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
 .headerLeft img {
-  width: 55px;
-  height: 55px;
-  object-fit: contain;
-  border-radius: 8px;
+  width:55px;
+  height:55px;
+  object-fit:contain;
+  border-radius:8px;
 }
 
 .headerLeft h2 {
-  margin: 0;
-  font-size: 21px;
+  margin:0;
+  font-size:20px;
 }
 
 .headerLeft small {
-  color: #777;
+  color:#777;
 }
 
 .headerButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
 }
 
-.headerButtons button {
-  border: 1px solid #ccc;
-  background: white;
-  border-radius: 7px;
-  padding: 9px 12px;
+button {
+  border:1px solid #ccc;
+  background:#fff;
+  padding:9px 13px;
+  border-radius:7px;
 }
 
-.headerButtons button:hover {
-  background: #f0f0f0;
+button:hover {
+  background:#f1f1f1;
 }
 
-/* =========================================================
-   CONTAINER
-   ========================================================= */
-
-.container {
-  max-width: 1600px;
-  margin: auto;
-  padding: 20px;
+.primaryBtn {
+  background:#1677ff;
+  color:#fff;
+  border-color:#1677ff;
 }
 
-/* =========================================================
-   FILTERS
-   ========================================================= */
+.primaryBtn:hover {
+  background:#0d65dc;
+}
+
+.dangerBtn {
+  background:#dc3545;
+  color:#fff;
+  border-color:#dc3545;
+}
+
+.status {
+  min-height:20px;
+}
+
+.loginPage {
+  max-width:420px;
+  margin:100px auto;
+  padding:30px;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.08);
+}
+
+.dashboardPage {
+  display:none;
+}
 
 .filters {
-  display: grid;
-  grid-template-columns:
-    minmax(180px,1fr)
-    minmax(180px,1fr)
-    minmax(250px,2fr)
-    auto;
-
-  gap: 12px;
-  align-items: end;
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  display:flex;
+  gap:12px;
+  align-items:end;
+  flex-wrap:wrap;
+  padding:18px;
+  background:#fff;
+  border-bottom:1px solid #ddd;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
 }
 
-.field label {
-  font-size: 13px;
-  font-weight: bold;
-  color: #555;
+.field label,
+label {
+  font-size:13px;
+  font-weight:bold;
 }
 
-.field input,
-.field select,
-.modal input,
-.modal select {
-  width: 100%;
-  padding: 11px;
-  border: 1px solid #ccc;
-  border-radius: 7px;
-  background: white;
+input,
+select {
+  border:1px solid #ccc;
+  border-radius:7px;
+  padding:9px 10px;
+  background:#fff;
 }
 
 .searchBtn {
-  padding: 11px 20px;
-  border: 0;
-  border-radius: 7px;
-  background: #1976d2;
-  color: white;
-  font-weight: bold;
+  background:#1677ff;
+  color:#fff;
+  border-color:#1677ff;
 }
 
-/* =========================================================
-   CARDS
-   ========================================================= */
-
 .cards {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 15px;
-  margin: 18px 0;
+  display:grid;
+  grid-template-columns:
+    repeat(4,minmax(150px,1fr));
+  gap:14px;
+  padding:18px;
 }
 
 .card {
-  background: white;
-  border-radius: 12px;
-  padding: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  background:#fff;
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
 
 .card h3 {
-  margin: 0;
-  color: #666;
-  font-size: 14px;
+  margin:0 0 8px;
+  color:#666;
+  font-size:14px;
 }
 
 .card h1 {
-  margin: 8px 0 0;
-  font-size: 30px;
+  margin:0;
 }
 
-/* =========================================================
-   TABLE
-   ========================================================= */
-
 .tableWrapper {
-  background: white;
-  border-radius: 12px;
-  overflow-x: auto;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  margin:0 18px;
+  background:#fff;
+  border-radius:10px;
+  overflow:auto;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 850px;
+  width:100%;
+  border-collapse:collapse;
 }
 
 th,
 td {
-  padding: 11px;
-  border-bottom: 1px solid #eee;
-  text-align: left;
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+  white-space:nowrap;
 }
 
 th {
-  background: #f7f7f7;
-  font-size: 13px;
+  background:#fafafa;
 }
-
-td {
-  font-size: 13px;
-}
-
-.actionBtn {
-  padding: 6px 9px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: white;
-  margin-right: 4px;
-}
-
-.actionBtn:hover {
-  background: #f0f0f0;
-}
-
-.deleteBtn {
-  color: #c62828;
-}
-
-/* =========================================================
-   PAGINATION
-   ========================================================= */
 
 .pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  padding: 18px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:15px;
+  padding:18px;
 }
-
-.pagination button {
-  padding: 8px 14px;
-  border: 1px solid #ccc;
-  border-radius: 7px;
-  background: white;
-}
-
-.pagination button:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-}
-
-/* =========================================================
-   MODAL BACKDROP
-   ========================================================= */
 
 .modalBackdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  z-index: 1000;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
 }
 
 .modal {
-  background: white;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 15px 50px rgba(0,0,0,.25);
+  width:min(95%,500px);
+  background:#fff;
+  border-radius:14px;
+  padding:22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
 }
 
 .modal h3 {
-  margin-top: 0;
-}
-
-.modal label {
-  display: block;
-  margin-top: 12px;
-  margin-bottom: 5px;
-  font-size: 13px;
-  font-weight: bold;
+  margin-top:0;
 }
 
 .modalButtons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.modalButtons button {
-  padding: 9px 15px;
-  border: 1px solid #ccc;
-  border-radius: 7px;
-  background: white;
-}
-
-.primaryBtn {
-  background: #1976d2 !important;
-  color: white !important;
-  border: 0 !important;
-}
-
-.dangerBtn {
-  background: #d32f2f !important;
-  color: white !important;
-  border: 0 !important;
-}
-
-/* =========================================================
-   DIALOG
-   ========================================================= */
-
-.dialogIcon {
-  font-size: 45px;
-  text-align: center;
-  margin-bottom: 8px;
-}
-
-.dialogTitle {
-  font-size: 20px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.dialogMessage {
-  text-align: center;
-  margin-top: 10px;
-  white-space: pre-wrap;
-  line-height: 1.5;
-}
-
-.dialogButtons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.dialogButtons button {
-  padding: 9px 18px;
-  border: 1px solid #ccc;
-  border-radius: 7px;
-  background: white;
-}
-
-/* =========================================================
-   LOADING / JOB MODAL
-   ========================================================= */
-
-.jobModal {
-  max-width: 550px;
-}
-
-.loadingIcon {
-  text-align: center;
-  font-size: 45px;
-  margin-bottom: 10px;
-}
-
-#loadingText {
-  text-align: center;
-  font-size: 19px;
-  font-weight: bold;
-}
-
-.progressOuter {
-  width: 100%;
-  height: 22px;
-  background: #e5e5e5;
-  border-radius: 20px;
-  overflow: hidden;
-  margin-top: 20px;
-}
-
-.progressInner {
-  width: 0%;
-  height: 100%;
-  background: #1976d2;
-  transition: width .2s ease;
-}
-
-.progressText {
-  text-align: center;
-  margin-top: 8px;
-  font-weight: bold;
-}
-
-.jobDetails {
-  margin-top: 15px;
-  padding: 12px;
-  background: #f7f7f7;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: pre-wrap;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:20px;
 }
 
 .fileName {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #555;
+  margin-top:8px;
+  color:#555;
+  font-size:13px;
 }
 
 /* =========================================================
-   RESULT LINKS
+   NON-BLOCKING QUEUE
    ========================================================= */
 
-.exportLinks {
-  margin-top: 15px;
+#jobQueue {
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  width:min(390px,calc(100vw - 36px));
+  background:#fff;
+  border:1px solid #d9d9d9;
+  border-radius:13px;
+  box-shadow:0 10px 35px rgba(0,0,0,.18);
+  z-index:5000;
+  display:none;
+  overflow:hidden;
 }
 
-.exportLinks a {
-  display: block;
-  margin-top: 8px;
-  padding: 10px;
-  background: #f5f5f5;
-  border-radius: 7px;
-  text-decoration: none;
-  color: #1976d2;
+.queueHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:11px 13px;
+  background:#f7f8fa;
+  border-bottom:1px solid #e5e5e5;
 }
 
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-.status {
-  min-height: 20px;
-  font-size: 13px;
+.queueTitle {
+  font-weight:bold;
+  font-size:14px;
 }
 
-.status.error {
-  color: #c62828;
+.queueX {
+  width:30px;
+  height:30px;
+  padding:0;
+  border-radius:50%;
+  font-size:18px;
+  line-height:1;
 }
 
-.status.success {
-  color: #2e7d32;
+.queueBody {
+  padding:14px;
 }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
+.queueStatus {
+  font-size:13px;
+  font-weight:bold;
+  margin-bottom:7px;
+}
 
-@media (max-width: 900px) {
+.queueDetails {
+  font-size:12px;
+  color:#666;
+  margin-bottom:10px;
+  line-height:1.5;
+}
 
-  .appHeader {
-    position: static;
-    flex-direction: column;
-    align-items: stretch;
+.queueProgressOuter {
+  width:100%;
+  height:8px;
+  border-radius:20px;
+  background:#e9ecef;
+  overflow:hidden;
+}
+
+.queueProgressInner {
+  width:0%;
+  height:100%;
+  background:#1677ff;
+  transition:width .25s ease;
+}
+
+.queueProgressText {
+  margin-top:7px;
+  font-size:12px;
+  text-align:right;
+  font-weight:bold;
+}
+
+.queueActions {
+  display:flex;
+  gap:7px;
+  justify-content:flex-end;
+  margin-top:12px;
+}
+
+.queueLink {
+  display:inline-block;
+  padding:7px 10px;
+  border-radius:6px;
+  background:#1677ff;
+  color:#fff;
+  text-decoration:none;
+  font-size:12px;
+}
+
+.successText {
+  color:#16803c;
+}
+
+.errorText {
+  color:#c62828;
+}
+
+.warningText {
+  color:#a15c00;
+}
+
+.actionBtn {
+  padding:6px 9px;
+  font-size:12px;
+}
+
+.hidden {
+  display:none !important;
+}
+
+@media(max-width:900px) {
+
+  .header {
+    align-items:flex-start;
+    flex-direction:column;
   }
 
-  .headerButtons {
-    justify-content: center;
+  .cards {
+    grid-template-columns:
+      repeat(2,minmax(140px,1fr));
+  }
+
+}
+
+@media(max-width:600px) {
+
+  .cards {
+    grid-template-columns:1fr 1fr;
   }
 
   .filters {
-    grid-template-columns: 1fr;
+    align-items:stretch;
+    flex-direction:column;
   }
 
-  .cards {
-    grid-template-columns: repeat(2,1fr);
+  .field,
+  .searchBtn {
+    width:100%;
   }
 
-}
-
-@media (max-width: 550px) {
-
-  .cards {
-    grid-template-columns: 1fr;
+  .headerButtons {
+    width:100%;
   }
 
-  .container {
-    padding: 10px;
-  }
-
-  .headerLeft h2 {
-    font-size: 17px;
+  .headerButtons button {
+    flex:1;
   }
 
 }
@@ -541,78 +416,85 @@ td {
 
 <body>
 
+
 <!-- =========================================================
-     LOGIN SCREEN
-     ========================================================= -->
+     LOGIN
+========================================================= -->
 
-<div id="loginScreen">
+<div
+  id="loginPage"
+  class="loginPage"
+>
 
-  <div class="loginBox">
+  <h2>
+    🔐 ADMIN LOGIN
+  </h2>
 
-    <h2>
-      🔐 ADMIN LOGIN
-    </h2>
+  <p>
+    Dashboard Access
+  </p>
 
-    <p>
-      Dashboard Access
-    </p>
+  <input
+    id="email"
+    type="email"
+    placeholder="Enter Gmail"
+    autocomplete="email"
+    style="width:100%;"
+  >
 
-    <input
-      id="email"
-      type="email"
-      placeholder="Enter Gmail"
-      autocomplete="email"
-    >
+  <button
+    id="sendOtpBtn"
+    class="primaryBtn"
+    onclick="sendOTP()"
+    style="width:100%;margin-top:10px;"
+  >
+    SEND OTP
+  </button>
 
-    <button
-      id="sendOtpBtn"
-      class="primaryBtn"
-      onclick="sendOTP()"
-      style="width:100%;margin-top:10px;"
-    >
-      SEND OTP
-    </button>
+  <input
+    id="otp"
+    placeholder="Enter OTP"
+    inputmode="numeric"
+    autocomplete="one-time-code"
+    style="
+      display:none;
+      width:100%;
+      margin-top:10px;
+    "
+  >
 
-    <input
-      id="otp"
-      placeholder="Enter OTP"
-      inputmode="numeric"
-      autocomplete="one-time-code"
-      style="display:none;"
-    >
+  <button
+    id="verifyBtn"
+    class="primaryBtn"
+    onclick="verifyOTP()"
+    style="
+      display:none;
+      width:100%;
+      margin-top:5px;
+    "
+  >
+    VERIFY OTP
+  </button>
 
-    <button
-      id="verifyBtn"
-      class="primaryBtn"
-      onclick="verifyOTP()"
-      style="
-        display:none;
-        width:100%;
-        margin-top:5px;
-      "
-    >
-      VERIFY OTP
-    </button>
-
-    <p
-      id="loginStatus"
-      class="status"
-    ></p>
-
-  </div>
+  <p
+    id="loginStatus"
+    class="status"
+  ></p>
 
 </div>
 
 
 <!-- =========================================================
-     MAIN APPLICATION
-     ========================================================= -->
+     DASHBOARD
+========================================================= -->
 
-<div id="appScreen">
+<div
+  id="dashboardPage"
+  class="dashboardPage"
+>
 
-  <!-- HEADER -->
 
-  <div class="appHeader">
+  <div class="header">
 
     <div class="headerLeft">
 
@@ -673,230 +555,226 @@ td {
   </div>
 
 
-  <div class="container">
+  <!-- =======================================================
+       FILTERS
+  ======================================================= -->
 
-    <!-- =====================================================
-         FILTERS
-         ===================================================== -->
+  <div class="filters">
 
-    <div class="filters">
+    <div class="field">
 
-      <div class="field">
+      <label>
+        Branch
+      </label>
 
-        <label>
-          Branch
-        </label>
+      <select id="branchSelect">
 
-        <select id="branchSelect">
+        <option value="">
+          -- Select Branch --
+        </option>
 
-          <option value="">
-            -- Select Branch --
-          </option>
+        <option value="GAI">🏢 Gaisano Iloilo</option>
+        <option value="CAS">🏢 Casa Plaza</option>
+        <option value="BAC">🏢 Bacolod</option>
+        <option value="BIN">🏢 Binalbagan</option>
+        <option value="BIS">🏢 Bislig</option>
+        <option value="CAD">🏢 Cadiz</option>
+        <option value="DGT">🏢 Dumaguete</option>
+        <option value="KAB">🏢 Kabankalan</option>
+        <option value="KAL">🏢 Kalibo</option>
+        <option value="PAS">🏢 Passi</option>
+        <option value="POT">🏢 Pototan</option>
+        <option value="SAN">🏢 San Carlos</option>
+        <option value="TAB">🏢 Tabunok</option>
+        <option value="TAN">🏢 Tandag</option>
+        <option value="TIS">🏢 Tisa</option>
+        <option value="TOL">🏢 Toledo</option>
 
-          <option value="GAI">🏢 Gaisano Iloilo</option>
-          <option value="CAS">🏢 Casa Plaza</option>
-          <option value="BAC">🏢 Bacolod</option>
-          <option value="BIN">🏢 Binalbagan</option>
-          <option value="BIS">🏢 Bislig</option>
-          <option value="CAD">🏢 Cadiz</option>
-          <option value="DGT">🏢 Dumaguete</option>
-          <option value="KAB">🏢 Kabankalan</option>
-          <option value="KAL">🏢 Kalibo</option>
-          <option value="PAS">🏢 Passi</option>
-          <option value="POT">🏢 Pototan</option>
-          <option value="SAN">🏢 San Carlos</option>
-          <option value="TAB">🏢 Tabunok</option>
-          <option value="TAN">🏢 Tandag</option>
-          <option value="TIS">🏢 Tisa</option>
-          <option value="TOL">🏢 Toledo</option>
+      </select>
 
-        </select>
-
-      </div>
+    </div>
 
 
-      <div class="field">
+    <div class="field">
 
-        <label>
-          Select Report
-        </label>
+      <label>
+        Select Report
+      </label>
 
-        <select id="sheetSelect">
+      <select id="sheetSelect">
 
-          <option value="stocks">
-            📦 Stocks
-          </option>
+        <option value="stocks">
+          📦 Stocks
+        </option>
 
-          <option value="SCANRESULTS">
-            💰 Sold Out
-          </option>
+        <option value="SCANRESULTS">
+          💰 Sold Out
+        </option>
 
-          <option value="AUDIT">
-            🔄 Re-Inventory
-          </option>
+        <option value="AUDIT">
+          🔄 Re-Inventory
+        </option>
 
-        </select>
+      </select>
 
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Search
-        </label>
-
-        <input
-          id="searchBox"
-          placeholder="Tag, SI, Description"
-          onkeydown="searchKeyDown(event)"
-        >
-
-      </div>
+    </div>
 
 
-      <button
-        class="searchBtn"
-        onclick="searchDashboard()"
+    <div class="field">
+
+      <label>
+        Search
+      </label>
+
+      <input
+        id="searchBox"
+        placeholder="Tag, SI, Description"
+        onkeydown="searchKeyDown(event)"
       >
-        🔍 Search
-      </button>
 
     </div>
 
 
-    <!-- =====================================================
-         CARDS
-         ===================================================== -->
+    <button
+      class="searchBtn"
+      onclick="searchDashboard()"
+    >
+      🔍 Search
+    </button>
 
-    <div class="cards">
-
-      <div class="card">
-
-        <h3>
-          Available
-        </h3>
-
-        <h1 id="availableCount">
-          0
-        </h1>
-
-      </div>
+  </div>
 
 
-      <div class="card">
+  <!-- =======================================================
+       CARDS
+  ======================================================= -->
 
-        <h3>
-          Sold Out
-        </h3>
+  <div class="cards">
 
-        <h1 id="soldCount">
-          0
-        </h1>
+    <div class="card">
 
-      </div>
+      <h3>
+        Available
+      </h3>
 
-
-      <div class="card">
-
-        <h3>
-          Audited
-        </h3>
-
-        <h1 id="auditCount">
-          0
-        </h1>
-
-      </div>
-
-
-      <div class="card">
-
-        <h3>
-          Showing
-        </h3>
-
-        <h1 id="showingCount">
-          0
-        </h1>
-
-      </div>
+      <h1 id="availableCount">
+        0
+      </h1>
 
     </div>
 
 
-    <!-- =====================================================
-         TABLE
-         ===================================================== -->
+    <div class="card">
 
-    <div class="tableWrapper">
+      <h3>
+        Sold Out
+      </h3>
 
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>Branch</th>
-            <th>Lenstype</th>
-            <th>Description</th>
-            <th>Tag</th>
-            <th>SI</th>
-            <th>Date</th>
-            <th>Actions</th>
-
-          </tr>
-
-        </thead>
-
-        <tbody id="tableBody">
-
-          <tr>
-
-            <td
-              colspan="7"
-              style="
-                text-align:center;
-                padding:40px;
-              "
-            >
-              Select a branch and click SEARCH.
-            </td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
+      <h1 id="soldCount">
+        0
+      </h1>
 
     </div>
 
 
-    <!-- =====================================================
-         PAGINATION
-         ===================================================== -->
+    <div class="card">
 
-    <div class="pagination">
+      <h3>
+        Audited
+      </h3>
 
-      <button
-        id="prevBtn"
-        onclick="previousPage()"
-      >
-        ◀ Previous
-      </button>
-
-      <span id="pageInfo">
-        Page 0 / 0
-      </span>
-
-      <button
-        id="nextBtn"
-        onclick="nextPage()"
-      >
-        Next ▶
-      </button>
+      <h1 id="auditCount">
+        0
+      </h1>
 
     </div>
+
+
+    <div class="card">
+
+      <h3>
+        Showing
+      </h3>
+
+      <h1 id="showingCount">
+        0
+      </h1>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       TABLE
+  ======================================================= -->
+
+  <div class="tableWrapper">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>Branch</th>
+          <th>Lenstype</th>
+          <th>Description</th>
+          <th>Tag</th>
+          <th>SI</th>
+          <th>Date</th>
+          <th>Actions</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="tableBody">
+
+        <tr>
+
+          <td
+            colspan="7"
+            style="
+              text-align:center;
+              padding:40px;
+            "
+          >
+            Select a branch and click SEARCH.
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <!-- =======================================================
+       PAGINATION
+  ======================================================= -->
+
+  <div class="pagination">
+
+    <button
+      id="prevBtn"
+      onclick="previousPage()"
+    >
+      ◀ Previous
+    </button>
+
+    <span id="pageInfo">
+      Page 0 / 0
+    </span>
+
+    <button
+      id="nextBtn"
+      onclick="nextPage()"
+    >
+      Next ▶
+    </button>
 
   </div>
 
@@ -904,8 +782,8 @@ td {
 
 
 <!-- =========================================================
-     EDIT SOLD MODAL
-     ========================================================= -->
+     EDIT MODAL
+========================================================= -->
 
 <div
   id="editModal"
@@ -936,6 +814,7 @@ td {
       id="editSI"
       type="text"
       placeholder="Enter SI Number"
+      style="width:100%;margin-top:5px;"
     >
 
     <div class="modalButtons">
@@ -962,7 +841,7 @@ td {
 
 <!-- =========================================================
      UPDATE STOCKS MODAL
-     ========================================================= -->
+========================================================= -->
 
 <div
   id="updateStockModal"
@@ -979,7 +858,10 @@ td {
       Select Branch
     </label>
 
-    <select id="updateBranch">
+    <select
+      id="updateBranch"
+      style="width:100%;margin-top:5px;"
+    >
 
       <option value="">
         -- Select Branch --
@@ -1005,7 +887,7 @@ td {
     </select>
 
 
-    <label>
+    <label style="display:block;margin-top:14px;">
       Select Excel File
     </label>
 
@@ -1013,6 +895,8 @@ td {
       type="file"
       id="stockFile"
       accept=".xlsx,.xls,.csv"
+      style="width:100%;margin-top:5px;"
+      onchange="showSelectedFile()"
     >
 
     <div
@@ -1045,8 +929,8 @@ td {
 
 
 <!-- =========================================================
-     CLEAR REPORT MODAL
-     ========================================================= -->
+     CLEAR MODAL
+========================================================= -->
 
 <div
   id="clearModal"
@@ -1063,7 +947,10 @@ td {
       Select Branch
     </label>
 
-    <select id="clearBranch">
+    <select
+      id="clearBranch"
+      style="width:100%;margin-top:5px;"
+    >
 
       <option value="">
         -- Select Branch --
@@ -1089,11 +976,14 @@ td {
     </select>
 
 
-    <label>
+    <label style="display:block;margin-top:14px;">
       Select Report
     </label>
 
-    <select id="clearSheet">
+    <select
+      id="clearSheet"
+      style="width:100%;margin-top:5px;"
+    >
 
       <option value="">
         -- Select Report --
@@ -1138,7 +1028,7 @@ td {
 
 <!-- =========================================================
      EXPORT MODAL
-     ========================================================= -->
+========================================================= -->
 
 <div
   id="exportModal"
@@ -1155,7 +1045,10 @@ td {
       Select Branch
     </label>
 
-    <select id="exportBranch">
+    <select
+      id="exportBranch"
+      style="width:100%;margin-top:5px;"
+    >
 
       <option value="">
         -- Select Branch --
@@ -1204,127 +1097,84 @@ td {
 
 
 <!-- =========================================================
-     CONFIRM DIALOG
-     ========================================================= -->
+     NON-BLOCKING QUEUE BOX
+========================================================= -->
 
 <div
-  id="dialogModal"
-  class="modalBackdrop"
+  id="jobQueue"
 >
 
-  <div class="modal">
+  <div class="queueHeader">
 
     <div
-      id="dialogIcon"
-      class="dialogIcon"
+      id="queueTitle"
+      class="queueTitle"
     >
-      ⚠️
+      Background Job
     </div>
 
-    <div
-      id="dialogTitle"
-      class="dialogTitle"
+    <button
+      class="queueX"
+      onclick="closeQueueBox()"
+      title="Close"
     >
-      Confirm
-    </div>
-
-    <div
-      id="dialogMessage"
-      class="dialogMessage"
-    >
-      Message
-    </div>
-
-    <div class="dialogButtons">
-
-      <button
-        onclick="closeDialog(false)"
-      >
-        Cancel
-      </button>
-
-      <button
-        id="dialogOK"
-        class="primaryBtn"
-        onclick="dialogOKClick()"
-      >
-        OK
-      </button>
-
-    </div>
+      ×
+    </button>
 
   </div>
 
-</div>
 
-
-<!-- =========================================================
-     JOB PROGRESS MODAL
-     ========================================================= -->
-
-<div
-  id="loadingModal"
-  class="modalBackdrop"
->
-
-  <div class="modal jobModal">
-
-    <div class="loadingIcon">
-      ⏳
-    </div>
-
-    <div id="loadingText">
-      Please wait...
-    </div>
-
-    <div class="progressOuter">
-
-      <div
-        id="loadingProgress"
-        class="progressInner"
-      ></div>
-
-    </div>
+  <div class="queueBody">
 
     <div
-      id="loadingProgressText"
-      class="progressText"
-    >
-      0%
-    </div>
-
-    <div
-      id="jobDetails"
-      class="jobDetails"
+      id="queueStatus"
+      class="queueStatus"
     >
       Starting...
     </div>
 
     <div
-      id="exportLinks"
-      class="exportLinks"
-    ></div>
+      id="queueDetails"
+      class="queueDetails"
+    >
+      Please wait...
+    </div>
+
+
+    <div class="queueProgressOuter">
+
+      <div
+        id="queueProgress"
+        class="queueProgressInner"
+      ></div>
+
+    </div>
+
 
     <div
-      id="loadingButtons"
-      class="modalButtons"
-      style="justify-content:center;"
+      id="queueProgressText"
+      class="queueProgressText"
+    >
+      0%
+    </div>
+
+
+    <div
+      id="queueLinks"
+      class="queueActions"
+    ></div>
+
+
+    <div
+      id="queueCancelArea"
+      class="queueActions"
     >
 
       <button
-        id="cancelJobBtn"
+        id="queueCancelBtn"
         onclick="cancelCurrentJob()"
-        style="display:none;"
       >
-        Cancel Job
-      </button>
-
-      <button
-        id="closeLoadingBtn"
-        onclick="closeLoading()"
-        style="display:none;"
-      >
-        Close
+        Cancel
       </button>
 
     </div>
@@ -1338,128 +1188,105 @@ td {
 
 /* ============================================================
    CONFIGURATION
-   ============================================================ */
+============================================================ */
 
 /*
- * IMPORTANT:
- *
- * Replace this with your deployed Apps Script WEB APP URL.
- *
- * Example:
- * https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+ * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
+const GAS_URL =
+  'https://script.google.com/macros/s/AKfycbwOlPCHeBn3Jl8_XBuikqxNo_SwGwhDvOGGZQchDRKP9BLJt-MNZNdgiuMHFyRvn7YuMw/exec';
 
-const API_URL =
-  'https://script.google.com/macros/s/AKfycbxQNcrpFjbdX_8d_2PbF8QFyCI1nshPIjm_fZabSjGskJJQjW8K9CwT4IIswJ7jEJxJeQ/exec';
+
+const IMPORT_CHUNK_SIZE =
+  500;
+
+const IMPORT_CONCURRENT_REQUESTS =
+  4;
+
+const ROWS_PER_PAGE =
+  20;
 
 
 /* ============================================================
-   IMPORT CONFIG
-   ============================================================ */
+   GLOBAL STATE
+============================================================ */
 
-const IMPORT_CHUNK_SIZE = 500;
+let session =
+  localStorage.getItem(
+    'inventorySession'
+  ) || '';
 
-const IMPORT_CONCURRENT_REQUESTS = 4;
+let currentEmail =
+  localStorage.getItem(
+    'inventoryEmail'
+  ) || '';
 
-
-/* ============================================================
-   APP STATE
-   ============================================================ */
-
-let session = '';
-
-let currentEmail = '';
-
-let dashboardData = [];
+let currentData = [];
 
 let currentPage = 1;
 
-const ROWS_PER_PAGE = 20;
+let currentJob = null;
 
-let currentJobType = '';
+let queuePollTimer = null;
 
-let currentJobId = '';
+let importRunning =
+  false;
 
-let jobPollTimer = null;
-
-let dialogCallback = null;
-
-
-/* ============================================================
-   IMPORT STATE
-   ============================================================ */
-
-let importState = {
-
-  rows: [],
-
-  chunks: [],
-
-  completed: 0,
-
-  failed: 0,
-
-  totalChunks: 0,
-
-  totalRows: 0,
-
-  cancelled: false,
-
-  active: 0
-
-};
+let exportRunning =
+  false;
 
 
 /* ============================================================
-   STARTUP
-   ============================================================ */
+   API
+============================================================ */
 
-document.addEventListener(
-  'DOMContentLoaded',
-  function() {
+function apiUrl(
+  action,
+  params = {}
+) {
 
-    const savedSession =
-      localStorage.getItem(
-        'inventorySession'
-      );
+  const url =
+    new URL(
+      GAS_URL
+    );
 
-    const savedEmail =
-      localStorage.getItem(
-        'inventoryEmail'
-      );
+  url.searchParams.set(
+    'action',
+    action
+  );
 
-    if (
-      savedSession
-    ) {
+  Object.keys(
+    params
+  ).forEach(
+    function(key) {
 
-      session =
-        savedSession;
+      if (
+        params[key] !==
+        undefined &&
+        params[key] !==
+        null
+      ) {
 
-      currentEmail =
-        savedEmail || '';
+        url.searchParams.set(
+          key,
+          params[key]
+        );
 
-      checkExistingSession();
+      }
 
     }
+  );
 
-    document
-      .getElementById(
-        'stockFile'
-      )
-      .addEventListener(
-        'change',
-        showSelectedFile
-      );
+  return url.toString();
 
-  }
-);
+}
 
 
 /* ============================================================
-   API GET / JSONP
-   ============================================================ */
+   JSONP
+============================================================ */
 
-function apiGet(
+function api(
   action,
   params = {}
 ) {
@@ -1468,65 +1295,21 @@ function apiGet(
     function(resolve, reject) {
 
       const callbackName =
-        '__acebedo_cb_' +
+        'cb_' +
         Date.now() +
         '_' +
-        Math.floor(
-          Math.random() * 100000
-        );
-
-      const query =
-        new URLSearchParams();
-
-      query.set(
-        'action',
-        action
-      );
-
-      query.set(
-        'callback',
-        callbackName
-      );
-
-      Object.keys(params)
-        .forEach(
-          function(key) {
-
-            if (
-              params[key] !==
-              undefined &&
-              params[key] !==
-              null
-            ) {
-
-              query.set(
-                key,
-                String(
-                  params[key]
-                )
-              );
-
-            }
-
-          }
-        );
+        Math.random()
+          .toString(36)
+          .substring(2);
 
       const script =
         document.createElement(
           'script'
         );
 
-      let finished = false;
-
       const timeout =
         setTimeout(
           function() {
-
-            if (finished) {
-              return;
-            }
-
-            finished = true;
 
             cleanup();
 
@@ -1537,65 +1320,14 @@ function apiGet(
             );
 
           },
-          30000
+          60000
         );
-
-      window[
-        callbackName
-      ] =
-        function(data) {
-
-          if (finished) {
-            return;
-          }
-
-          finished = true;
-
-          clearTimeout(
-            timeout
-          );
-
-          cleanup();
-
-          resolve(
-            data
-          );
-
-        };
-
-      script.onerror =
-        function() {
-
-          if (finished) {
-            return;
-          }
-
-          finished = true;
-
-          clearTimeout(
-            timeout
-          );
-
-          cleanup();
-
-          reject(
-            new Error(
-              'Unable to connect to Apps Script.'
-            )
-          );
-
-        };
 
       function cleanup() {
 
-        try {
-
-          delete window[
-            callbackName
-          ];
-
-        }
-        catch (err) {}
+        clearTimeout(
+          timeout
+        );
 
         if (
           script.parentNode
@@ -1608,15 +1340,196 @@ function apiGet(
 
         }
 
+        try {
+
+          delete window[
+            callbackName
+          ];
+
+        }
+
+        catch (err) {}
+
       }
 
-      script.src =
-        API_URL +
-        '?' +
-        query.toString();
+      window[
+        callbackName
+      ] =
+        function(data) {
 
-      document.body.appendChild(
-        script
+          cleanup();
+
+          if (
+            data &&
+            data.ok === false &&
+            data.error
+          ) {
+
+            reject(
+              new Error(
+                data.error
+              )
+            );
+
+            return;
+
+          }
+
+          resolve(
+            data
+          );
+
+        };
+
+      params.callback =
+        callbackName;
+
+      script.src =
+        apiUrl(
+          action,
+          params
+        );
+
+      script.onerror =
+        function() {
+
+          cleanup();
+
+          reject(
+            new Error(
+              'Unable to contact Apps Script.'
+            )
+          );
+
+        };
+
+      document.body
+        .appendChild(
+          script
+        );
+
+    }
+  );
+
+}
+
+
+/* ============================================================
+   POST CHUNK
+============================================================ */
+
+function postChunk(
+  payload
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const xhr =
+        new XMLHttpRequest();
+
+      xhr.open(
+        'POST',
+        GAS_URL,
+        true
+      );
+
+      xhr.setRequestHeader(
+        'Content-Type',
+        'text/plain;charset=utf-8'
+      );
+
+      xhr.timeout =
+        120000;
+
+      xhr.onload =
+        function() {
+
+          if (
+            xhr.status >= 200 &&
+            xhr.status < 300
+          ) {
+
+            try {
+
+              const data =
+                JSON.parse(
+                  xhr.responseText
+                );
+
+              if (
+                data &&
+                data.ok === false
+              ) {
+
+                reject(
+                  new Error(
+                    data.error ||
+                    'Chunk upload failed.'
+                  )
+                );
+
+                return;
+
+              }
+
+              resolve(
+                data
+              );
+
+            }
+
+            catch (err) {
+
+              reject(
+                new Error(
+                  'Invalid upload response.'
+                )
+              );
+
+            }
+
+          }
+
+          else {
+
+            reject(
+              new Error(
+                'Upload HTTP ' +
+                xhr.status
+              )
+            );
+
+          }
+
+        };
+
+      xhr.onerror =
+        function() {
+
+          reject(
+            new Error(
+              'Chunk upload network error.'
+            )
+          );
+
+        };
+
+      xhr.ontimeout =
+        function() {
+
+          reject(
+            new Error(
+              'Chunk upload timed out.'
+            )
+          );
+
+        };
+
+      xhr.send(
+        JSON.stringify(
+          payload
+        )
       );
 
     }
@@ -1626,143 +1539,8 @@ function apiGet(
 
 
 /* ============================================================
-   API POST
-   ============================================================ */
-
-async function apiPost(
-  body
-) {
-
-  const response =
-    await fetch(
-      API_URL,
-      {
-
-        method:
-          'POST',
-
-        mode:
-          'cors',
-
-        cache:
-          'no-store',
-
-        headers: {
-
-          'Content-Type':
-            'text/plain;charset=UTF-8'
-
-        },
-
-        body:
-          JSON.stringify(
-            body
-          )
-
-      }
-    );
-
-  if (
-    !response.ok
-  ) {
-
-    throw new Error(
-      'HTTP ' +
-      response.status
-    );
-
-  }
-
-  const text =
-    await response.text();
-
-  let data;
-
-  try {
-
-    data =
-      JSON.parse(
-        text
-      );
-
-  }
-
-  catch (err) {
-
-    throw new Error(
-      'Invalid Apps Script response: ' +
-      text.substring(
-        0,
-        300
-      )
-    );
-
-  }
-
-  if (
-    !data.ok
-  ) {
-
-    throw new Error(
-      data.error ||
-      'Request failed.'
-    );
-
-  }
-
-  return data;
-
-}
-
-
-/* ============================================================
-   SESSION CHECK
-   ============================================================ */
-
-async function checkExistingSession() {
-
-  try {
-
-    const result =
-      await apiGet(
-        'checkSession',
-        {
-          session:
-            session
-        }
-      );
-
-    if (
-      result.ok
-    ) {
-
-      currentEmail =
-        result.email ||
-        currentEmail;
-
-      showApp();
-
-    }
-    else {
-
-      clearSession();
-
-    }
-
-  }
-
-  catch (err) {
-
-    clearSession();
-
-  }
-
-}
-
-
-/* ============================================================
    LOGIN
-   ============================================================ */
+============================================================ */
 
 async function sendOTP() {
 
@@ -1772,8 +1550,7 @@ async function sendOTP() {
         'email'
       )
       .value
-      .trim()
-      .toLowerCase();
+      .trim();
 
   const status =
     document
@@ -1781,37 +1558,13 @@ async function sendOTP() {
         'loginStatus'
       );
 
-  if (!email) {
-
-    status.className =
-      'status error';
-
-    status.textContent =
-      'Please enter your Gmail address.';
-
-    return;
-
-  }
-
-  const button =
-    document
-      .getElementById(
-        'sendOtpBtn'
-      );
-
-  button.disabled =
-    true;
-
-  status.className =
-    'status';
-
   status.textContent =
     'Sending OTP...';
 
   try {
 
     const result =
-      await apiGet(
+      await api(
         'sendOTP',
         {
           email:
@@ -1819,16 +1572,16 @@ async function sendOTP() {
         }
       );
 
-    if (
-      !result.ok
-    ) {
+    if (!result.ok) {
 
       throw new Error(
-        result.error ||
-        'Unable to send OTP.'
+        result.error
       );
 
     }
+
+    status.textContent =
+      'OTP sent. Check your Gmail.';
 
     document
       .getElementById(
@@ -1844,37 +1597,18 @@ async function sendOTP() {
       .style.display =
       'block';
 
-    status.className =
-      'status success';
-
-    status.textContent =
-      'OTP sent. Check your email.';
-
   }
 
   catch (err) {
 
-    status.className =
-      'status error';
-
     status.textContent =
+      '❌ ' +
       err.message;
-
-  }
-
-  finally {
-
-    button.disabled =
-      false;
 
   }
 
 }
 
-
-/* ============================================================
-   VERIFY OTP
-   ============================================================ */
 
 async function verifyOTP() {
 
@@ -1884,8 +1618,7 @@ async function verifyOTP() {
         'email'
       )
       .value
-      .trim()
-      .toLowerCase();
+      .trim();
 
   const otp =
     document
@@ -1901,40 +1634,13 @@ async function verifyOTP() {
         'loginStatus'
       );
 
-  const button =
-    document
-      .getElementById(
-        'verifyBtn'
-      );
-
-  if (
-    !email ||
-    !otp
-  ) {
-
-    status.className =
-      'status error';
-
-    status.textContent =
-      'Enter your email and OTP.';
-
-    return;
-
-  }
-
-  button.disabled =
-    true;
-
-  status.className =
-    'status';
-
   status.textContent =
     'Verifying...';
 
   try {
 
     const result =
-      await apiGet(
+      await api(
         'verifyOTP',
         {
           email:
@@ -1945,13 +1651,10 @@ async function verifyOTP() {
         }
       );
 
-    if (
-      !result.ok
-    ) {
+    if (!result.ok) {
 
       throw new Error(
-        result.error ||
-        'Invalid OTP.'
+        result.error
       );
 
     }
@@ -1960,8 +1663,7 @@ async function verifyOTP() {
       result.session;
 
     currentEmail =
-      result.email ||
-      email;
+      result.email;
 
     localStorage.setItem(
       'inventorySession',
@@ -1973,24 +1675,15 @@ async function verifyOTP() {
       currentEmail
     );
 
-    showApp();
+    showDashboard();
 
   }
 
   catch (err) {
 
-    status.className =
-      'status error';
-
     status.textContent =
+      '❌ ' +
       err.message;
-
-  }
-
-  finally {
-
-    button.disabled =
-      false;
 
   }
 
@@ -1998,21 +1691,112 @@ async function verifyOTP() {
 
 
 /* ============================================================
-   SHOW APP
-   ============================================================ */
+   INITIAL SESSION CHECK
+============================================================ */
 
-function showApp() {
+async function checkExistingSession() {
+
+  if (!session) {
+
+    showLogin();
+
+    return;
+
+  }
+
+  try {
+
+    const result =
+      await api(
+        'checkSession',
+        {
+          session:
+            session
+        }
+      );
+
+    if (
+      result &&
+      result.ok
+    ) {
+
+      currentEmail =
+        result.email ||
+        currentEmail;
+
+      showDashboard();
+
+    }
+
+    else {
+
+      clearSession();
+
+      showLogin();
+
+    }
+
+  }
+
+  catch (err) {
+
+    clearSession();
+
+    showLogin();
+
+  }
+
+}
+
+
+function clearSession() {
+
+  session = '';
+
+  currentEmail = '';
+
+  localStorage.removeItem(
+    'inventorySession'
+  );
+
+  localStorage.removeItem(
+    'inventoryEmail'
+  );
+
+}
+
+
+function showLogin() {
 
   document
     .getElementById(
-      'loginScreen'
+      'loginPage'
+    )
+    .style.display =
+    'block';
+
+  document
+    .getElementById(
+      'dashboardPage'
+    )
+    .style.display =
+    'none';
+
+}
+
+
+function showDashboard() {
+
+  document
+    .getElementById(
+      'loginPage'
     )
     .style.display =
     'none';
 
   document
     .getElementById(
-      'appScreen'
+      'dashboardPage'
     )
     .style.display =
     'block';
@@ -2022,17 +1806,15 @@ function showApp() {
 
 /* ============================================================
    LOGOUT
-   ============================================================ */
+============================================================ */
 
 async function logoutUser() {
 
   try {
 
-    if (
-      session
-    ) {
+    if (session) {
 
-      await apiGet(
+      await api(
         'logout',
         {
           session:
@@ -2048,63 +1830,16 @@ async function logoutUser() {
 
   clearSession();
 
-}
-
-
-/* ============================================================
-   CLEAR SESSION
-   ============================================================ */
-
-function clearSession() {
-
-  session =
-    '';
-
-  currentEmail =
-    '';
-
-  localStorage.removeItem(
-    'inventorySession'
-  );
-
-  localStorage.removeItem(
-    'inventoryEmail'
-  );
-
-  document
-    .getElementById(
-      'appScreen'
-    )
-    .style.display =
-    'none';
-
-  document
-    .getElementById(
-      'loginScreen'
-    )
-    .style.display =
-    'flex';
+  showLogin();
 
 }
 
 
 /* ============================================================
    DASHBOARD SEARCH
-   ============================================================ */
+============================================================ */
 
 async function searchDashboard() {
-
-  if (!session) {
-
-    alert(
-      'Your session has expired.'
-    );
-
-    clearSession();
-
-    return;
-
-  }
 
   const branch =
     document
@@ -2130,11 +1865,8 @@ async function searchDashboard() {
 
   if (!branch) {
 
-    showDialog(
-      '⚠️',
-      'Select Branch',
-      'Please select a branch first.',
-      null
+    alert(
+      'Please select a branch.'
     );
 
     return;
@@ -2148,19 +1880,12 @@ async function searchDashboard() {
       );
 
   tbody.innerHTML =
-    `
-      <tr>
-        <td colspan="7"
-            style="text-align:center;padding:40px;">
-          🔄 Searching...
-        </td>
-      </tr>
-    `;
+    '<tr><td colspan="7" style="text-align:center;padding:30px;">Searching...</td></tr>';
 
   try {
 
     const result =
-      await apiGet(
+      await api(
         'dashboard',
         {
 
@@ -2179,23 +1904,8 @@ async function searchDashboard() {
         }
       );
 
-    if (
-      !result.ok
-    ) {
-
-      throw new Error(
-        result.error ||
-        'Unable to load dashboard.'
-      );
-
-    }
-
-    dashboardData =
-      Array.isArray(
-        result.data
-      )
-        ? result.data
-        : [];
+    currentData =
+      result.data || [];
 
     currentPage =
       1;
@@ -2205,36 +1915,28 @@ async function searchDashboard() {
         'availableCount'
       )
       .textContent =
-      formatNumber(
-        result.availableCount
-      );
+      result.availableCount || 0;
 
     document
       .getElementById(
         'soldCount'
       )
       .textContent =
-      formatNumber(
-        result.soldCount
-      );
+      result.soldCount || 0;
 
     document
       .getElementById(
         'auditCount'
       )
       .textContent =
-      formatNumber(
-        result.auditCount
-      );
+      result.auditCount || 0;
 
     document
       .getElementById(
         'showingCount'
       )
       .textContent =
-      formatNumber(
-        result.showingCount
-      );
+      result.showingCount || 0;
 
     renderTable();
 
@@ -2243,23 +1945,16 @@ async function searchDashboard() {
   catch (err) {
 
     tbody.innerHTML =
-      `
-        <tr>
-          <td colspan="7"
-              style="text-align:center;padding:40px;color:#c62828;">
-            ❌ ${escapeHTML(err.message)}
-          </td>
-        </tr>
-      `;
+      '<tr><td colspan="7" style="text-align:center;padding:30px;color:#c62828;">' +
+      escapeHtml(
+        err.message
+      ) +
+      '</td></tr>';
 
   }
 
 }
 
-
-/* ============================================================
-   KEYBOARD SEARCH
-   ============================================================ */
 
 function searchKeyDown(
   event
@@ -2277,20 +1972,16 @@ function searchKeyDown(
 }
 
 
-/* ============================================================
-   REFRESH
-   ============================================================ */
+async function refreshDashboard() {
 
-function refreshDashboard() {
-
-  searchDashboard();
+  await searchDashboard();
 
 }
 
 
 /* ============================================================
-   TABLE RENDER
-   ============================================================ */
+   TABLE
+============================================================ */
 
 function renderTable() {
 
@@ -2300,37 +1991,13 @@ function renderTable() {
         'tableBody'
       );
 
-  const report =
-    document
-      .getElementById(
-        'sheetSelect'
-      )
-      .value;
-
-  if (
-    !dashboardData.length
-  ) {
-
-    tbody.innerHTML =
-      `
-        <tr>
-          <td colspan="7"
-              style="text-align:center;padding:40px;">
-            No records found.
-          </td>
-        </tr>
-      `;
-
-    updatePagination();
-
-    return;
-
-  }
-
   const totalPages =
-    Math.ceil(
-      dashboardData.length /
-      ROWS_PER_PAGE
+    Math.max(
+      1,
+      Math.ceil(
+        currentData.length /
+        ROWS_PER_PAGE
+      )
     );
 
   if (
@@ -2350,140 +2017,132 @@ function renderTable() {
     ) *
     ROWS_PER_PAGE;
 
+  const end =
+    start +
+    ROWS_PER_PAGE;
+
   const rows =
-    dashboardData.slice(
+    currentData.slice(
       start,
-      start +
-      ROWS_PER_PAGE
+      end
     );
 
-  tbody.innerHTML =
-    rows
-      .map(
-        function(row) {
+  if (!rows.length) {
 
-          const editable =
-            report ===
-            'SCANRESULTS';
+    tbody.innerHTML =
+      '<tr><td colspan="7" style="text-align:center;padding:40px;">No records found.</td></tr>';
 
-          const actions =
-            editable
-              ? `
-                <button
-                  class="actionBtn"
-                  onclick='openEditModal(
-                    ${JSON.stringify(
-                      row.branch
-                    )},
-                    ${JSON.stringify(
-                      row.tag
-                    )},
-                    ${JSON.stringify(
-                      row.si
-                    )}
-                  )'
-                >
-                  ✏️ Edit
-                </button>
+  }
 
-                <button
-                  class="actionBtn deleteBtn"
-                  onclick='deleteSoldRecord(
-                    ${JSON.stringify(
-                      row.branch
-                    )},
-                    ${JSON.stringify(
-                      row.tag
-                    )}
-                  )'
-                >
-                  🗑 Delete
-                </button>
-              `
-              : '';
+  else {
 
-          return `
-            <tr>
+    tbody.innerHTML =
+      rows
+        .map(
+          function(row) {
 
-              <td>
-                ${escapeHTML(
-                  row.branchName ||
-                  row.branch ||
-                  ''
-                )}
-              </td>
+            let actions =
+              '';
 
-              <td>
-                ${escapeHTML(
-                  row.lenstype ||
-                  ''
-                )}
-              </td>
+            if (
+              row.editable
+            ) {
 
-              <td>
-                ${escapeHTML(
-                  row.description ||
-                  ''
-                )}
-              </td>
+              actions =
+                '<button class="actionBtn" onclick="openEditModal(' +
+                "'" +
+                escapeJs(
+                  row.branch
+                ) +
+                "','" +
+                escapeJs(
+                  row.tag
+                ) +
+                "','" +
+                escapeJs(
+                  row.si
+                ) +
+                "'" +
+                ')">✏️ Edit</button>' +
 
-              <td>
-                ${escapeHTML(
-                  row.tag ||
-                  ''
-                )}
-              </td>
+                ' ' +
 
-              <td>
-                ${escapeHTML(
-                  row.si ||
-                  ''
-                )}
-              </td>
+                '<button class="actionBtn" onclick="deleteSoldRecord(' +
+                "'" +
+                escapeJs(
+                  row.branch
+                ) +
+                "','" +
+                escapeJs(
+                  row.tag
+                ) +
+                "'" +
+                ')">🗑 Delete</button>';
 
-              <td>
-                ${escapeHTML(
-                  row.date ||
-                  ''
-                )}
-              </td>
+            }
 
-              <td>
-                ${actions}
-              </td>
+            return (
+              '<tr>' +
 
-            </tr>
-          `;
+              '<td>' +
+              escapeHtml(
+                row.branchName ||
+                row.branch
+              ) +
+              '</td>' +
 
-        }
-      )
-      .join('');
+              '<td>' +
+              escapeHtml(
+                row.lenstype
+              ) +
+              '</td>' +
 
-  updatePagination();
+              '<td>' +
+              escapeHtml(
+                row.description
+              ) +
+              '</td>' +
 
-}
+              '<td>' +
+              escapeHtml(
+                row.tag
+              ) +
+              '</td>' +
 
+              '<td>' +
+              escapeHtml(
+                row.si
+              ) +
+              '</td>' +
 
-/* ============================================================
-   PAGINATION
-   ============================================================ */
+              '<td>' +
+              escapeHtml(
+                row.date
+              ) +
+              '</td>' +
 
-function updatePagination() {
+              '<td>' +
+              actions +
+              '</td>' +
 
-  const totalPages =
-    Math.ceil(
-      dashboardData.length /
-      ROWS_PER_PAGE
-    );
+              '</tr>'
+            );
+
+          }
+        )
+        .join('');
+
+  }
 
   document
     .getElementById(
       'pageInfo'
     )
     .textContent =
-    totalPages
-      ? `Page ${currentPage} / ${totalPages}`
-      : 'Page 0 / 0';
+    'Page ' +
+    currentPage +
+    ' / ' +
+    totalPages;
 
   document
     .getElementById(
@@ -2506,7 +2165,8 @@ function updatePagination() {
 function previousPage() {
 
   if (
-    currentPage > 1
+    currentPage >
+    1
   ) {
 
     currentPage--;
@@ -2521,9 +2181,12 @@ function previousPage() {
 function nextPage() {
 
   const totalPages =
-    Math.ceil(
-      dashboardData.length /
-      ROWS_PER_PAGE
+    Math.max(
+      1,
+      Math.ceil(
+        currentData.length /
+        ROWS_PER_PAGE
+      )
     );
 
   if (
@@ -2541,8 +2204,8 @@ function nextPage() {
 
 
 /* ============================================================
-   EDIT MODAL
-   ============================================================ */
+   EDIT
+============================================================ */
 
 function openEditModal(
   branch,
@@ -2555,14 +2218,14 @@ function openEditModal(
       'editBranch'
     )
     .value =
-    branch || '';
+    branch;
 
   document
     .getElementById(
       'editTag'
     )
     .value =
-    tag || '';
+    tag;
 
   document
     .getElementById(
@@ -2592,10 +2255,6 @@ function closeEditModal() {
 
 }
 
-
-/* ============================================================
-   SAVE EDIT
-   ============================================================ */
 
 async function saveEdit() {
 
@@ -2634,7 +2293,7 @@ async function saveEdit() {
   try {
 
     const result =
-      await apiGet(
+      await api(
         'editSold',
         {
 
@@ -2653,13 +2312,10 @@ async function saveEdit() {
         }
       );
 
-    if (
-      !result.ok
-    ) {
+    if (!result.ok) {
 
       throw new Error(
-        result.error ||
-        'Unable to update SI.'
+        result.error
       );
 
     }
@@ -2683,71 +2339,70 @@ async function saveEdit() {
 
 /* ============================================================
    DELETE SOLD
-   ============================================================ */
+============================================================ */
 
-function deleteSoldRecord(
+async function deleteSoldRecord(
   branch,
   tag
 ) {
 
-  showDialog(
-    '🗑',
-    'Delete Sold Record',
-    'Are you sure you want to delete this sold record?\n\nTag: ' +
-    tag,
-    async function() {
+  if (
+    !confirm(
+      'Delete sold record with tag ' +
+      tag +
+      '?'
+    )
+  ) {
 
-      try {
+    return;
 
-        const result =
-          await apiGet(
-            'deleteSold',
-            {
+  }
 
-              session:
-                session,
+  try {
 
-              branch:
-                branch,
+    const result =
+      await api(
+        'deleteSold',
+        {
 
-              tag:
-                tag
+          session:
+            session,
 
-            }
-          );
+          branch:
+            branch,
 
-        if (
-          !result.ok
-        ) {
-
-          throw new Error(
-            result.error ||
-            'Delete failed.'
-          );
+          tag:
+            tag
 
         }
+      );
 
-        await searchDashboard();
+    if (!result.ok) {
 
-      }
-
-      catch (err) {
-
-        alert(
-          err.message
-        );
-
-      }
+      throw new Error(
+        result.error
+      );
 
     }
-  );
+
+    await searchDashboard();
+
+  }
+
+  catch (err) {
+
+    alert(
+      err.message
+    );
+
+  }
 
 }
 
 
 /* ============================================================
-   UPDATE STOCK MODAL
-   ============================================================ */
+   MODALS
+============================================================ */
 
 function openUpdateStockModal() {
 
@@ -2773,47 +2428,99 @@ function closeUpdateStockModal() {
 }
 
 
-/* ============================================================
-   SELECTED FILE
-   ============================================================ */
+function openClearModal() {
 
-function showSelectedFile(
-  event
-) {
+  document
+    .getElementById(
+      'clearModal'
+    )
+    .style.display =
+    'flex';
 
-  const file =
-    event.target.files[0];
+}
 
-  const info =
-    document
-      .getElementById(
-        'importFileInfo'
-      );
 
-  if (!file) {
+function closeClearModal() {
 
-    info.textContent =
-      '';
+  document
+    .getElementById(
+      'clearModal'
+    )
+    .style.display =
+    'none';
 
-    return;
+}
 
-  }
 
-  info.textContent =
-    file.name +
-    ' — ' +
-    formatBytes(
-      file.size
-    );
+function openExportModal() {
+
+  document
+    .getElementById(
+      'exportModal'
+    )
+    .style.display =
+    'flex';
+
+}
+
+
+function closeExportModal() {
+
+  document
+    .getElementById(
+      'exportModal'
+    )
+    .style.display =
+    'none';
 
 }
 
 
 /* ============================================================
-   UPDATE STOCKS
-   ============================================================ */
+   FILE NAME
+============================================================ */
+
+function showSelectedFile() {
+
+  const file =
+    document
+      .getElementById(
+        'stockFile'
+      )
+      .files[0];
+
+  document
+    .getElementById(
+      'importFileInfo'
+    )
+    .textContent =
+    file
+      ? file.name +
+        ' (' +
+        formatBytes(
+          file.size
+        ) +
+        ')'
+      : '';
+
+}
+
+
+/* ============================================================
+   IMPORT
+============================================================ */
 
 async function updateStocks() {
+
+  if (importRunning) {
+
+    alert(
+      'An import is already running.'
+    );
+
+    return;
+
+  }
 
   const branch =
     document
@@ -2849,41 +2556,117 @@ async function updateStocks() {
 
   }
 
-  const button =
-    document
-      .getElementById(
-        'updateStocksBtn'
-      );
-
-  button.disabled =
+  importRunning =
     true;
+
+  closeUpdateStockModal();
+
+  showQueue(
+    'IMPORT',
+    'Preparing import...',
+    branch
+  );
 
   try {
 
-    /*
-     * STEP 1
-     *
-     * Ask Apps Script to clear the branch stocks.
-     */
+    const rows =
+      await readImportFile(
+        file
+      );
 
-    showJobModal(
-      'IMPORT',
-      '',
-      'Preparing Import',
-      'Preparing database...'
-    );
+    if (
+      !rows.length
+    ) {
+
+      throw new Error(
+        'The selected file contains no data.'
+      );
+
+    }
+
+    const dataRows =
+      normalizeImportRows(
+        rows
+      );
+
+    const totalRows =
+      dataRows.length;
+
+    const chunks =
+      [];
+
+    for (
+      let i = 0;
+      i < totalRows;
+      i +=
+        IMPORT_CHUNK_SIZE
+    ) {
+
+      chunks.push(
+        dataRows.slice(
+          i,
+          i +
+          IMPORT_CHUNK_SIZE
+        )
+      );
+
+    }
+
+    const totalChunks =
+      chunks.length;
 
     const jobId =
       crypto.randomUUID
         ? crypto.randomUUID()
-        : (
+        :
+        (
           Date.now() +
           '_' +
           Math.random()
+            .toString(36)
+            .substring(2)
         );
 
-    const prepare =
-      await apiGet(
+    currentJob = {
+
+      type:
+        'IMPORT',
+
+      jobId:
+        jobId,
+
+      branch:
+        branch,
+
+      totalRows:
+        totalRows,
+
+      totalChunks:
+        totalChunks,
+
+      processedRows:
+        0,
+
+      processedChunks:
+        0,
+
+      cancelled:
+        false
+
+    };
+
+    updateQueue(
+      'IMPORT',
+      'Preparing import...',
+      branch,
+      0,
+      '0 / ' +
+      totalRows +
+      ' rows'
+    );
+
+    const prepared =
+      await api(
         'prepareImport',
         {
 
@@ -2894,205 +2677,86 @@ async function updateStocks() {
             branch,
 
           jobId:
-            jobId
+            jobId,
+
+          totalRows:
+            totalRows,
+
+          totalChunks:
+            totalChunks
 
         }
       );
 
     if (
-      !prepare.ok
+      !prepared.ok
     ) {
 
       throw new Error(
-        prepare.error ||
-        'Unable to prepare import.'
+        prepared.error
       );
 
     }
 
-    currentJobId =
-      prepare.jobId;
-
-    /*
-     * Close the Update Stocks modal immediately.
-     *
-     * The actual upload runs from the background-style
-     * progress window.
-     */
-
-    closeUpdateStockModal();
-
-    /*
-     * STEP 2
-     *
-     * Read Excel in browser.
-     */
-
-    setJobProgress(
-      0,
-      'Reading Excel file...',
-      'Opening ' +
-      file.name
+    await uploadChunksConcurrent(
+      chunks,
+      branch,
+      prepared.jobId ||
+      jobId,
+      totalRows
     );
 
-    const rows =
-      await readSpreadsheetFile(
-        file
-      );
-
     if (
-      !rows.length
+      currentJob &&
+      currentJob.cancelled
     ) {
 
-      throw new Error(
-        'The selected file contains no data rows.'
-      );
+      return;
 
     }
 
-    /*
-     * STEP 3
-     *
-     * Prepare chunks.
-     */
-
-    importState = {
-
-      rows:
-        rows,
-
-      chunks:
-        [],
-
-      completed:
-        0,
-
-      failed:
-        0,
-
-      totalChunks:
-        Math.ceil(
-          rows.length /
-          IMPORT_CHUNK_SIZE
-        ),
-
-      totalRows:
-        rows.length,
-
-      cancelled:
-        false,
-
-      active:
-        0
-
-    };
-
-    for (
-      let i = 0;
-      i < rows.length;
-      i += IMPORT_CHUNK_SIZE
-    ) {
-
-      importState.chunks.push(
-        rows.slice(
-          i,
-          i +
-          IMPORT_CHUNK_SIZE
-        )
-      );
-
-    }
-
-    setJobProgress(
-      0,
-      'Uploading stocks...',
-      rows.length.toLocaleString() +
-      ' rows • ' +
-      importState.totalChunks.toLocaleString() +
-      ' chunks • ' +
-      IMPORT_CONCURRENT_REQUESTS +
-      ' concurrent uploads'
-    );
-
-    /*
-     * STEP 4
-     *
-     * Upload chunks concurrently.
-     */
-
-    await uploadImportChunks();
-
-    if (
-      importState.cancelled
-    ) {
-
-      throw new Error(
-        'Import cancelled.'
-      );
-
-    }
-
-    /*
-     * STEP 5
-     *
-     * Wait until Apps Script confirms the job.
-     */
-
-    setJobProgress(
+    updateQueue(
+      'IMPORT',
+      'Import complete',
+      branch,
       100,
-      'Import upload completed',
-      'Verifying database status...'
+      totalRows +
+      ' / ' +
+      totalRows +
+      ' rows'
     );
 
-    await waitForImportCompletion();
+    showQueueComplete(
+      'IMPORT',
+      'Import complete',
+      branch
+    );
+
+    await searchDashboard();
 
   }
 
   catch (err) {
 
     if (
-      String(
-        err.message
-      ) ===
-      'Import cancelled.'
+      currentJob &&
+      currentJob.cancelled
     ) {
 
-      setJobProgress(
-        0,
-        'Import cancelled',
-        'The import job was cancelled.'
-      );
-
-    }
-    else {
-
-      setJobProgress(
-        0,
-        'Import failed',
-        err.message
-      );
+      return;
 
     }
 
-    document
-      .getElementById(
-        'cancelJobBtn'
-      )
-      .style.display =
-      'none';
-
-    document
-      .getElementById(
-        'closeLoadingBtn'
-      )
-      .style.display =
-      'inline-block';
+    showQueueError(
+      'IMPORT',
+      err.message
+    );
 
   }
 
   finally {
 
-    button.disabled =
+    importRunning =
       false;
 
   }
@@ -3101,10 +2765,10 @@ async function updateStocks() {
 
 
 /* ============================================================
-   READ SPREADSHEET
-   ============================================================ */
+   READ IMPORT FILE
+============================================================ */
 
-function readSpreadsheetFile(
+function readImportFile(
   file
 ) {
 
@@ -3128,14 +2792,9 @@ function readSpreadsheetFile(
               XLSX.read(
                 data,
                 {
-                  type:
-                    'array',
-
-                  cellDates:
-                    false,
-
-                  raw:
-                    false
+                  type:'array',
+                  raw:false,
+                  cellDates:false
                 }
               );
 
@@ -3143,9 +2802,13 @@ function readSpreadsheetFile(
               !workbook.SheetNames.length
             ) {
 
-              throw new Error(
-                'No worksheet found.'
+              reject(
+                new Error(
+                  'No worksheet found.'
+                )
               );
+
+              return;
 
             }
 
@@ -3158,86 +2821,14 @@ function readSpreadsheetFile(
               XLSX.utils.sheet_to_json(
                 sheet,
                 {
-                  header:
-                    1,
-
-                  defval:
-                    '',
-
-                  raw:
-                    false
+                  header:1,
+                  defval:'',
+                  raw:false
                 }
               );
 
-            if (
-              !rows.length
-            ) {
-
-              resolve([]);
-
-              return;
-
-            }
-
-            /*
-             * First row is assumed to be the header.
-             *
-             * The Apps Script backend expects the
-             * exact 27-column order.
-             */
-
-            const dataRows =
-              rows.slice(1);
-
-            const normalized =
-              dataRows
-                .filter(
-                  function(row) {
-
-                    return row.some(
-                      function(value) {
-
-                        return String(
-                          value ===
-                          undefined ||
-                          value ===
-                          null
-                            ? ''
-                            : value
-                        ).trim() !== '';
-
-                      }
-                    );
-
-                  }
-                )
-                .map(
-                  function(row) {
-
-                    const output =
-                      new Array(27)
-                        .fill('');
-
-                    for (
-                      let i = 0;
-                      i < 27;
-                      i++
-                    ) {
-
-                      output[i] =
-                        normalizeImportValue(
-                          row[i]
-                        );
-
-                    }
-
-                    return output;
-
-                  }
-                );
-
             resolve(
-              normalized
+              rows
             );
 
           }
@@ -3245,7 +2836,10 @@ function readSpreadsheetFile(
           catch (err) {
 
             reject(
-              err
+              new Error(
+                'Unable to read Excel file: ' +
+                err.message
+              )
             );
 
           }
@@ -3257,7 +2851,7 @@ function readSpreadsheetFile(
 
           reject(
             new Error(
-              'Unable to read the selected file.'
+              'Unable to read selected file.'
             )
           );
 
@@ -3274,214 +2868,400 @@ function readSpreadsheetFile(
 
 
 /* ============================================================
-   IMPORT VALUE NORMALIZATION
-   ============================================================ */
+   NORMALIZE IMPORT ROWS
+============================================================ */
 
-function normalizeImportValue(
-  value
+const DB_COLUMNS = [
+
+  'SDATE',
+  'SUPPLIER',
+  'DR',
+  'COST',
+  'ASG',
+  'CB',
+  'FD',
+  'UNITS',
+  'POWER',
+  'LENSTYPE',
+  'PUNIT',
+  'BR',
+  'NTAGN',
+  'CATEGORY',
+  'DESCRIPTION',
+  'LENSCODE',
+  'SELLINGPRICE',
+  'DELIVERYDATE',
+  'ORNUMBER',
+  'ORDATE',
+  'REMARKS',
+  'TAGPRICE',
+  'QR',
+  'SI NO.',
+  'DATE AND TIME',
+  'USER EMAIL',
+  'STATUS'
+
+];
+
+
+function normalizeImportRows(
+  rows
 ) {
 
   if (
-    value ===
-    undefined ||
-    value ===
-    null
+    !rows ||
+    !rows.length
   ) {
 
-    return '';
+    return [];
 
   }
 
-  if (
-    value instanceof Date
-  ) {
+  const header =
+    rows[0]
+      .map(
+        function(value) {
 
-    return value
-      .toISOString();
+          return String(
+            value || ''
+          )
+            .trim()
+            .toUpperCase();
+
+        }
+      );
+
+  const indexes =
+    {};
+
+  DB_COLUMNS.forEach(
+    function(column) {
+
+      indexes[column] =
+        header.indexOf(
+          column
+        );
+
+    }
+  );
+
+  /*
+   * If the uploaded file does not contain headers,
+   * assume the first row is already data.
+   */
+  let start =
+    1;
+
+  const hasKnownHeader =
+    header.indexOf(
+      'NTAGN'
+    ) !== -1 ||
+    header.indexOf(
+      'DESCRIPTION'
+    ) !== -1;
+
+  if (!hasKnownHeader) {
+
+    start = 0;
 
   }
 
-  return String(
-    value
-  ).trim();
+  const output = [];
 
-}
+  for (
+    let r = start;
+    r < rows.length;
+    r++
+  ) {
 
+    const source =
+      rows[r];
 
-/* ============================================================
-   UPLOAD IMPORT CHUNKS
-   ============================================================ */
+    if (
+      !source ||
+      !source.length
+    ) {
 
-async function uploadImportChunks() {
+      continue;
 
-  let nextIndex =
-    0;
+    }
 
-  async function worker() {
+    let hasData =
+      false;
 
-    while (true) {
+    const target =
+      DB_COLUMNS.map(
+        function(column, index) {
 
-      if (
-        importState.cancelled
-      ) {
+          let value = '';
 
-        return;
+          if (
+            hasKnownHeader &&
+            indexes[column] !== -1
+          ) {
 
-      }
-
-      const index =
-        nextIndex++;
-
-      if (
-        index >=
-        importState.chunks.length
-      ) {
-
-        return;
-
-      }
-
-      const chunk =
-        importState.chunks[
-          index
-        ];
-
-      importState.active++;
-
-      try {
-
-        /*
-         * JSON -> UTF-8 -> Base64
-         *
-         * This matches uploadChunk() in Code.gs.
-         */
-
-        const json =
-          JSON.stringify(
-            chunk
-          );
-
-        const base64 =
-          uint8ToBase64(
-            new TextEncoder()
-              .encode(
-                json
-              )
-          );
-
-        await apiPost(
-          {
-
-            action:
-              'uploadChunk',
-
-            session:
-              session,
-
-            branch:
-              document
-                .getElementById(
-                  'updateBranch'
-                )
-                .value,
-
-            chunk:
-              base64,
-
-            chunkIndex:
-              index,
-
-            totalChunks:
-              importState.totalChunks
+            value =
+              source[
+                indexes[column]
+              ];
 
           }
-        );
 
-        importState.completed++;
+          else {
 
-        const percent =
-          Math.round(
-            (
-              importState.completed /
-              importState.totalChunks
-            ) *
-            100
-          );
+            value =
+              source[index];
 
-        setJobProgress(
-          percent,
-          'Uploading stocks...',
-          'Chunk ' +
-          (
-            index + 1
-          ).toLocaleString() +
-          ' / ' +
-          importState.totalChunks.toLocaleString() +
-          ' completed\n' +
-          importState.completedRows?.toLocaleString?.() ||
-          ''
-        );
+          }
 
-        /*
-         * Update details separately because the expression
-         * above intentionally handles older browsers.
-         */
+          if (
+            value !== undefined &&
+            value !== null &&
+            String(
+              value
+            ).trim() !== ''
+          ) {
 
-        document
-          .getElementById(
-            'jobDetails'
-          )
-          .textContent =
-          'Rows: ' +
-          (
-            Math.min(
-              importState.completed *
-              IMPORT_CHUNK_SIZE,
-              importState.totalRows
-            )
-          ).toLocaleString() +
-          ' / ' +
-          importState.totalRows.toLocaleString() +
-          '\nChunks: ' +
-          importState.completed.toLocaleString() +
-          ' / ' +
-          importState.totalChunks.toLocaleString() +
-          '\nConcurrent workers: ' +
-          IMPORT_CONCURRENT_REQUESTS;
+            hasData =
+              true;
 
-      }
+          }
 
-      catch (err) {
+          return String(
+            value === undefined ||
+            value === null
+              ? ''
+              : value
+          ).trim();
 
-        importState.failed++;
+        }
+      );
 
-        throw new Error(
-          'Chunk ' +
-          (
-            index + 1
-          ) +
-          ' failed: ' +
-          err.message
-        );
+    if (
+      hasData
+    ) {
 
-      }
-
-      finally {
-
-        importState.active--;
-
-      }
+      output.push(
+        target
+      );
 
     }
 
   }
 
-  const workers = [];
+  return output;
+
+}
+
+
+/* ============================================================
+   CONCURRENT CHUNK UPLOAD
+============================================================ */
+
+async function uploadChunksConcurrent(
+  chunks,
+  branch,
+  jobId,
+  totalRows
+) {
+
+  const totalChunks =
+    chunks.length;
+
+  let nextIndex =
+    0;
+
+  let completed =
+    0;
+
+  const worker =
+    async function() {
+
+      while (true) {
+
+        if (
+          currentJob &&
+          currentJob.cancelled
+        ) {
+
+          return;
+
+        }
+
+        const index =
+          nextIndex++;
+
+        if (
+          index >=
+          totalChunks
+        ) {
+
+          return;
+
+        }
+
+        let success =
+          false;
+
+        let lastError =
+          null;
+
+        for (
+          let attempt = 1;
+          attempt <= 3;
+          attempt++
+        ) {
+
+          try {
+
+            const encoded =
+              btoa(
+                unescape(
+                  encodeURIComponent(
+                    JSON.stringify(
+                      chunks[index]
+                    )
+                  )
+                )
+              );
+
+            const result =
+              await postChunk(
+                {
+
+                  action:
+                    'uploadChunk',
+
+                  session:
+                    session,
+
+                  branch:
+                    branch,
+
+                  jobId:
+                    jobId,
+
+                  chunk:
+                    encoded,
+
+                  chunkIndex:
+                    index,
+
+                  totalChunks:
+                    totalChunks,
+
+                  totalRows:
+                    totalRows
+
+                }
+              );
+
+            if (
+              result &&
+              (
+                result.ok ||
+                result.duplicate
+              )
+            ) {
+
+              success =
+                true;
+
+              break;
+
+            }
+
+            lastError =
+              new Error(
+                result &&
+                result.error
+                  ? result.error
+                  : 'Chunk upload failed.'
+              );
+
+          }
+
+          catch (err) {
+
+            lastError =
+              err;
+
+            await sleep(
+              500 *
+              attempt
+            );
+
+          }
+
+        }
+
+        if (!success) {
+
+          throw (
+            lastError ||
+            new Error(
+              'Chunk ' +
+              (index + 1) +
+              ' failed.'
+            )
+          );
+
+        }
+
+        completed++;
+
+        const processedRows =
+          Math.min(
+            totalRows,
+            completed *
+            IMPORT_CHUNK_SIZE
+          );
+
+        const percent =
+          Math.round(
+            (
+              completed /
+              totalChunks
+            ) *
+            100
+          );
+
+        if (currentJob) {
+
+          currentJob.processedChunks =
+            completed;
+
+          currentJob.processedRows =
+            processedRows;
+
+        }
+
+        updateQueue(
+          'IMPORT',
+          'Uploading inventory...',
+          branch,
+          percent,
+          completed +
+          ' / ' +
+          totalChunks +
+          ' chunks • ' +
+          processedRows +
+          ' / ' +
+          totalRows +
+          ' rows'
+        );
+
+      }
+
+    };
+
+  const workers =
+    [];
 
   const workerCount =
     Math.min(
       IMPORT_CONCURRENT_REQUESTS,
-      importState.totalChunks
+      totalChunks
     );
 
   for (
@@ -3504,234 +3284,114 @@ async function uploadImportChunks() {
 
 
 /* ============================================================
-   BASE64 BYTE CONVERSION
-   ============================================================ */
+   CANCEL CURRENT JOB
+============================================================ */
 
-function uint8ToBase64(
-  bytes
-) {
+async function cancelCurrentJob() {
 
-  let binary = '';
+  if (!currentJob) {
 
-  const chunkSize =
-    0x8000;
+    closeQueueBox();
 
-  for (
-    let i = 0;
-    i < bytes.length;
-    i += chunkSize
-  ) {
-
-    binary += String.fromCharCode
-      .apply(
-        null,
-        bytes.subarray(
-          i,
-          i +
-          chunkSize
-        )
-      );
+    return;
 
   }
 
-  return btoa(
-    binary
-  );
+  currentJob.cancelled =
+    true;
 
-}
+  const job =
+    currentJob;
 
-
-/* ============================================================
-   IMPORT COMPLETION
-   ============================================================ */
-
-async function waitForImportCompletion() {
-
-  /*
-   * The upload itself has completed.
-   *
-   * The Apps Script status is still queried so that the
-   * browser knows the server accepted the job.
-   */
-
-  for (
-    let attempt = 0;
-    attempt < 10;
-    attempt++
-  ) {
+  try {
 
     if (
-      importState.cancelled
+      job.type ===
+      'IMPORT'
     ) {
 
-      return;
+      await api(
+        'cancelImport',
+        {
+
+          session:
+            session,
+
+          jobId:
+            job.jobId
+
+        }
+      );
 
     }
 
-    try {
+    else if (
+      job.type ===
+      'EXPORT'
+    ) {
 
-      const result =
-        await apiGet(
-          'importStatus',
-          {
+      await api(
+        'cancelExport',
+        {
 
-            session:
-              session,
+          session:
+            session,
 
-            jobId:
-              currentJobId
+          jobId:
+            job.jobId
 
-          }
-        );
-
-      if (
-        result.status ===
-        'cancelled'
-      ) {
-
-        throw new Error(
-          'Import cancelled by user.'
-        );
-
-      }
-
-      if (
-        result.status ===
-        'error'
-      ) {
-
-        throw new Error(
-          result.error ||
-          'Import failed on server.'
-        );
-
-      }
-
-      /*
-       * uploadChunk() does not currently update
-       * processedRows on the server, so successful browser
-       * uploads are the authoritative progress indicator.
-       */
-
-      if (
-        result.status ===
-        'uploading' ||
-        result.status ===
-        'waiting_for_chunks'
-      ) {
-
-        await sleep(
-          700
-        );
-
-        continue;
-
-      }
-
-      break;
-
-    }
-
-    catch (err) {
-
-      if (
-        attempt === 9
-      ) {
-
-        throw err;
-
-      }
-
-      await sleep(
-        700
+        }
       );
 
     }
 
   }
 
-  setJobProgress(
-    100,
-    'Import completed',
-    importState.totalRows.toLocaleString() +
-    ' rows uploaded successfully.\n' +
-    importState.totalChunks.toLocaleString() +
-    ' chunks completed.'
+  catch (err) {}
+
+  updateQueue(
+    job.type,
+    'Job cancelled',
+    job.branch,
+    0,
+    'The background job has been cancelled.'
   );
 
   document
     .getElementById(
-      'cancelJobBtn'
+      'queueCancelArea'
     )
-    .style.display =
-    'none';
+    .classList.add(
+      'hidden'
+    );
 
-  document
-    .getElementById(
-      'closeLoadingBtn'
-    )
-    .style.display =
-    'inline-block';
+  setTimeout(
+    function() {
 
-  /*
-   * Keep dashboard available.
-   *
-   * Only refresh if the user already selected a branch.
-   */
+      closeQueueBox();
 
-  if (
-    document
-      .getElementById(
-        'branchSelect'
-      )
-      .value ===
-    document
-      .getElementById(
-        'updateBranch'
-      )
-      .value
-  ) {
-
-    searchDashboard();
-
-  }
+    },
+    1200
+  );
 
 }
 
 
 /* ============================================================
-   EXPORT MODAL
-   ============================================================ */
-
-function openExportModal() {
-
-  document
-    .getElementById(
-      'exportModal'
-    )
-    .style.display =
-    'flex';
-
-}
-
-
-function closeExportModal() {
-
-  document
-    .getElementById(
-      'exportModal'
-    )
-    .style.display =
-    'none';
-
-}
-
-
-/* ============================================================
-   START EXPORT
-   ============================================================ */
+   EXPORT
+============================================================ */
 
 async function startExport() {
+
+  if (exportRunning) {
+
+    alert(
+      'An export is already running.'
+    );
+
+    return;
+
+  }
 
   const branch =
     document
@@ -3750,17 +3410,21 @@ async function startExport() {
 
   }
 
+  closeExportModal();
+
+  exportRunning =
+    true;
+
+  showQueue(
+    'EXPORT',
+    'Queueing export...',
+    branch
+  );
+
   try {
 
-    showJobModal(
-      'EXPORT',
-      '',
-      'Queueing Export',
-      'Creating background export job...'
-    );
-
     const result =
-      await apiGet(
+      await api(
         'startExport',
         {
 
@@ -3773,71 +3437,51 @@ async function startExport() {
         }
       );
 
-    if (
-      !result.ok
-    ) {
+    if (!result.ok) {
 
       throw new Error(
-        result.error ||
-        'Unable to start export.'
+        result.error
       );
 
     }
 
-    currentJobType =
-      'EXPORT';
+    currentJob = {
 
-    currentJobId =
-      result.jobId;
+      type:
+        'EXPORT',
 
-    closeExportModal();
+      jobId:
+        result.jobId,
 
-    document
-      .getElementById(
-        'cancelJobBtn'
-      )
-      .style.display =
-      'inline-block';
+      branch:
+        branch,
 
-    document
-      .getElementById(
-        'closeLoadingBtn'
-      )
-      .style.display =
-      'none';
+      cancelled:
+        false
 
-    setJobProgress(
-      0,
+    };
+
+    updateQueue(
+      'EXPORT',
       'Export queued...',
-      'The export is running in the background.\n' +
-      'You can continue using the dashboard.'
+      branch,
+      0,
+      'Waiting for background worker'
     );
 
-    startJobPolling();
+    startQueuePolling();
 
   }
 
   catch (err) {
 
-    setJobProgress(
-      0,
-      'Export failed',
+    exportRunning =
+      false;
+
+    showQueueError(
+      'EXPORT',
       err.message
     );
-
-    document
-      .getElementById(
-        'cancelJobBtn'
-      )
-      .style.display =
-      'none';
-
-    document
-      .getElementById(
-        'closeLoadingBtn'
-      )
-      .style.display =
-      'inline-block';
 
   }
 
@@ -3845,35 +3489,35 @@ async function startExport() {
 
 
 /* ============================================================
-   EXPORT POLLING
-   ============================================================ */
+   QUEUE POLLING
+============================================================ */
 
-function startJobPolling() {
+function startQueuePolling() {
 
-  stopJobPolling();
+  stopQueuePolling();
 
-  pollExportJob();
-
-  jobPollTimer =
+  queuePollTimer =
     setInterval(
-      pollExportJob,
+      pollCurrentJob,
       3000
     );
+
+  pollCurrentJob();
 
 }
 
 
-function stopJobPolling() {
+function stopQueuePolling() {
 
   if (
-    jobPollTimer
+    queuePollTimer
   ) {
 
     clearInterval(
-      jobPollTimer
+      queuePollTimer
     );
 
-    jobPollTimer =
+    queuePollTimer =
       null;
 
   }
@@ -3881,268 +3525,261 @@ function stopJobPolling() {
 }
 
 
-async function pollExportJob() {
+async function pollCurrentJob() {
 
-  if (
-    currentJobType !==
-    'EXPORT' ||
-    !currentJobId
-  ) {
+  if (!currentJob) {
 
-    stopJobPolling();
+    stopQueuePolling();
 
     return;
 
   }
 
+  const job =
+    currentJob;
+
   try {
 
-    const result =
-      await apiGet(
-        'exportStatus',
-        {
-
-          session:
-            session,
-
-          jobId:
-            currentJobId
-
-        }
-      );
-
     if (
-      !result.ok
+      job.type ===
+      'IMPORT'
     ) {
 
-      throw new Error(
-        result.error ||
-        'Unable to read export status.'
-      );
+      const result =
+        await api(
+          'importStatus',
+          {
 
-    }
+            session:
+              session,
 
-    const totalRows =
-      (
-        Number(
-          result.stocksRows
-        ) +
-        Number(
-          result.soldRows
-        ) +
-        Number(
-          result.auditRows
-        )
-      );
+            jobId:
+              job.jobId
 
-    const pages =
-      (
-        Number(
-          result.stocksPages
-        ) +
-        Number(
-          result.soldPages
-        ) +
-        Number(
-          result.auditPages
-        )
-      );
-
-    /*
-     * There is no artificial 760/1000/100000 limit.
-     *
-     * Progress is based on actual processed rows when
-     * available.
-     */
-
-    let percent =
-      0;
-
-    if (
-      result.status ===
-      'completed'
-    ) {
-
-      percent =
-        100;
-
-    }
-    else if (
-      result.stage ===
-      'sold'
-    ) {
-
-      percent =
-        totalRows
-          ? Math.min(
-              60,
-              Math.round(
-                (
-                  Number(
-                    result.stocksRows
-                  ) /
-                  Math.max(
-                    Number(
-                      result.stocksRows
-                    ) +
-                    1,
-                    1
-                  )
-                ) *
-                60
-              )
-            )
-          : 20;
-
-    }
-    else if (
-      result.stage ===
-      'audit'
-    ) {
-
-      percent =
-        70;
-
-    }
-    else if (
-      result.stage ===
-      'processing'
-    ) {
-
-      percent =
-        90;
-
-    }
-    else {
-
-      percent =
-        Math.min(
-          20,
-          pages
-            ? 10 +
-              (
-                pages % 10
-              )
-            : 5
+          }
         );
 
+      if (!result.ok) {
+
+        throw new Error(
+          result.error
+        );
+
+      }
+
+      const total =
+        Number(
+          result.totalRows || 0
+        );
+
+      const processed =
+        Number(
+          result.processedRows || 0
+        );
+
+      const percent =
+        total
+          ? Math.min(
+              100,
+              Math.round(
+                processed /
+                total *
+                100
+              )
+            )
+          : 0;
+
+      updateQueue(
+        'IMPORT',
+        importStatusText(
+          result.status
+        ),
+        result.branch ||
+        job.branch,
+        percent,
+        processed +
+        ' / ' +
+        total +
+        ' rows'
+      );
+
+      if (
+        result.status ===
+        'completed'
+      ) {
+
+        importRunning =
+          false;
+
+        stopQueuePolling();
+
+        showQueueComplete(
+          'IMPORT',
+          'Import complete',
+          result.branch ||
+          job.branch
+        );
+
+        currentJob =
+          null;
+
+        await searchDashboard();
+
+      }
+
+      else if (
+        result.status ===
+        'error'
+      ) {
+
+        importRunning =
+          false;
+
+        stopQueuePolling();
+
+        showQueueError(
+          'IMPORT',
+          result.error ||
+          'Import failed.'
+        );
+
+        currentJob =
+          null;
+
+      }
+
+      return;
+
     }
 
+
     if (
-      result.status ===
-      'completed'
+      job.type ===
+      'EXPORT'
     ) {
 
-      setJobProgress(
-        100,
-        'Export completed',
-        buildExportDetails(
+      const result =
+        await api(
+          'exportStatus',
+          {
+
+            session:
+              session,
+
+            jobId:
+              job.jobId
+
+          }
+        );
+
+      if (!result.ok) {
+
+        throw new Error(
+          result.error
+        );
+
+      }
+
+      const stocks =
+        Number(
+          result.stocksRows || 0
+        );
+
+      const sold =
+        Number(
+          result.soldRows || 0
+        );
+
+      const audit =
+        Number(
+          result.auditRows || 0
+        );
+
+      const stage =
+        result.stage || '';
+
+      const percent =
+        exportPercent(
+          stage
+        );
+
+      updateQueue(
+        'EXPORT',
+        exportStatusText(
+          stage
+        ),
+        result.branch ||
+        job.branch,
+        percent,
+        'Stocks: ' +
+        stocks.toLocaleString() +
+        ' • Sold: ' +
+        sold.toLocaleString() +
+        ' • Audit: ' +
+        audit.toLocaleString()
+      );
+
+      if (
+        result.status ===
+        'completed'
+      ) {
+
+        exportRunning =
+          false;
+
+        stopQueuePolling();
+
+        showExportComplete(
           result
-        )
-      );
+        );
 
-      showExportLinks(
-        result.files || []
-      );
+        currentJob =
+          null;
 
-      stopJobPolling();
+      }
 
-      document
-        .getElementById(
-          'cancelJobBtn'
-        )
-        .style.display =
-        'none';
+      else if (
+        result.status ===
+        'error'
+      ) {
 
-      document
-        .getElementById(
-          'closeLoadingBtn'
-        )
-        .style.display =
-        'inline-block';
+        exportRunning =
+          false;
 
-      return;
+        stopQueuePolling();
 
-    }
+        showQueueError(
+          'EXPORT',
+          result.error ||
+          'Export failed.'
+        );
 
-    if (
-      result.status ===
-      'cancelled'
-    ) {
+        currentJob =
+          null;
 
-      setJobProgress(
-        0,
-        'Export cancelled',
-        'The background export was cancelled.'
-      );
-
-      stopJobPolling();
-
-      document
-        .getElementById(
-          'cancelJobBtn'
-        )
-        .style.display =
-        'none';
-
-      document
-        .getElementById(
-          'closeLoadingBtn'
-        )
-        .style.display =
-        'inline-block';
+      }
 
       return;
 
     }
-
-    if (
-      result.status ===
-      'error'
-    ) {
-
-      throw new Error(
-        result.error ||
-        'Export worker failed.'
-      );
-
-    }
-
-    setJobProgress(
-      percent,
-      getExportStageText(
-        result.stage
-      ),
-      buildExportDetails(
-        result
-      )
-    );
 
   }
 
   catch (err) {
 
-    setJobProgress(
+    /*
+     * Do not immediately kill the queue on a temporary
+     * polling/network error.
+     *
+     * The worker continues in Apps Script.
+     */
+    updateQueue(
+      job.type,
+      'Connection checking...',
+      job.branch,
       0,
-      'Export error',
       err.message
     );
-
-    stopJobPolling();
-
-    document
-      .getElementById(
-        'cancelJobBtn'
-      )
-      .style.display =
-      'none';
-
-    document
-      .getElementById(
-        'closeLoadingBtn'
-      )
-      .style.display =
-      'inline-block';
 
   }
 
@@ -4150,34 +3787,108 @@ async function pollExportJob() {
 
 
 /* ============================================================
-   EXPORT STAGE TEXT
-   ============================================================ */
+   EXPORT PROGRESS
+============================================================ */
 
-function getExportStageText(
+function exportPercent(
   stage
 ) {
 
   switch (
-    stage
+    String(
+      stage || ''
+    )
   ) {
 
     case 'stocks':
-      return 'Exporting Stocks...';
+      return 20;
 
     case 'sold':
-      return 'Exporting Sold Out...';
+      return 45;
 
     case 'audit':
-      return 'Exporting Re-Inventory...';
+      return 70;
 
     case 'processing':
-      return 'Creating Export Files...';
+      return 85;
 
-    case 'creating_files':
-      return 'Creating Export Files...';
+    case 'creating_xlsx':
+      return 95;
+
+    case 'completed':
+      return 100;
 
     default:
-      return 'Export running...';
+      return 5;
+
+  }
+
+}
+
+
+function exportStatusText(
+  stage
+) {
+
+  switch (
+    String(
+      stage || ''
+    )
+  ) {
+
+    case 'stocks':
+      return 'Exporting STOCKS...';
+
+    case 'sold':
+      return 'Exporting SOLD...';
+
+    case 'audit':
+      return 'Exporting AUDIT...';
+
+    case 'processing':
+      return 'Processing export...';
+
+    case 'creating_xlsx':
+      return 'Creating one XLSX file...';
+
+    case 'completed':
+      return 'Export complete';
+
+    default:
+      return 'Export queued...';
+
+  }
+
+}
+
+
+function importStatusText(
+  status
+) {
+
+  switch (
+    String(
+      status || ''
+    )
+  ) {
+
+    case 'preparing':
+      return 'Preparing import...';
+
+    case 'uploading':
+      return 'Uploading inventory...';
+
+    case 'waiting_for_chunks':
+      return 'Waiting for chunks...';
+
+    case 'uploading_chunks':
+      return 'Uploading chunks...';
+
+    case 'completed':
+      return 'Import complete';
+
+    default:
+      return 'Import running...';
 
   }
 
@@ -4185,137 +3896,382 @@ function getExportStageText(
 
 
 /* ============================================================
-   EXPORT DETAILS
-   ============================================================ */
+   QUEUE UI
+============================================================ */
 
-function buildExportDetails(
+function showQueue(
+  type,
+  status,
+  branch
+) {
+
+  const box =
+    document
+      .getElementById(
+        'jobQueue'
+      );
+
+  box.style.display =
+    'block';
+
+  document
+    .getElementById(
+      'queueTitle'
+    )
+    .textContent =
+    type === 'IMPORT'
+      ? '📤 Import Queue'
+      : '📥 Export Queue';
+
+  updateQueue(
+    type,
+    status,
+    branch,
+    0,
+    ''
+  );
+
+  document
+    .getElementById(
+      'queueCancelArea'
+    )
+    .classList.remove(
+      'hidden'
+    );
+
+  document
+    .getElementById(
+      'queueLinks'
+    )
+    .innerHTML =
+    '';
+
+}
+
+
+function updateQueue(
+  type,
+  status,
+  branch,
+  percent,
+  details
+) {
+
+  document
+    .getElementById(
+      'jobQueue'
+    )
+    .style.display =
+    'block';
+
+  document
+    .getElementById(
+      'queueTitle'
+    )
+    .textContent =
+    type === 'IMPORT'
+      ? '📤 Import Queue'
+      : '📥 Export Queue';
+
+  document
+    .getElementById(
+      'queueStatus'
+    )
+    .textContent =
+    status;
+
+  document
+    .getElementById(
+      'queueDetails'
+    )
+    .textContent =
+    (
+      branch
+        ? branch +
+          ' • '
+        : ''
+    ) +
+    details;
+
+  document
+    .getElementById(
+      'queueProgress'
+    )
+    .style.width =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        percent || 0
+      )
+    ) +
+    '%';
+
+  document
+    .getElementById(
+      'queueProgressText'
+    )
+    .textContent =
+    Math.round(
+      percent || 0
+    ) +
+    '%';
+
+}
+
+
+function showQueueComplete(
+  type,
+  status,
+  branch
+) {
+
+  updateQueue(
+    type,
+    status,
+    branch,
+    100,
+    'Finished successfully.'
+  );
+
+  document
+    .getElementById(
+      'queueStatus'
+    )
+    .className =
+    'queueStatus successText';
+
+  document
+    .getElementById(
+      'queueCancelArea'
+    )
+    .classList.add(
+      'hidden'
+    );
+
+}
+
+
+function showQueueError(
+  type,
+  error
+) {
+
+  document
+    .getElementById(
+      'jobQueue'
+    )
+    .style.display =
+    'block';
+
+  document
+    .getElementById(
+      'queueTitle'
+    )
+    .textContent =
+    type === 'IMPORT'
+      ? '📤 Import Queue'
+      : '📥 Export Queue';
+
+  document
+    .getElementById(
+      'queueStatus'
+    )
+    .textContent =
+    '❌ Job failed';
+
+  document
+    .getElementById(
+      'queueStatus'
+    )
+    .className =
+    'queueStatus errorText';
+
+  document
+    .getElementById(
+      'queueDetails'
+    )
+    .textContent =
+    error;
+
+  document
+    .getElementById(
+      'queueProgress'
+    )
+    .style.width =
+    '0%';
+
+  document
+    .getElementById(
+      'queueProgressText'
+    )
+    .textContent =
+    '';
+
+  document
+    .getElementById(
+      'queueCancelArea'
+    )
+    .classList.add(
+      'hidden'
+    );
+
+}
+
+
+function showExportComplete(
   result
 ) {
 
-  return (
-    'Stocks: ' +
+  const box =
+    document
+      .getElementById(
+        'jobQueue'
+      );
+
+  box.style.display =
+    'block';
+
+  document
+    .getElementById(
+      'queueTitle'
+    )
+    .textContent =
+    '📥 Export Queue';
+
+  document
+    .getElementById(
+      'queueStatus'
+    )
+    .textContent =
+    '✅ Export complete';
+
+  document
+    .getElementById(
+      'queueStatus'
+    )
+    .className =
+    'queueStatus successText';
+
+  document
+    .getElementById(
+      'queueProgress'
+    )
+    .style.width =
+    '100%';
+
+  document
+    .getElementById(
+      'queueProgressText'
+    )
+    .textContent =
+    '100%';
+
+  document
+    .getElementById(
+      'queueDetails'
+    )
+    .textContent =
+    (
+      result.branch ||
+      ''
+    ) +
+    ' • ' +
     Number(
       result.stocksRows || 0
     ).toLocaleString() +
-    ' rows / ' +
-    Number(
-      result.stocksPages || 0
-    ).toLocaleString() +
-    ' pages\n' +
-
-    'Sold Out: ' +
+    ' stocks • ' +
     Number(
       result.soldRows || 0
     ).toLocaleString() +
-    ' rows / ' +
-    Number(
-      result.soldPages || 0
-    ).toLocaleString() +
-    ' pages\n' +
-
-    'Audit: ' +
+    ' sold • ' +
     Number(
       result.auditRows || 0
     ).toLocaleString() +
-    ' rows / ' +
-    Number(
-      result.auditPages || 0
-    ).toLocaleString() +
-    ' pages\n' +
+    ' audit';
 
-    'Available: ' +
-    Number(
-      result.availableRows || 0
-    ).toLocaleString()
+  document
+    .getElementById(
+      'queueCancelArea'
+    )
+    .classList.add(
+      'hidden'
+    );
+
+  const links =
+    document
+      .getElementById(
+        'queueLinks'
+      );
+
+  links.innerHTML =
+    '';
+
+  const files =
+    result.files || [];
+
+  files.forEach(
+    function(file) {
+
+      if (
+        !file.url
+      ) {
+
+        return;
+
+      }
+
+      const a =
+        document.createElement(
+          'a'
+        );
+
+      a.href =
+        file.url;
+
+      a.target =
+        '_blank';
+
+      a.rel =
+        'noopener';
+
+      a.className =
+        'queueLink';
+
+      a.textContent =
+        file.name
+          .toLowerCase()
+          .endsWith(
+            '.xlsx'
+          )
+          ? '⬇ Download XLSX'
+          : '📁 Open Folder';
+
+      links.appendChild(
+        a
+      );
+
+    }
   );
 
 }
 
 
 /* ============================================================
-   EXPORT LINKS
-   ============================================================ */
+   CLOSE QUEUE
+============================================================ */
 
-function showExportLinks(
-  files
-) {
+function closeQueueBox() {
 
-  const container =
-    document
-      .getElementById(
-        'exportLinks'
-      );
-
-  if (
-    !Array.isArray(
-      files
-    ) ||
-    !files.length
-  ) {
-
-    container.innerHTML =
-      '<div>No download files were generated.</div>';
-
-    return;
-
-  }
-
-  container.innerHTML =
-    files
-      .map(
-        function(file) {
-
-          if (
-            !file.url
-          ) {
-
-            return '';
-
-          }
-
-          return `
-            <a
-              href="${escapeAttribute(
-                file.url
-              )}"
-              target="_blank"
-              rel="noopener"
-            >
-              📥 ${escapeHTML(
-                file.name ||
-                'Export File'
-              )}
-            </a>
-          `;
-
-        }
-      )
-      .join('');
-
-}
-
-
-/* ============================================================
-   CLEAR REPORT MODAL
-   ============================================================ */
-
-function openClearModal() {
-
+  /*
+   * X closes the visual box only.
+   *
+   * A running job is NOT cancelled by accidentally
+   * closing the box.
+   */
   document
     .getElementById(
-      'clearModal'
-    )
-    .style.display =
-    'flex';
-
-}
-
-
-function closeClearModal() {
-
-  document
-    .getElementById(
-      'clearModal'
+      'jobQueue'
     )
     .style.display =
     'none';
@@ -4325,9 +4281,9 @@ function closeClearModal() {
 
 /* ============================================================
    CLEAR REPORT
-   ============================================================ */
+============================================================ */
 
-function clearReportAction() {
+async function clearReportAction() {
 
   const branch =
     document
@@ -4363,313 +4319,54 @@ function clearReportAction() {
 
   }
 
-  showDialog(
-    '⚠️',
-    'Clear Report',
-    'This will permanently delete all records from:\n\n' +
-    branch +
-    ' → ' +
-    report +
-    '\n\nContinue?',
-    async function() {
-
-      try {
-
-        const result =
-          await apiGet(
-            'clearReport',
-            {
-
-              session:
-                session,
-
-              branch:
-                branch,
-
-              report:
-                report
-
-            }
-          );
-
-        if (
-          !result.ok
-        ) {
-
-          throw new Error(
-            result.error ||
-            'Clear failed.'
-          );
-
-        }
-
-        closeClearModal();
-
-        alert(
-          result.message ||
-          'Report cleared successfully.'
-        );
-
-        if (
-          document
-            .getElementById(
-              'branchSelect'
-            )
-            .value ===
-          branch
-        ) {
-
-          searchDashboard();
-
-        }
-
-      }
-
-      catch (err) {
-
-        alert(
-          err.message
-        );
-
-      }
-
-    }
-  );
-
-}
-
-
-/* ============================================================
-   JOB MODAL
-   ============================================================ */
-
-function showJobModal(
-  type,
-  jobId,
-  title,
-  details
-) {
-
-  currentJobType =
-    type || '';
-
-  currentJobId =
-    jobId || '';
-
-  document
-    .getElementById(
-      'loadingModal'
-    )
-    .style.display =
-    'flex';
-
-  document
-    .getElementById(
-      'loadingText'
-    )
-    .textContent =
-    title ||
-    'Please wait...';
-
-  document
-    .getElementById(
-      'jobDetails'
-    )
-    .textContent =
-    details ||
-    'Starting...';
-
-  document
-    .getElementById(
-      'loadingProgress'
-    )
-    .style.width =
-    '0%';
-
-  document
-    .getElementById(
-      'loadingProgressText'
-    )
-    .textContent =
-    '0%';
-
-  document
-    .getElementById(
-      'exportLinks'
-    )
-    .innerHTML =
-    '';
-
-  document
-    .getElementById(
-      'cancelJobBtn'
-    )
-    .style.display =
-    type === 'EXPORT'
-      ? 'inline-block'
-      : 'inline-block';
-
-  document
-    .getElementById(
-      'closeLoadingBtn'
-    )
-    .style.display =
-    'none';
-
-}
-
-
-function setJobProgress(
-  percent,
-  title,
-  details
-) {
-
-  const safePercent =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        Number(
-          percent || 0
-        )
-      )
-    );
-
-  document
-    .getElementById(
-      'loadingText'
-    )
-    .textContent =
-    title ||
-    'Please wait...';
-
-  document
-    .getElementById(
-      'loadingProgress'
-    )
-    .style.width =
-    safePercent +
-    '%';
-
-  document
-    .getElementById(
-      'loadingProgressText'
-    )
-    .textContent =
-    Math.round(
-      safePercent
-    ) +
-    '%';
-
-  document
-    .getElementById(
-      'jobDetails'
-    )
-    .textContent =
-    details ||
-    '';
-
-}
-
-
-/* ============================================================
-   CANCEL CURRENT JOB
-   ============================================================ */
-
-async function cancelCurrentJob() {
-
   if (
-    !currentJobId
+    !confirm(
+      'Are you sure you want to clear ' +
+      report +
+      ' for ' +
+      branch +
+      '?'
+    )
   ) {
 
-    closeLoading();
-
     return;
 
   }
-
-  const confirmed =
-    confirm(
-      'Cancel this background job?'
-    );
-
-  if (!confirmed) {
-    return;
-  }
-
-  document
-    .getElementById(
-      'cancelJobBtn'
-    )
-    .disabled =
-    true;
 
   try {
 
-    if (
-      currentJobType ===
-      'IMPORT'
-    ) {
-
-      importState.cancelled =
-        true;
-
-      await apiGet(
-        'cancelImport',
+    const result =
+      await api(
+        'clearReport',
         {
 
           session:
             session,
 
-          jobId:
-            currentJobId
+          branch:
+            branch,
+
+          report:
+            report
 
         }
       );
 
-    }
-    else if (
-      currentJobType ===
-      'EXPORT'
-    ) {
+    if (!result.ok) {
 
-      await apiGet(
-        'cancelExport',
-        {
-
-          session:
-            session,
-
-          jobId:
-            currentJobId
-
-        }
+      throw new Error(
+        result.error
       );
 
-      stopJobPolling();
-
     }
 
-    setJobProgress(
-      0,
-      'Job cancelled',
-      'The background operation has been cancelled.'
+    closeClearModal();
+
+    await searchDashboard();
+
+    alert(
+      result.message
     );
-
-    document
-      .getElementById(
-        'cancelJobBtn'
-      )
-      .style.display =
-      'none';
-
-    document
-      .getElementById(
-        'closeLoadingBtn'
-      )
-      .style.display =
-      'inline-block';
 
   }
 
@@ -4681,262 +4378,15 @@ async function cancelCurrentJob() {
 
   }
 
-  finally {
-
-    document
-      .getElementById(
-        'cancelJobBtn'
-      )
-      .disabled =
-      false;
-
-  }
-
 }
 
 
 /* ============================================================
-   CLOSE LOADING
-   ============================================================ */
-
-function closeLoading() {
-
-  stopJobPolling();
-
-  document
-    .getElementById(
-      'loadingModal'
-    )
-    .style.display =
-    'none';
-
-  document
-    .getElementById(
-      'cancelJobBtn'
-    )
-    .style.display =
-    'none';
-
-  document
-    .getElementById(
-      'closeLoadingBtn'
-    )
-    .style.display =
-    'none';
-
-  document
-    .getElementById(
-      'exportLinks'
-    )
-    .innerHTML =
-    '';
-
-  currentJobType =
-    '';
-
-  currentJobId =
-    '';
-
-}
-
-
-/* ============================================================
-   CONFIRM DIALOG
-   ============================================================ */
-
-function showDialog(
-  icon,
-  title,
-  message,
-  callback
-) {
-
-  dialogCallback =
-    callback;
-
-  document
-    .getElementById(
-      'dialogIcon'
-    )
-    .textContent =
-    icon ||
-    '⚠️';
-
-  document
-    .getElementById(
-      'dialogTitle'
-    )
-    .textContent =
-    title ||
-    'Confirm';
-
-  document
-    .getElementById(
-      'dialogMessage'
-    )
-    .textContent =
-    message ||
-    '';
-
-  document
-    .getElementById(
-      'dialogModal'
-    )
-    .style.display =
-    'flex';
-
-}
-
-
-function closeDialog(
-  result
-) {
-
-  document
-    .getElementById(
-      'dialogModal'
-    )
-    .style.display =
-    'none';
-
-  const callback =
-    dialogCallback;
-
-  dialogCallback =
-    null;
-
-  if (
-    result &&
-    typeof callback ===
-    'function'
-  ) {
-
-    callback();
-
-  }
-
-}
-
-
-function dialogOKClick() {
-
-  closeDialog(
-    true
-  );
-
-}
-
-
-/* ============================================================
-   HELPERS
-   ============================================================ */
-
-function escapeHTML(
-  value
-) {
-
-  return String(
-    value ===
-    undefined ||
-    value ===
-    null
-      ? ''
-      : value
-  )
-  .replace(
-    /&/g,
-    '&amp;'
-  )
-  .replace(
-    /</g,
-    '&lt;'
-  )
-  .replace(
-    />/g,
-    '&gt;'
-  )
-  .replace(
-    /"/g,
-    '&quot;'
-  )
-  .replace(
-    /'/g,
-    '&#039;'
-  );
-
-}
-
-
-function escapeAttribute(
-  value
-) {
-
-  return escapeHTML(
-    value
-  );
-
-}
-
-
-function formatNumber(
-  value
-) {
-
-  const number =
-    Number(
-      value || 0
-    );
-
-  return number.toLocaleString();
-
-}
-
-
-function formatBytes(
-  bytes
-) {
-
-  if (
-    !bytes
-  ) {
-
-    return '0 B';
-
-  }
-
-  const units = [
-    'B',
-    'KB',
-    'MB',
-    'GB'
-  ];
-
-  const index =
-    Math.floor(
-      Math.log(bytes) /
-      Math.log(1024)
-    );
-
-  return (
-    bytes /
-    Math.pow(
-      1024,
-      index
-    )
-  )
-    .toFixed(
-      index === 0
-        ? 0
-        : 2
-    ) +
-    ' ' +
-    units[index];
-
-}
-
+   UTILITIES
+============================================================ */
 
 function sleep(
-  milliseconds
+  ms
 ) {
 
   return new Promise(
@@ -4944,7 +4394,7 @@ function sleep(
 
       setTimeout(
         resolve,
-        milliseconds
+        ms
       );
 
     }
@@ -4953,39 +4403,118 @@ function sleep(
 }
 
 
+function formatBytes(
+  bytes
+) {
+
+  if (!bytes) {
+    return '0 B';
+  }
+
+  const units =
+    [
+      'B',
+      'KB',
+      'MB',
+      'GB'
+    ];
+
+  const i =
+    Math.floor(
+      Math.log(bytes) /
+      Math.log(1024)
+    );
+
+  return (
+    (
+      bytes /
+      Math.pow(
+        1024,
+        i
+      )
+    ).toFixed(
+      1
+    ) +
+    ' ' +
+    units[i]
+  );
+
+}
+
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value === undefined ||
+    value === null
+      ? ''
+      : value
+  )
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+    .replace(
+      /</g,
+      '&lt;'
+    )
+    .replace(
+      />/g,
+      '&gt;'
+    )
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+    .replace(
+      /'/g,
+      '&#039;'
+    );
+
+}
+
+
+function escapeJs(
+  value
+) {
+
+  return String(
+    value === undefined ||
+    value === null
+      ? ''
+      : value
+  )
+    .replace(
+      /\\/g,
+      '\\\\'
+    )
+    .replace(
+      /'/g,
+      "\\'"
+    )
+    .replace(
+      /\r/g,
+      '\\r'
+    )
+    .replace(
+      /\n/g,
+      '\\n'
+    );
+
+}
+
+
 /* ============================================================
-   CLOSE MODALS WHEN CLICKING BACKDROP
-   ============================================================ */
+   START
+============================================================ */
 
 document.addEventListener(
-  'click',
-  function(event) {
+  'DOMContentLoaded',
+  function() {
 
-    if (
-      event.target.classList
-        .contains(
-          'modalBackdrop'
-        )
-    ) {
-
-      /*
-       * Do not automatically close the job modal while
-       * an import/export operation is running.
-       */
-
-      if (
-        event.target.id ===
-        'loadingModal'
-      ) {
-
-        return;
-
-      }
-
-      event.target.style.display =
-        'none';
-
-    }
+    checkExistingSession();
 
   }
 );

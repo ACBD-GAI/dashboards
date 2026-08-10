@@ -1302,7 +1302,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycbyP7HAEw6q2JTZg9fbi_mn0gkZELakQCm4qdPAFH07oaHUdiDZK45z4bHIISyVqtqJC/exec';
+  'https://script.google.com/macros/s/AKfycbwACrxFvgpmPr3Kk_LodtX5VzuNXKSWz4eW5qTz5t-ao8TbKTY-X-g22y5f8zJxvWLINQ/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -3899,7 +3899,17 @@ async function pollCurrentJob() {
           '';
 
         showExportComplete(
-          result
+          Object.assign(
+            {},
+            result,
+            {
+              exportJobId:
+                result.jobId ||
+                (currentJob && currentJob.jobId) ||
+                window.lastCompletedExportJobId ||
+                ''
+            }
+          )
         );
 
         currentJob =
@@ -4395,8 +4405,10 @@ async function showExportComplete(
   }
 
   const jobId =
+    result.exportJobId ||
     result.jobId ||
-    (window.lastCompletedExportJobId || '');
+    window.lastCompletedExportJobId ||
+    '';
 
   if (!fileId && !downloadUrl && jobId) {
     try {

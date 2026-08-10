@@ -1194,7 +1194,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycbzCqPRfcF3ds0uI7bOMqOcwuH48Md1WX4uwUQ4LFMMEkTooe_xQdF3h7w8VmsrwumN2qw/exec';
+  'https://script.google.com/macros/s/AKfycbxfAd35A3bQxSjzLVNGLRboF7ZWrWzx0IUPCER7Z9LP56Vb6x_zKfMlVqhfvMwo9yHg8g/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -4138,10 +4138,9 @@ async function showExportComplete(
 ) {
 
   const box =
-    document
-      .getElementById(
-        'jobQueue'
-      );
+    document.getElementById(
+      'jobQueue'
+    );
 
   box.style.display =
     'block';
@@ -4192,15 +4191,18 @@ async function showExportComplete(
     ) +
     ' • ONE XLSX • 3 sheets • ' +
     Number(
-      result.stocksRows || 0
+      result.stocksRows ||
+      0
     ).toLocaleString() +
     ' stocks • ' +
     Number(
-      result.soldRows || 0
+      result.soldRows ||
+      0
     ).toLocaleString() +
     ' sold • ' +
     Number(
-      result.auditRows || 0
+      result.auditRows ||
+      0
     ).toLocaleString() +
     ' audit';
 
@@ -4213,97 +4215,209 @@ async function showExportComplete(
     );
 
   const links =
-    document
-      .getElementById(
-        'queueLinks'
-      );
+    document.getElementById(
+      'queueLinks'
+    );
 
   links.innerHTML =
     '';
 
-  /* Prefer the authoritative XLSX URL returned by Apps Script. */
   let url =
     String(
       result.xlsxDownloadUrl ||
       ''
     ).trim();
 
-  const viewUrl =
-    String(
-      result.xlsxViewUrl ||
-      ''
-    ).trim();
-
-  const fileId =
+  let fileId =
     String(
       result.xlsxFileId ||
       ''
     ).trim();
 
+  let fileName =
+    String(
+      result.xlsxFileName ||
+      ''
+    ).trim();
+
+  let viewUrl =
+    String(
+      result.xlsxViewUrl ||
+      ''
+    ).trim();
+
   const files =
-    Array.isArray(result.files)
+    Array.isArray(
+      result.files
+    )
       ? result.files
       : [];
 
+  /* 1. Recover XLSX information from files[]. */
   if (!url) {
+
     const xlsx =
       files.find(
         function(file) {
-          return file &&
+
+          return (
+            file &&
             String(
-              file.name || ''
-            ).toLowerCase()
-              .endsWith('.xlsx') &&
-            file.url;
+              file.name ||
+              ''
+            )
+              .toLowerCase()
+              .endsWith('.xlsx')
+          );
+
         }
       );
 
     if (xlsx) {
+
       url =
         String(
-          xlsx.url
-        );
+          xlsx.url ||
+          ''
+        ).trim();
+
+      if (!fileId) {
+
+        fileId =
+          String(
+            xlsx.id ||
+            ''
+          ).trim();
+
+      }
+
+      if (!fileName) {
+
+        fileName =
+          String(
+            xlsx.name ||
+            ''
+          ).trim();
+
+      }
+
+      if (!viewUrl) {
+
+        viewUrl =
+          String(
+            xlsx.viewUrl ||
+            ''
+          ).trim();
+
+      }
+
     }
+
   }
 
-  /* Last-resort URL construction from the real Drive file ID. */
-  if (!url && fileId) {
+  /* 2. Build direct Google Drive URL from the real file ID. */
+  if (
+    !url &&
+    fileId
+  ) {
+
     url =
       'https://drive.google.com/uc?export=download&id=' +
       encodeURIComponent(
         fileId
       );
+
   }
 
-  /* If the completed status did not carry the file information, ask the
-   * server for the actual XLSX by Job ID before showing an error. */
-  if (!url && currentJob && currentJob.jobId) {
+  /* 3. Ask Apps Script to recover the file from the job. */
+  if (
+    !url &&
+    result.jobId
+  ) {
+
     try {
-      const downloadResult = await api(
-        'getExportDownload',
-        {
-          session: session,
-          jobId: currentJob.jobId
+
+      const downloadResult =
+        await api(
+          'getExportDownload',
+          {
+            session:
+              session,
+
+            jobId:
+              result.jobId
+          }
+        );
+
+      if (
+        downloadResult &&
+        downloadResult.ok
+      ) {
+
+        url =
+          String(
+            downloadResult.xlsxDownloadUrl ||
+            ''
+          ).trim();
+
+        if (
+          !fileId &&
+          downloadResult.xlsxFileId
+        ) {
+
+          fileId =
+            String(
+              downloadResult.xlsxFileId
+            ).trim();
+
         }
+
+        if (
+          !fileName &&
+          downloadResult.xlsxFileName
+        ) {
+
+          fileName =
+            String(
+              downloadResult.xlsxFileName
+            ).trim();
+
+        }
+
+        if (
+          !viewUrl &&
+          downloadResult.xlsxViewUrl
+        ) {
+
+          viewUrl =
+            String(
+              downloadResult.xlsxViewUrl
+            ).trim();
+
+        }
+
+      }
+
+    }
+
+    catch (downloadErr) {
+      /* Final error message below. */
+    }
+
+  }
+
+  /* 4. One final direct URL recovery. */
+  if (
+    !url &&
+    fileId
+  ) {
+
+    url =
+      'https://drive.google.com/uc?export=download&id=' +
+      encodeURIComponent(
+        fileId
       );
 
-      if (downloadResult && downloadResult.ok) {
-        url = String(
-          downloadResult.xlsxDownloadUrl || ''
-        ).trim();
-
-        if (!fileId && downloadResult.xlsxFileId) {
-          result.xlsxFileId = downloadResult.xlsxFileId;
-        }
-
-        if (!result.xlsxFileName && downloadResult.xlsxFileName) {
-          result.xlsxFileName = downloadResult.xlsxFileName;
-        }
-      }
-    }
-    catch (downloadErr) {
-      /* Keep the normal error message below if Drive lookup fails. */
-    }
   }
 
   if (url) {
@@ -4328,35 +4442,37 @@ async function showExportComplete(
     a.style.fontSize =
       '13px';
 
-    a.style.padding =
-      '9px 12px';
+    a.style.fontWeight =
+      '700';
 
     a.textContent =
-      '⬇ Download ONE XLSX • 3 Sheets';
+      '⬇️ Download XLSX';
 
     links.appendChild(
       a
     );
 
-    const name =
-      document.createElement(
-        'div'
+    if (fileName) {
+
+      const name =
+        document.createElement(
+          'div'
+        );
+
+      name.className =
+        'fileName';
+
+      name.textContent =
+        fileName;
+
+      links.appendChild(
+        name
       );
 
-    name.className =
-      'fileName';
-
-    name.textContent =
-      result.xlsxFileName ||
-      'ACEBEDO_' +
-      (result.branch || '') +
-      '_EXPORT.xlsx';
-
-    links.appendChild(
-      name
-    );
+    }
 
     if (viewUrl) {
+
       const view =
         document.createElement(
           'a'
@@ -4380,6 +4496,7 @@ async function showExportComplete(
       links.appendChild(
         view
       );
+
     }
 
   }
@@ -4387,33 +4504,13 @@ async function showExportComplete(
 
     links.innerHTML =
       '<div class="errorText" style="font-size:12px;">' +
-      'XLSX was created, but no download information was returned.' +
+      'XLSX was created, but the Google Drive file information could not be recovered.' +
       '</div>';
 
   }
 
 }
 
-/* ============================================================
-   CLOSE QUEUE
-============================================================ */
-
-function closeQueueBox() {
-
-  /*
-   * X closes the visual box only.
-   *
-   * A running job is NOT cancelled by accidentally
-   * closing the box.
-   */
-  document
-    .getElementById(
-      'jobQueue'
-    )
-    .style.display =
-    'none';
-
-}
 
 
 /* ============================================================

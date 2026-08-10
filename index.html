@@ -1194,7 +1194,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycbwpOUo5iAmxvhk5tM379BcKGdQvYApMzgSlN6ppRZylaFWpYP3nyyAkyJtCSNeQu5bXrA/exec';
+  'https://script.google.com/macros/s/AKfycbzCqPRfcF3ds0uI7bOMqOcwuH48Md1WX4uwUQ4LFMMEkTooe_xQdF3h7w8VmsrwumN2qw/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -4133,7 +4133,7 @@ function showQueueError(
 }
 
 
-function showExportComplete(
+async function showExportComplete(
   result
 ) {
 
@@ -4273,6 +4273,37 @@ function showExportComplete(
       encodeURIComponent(
         fileId
       );
+  }
+
+  /* If the completed status did not carry the file information, ask the
+   * server for the actual XLSX by Job ID before showing an error. */
+  if (!url && currentJob && currentJob.jobId) {
+    try {
+      const downloadResult = await api(
+        'getExportDownload',
+        {
+          session: session,
+          jobId: currentJob.jobId
+        }
+      );
+
+      if (downloadResult && downloadResult.ok) {
+        url = String(
+          downloadResult.xlsxDownloadUrl || ''
+        ).trim();
+
+        if (!fileId && downloadResult.xlsxFileId) {
+          result.xlsxFileId = downloadResult.xlsxFileId;
+        }
+
+        if (!result.xlsxFileName && downloadResult.xlsxFileName) {
+          result.xlsxFileName = downloadResult.xlsxFileName;
+        }
+      }
+    }
+    catch (downloadErr) {
+      /* Keep the normal error message below if Drive lookup fails. */
+    }
   }
 
   if (url) {

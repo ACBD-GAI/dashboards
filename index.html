@@ -276,11 +276,11 @@ th {
   position:fixed;
   right:22px;
   bottom:22px;
-  width:min(420px,calc(100vw - 30px));
+  width:min(390px,calc(100vw - 30px));
   background:rgba(255,255,255,.97);
   border:1px solid rgba(22,119,255,.14);
-  border-radius:20px;
-  box-shadow:0 18px 55px rgba(15,23,42,.22);
+  border-radius:18px;
+  box-shadow:0 16px 45px rgba(15,23,42,.22);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
   z-index:5000;
@@ -393,6 +393,7 @@ th {
   justify-content:flex-end;
   margin-top:12px;
 }
+#queueCancelArea { display:none !important; }
 
 .queueLink {
   display:inline-block;
@@ -1310,7 +1311,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycbxTcC_tnRWWNoESojTZpoxl7lxWr-00DOCvvGNTiP_kvKlCZxLFSUwG6UHGuZR6LeSCjA/exec';
+  'https://script.google.com/macros/s/AKfycbz6Y8MjMNtM8QHJb2cit7merxyF0Van5V_f1UyxudUpkuM6IblvODICaYfLX74W-2RCNw/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -1406,129 +1407,56 @@ function api(
   action,
   params = {}
 ) {
+  return new Promise(function(resolve, reject) {
+    const callbackName =
+      'cb_' + Date.now() + '_' + Math.random().toString(36).substring(2);
 
-  return new Promise(
-    function(resolve, reject) {
+    const script = document.createElement('script');
+    let finished = false;
 
-      const callbackName =
-        'cb_' +
-        Date.now() +
-        '_' +
-        Math.random()
-          .toString(36)
-          .substring(2);
+    const request = Object.assign({}, params || {});
 
-      const script =
-        document.createElement(
-          'script'
-        );
-
-      const timeout =
-        setTimeout(
-          function() {
-
-            cleanup();
-
-            reject(
-              new Error(
-                'Request timed out.'
-              )
-            );
-
-          },
-          60000
-        );
-
-      function cleanup() {
-
-        clearTimeout(
-          timeout
-        );
-
-        if (
-          script.parentNode
-        ) {
-
-          script.parentNode
-            .removeChild(
-              script
-            );
-
-        }
-
-        try {
-
-          delete window[
-            callbackName
-          ];
-
-        }
-
-        catch (err) {}
-
-      }
-
-      window[
-        callbackName
-      ] =
-        function(data) {
-
-          cleanup();
-
-          if (
-            data &&
-            ((data.ok === false) ||
-             (String(data.status || '').toUpperCase() === 'ERROR'))
-          ) {
-
-            reject(
-              new Error(
-                data.error
-              )
-            );
-
-            return;
-
-          }
-
-          resolve(
-            data
-          );
-
-        };
-
-      params.callback =
-        callbackName;
-
-      script.src =
-        apiUrl(
-          action,
-          params
-        );
-
-      script.onerror =
-        function() {
-
-          cleanup();
-
-          reject(
-            new Error(
-              'Unable to contact Apps Script.'
-            )
-          );
-
-        };
-
-      document.body
-        .appendChild(
-          script
-        );
-
+    // Keep the original login flow intact, but automatically attach the
+    // currently logged-in identity to protected calls. This prevents the
+    // GitHub frontend from accidentally omitting the email required by
+    // Apps Script session validation.
+    if (action !== 'sendOTP' && action !== 'verifyOTP') {
+      if (request.email == null && currentEmail) request.email = currentEmail;
+      if (request.sessionId == null && session) request.sessionId = session;
     }
-  );
 
+    function cleanup() {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeout);
+      try { delete window[callbackName]; } catch (ignore) {}
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    const timeout = setTimeout(function() {
+      cleanup();
+      reject(new Error('Request timed out.'));
+    }, 60000);
+
+    window[callbackName] = function(data) {
+      if (finished) return;
+      cleanup();
+      if (data && (data.ok === false || String(data.status || '').toUpperCase() === 'ERROR')) {
+        reject(new Error(data.error || data.message || 'Request failed.'));
+        return;
+      }
+      resolve(data || {});
+    };
+
+    request.callback = callbackName;
+    script.src = apiUrl(action, request);
+    script.onerror = function() {
+      cleanup();
+      reject(new Error('Unable to contact Apps Script.'));
+    };
+    document.body.appendChild(script);
+  });
 }
-
 
 /* ============================================================
    POST CHUNK
@@ -1673,6 +1601,11 @@ function showToast(title, message, type='info', timeout=3500) {
   if (timeout > 0) setTimeout(() => toast.remove(), timeout);
 }
 
+// Replace browser alert() dialogs with the same clean, non-blocking toast UI.
+window.alert = function(message) {
+  showToast('Notice', String(message || ''), 'info', 4500);
+};
+
 function apiSucceeded(result) {
   return !!result && (
     result.ok === true ||
@@ -1808,7 +1741,7 @@ async function verifyOTP() {
     }
 
     session =
-      result.session;
+      result.session || result.sessionId || '';
 
     currentEmail =
       result.email;
@@ -2680,42 +2613,50 @@ async function updateStocks() {
     return;
   }
   if (!file) {
-    alert('Please select an Excel or CSV file.');
+    showToast('File required', 'Please select an Excel or CSV file.', 'warning');
     return;
   }
 
   importRunning = true;
   closeUpdateStockModal();
-  showToast('Import queued', 'The dashboard stays available while the inventory is processed.', 'info', 4500);
-  showQueue('IMPORT', 'Uploading file to background queue...', branch);
+  showQueue('IMPORT', 'Preparing import...', branch);
+  updateQueue('IMPORT', 'Preparing import...', branch, 2, 'Reading the selected file.');
 
   try {
     const base64 = await fileToBase64(file);
+    const jobId = (window.crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : ('job-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+
+    currentJob = {
+      type:'IMPORT',
+      jobId:jobId,
+      branch:branch,
+      cancelled:false,
+      notFoundChecks:0
+    };
+
+    updateQueue('IMPORT', 'Uploading inventory...', branch, 8, 'Sending the file to the background queue.');
 
     const result = await postBackgroundJob({
-      action: 'uploadStock',
-      email: currentEmail,
-      sessionId: session,
-      branch: branch,
-      fileName: file.name,
-      file: base64
+      action:'uploadStock',
+      email:currentEmail,
+      sessionId:session,
+      branch:branch,
+      fileName:file.name,
+      file:base64,
+      jobId:jobId
     });
 
     if (!result || result.status !== 'QUEUED' || !result.jobId) {
-      throw new Error((result && (result.message || result.error)) || 'Import job was not queued.');
+      throw new Error('Import job could not be queued.');
     }
 
-    currentJob = {
-      type: 'IMPORT',
-      jobId: result.jobId,
-      branch: branch,
-      cancelled: false
-    };
-
-    updateQueue('IMPORT', 'Import queued...', branch, 5, 'Waiting for background worker');
+    updateQueue('IMPORT', 'Import queued...', branch, 10, 'Waiting for the background worker.');
     startQueuePolling();
   } catch (err) {
     importRunning = false;
+    currentJob = null;
     showQueueError('IMPORT', err.message || String(err));
   }
 }
@@ -2736,58 +2677,53 @@ function fileToBase64(file) {
 }
 
 function backgroundGet(action, params) {
-  return new Promise(function(resolve, reject) {
-    const url = new URL(GAS_URL);
-    url.searchParams.set('action', action);
-    Object.keys(params || {}).forEach(function(key) {
-      url.searchParams.set(key, params[key] == null ? '' : params[key]);
-    });
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url.toString(), true);
-    xhr.timeout = 60000;
-    xhr.onload = function() {
-      if (xhr.status < 200 || xhr.status >= 300) {
-        reject(new Error('Server HTTP ' + xhr.status));
-        return;
-      }
-      try {
-        resolve(JSON.parse(xhr.responseText || '{}'));
-      } catch (err) {
-        reject(new Error('Invalid Apps Script response.'));
-      }
-    };
-    xhr.onerror = function() { reject(new Error('Connection failed.')); };
-    xhr.ontimeout = function() { reject(new Error('Request timed out.')); };
-    xhr.send();
-  });
+  // JSONP is used here too. GitHub Pages cannot read a normal XHR response
+  // from the Apps Script domain because of browser CORS restrictions.
+  return api(action, params || {});
 }
 
 function postBackgroundJob(params) {
   return new Promise(function(resolve, reject) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', GAS_URL, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
-    xhr.timeout = 120000;
+    try {
+      const frame = document.createElement('iframe');
+      frame.name = 'import_submit_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      frame.style.display = 'none';
+      document.body.appendChild(frame);
 
-    xhr.onload = function() {
-      if (xhr.status < 200 || xhr.status >= 300) {
-        reject(new Error('Server HTTP ' + xhr.status));
-        return;
-      }
-      try {
-        resolve(JSON.parse(xhr.responseText || '{}'));
-      } catch (err) {
-        reject(new Error('Invalid Apps Script response.'));
-      }
-    };
-    xhr.onerror = function() { reject(new Error('Upload connection failed.')); };
-    xhr.ontimeout = function() { reject(new Error('Upload request timed out.')); };
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = GAS_URL;
+      form.target = frame.name;
+      form.enctype = 'application/x-www-form-urlencoded';
+      form.encoding = 'application/x-www-form-urlencoded';
+      form.style.display = 'none';
 
-    const body = Object.keys(params).map(function(key) {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key] == null ? '' : params[key]);
-    }).join('&');
-    xhr.send(body);
+      Object.keys(params || {}).forEach(function(key) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = params[key] == null ? '' : String(params[key]);
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+      form.remove();
+
+      // Resolve immediately. The browser continues the POST in the hidden
+      // iframe, while the dashboard remains completely usable. The known
+      // client-generated job ID is then checked through JSONP polling.
+      setTimeout(function() {
+        resolve({status:'QUEUED', jobId:params.jobId});
+      }, 100);
+
+      // Keep the iframe long enough for Apps Script to receive the request.
+      setTimeout(function() {
+        if (frame.parentNode) frame.parentNode.removeChild(frame);
+      }, 120000);
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
@@ -3422,8 +3358,7 @@ async function startExport() {
 
   closeExportModal();
   exportRunning = true;
-  showToast('Export queued', 'You can continue using the dashboard while the export runs.', 'info', 4500);
-  showQueue('EXPORT', 'Queueing export...', branch);
+    showQueue('EXPORT', 'Queueing export...', branch);
 
   try {
     const result = await backgroundGet('export', {
@@ -3504,8 +3439,16 @@ async function pollCurrentJob() {
     });
 
     if (!result || result.status !== 'OK') {
+      if (result && result.status === 'NOT_FOUND') {
+        job.notFoundChecks = (job.notFoundChecks || 0) + 1;
+        if (job.notFoundChecks <= 10) {
+          updateQueue(job.type, 'Uploading in background...', job.branch, 8, 'Waiting for Apps Script to register the job.');
+          return;
+        }
+      }
       throw new Error((result && (result.message || result.error)) || 'Unable to read job status.');
     }
+    job.notFoundChecks = 0;
 
     const status = String(result.jobStatus || '').toUpperCase();
 

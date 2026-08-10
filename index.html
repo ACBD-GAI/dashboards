@@ -1,342 +1,771 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>ACEBEDO OPTICAL INVENTORY</title>
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
+
+<title>
+ACEBEDO OPTICAL INVENTORY
+</title>
+
+
+<!-- =====================================================
+     XLSX LIBRARY
+     Used only to read the uploaded Excel file.
+     The database remains Supabase.
+     ===================================================== -->
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
 
 <style>
 
+/* =====================================================
+   GLOBAL
+   ===================================================== */
+
 *{
-    box-sizing:border-box;
+  box-sizing:border-box;
 }
 
 body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#eef2f7;
-    color:#333;
+
+  margin:0;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  background:#eef2f7;
+
+  color:#333;
+
 }
 
-button,
-input,
-select{
-    font:inherit;
+
+/* =====================================================
+   LOGIN
+   ===================================================== */
+
+#loginScreen{
+
+  min-height:100vh;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  padding:20px;
+
 }
+
+
+.loginBox{
+
+  width:100%;
+
+  max-width:420px;
+
+  background:white;
+
+  padding:35px;
+
+  border-radius:16px;
+
+  box-shadow:
+    0 10px 35px
+    rgba(0,0,0,.12);
+
+  text-align:center;
+
+}
+
+
+.loginBox h2{
+
+  margin-top:0;
+
+}
+
+
+.loginBox input{
+
+  width:100%;
+
+  padding:13px;
+
+  margin:
+    8px 0;
+
+  border:
+    1px solid #ccc;
+
+  border-radius:8px;
+
+  font-size:15px;
+
+}
+
+
+/* =====================================================
+   BUTTONS
+   ===================================================== */
 
 button{
-    cursor:pointer;
+
+  border:0;
+
+  border-radius:8px;
+
+  padding:
+    10px 15px;
+
+  cursor:pointer;
+
+  background:#e5e7eb;
+
+  font-size:14px;
+
 }
 
-.header{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    padding:15px 20px;
-    background:#fff;
-    border-bottom:1px solid #ddd;
+
+button:hover{
+
+  opacity:.9;
+
 }
 
-.header img{
-    width:70px;
-    height:70px;
-    object-fit:contain;
+
+button:disabled{
+
+  opacity:.5;
+
+  cursor:not-allowed;
+
 }
 
-.header h2{
-    margin:0;
+
+.primaryBtn{
+
+  background:#2563eb;
+
+  color:white;
+
 }
 
-.header small{
-    color:#777;
+
+.dangerBtn{
+
+  background:#dc2626;
+
+  color:white;
+
 }
 
-.toolbar{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    padding:15px 20px;
-    background:#fff;
-    border-bottom:1px solid #ddd;
-}
-
-.toolbar button{
-    border:0;
-    padding:10px 16px;
-    border-radius:6px;
-    background:#2563eb;
-    color:#fff;
-}
-
-.toolbar button:hover{
-    opacity:.9;
-}
-
-.container{
-    padding:20px;
-}
-
-.filters{
-    display:flex;
-    flex-wrap:wrap;
-    gap:15px;
-    align-items:end;
-    background:#fff;
-    padding:20px;
-    border-radius:10px;
-    margin-bottom:20px;
-}
-
-.field{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    min-width:200px;
-}
-
-.field label{
-    font-weight:bold;
-}
-
-.field input,
-.field select,
-.modal input,
-.modal select{
-    padding:10px;
-    border:1px solid #ccc;
-    border-radius:6px;
-}
 
 .searchBtn{
-    background:#16a34a;
-    color:#fff;
-    border:0;
-    padding:10px 18px;
-    border-radius:6px;
+
+  background:#2563eb;
+
+  color:white;
+
+  height:42px;
+
 }
+
+
+/* =====================================================
+   LOGIN STATUS
+   ===================================================== */
+
+.status{
+
+  min-height:20px;
+
+  margin-top:12px;
+
+}
+
+
+.success{
+
+  color:#15803d;
+
+}
+
+
+.error{
+
+  color:#dc2626;
+
+}
+
+
+/* =====================================================
+   APP
+   ===================================================== */
+
+#app{
+
+  display:none;
+
+}
+
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.header{
+
+  background:white;
+
+  padding:
+    12px 20px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:15px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.08);
+
+}
+
+
+.headerLeft{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+}
+
+
+.headerLeft img{
+
+  width:55px;
+
+  height:55px;
+
+  object-fit:contain;
+
+}
+
+
+.headerLeft h2{
+
+  margin:0;
+
+  font-size:20px;
+
+}
+
+
+.headerLeft small{
+
+  color:#777;
+
+}
+
+
+.headerButtons{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:7px;
+
+}
+
+
+/* =====================================================
+   MAIN
+   ===================================================== */
+
+.main{
+
+  padding:20px;
+
+}
+
+
+/* =====================================================
+   FILTERS
+   ===================================================== */
+
+.filters{
+
+  background:white;
+
+  padding:15px;
+
+  border-radius:12px;
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  align-items:end;
+
+  gap:12px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.06);
+
+}
+
+
+.field{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:5px;
+
+  min-width:200px;
+
+}
+
+
+.field label{
+
+  font-size:13px;
+
+  font-weight:bold;
+
+}
+
+
+select,
+input{
+
+  padding:10px;
+
+  border:
+    1px solid #ccc;
+
+  border-radius:7px;
+
+  background:white;
+
+}
+
+
+/* =====================================================
+   CARDS
+   ===================================================== */
 
 .cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-    margin-bottom:20px;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  gap:15px;
+
+  margin:
+    18px 0;
+
 }
+
 
 .card{
-    background:#fff;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,.06);
+
+  background:white;
+
+  padding:18px;
+
+  border-radius:12px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.06);
+
 }
+
 
 .card h3{
-    margin:0 0 10px;
-    color:#666;
+
+  margin:
+    0 0 8px;
+
+  color:#666;
+
+  font-size:14px;
+
 }
+
 
 .card h1{
-    margin:0;
+
+  margin:0;
+
+  font-size:30px;
+
 }
+
+
+/* =====================================================
+   TABLE
+   ===================================================== */
 
 .tableWrap{
-    background:#fff;
-    border-radius:10px;
-    overflow:auto;
+
+  background:white;
+
+  border-radius:12px;
+
+  overflow:auto;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.06);
+
 }
 
+
 table{
-    width:100%;
-    border-collapse:collapse;
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  min-width:850px;
+
 }
+
 
 th,
 td{
-    padding:12px;
-    border-bottom:1px solid #eee;
-    text-align:left;
+
+  padding:
+    11px 12px;
+
+  border-bottom:
+    1px solid #eee;
+
+  text-align:left;
+
 }
+
 
 th{
-    background:#f8fafc;
+
+  background:#f8fafc;
+
+  font-size:13px;
+
 }
 
-.actionBtn{
-    border:0;
-    padding:6px 10px;
-    border-radius:5px;
-    margin-right:4px;
+
+td{
+
+  font-size:13px;
+
 }
 
-.editBtn{
-    background:#2563eb;
-    color:#fff;
-}
 
-.deleteBtn{
-    background:#dc2626;
-    color:#fff;
-}
+/* =====================================================
+   PAGINATION
+   ===================================================== */
 
 .pagination{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:15px;
-    padding:20px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:15px;
+
+  padding:18px;
+
 }
 
-.pagination button{
-    padding:8px 14px;
-    border:1px solid #ccc;
-    background:#fff;
-    border-radius:6px;
-}
+
+/* =====================================================
+   MODAL
+   ===================================================== */
 
 .modalOverlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.5);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:1000;
+
+  display:none;
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+    rgba(0,0,0,.45);
+
+  align-items:center;
+
+  justify-content:center;
+
+  z-index:1000;
+
+  padding:20px;
+
 }
+
 
 .modal{
-    background:#fff;
-    width:min(500px,92%);
-    padding:25px;
-    border-radius:12px;
+
+  background:white;
+
+  width:100%;
+
+  max-width:500px;
+
+  max-height:
+    90vh;
+
+  overflow:auto;
+
+  padding:25px;
+
+  border-radius:14px;
+
+  box-shadow:
+    0 20px 60px
+    rgba(0,0,0,.25);
+
 }
+
+
+.modal h3{
+
+  margin-top:0;
+
+}
+
+
+.modal label{
+
+  display:block;
+
+  margin:
+    12px 0 5px;
+
+  font-weight:bold;
+
+  font-size:13px;
+
+}
+
+
+.modal input,
+.modal select{
+
+  width:100%;
+
+}
+
 
 .modalButtons{
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
-    margin-top:20px;
+
+  display:flex;
+
+  justify-content:flex-end;
+
+  gap:8px;
+
+  margin-top:20px;
+
 }
 
-.modalButtons button{
-    padding:10px 16px;
-    border:0;
-    border-radius:6px;
-}
 
-.primaryBtn{
-    background:#2563eb;
-    color:#fff;
-}
-
-.dangerBtn{
-    background:#dc2626;
-    color:#fff;
-}
-
-.loginScreen{
-    position:fixed;
-    inset:0;
-    background:#eef2f7;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:2000;
-}
-
-.loginBox{
-    background:#fff;
-    width:min(400px,92%);
-    padding:30px;
-    border-radius:12px;
-    box-shadow:0 5px 25px rgba(0,0,0,.12);
-    text-align:center;
-}
-
-.loginBox input{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border:1px solid #ccc;
-    border-radius:6px;
-}
-
-.loginBox button{
-    width:100%;
-    padding:12px;
-    margin-top:12px;
-    border:0;
-    border-radius:6px;
-    background:#2563eb;
-    color:#fff;
-}
-
-#dashboard{
-    display:none;
-}
+/* =====================================================
+   DIALOG
+   ===================================================== */
 
 .dialogIcon{
-    font-size:40px;
-    text-align:center;
+
+  text-align:center;
+
+  font-size:45px;
+
 }
+
 
 .dialogTitle{
-    font-size:20px;
-    font-weight:bold;
-    text-align:center;
-    margin-top:10px;
+
+  text-align:center;
+
+  font-size:20px;
+
+  font-weight:bold;
+
+  margin:
+    10px 0;
+
 }
+
 
 .dialogMessage{
-    text-align:center;
-    margin:15px 0;
+
+  text-align:center;
+
+  color:#555;
+
+  white-space:pre-wrap;
+
 }
+
 
 .dialogButtons{
-    display:flex;
-    justify-content:center;
-    gap:10px;
+
+  display:flex;
+
+  justify-content:center;
+
+  gap:10px;
+
+  margin-top:20px;
+
 }
 
-.dialogBtn{
-    padding:10px 20px;
-    border:0;
-    border-radius:6px;
+
+/* =====================================================
+   LOADING
+   ===================================================== */
+
+#loadingOverlay{
+
+  display:none;
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+    rgba(255,255,255,.82);
+
+  z-index:2000;
+
+  align-items:center;
+
+  justify-content:center;
+
 }
 
-.dialogCancel{
-    background:#ddd;
+
+.loadingBox{
+
+  background:white;
+
+  padding:30px 45px;
+
+  border-radius:14px;
+
+  box-shadow:
+    0 10px 40px
+    rgba(0,0,0,.15);
+
+  text-align:center;
+
 }
 
-.dialogOK{
-    background:#2563eb;
-    color:#fff;
+
+.loadingBox > div:first-child{
+
+  font-size:40px;
+
+  margin-bottom:10px;
+
 }
 
-.status{
-    margin-top:10px;
-    min-height:20px;
-}
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
 
 @media(max-width:800px){
 
-    .cards{
-        grid-template-columns:repeat(2,1fr);
-    }
+  .header{
+
+    flex-direction:column;
+
+    align-items:stretch;
+
+  }
+
+
+  .headerButtons{
+
+    justify-content:center;
+
+  }
+
+
+  .cards{
+
+    grid-template-columns:
+      repeat(2,1fr);
+
+  }
+
+
+  .filters{
+
+    flex-direction:column;
+
+    align-items:stretch;
+
+  }
+
+
+  .field{
+
+    width:100%;
+
+  }
+
+
+  .searchBtn{
+
+    width:100%;
+
+  }
 
 }
 
-@media(max-width:500px){
 
-    .cards{
-        grid-template-columns:1fr;
-    }
+@media(max-width:450px){
 
-    .header{
-        flex-direction:column;
-        text-align:center;
-    }
+  .cards{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .headerLeft h2{
+
+    font-size:16px;
+
+  }
 
 }
 
@@ -344,2921 +773,3158 @@ th{
 
 </head>
 
+
 <body>
 
-<!-- =========================================================
-     LOGIN
-========================================================= -->
 
-<div id="loginScreen" class="loginScreen">
+<!-- =====================================================
+     LOGIN SCREEN
+     ===================================================== -->
 
-```
-<div class="loginBox">
+<div id="loginScreen">
 
-    <h2>🔐 ADMIN LOGIN</h2>
+  <div class="loginBox">
 
-    <p>Dashboard Access</p>
+    <h2>
+      🔐 ADMIN LOGIN
+    </h2>
 
-    <input
-        id="email"
-        type="email"
-        placeholder="Enter Gmail"
-    >
+    <p>
+      Dashboard Access
+    </p>
 
-    <button onclick="sendOTP()">
-        SEND OTP
-    </button>
 
     <input
-        id="otp"
-        placeholder="Enter OTP"
-        style="display:none;"
+      id="email"
+      type="email"
+      placeholder="Enter Gmail"
+      autocomplete="email"
     >
+
 
     <button
-        id="verifyBtn"
-        onclick="verifyOTP()"
-        style="display:none;"
+      id="sendOtpBtn"
+      class="primaryBtn"
+      onclick="sendOTP()"
+      style="width:100%;"
     >
-        VERIFY OTP
+      SEND OTP
     </button>
 
-    <p id="loginStatus" class="status"></p>
 
-</div>
-```
-
-</div>
-
-<!-- =========================================================
-     DASHBOARD
-========================================================= -->
-
-<div id="dashboard">
-
-```
-<!-- HEADER -->
-
-<div class="header">
-
-    <img
-        src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200"
+    <input
+      id="otp"
+      placeholder="Enter OTP"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      style="display:none;"
     >
 
-    <div>
 
-        <h2>ACEBEDO OPTICAL INVENTORY</h2>
+    <button
+      id="verifyBtn"
+      class="primaryBtn"
+      onclick="verifyOTP()"
+      style="
+        display:none;
+        width:100%;
+        margin-top:5px;
+      "
+    >
+      VERIFY OTP
+    </button>
+
+
+    <p
+      id="loginStatus"
+      class="status"
+    ></p>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     APPLICATION
+     ===================================================== -->
+
+<div id="app">
+
+
+  <!-- ===================================================
+       HEADER
+       =================================================== -->
+
+  <div class="header">
+
+
+    <div class="headerLeft">
+
+      <img
+        src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200"
+      >
+
+
+      <div>
+
+        <h2>
+          ACEBEDO OPTICAL INVENTORY
+        </h2>
 
         <small>
-            Central Inventory Management
+          Central Inventory Management
         </small>
+
+      </div>
 
     </div>
 
-</div>
 
+    <div class="headerButtons">
 
-<!-- TOOLBAR -->
-
-<div class="toolbar">
-
-    <button id="refreshBtn">
+      <button
+        id="refreshBtn"
+        onclick="refreshDashboard()"
+      >
         🔄 Refresh
-    </button>
+      </button>
 
-    <button id="updateStockBtn">
+
+      <button
+        id="updateStockBtn"
+        onclick="openUpdateStockModal()"
+      >
         📤 Update Stocks
-    </button>
+      </button>
 
-    <button id="clearBtn">
+
+      <button
+        id="clearBtn"
+        onclick="openClearModal()"
+      >
         🗑 Clear Report
-    </button>
+      </button>
 
-    <button id="exportBtn">
+
+      <button
+        id="exportBtn"
+        onclick="openExportModal()"
+      >
         📥 Export
-    </button>
+      </button>
 
-    <button id="logoutBtn">
+
+      <button
+        id="logoutBtn"
+        onclick="logoutUser()"
+      >
         Logout
-    </button>
+      </button>
 
-</div>
+    </div>
+
+  </div>
 
 
-<div class="container">
+  <!-- ===================================================
+       MAIN
+       =================================================== -->
+
+  <div class="main">
 
 
-    <!-- FILTERS -->
+    <!-- =================================================
+         FILTERS
+         ================================================= -->
 
     <div class="filters">
 
-        <div class="field">
 
-            <label>Branch</label>
+      <div class="field">
 
-            <select id="branchSelect">
-
-                <option value="">
-                    -- Select Branch --
-                </option>
-
-                <option value="ALL">
-                    🏢 ALL BRANCHES
-                </option>
-
-                <option value="GAI">🏢 Gaisano Iloilo</option>
-                <option value="CAS">🏢 Casa Plaza</option>
-                <option value="BAC">🏢 Bacolod</option>
-                <option value="BIN">🏢 Binalbagan</option>
-                <option value="BIS">🏢 Bislig</option>
-                <option value="CAD">🏢 Cadiz</option>
-                <option value="DGT">🏢 Dumaguete</option>
-                <option value="KAB">🏢 Kabankalan</option>
-                <option value="KAL">🏢 Kalibo</option>
-                <option value="PAS">🏢 Passi</option>
-                <option value="POT">🏢 Pototan</option>
-                <option value="SAN">🏢 San Carlos</option>
-                <option value="TAB">🏢 Tabunok</option>
-                <option value="TAN">🏢 Tandag</option>
-                <option value="TIS">🏢 Tisa</option>
-                <option value="TOL">🏢 Toledo</option>
-
-            </select>
-
-        </div>
+        <label>
+          Branch
+        </label>
 
 
-        <div class="field">
-
-            <label>Select Report</label>
-
-            <select id="sheetSelect">
-
-                <option value="stocks">
-                    📦 Stocks
-                </option>
-
-                <option value="SCANRESULTS">
-                    💰 Sold Out
-                </option>
-
-                <option value="AUDIT">
-                    🔄 Re-Inventory
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <div class="field">
-
-            <label>Search</label>
-
-            <input
-                id="searchBox"
-                placeholder="Tag, SI, Description"
-            >
-
-        </div>
-
-
-        <button
-            id="searchBtn"
-            class="searchBtn"
+        <select
+          id="branchSelect"
         >
-            🔍 Search
-        </button>
+
+          <option value="">
+            -- Select Branch --
+          </option>
+
+          <option value="ALL">
+            🏢 ALL BRANCHES
+          </option>
+
+          <option value="GAI">
+            🏢 Gaisano Iloilo
+          </option>
+
+          <option value="CAS">
+            🏢 Casa Plaza
+          </option>
+
+          <option value="BAC">
+            🏢 Bacolod
+          </option>
+
+          <option value="BIN">
+            🏢 Binalbagan
+          </option>
+
+          <option value="BIS">
+            🏢 Bislig
+          </option>
+
+          <option value="CAD">
+            🏢 Cadiz
+          </option>
+
+          <option value="DGT">
+            🏢 Dumaguete
+          </option>
+
+          <option value="KAB">
+            🏢 Kabankalan
+          </option>
+
+          <option value="KAL">
+            🏢 Kalibo
+          </option>
+
+          <option value="PAS">
+            🏢 Passi
+          </option>
+
+          <option value="POT">
+            🏢 Pototan
+          </option>
+
+          <option value="SAN">
+            🏢 San Carlos
+          </option>
+
+          <option value="TAB">
+            🏢 Tabunok
+          </option>
+
+          <option value="TAN">
+            🏢 Tandag
+          </option>
+
+          <option value="TIS">
+            🏢 Tisa
+          </option>
+
+          <option value="TOL">
+            🏢 Toledo
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Select Report
+        </label>
+
+
+        <select
+          id="sheetSelect"
+        >
+
+          <option value="stocks">
+            📦 Stocks
+          </option>
+
+          <option value="SCANRESULTS">
+            💰 Sold Out
+          </option>
+
+          <option value="AUDIT">
+            🔄 Re-Inventory
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Search
+        </label>
+
+
+        <input
+          id="searchBox"
+          placeholder="Tag, SI, Description"
+          onkeydown="
+            if(event.key==='Enter'){
+              searchDashboard();
+            }
+          "
+        >
+
+      </div>
+
+
+      <button
+        id="searchBtn"
+        class="searchBtn"
+        onclick="searchDashboard()"
+      >
+        🔍 Search
+      </button>
 
     </div>
 
 
-    <!-- CARDS -->
+    <!-- =================================================
+         CARDS
+         ================================================= -->
 
     <div class="cards">
 
-        <div class="card">
 
-            <h3>Available</h3>
+      <div class="card">
 
-            <h1 id="availableCount">
-                0
-            </h1>
+        <h3>
+          Available
+        </h3>
 
-        </div>
+        <h1 id="availableCount">
+          0
+        </h1>
 
-
-        <div class="card">
-
-            <h3>Sold Out</h3>
-
-            <h1 id="soldCount">
-                0
-            </h1>
-
-        </div>
+      </div>
 
 
-        <div class="card">
+      <div class="card">
 
-            <h3>Audited</h3>
+        <h3>
+          Sold Out
+        </h3>
 
-            <h1 id="auditCount">
-                0
-            </h1>
+        <h1 id="soldCount">
+          0
+        </h1>
 
-        </div>
+      </div>
 
 
-        <div class="card">
+      <div class="card">
 
-            <h3>Showing</h3>
+        <h3>
+          Audited
+        </h3>
 
-            <h1 id="showingCount">
-                0
-            </h1>
+        <h1 id="auditCount">
+          0
+        </h1>
 
-        </div>
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Showing
+        </h3>
+
+        <h1 id="showingCount">
+          0
+        </h1>
+
+      </div>
 
     </div>
 
 
-    <!-- TABLE -->
+    <!-- =================================================
+         TABLE
+         ================================================= -->
 
     <div class="tableWrap">
 
-        <table id="resultTable">
+      <table>
 
-            <thead>
+        <thead>
 
-                <tr>
+          <tr>
 
-                    <th>Branch</th>
-                    <th>Lenstype</th>
-                    <th>Description</th>
-                    <th>Tag</th>
-                    <th>SI</th>
-                    <th>Date</th>
-                    <th>Actions</th>
+            <th>
+              Branch
+            </th>
 
-                </tr>
+            <th>
+              Lenstype
+            </th>
 
-            </thead>
+            <th>
+              Description
+            </th>
 
-            <tbody id="tableBody">
+            <th>
+              Tag
+            </th>
 
-                <tr>
+            <th>
+              SI
+            </th>
 
-                    <td
-                        colspan="7"
-                        style="text-align:center;padding:40px;"
-                    >
-                        Click SEARCH to load data.
-                    </td>
+            <th>
+              Date
+            </th>
 
-                </tr>
+            <th>
+              Actions
+            </th>
 
-            </tbody>
+          </tr>
 
-        </table>
+        </thead>
+
+
+        <tbody
+          id="tableBody"
+        >
+
+          <tr>
+
+            <td
+              colspan="7"
+              style="
+                text-align:center;
+                padding:40px;
+              "
+            >
+              Select a branch and click SEARCH.
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
 
     </div>
 
 
-    <!-- PAGINATION -->
+    <!-- =================================================
+         PAGINATION
+         ================================================= -->
 
     <div class="pagination">
 
-        <button id="prevBtn">
-            ◀ Previous
-        </button>
+      <button
+        id="prevBtn"
+        onclick="previousPage()"
+      >
+        ◀ Previous
+      </button>
 
-        <span id="pageInfo">
-            Page 0 / 0
-        </span>
 
-        <button id="nextBtn">
-            Next ▶
-        </button>
+      <span
+        id="pageInfo"
+      >
+        Page 0 / 0
+      </span>
+
+
+      <button
+        id="nextBtn"
+        onclick="nextPage()"
+      >
+        Next ▶
+      </button>
 
     </div>
 
-</div>
-```
+  </div>
 
 </div>
 
-<!-- =========================================================
+
+<!-- =====================================================
      EDIT MODAL
-========================================================= -->
+     ===================================================== -->
 
 <div
-    id="editModal"
-    class="modalOverlay"
+  id="editModal"
+  class="modalOverlay"
 >
 
-```
-<div class="modal">
+  <div class="modal">
 
-    <h3>Edit Record</h3>
+    <h3>
+      Edit Record
+    </h3>
 
-    <input
-        type="hidden"
-        id="editBranch"
-    >
 
     <input
-        type="hidden"
-        id="editRow"
+      type="hidden"
+      id="editBranch"
     >
 
+
     <input
-        type="hidden"
-        id="editTag"
+      type="hidden"
+      id="editTag"
     >
+
 
     <label>
-        SI Number
+      SI Number
     </label>
 
+
     <input
-        id="editSI"
-        style="width:100%;"
+      id="editSI"
     >
+
 
     <div class="modalButtons">
 
-        <button onclick="closeEditModal()">
-            Cancel
-        </button>
+      <button
+        onclick="closeEditModal()"
+      >
+        Cancel
+      </button>
 
-        <button
-            class="primaryBtn"
-            onclick="saveEdit()"
-        >
-            Save
-        </button>
 
-    </div>
-
-</div>
-```
-
-</div>
-
-<!-- =========================================================
-     EXPORT MODAL
-========================================================= -->
-
-<div
-    id="exportModal"
-    class="modalOverlay"
->
-
-```
-<div class="modal">
-
-    <h3>Select Branch to Export</h3>
-
-    <select
-        id="exportBranch"
-        style="width:100%;"
-    >
-
-        <option value="">
-            -- Select Branch --
-        </option>
-
-        <option value="GAI">🏢 Gaisano Iloilo</option>
-        <option value="CAS">🏢 Casa Plaza</option>
-        <option value="BAC">🏢 Bacolod</option>
-        <option value="BIN">🏢 Binalbagan</option>
-        <option value="BIS">🏢 Bislig</option>
-        <option value="CAD">🏢 Cadiz</option>
-        <option value="DGT">🏢 Dumaguete</option>
-        <option value="KAB">🏢 Kabankalan</option>
-        <option value="KAL">🏢 Kalibo</option>
-        <option value="PAS">🏢 Passi</option>
-        <option value="POT">🏢 Pototan</option>
-        <option value="SAN">🏢 San Carlos</option>
-        <option value="TAB">🏢 Tabunok</option>
-        <option value="TAN">🏢 Tandag</option>
-        <option value="TIS">🏢 Tisa</option>
-        <option value="TOL">🏢 Toledo</option>
-
-    </select>
-
-    <div class="modalButtons">
-
-        <button onclick="closeExportModal()">
-            Cancel
-        </button>
-
-        <button
-            class="primaryBtn"
-            onclick="startExport()"
-        >
-            Export
-        </button>
+      <button
+        class="primaryBtn"
+        onclick="saveEdit()"
+      >
+        Save
+      </button>
 
     </div>
 
-</div>
-```
+  </div>
 
 </div>
 
-<!-- =========================================================
+
+<!-- =====================================================
      UPDATE STOCKS MODAL
-========================================================= -->
+     ===================================================== -->
 
 <div
-    id="updateStockModal"
-    class="modalOverlay"
+  id="updateStockModal"
+  class="modalOverlay"
 >
 
-```
-<div class="modal">
+  <div class="modal">
 
-    <h3>Update Stocks</h3>
+    <h3>
+      Update Stocks
+    </h3>
+
 
     <label>
-        Select Branch
+      Select Branch
     </label>
 
+
     <select
-        id="updateBranch"
-        style="width:100%;margin-bottom:15px;"
+      id="updateBranch"
     >
 
-        <option value="">
-            -- Select Branch --
-        </option>
+      <option value="">
+        -- Select Branch --
+      </option>
 
-        <option value="GAI">🏢 Gaisano Iloilo</option>
-        <option value="CAS">🏢 Casa Plaza</option>
-        <option value="BAC">🏢 Bacolod</option>
-        <option value="BIN">🏢 Binalbagan</option>
-        <option value="BIS">🏢 Bislig</option>
-        <option value="CAD">🏢 Cadiz</option>
-        <option value="DGT">🏢 Dumaguete</option>
-        <option value="KAB">🏢 Kabankalan</option>
-        <option value="KAL">🏢 Kalibo</option>
-        <option value="PAS">🏢 Passi</option>
-        <option value="POT">🏢 Pototan</option>
-        <option value="SAN">🏢 San Carlos</option>
-        <option value="TAB">🏢 Tabunok</option>
-        <option value="TAN">🏢 Tandag</option>
-        <option value="TIS">🏢 Tisa</option>
-        <option value="TOL">🏢 Toledo</option>
+      <option value="GAI">
+        🏢 Gaisano Iloilo
+      </option>
+
+      <option value="CAS">
+        🏢 Casa Plaza
+      </option>
+
+      <option value="BAC">
+        🏢 Bacolod
+      </option>
+
+      <option value="BIN">
+        🏢 Binalbagan
+      </option>
+
+      <option value="BIS">
+        🏢 Bislig
+      </option>
+
+      <option value="CAD">
+        🏢 Cadiz
+      </option>
+
+      <option value="DGT">
+        🏢 Dumaguete
+      </option>
+
+      <option value="KAB">
+        🏢 Kabankalan
+      </option>
+
+      <option value="KAL">
+        🏢 Kalibo
+      </option>
+
+      <option value="PAS">
+        🏢 Passi
+      </option>
+
+      <option value="POT">
+        🏢 Pototan
+      </option>
+
+      <option value="SAN">
+        🏢 San Carlos
+      </option>
+
+      <option value="TAB">
+        🏢 Tabunok
+      </option>
+
+      <option value="TAN">
+        🏢 Tandag
+      </option>
+
+      <option value="TIS">
+        🏢 Tisa
+      </option>
+
+      <option value="TOL">
+        🏢 Toledo
+      </option>
 
     </select>
 
+
     <label>
-        Select Excel File
+      Select Excel File
     </label>
+
 
     <input
-        type="file"
-        id="stockFile"
-        accept=".xlsx,.xls"
-        style="width:100%;margin-top:10px;"
+      type="file"
+      id="stockFile"
+      accept=".xlsx,.xls"
     >
+
 
     <div class="modalButtons">
 
-        <button onclick="closeUpdateStockModal()">
-            Cancel
-        </button>
+      <button
+        onclick="closeUpdateStockModal()"
+      >
+        Cancel
+      </button>
 
-        <button
-            class="primaryBtn"
-            onclick="updateStocks()"
-        >
-            Update
-        </button>
+
+      <button
+        id="updateConfirmBtn"
+        class="primaryBtn"
+        onclick="updateStocks()"
+      >
+        Update
+      </button>
 
     </div>
 
-</div>
-```
+  </div>
 
 </div>
 
-<!-- =========================================================
+
+<!-- =====================================================
+     EXPORT MODAL
+     ===================================================== -->
+
+<div
+  id="exportModal"
+  class="modalOverlay"
+>
+
+  <div class="modal">
+
+    <h3>
+      Select Branch to Export
+    </h3>
+
+
+    <label>
+      Branch
+    </label>
+
+
+    <select
+      id="exportBranch"
+    >
+
+      <option value="">
+        -- Select Branch --
+      </option>
+
+      <option value="GAI">
+        🏢 Gaisano Iloilo
+      </option>
+
+      <option value="CAS">
+        🏢 Casa Plaza
+      </option>
+
+      <option value="BAC">
+        🏢 Bacolod
+      </option>
+
+      <option value="BIN">
+        🏢 Binalbagan
+      </option>
+
+      <option value="BIS">
+        🏢 Bislig
+      </option>
+
+      <option value="CAD">
+        🏢 Cadiz
+      </option>
+
+      <option value="DGT">
+        🏢 Dumaguete
+      </option>
+
+      <option value="KAB">
+        🏢 Kabankalan
+      </option>
+
+      <option value="KAL">
+        🏢 Kalibo
+      </option>
+
+      <option value="PAS">
+        🏢 Passi
+      </option>
+
+      <option value="POT">
+        🏢 Pototan
+      </option>
+
+      <option value="SAN">
+        🏢 San Carlos
+      </option>
+
+      <option value="TAB">
+        🏢 Tabunok
+      </option>
+
+      <option value="TAN">
+        🏢 Tandag
+      </option>
+
+      <option value="TIS">
+        🏢 Tisa
+      </option>
+
+      <option value="TOL">
+        🏢 Toledo
+      </option>
+
+    </select>
+
+
+    <div class="modalButtons">
+
+      <button
+        onclick="closeExportModal()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        class="primaryBtn"
+        onclick="startExport()"
+      >
+        Export
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
      CLEAR MODAL
-========================================================= -->
+     ===================================================== -->
 
 <div
-    id="clearModal"
-    class="modalOverlay"
+  id="clearModal"
+  class="modalOverlay"
 >
 
-```
-<div class="modal">
+  <div class="modal">
 
-    <h3>Clear Report</h3>
+    <h3>
+      Clear Report
+    </h3>
+
 
     <label>
-        Select Branch
+      Select Branch
     </label>
 
+
     <select
-        id="clearBranch"
-        style="width:100%;margin-bottom:15px;"
+      id="clearBranch"
     >
 
-        <option value="">
-            -- Select Branch --
-        </option>
+      <option value="">
+        -- Select Branch --
+      </option>
 
-        <option value="GAI">🏢 Gaisano Iloilo</option>
-        <option value="CAS">🏢 Casa Plaza</option>
-        <option value="BAC">🏢 Bacolod</option>
-        <option value="BIN">🏢 Binalbagan</option>
-        <option value="BIS">🏢 Bislig</option>
-        <option value="CAD">🏢 Cadiz</option>
-        <option value="DGT">🏢 Dumaguete</option>
-        <option value="KAB">🏢 Kabankalan</option>
-        <option value="KAL">🏢 Kalibo</option>
-        <option value="PAS">🏢 Passi</option>
-        <option value="POT">🏢 Pototan</option>
-        <option value="SAN">🏢 San Carlos</option>
-        <option value="TAB">🏢 Tabunok</option>
-        <option value="TAN">🏢 Tandag</option>
-        <option value="TIS">🏢 Tisa</option>
-        <option value="TOL">🏢 Toledo</option>
+      <option value="GAI">
+        🏢 Gaisano Iloilo
+      </option>
+
+      <option value="CAS">
+        🏢 Casa Plaza
+      </option>
+
+      <option value="BAC">
+        🏢 Bacolod
+      </option>
+
+      <option value="BIN">
+        🏢 Binalbagan
+      </option>
+
+      <option value="BIS">
+        🏢 Bislig
+      </option>
+
+      <option value="CAD">
+        🏢 Cadiz
+      </option>
+
+      <option value="DGT">
+        🏢 Dumaguete
+      </option>
+
+      <option value="KAB">
+        🏢 Kabankalan
+      </option>
+
+      <option value="KAL">
+        🏢 Kalibo
+      </option>
+
+      <option value="PAS">
+        🏢 Passi
+      </option>
+
+      <option value="POT">
+        🏢 Pototan
+      </option>
+
+      <option value="SAN">
+        🏢 San Carlos
+      </option>
+
+      <option value="TAB">
+        🏢 Tabunok
+      </option>
+
+      <option value="TAN">
+        🏢 Tandag
+      </option>
+
+      <option value="TIS">
+        🏢 Tisa
+      </option>
+
+      <option value="TOL">
+        🏢 Toledo
+      </option>
 
     </select>
 
 
     <label>
-        Select Report
+      Select Report
     </label>
 
+
     <select
-        id="clearSheet"
-        style="width:100%;"
+      id="clearSheet"
     >
 
-        <option value="">
-            -- Select Report --
-        </option>
+      <option value="">
+        -- Select Report --
+      </option>
 
-        <option value="stocks">
-            📦 Stocks
-        </option>
+      <option value="stocks">
+        📦 Stocks
+      </option>
 
-        <option value="SCANRESULTS">
-            💰 Sold Out
-        </option>
+      <option value="SCANRESULTS">
+        💰 Sold Out
+      </option>
 
-        <option value="AUDIT">
-            🔄 Re-Inventory
-        </option>
+      <option value="AUDIT">
+        🔄 Re-Inventory
+      </option>
 
     </select>
 
 
     <div class="modalButtons">
 
-        <button onclick="closeClearModal()">
-            Cancel
-        </button>
+      <button
+        onclick="closeClearModal()"
+      >
+        Cancel
+      </button>
 
-        <button
-            class="dangerBtn"
-            onclick="clearReport()"
-        >
-            Clear
-        </button>
+
+      <button
+        class="dangerBtn"
+        onclick="clearReport()"
+      >
+        Clear
+      </button>
 
     </div>
 
-</div>
-```
+  </div>
 
 </div>
 
-<!-- =========================================================
+
+<!-- =====================================================
      CONFIRMATION DIALOG
-========================================================= -->
+     ===================================================== -->
 
 <div
-    id="dialogModal"
-    class="modalOverlay"
+  id="dialogModal"
+  class="modalOverlay"
 >
 
-```
-<div class="modal">
+  <div class="modal">
 
     <div
-        id="dialogIcon"
-        class="dialogIcon"
+      id="dialogIcon"
+      class="dialogIcon"
     >
-        ⚠️
+      ⚠️
     </div>
 
-    <div
-        id="dialogTitle"
-        class="dialogTitle"
-    >
-        Confirm
-    </div>
 
     <div
-        id="dialogMessage"
-        class="dialogMessage"
+      id="dialogTitle"
+      class="dialogTitle"
     >
-        Message
+      Confirm
     </div>
+
+
+    <div
+      id="dialogMessage"
+      class="dialogMessage"
+    >
+      Message
+    </div>
+
 
     <div class="dialogButtons">
 
-        <button
-            class="dialogBtn dialogCancel"
-            onclick="closeDialog()"
-        >
-            Cancel
-        </button>
+      <button
+        onclick="closeDialog()"
+      >
+        Cancel
+      </button>
 
-        <button
-            id="dialogOK"
-            class="dialogBtn dialogOK"
-            onclick="dialogOKClick()"
-        >
-            OK
-        </button>
+
+      <button
+        id="dialogOK"
+        class="primaryBtn"
+        onclick="dialogOKClick()"
+      >
+        OK
+      </button>
 
     </div>
 
-</div>
-```
+  </div>
 
 </div>
+
+
+<!-- =====================================================
+     LOADING
+     ===================================================== -->
+
+<div
+  id="loadingOverlay"
+>
+
+  <div class="loadingBox">
+
+    <div>
+      ⏳
+    </div>
+
+    <div id="loadingText">
+      Please wait...
+    </div>
+
+  </div>
+
+</div>
+
 
 <script>
 
-/* =========================================================
-   CONFIGURATION
-========================================================= */
+/* ==========================================================
+   GLOBAL STATE
+   ========================================================== */
 
-/*
- IMPORTANT:
-
- Use the SUPABASE PUBLISHABLE / ANON key here.
-
- NEVER put the SUPABASE SERVICE ROLE KEY in this HTML.
-*/
-
-const SUPABASE_URL =
-    "https://hvurhnarllvfinpdkfkp.supabase.co";
-
-const SUPABASE_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
+let sessionId =
+  localStorage.getItem(
+    'acebedo_inventory_session'
+  );
 
 
-/*
- Apps Script is still used only for:
-
- - OTP login
- - Excel import
- - Excel export
- - background jobs
-
- Put your deployed Apps Script /exec URL here.
-*/
-
-const APPS_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycby-s2AVJ5ee8LM_0HD3gd3Z19gQApaZROWFpfcpm2DktLbjT0kuRev6vjyEgzD1MXlq5Q/exec";
+let currentEmail =
+  localStorage.getItem(
+    'acebedo_inventory_email'
+  );
 
 
-/* =========================================================
-   STATE
-========================================================= */
-
-let currentData = [];
+let allData = [];
 
 let currentPage = 1;
 
-const rowsPerPage = 20;
-
-let currentBranch = "";
-
-let currentSheet = "stocks";
-
-let currentSearch = "";
+const PAGE_SIZE = 20;
 
 let dialogCallback = null;
 
 
-/* =========================================================
-   SUPABASE REST
-========================================================= */
+/* ==========================================================
+   INITIALIZE
+   ========================================================== */
 
-function supabaseHeaders(){
+document.addEventListener(
+  'DOMContentLoaded',
+  function(){
 
-    return {
+    if (sessionId) {
 
-        "apikey": SUPABASE_KEY,
+      checkSession();
 
-        "Authorization":
-            "Bearer " + SUPABASE_KEY,
-
-        "Content-Type":
-            "application/json"
-
-    };
-
-}
-
-
-async function supabaseRequest(
-    endpoint,
-    options = {}
-){
-
-    const response =
-        await fetch(
-            SUPABASE_URL +
-            "/rest/v1/" +
-            endpoint,
-            {
-
-                ...options,
-
-                headers:{
-                    ...supabaseHeaders(),
-                    ...(options.headers || {})
-                }
-
-            }
-        );
-
-    const text =
-        await response.text();
-
-    let data;
-
-    try{
-        data = text ? JSON.parse(text) : null;
     }
-    catch{
-        data = text;
-    }
+    else {
 
-    if(!response.ok){
-
-        throw new Error(
-            "Supabase " +
-            response.status +
-            ": " +
-            text
-        );
+      showLogin();
 
     }
 
-    return data;
+  }
+);
+
+
+/* ==========================================================
+   LOGIN
+   ========================================================== */
+
+function showLogin(){
+
+  document
+    .getElementById(
+      'loginScreen'
+    )
+    .style.display =
+      'flex';
+
+
+  document
+    .getElementById(
+      'app'
+    )
+    .style.display =
+      'none';
 
 }
 
 
-/* =========================================================
-   TABLE NAMES
-========================================================= */
+/* ==========================================================
+   SHOW APP
+   ========================================================== */
 
-function stockTable(branch){
+function showApp(){
 
-    return branch
-        .trim()
-        .toLowerCase() +
-        "_stocks";
-
-}
-
-
-function soldTable(branch){
-
-    return branch
-        .trim()
-        .toLowerCase() +
-        "_scanresults";
-
-}
+  document
+    .getElementById(
+      'loginScreen'
+    )
+    .style.display =
+      'none';
 
 
-function auditTable(branch){
-
-    return branch
-        .trim()
-        .toLowerCase() +
-        "_audit";
+  document
+    .getElementById(
+      'app'
+    )
+    .style.display =
+      'block';
 
 }
 
 
-/* =========================================================
-   SESSION
-========================================================= */
+/* ==========================================================
+   SEND OTP
+   ========================================================== */
 
-function getSession(){
+function sendOTP(){
 
-    const email =
-        localStorage.getItem(
-            "inventoryEmail"
-        );
-
-    const sessionId =
-        localStorage.getItem(
-            "inventorySession"
-        );
-
-    return {
-        email,
-        sessionId
-    };
-
-}
+  const email =
+    document
+      .getElementById(
+        'email'
+      )
+      .value
+      .trim();
 
 
-function saveSession(
-    email,
-    sessionId
-){
+  if (!email) {
 
-    localStorage.setItem(
-        "inventoryEmail",
-        email
+    setLoginStatus(
+      'Please enter your Gmail address.',
+      true
     );
 
-    localStorage.setItem(
-        "inventorySession",
-        sessionId
+    return;
+
+  }
+
+
+  setLoginStatus(
+    'Sending OTP...',
+    false
+  );
+
+
+  document
+    .getElementById(
+      'sendOtpBtn'
+    )
+    .disabled =
+      true;
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result){
+
+        document
+          .getElementById(
+            'sendOtpBtn'
+          )
+          .disabled =
+            false;
+
+
+        if (!result || !result.ok) {
+
+          setLoginStatus(
+            result
+              ? result.message
+              : 'Unable to send OTP.',
+            true
+          );
+
+          return;
+
+        }
+
+
+        document
+          .getElementById(
+            'otp'
+          )
+          .style.display =
+            'block';
+
+
+        document
+          .getElementById(
+            'verifyBtn'
+          )
+          .style.display =
+            'block';
+
+
+        setLoginStatus(
+          result.message,
+          false
+        );
+
+
+        document
+          .getElementById(
+            'otp'
+          )
+          .focus();
+
+      }
+    )
+
+    .withFailureHandler(
+      function(error){
+
+        document
+          .getElementById(
+            'sendOtpBtn'
+          )
+          .disabled =
+            false;
+
+
+        setLoginStatus(
+          error.message ||
+          String(error),
+          true
+        );
+
+      }
+    )
+
+    .sendOTP(
+      email
     );
 
 }
 
+
+/* ==========================================================
+   VERIFY OTP
+   ========================================================== */
+
+function verifyOTP(){
+
+  const email =
+    document
+      .getElementById(
+        'email'
+      )
+      .value
+      .trim();
+
+
+  const otp =
+    document
+      .getElementById(
+        'otp'
+      )
+      .value
+      .trim();
+
+
+  if (!email || !otp) {
+
+    setLoginStatus(
+      'Enter your email and OTP.',
+      true
+    );
+
+    return;
+
+  }
+
+
+  setLoginStatus(
+    'Verifying...',
+    false
+  );
+
+
+  document
+    .getElementById(
+      'verifyBtn'
+    )
+    .disabled =
+      true;
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result){
+
+        document
+          .getElementById(
+            'verifyBtn'
+          )
+          .disabled =
+            false;
+
+
+        if (!result || !result.ok) {
+
+          setLoginStatus(
+            result
+              ? result.message
+              : 'Login failed.',
+            true
+          );
+
+          return;
+
+        }
+
+
+        sessionId =
+          result.session;
+
+
+        currentEmail =
+          result.email;
+
+
+        localStorage.setItem(
+          'acebedo_inventory_session',
+          sessionId
+        );
+
+
+        localStorage.setItem(
+          'acebedo_inventory_email',
+          currentEmail
+        );
+
+
+        showApp();
+
+      }
+    )
+
+    .withFailureHandler(
+      function(error){
+
+        document
+          .getElementById(
+            'verifyBtn'
+          )
+          .disabled =
+            false;
+
+
+        setLoginStatus(
+          error.message ||
+          String(error),
+          true
+        );
+
+      }
+    )
+
+    .verifyOTP(
+      email,
+      otp
+    );
+
+}
+
+
+/* ==========================================================
+   LOGIN STATUS
+   ========================================================== */
+
+function setLoginStatus(
+  message,
+  isError
+){
+
+  const element =
+    document
+      .getElementById(
+        'loginStatus'
+      );
+
+
+  element.textContent =
+    message;
+
+
+  element.className =
+    'status ' +
+    (
+      isError
+        ? 'error'
+        : 'success'
+    );
+
+}
+
+
+/* ==========================================================
+   CHECK SESSION
+   ========================================================== */
+
+function checkSession(){
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result){
+
+        if (
+          result &&
+          result.ok
+        ) {
+
+          currentEmail =
+            result.email;
+
+
+          localStorage.setItem(
+            'acebedo_inventory_email',
+            currentEmail
+          );
+
+
+          showApp();
+
+        }
+        else {
+
+          clearSession();
+
+        }
+
+      }
+    )
+
+    .withFailureHandler(
+      function(){
+
+        clearSession();
+
+      }
+    )
+
+    .checkSession(
+      sessionId
+    );
+
+}
+
+
+/* ==========================================================
+   LOGOUT
+   ========================================================== */
+
+function logoutUser(){
+
+  showConfirm(
+    'Logout',
+    'Are you sure you want to logout?',
+    '🚪',
+    function(){
+
+      google.script.run
+
+        .withSuccessHandler(
+          function(){
+
+            clearSession();
+
+          }
+        )
+
+        .withFailureHandler(
+          function(){
+
+            clearSession();
+
+          }
+        )
+
+        .logout(
+          sessionId
+        );
+
+    }
+  );
+
+}
+
+
+/* ==========================================================
+   CLEAR SESSION
+   ========================================================== */
 
 function clearSession(){
 
-    localStorage.removeItem(
-        "inventoryEmail"
-    );
+  sessionId = null;
 
-    localStorage.removeItem(
-        "inventorySession"
-    );
+  currentEmail = null;
+
+  localStorage.removeItem(
+    'acebedo_inventory_session'
+  );
+
+  localStorage.removeItem(
+    'acebedo_inventory_email'
+  );
+
+
+  document
+    .getElementById(
+      'otp'
+    )
+    .style.display =
+      'none';
+
+
+  document
+    .getElementById(
+      'verifyBtn'
+    )
+    .style.display =
+      'none';
+
+
+  showLogin();
 
 }
 
 
-/* =========================================================
-   APPS SCRIPT REQUEST
-========================================================= */
+/* ==========================================================
+   SEARCH
+   ========================================================== */
 
-async function appsScriptRequest(
-    action,
-    params = {}
+function searchDashboard(){
+
+  const branch =
+    document
+      .getElementById(
+        'branchSelect'
+      )
+      .value;
+
+
+  const report =
+    document
+      .getElementById(
+        'sheetSelect'
+      )
+      .value;
+
+
+  const search =
+    document
+      .getElementById(
+        'searchBox'
+      )
+      .value
+      .trim();
+
+
+  if (!branch) {
+
+    showConfirm(
+      'Branch Required',
+      'Please select a branch first.',
+      '⚠️',
+      null,
+      false
+    );
+
+    return;
+
+  }
+
+
+  loadDashboard(
+    branch,
+    report,
+    search
+  );
+
+}
+
+
+/* ==========================================================
+   REFRESH
+   ========================================================== */
+
+function refreshDashboard(){
+
+  const branch =
+    document
+      .getElementById(
+        'branchSelect'
+      )
+      .value;
+
+
+  if (!branch) {
+
+    return;
+
+  }
+
+
+  const report =
+    document
+      .getElementById(
+        'sheetSelect'
+      )
+      .value;
+
+
+  const search =
+    document
+      .getElementById(
+        'searchBox'
+      )
+      .value
+      .trim();
+
+
+  loadDashboard(
+    branch,
+    report,
+    search
+  );
+
+}
+
+
+/* ==========================================================
+   LOAD DASHBOARD
+   ========================================================== */
+
+function loadDashboard(
+  branch,
+  report,
+  search
 ){
 
-    const query =
-        new URLSearchParams();
-
-    query.set(
-        "action",
-        action
-    );
-
-    Object.keys(params)
-        .forEach(key => {
-
-            if(
-                params[key] !== undefined &&
-                params[key] !== null
-            ){
-
-                query.set(
-                    key,
-                    params[key]
-                );
-
-            }
-
-        });
-
-    const response =
-        await fetch(
-            APPS_SCRIPT_URL +
-            "?" +
-            query.toString()
-        );
-
-    const data =
-        await response.json();
-
-    return data;
-
-}
+  showLoading(
+    'Loading Supabase data...'
+  );
 
 
-/* =========================================================
-   LOGIN
-========================================================= */
+  google.script.run
 
-async function sendOTP(){
+    .withSuccessHandler(
+      function(result){
 
-    const email =
-        document
-        .getElementById("email")
-        .value
-        .trim()
-        .toLowerCase();
+        hideLoading();
 
-    if(!email){
+
+        if (
+          !result ||
+          !result.ok
+        ) {
+
+          showError(
+            result
+              ? result.message
+              : 'Unable to load dashboard.'
+          );
+
+          return;
+
+        }
+
+
+        allData =
+          result.data ||
+          [];
+
+
+        currentPage =
+          1;
+
 
         document
-        .getElementById("loginStatus")
-        .textContent =
-            "Enter your Gmail.";
-
-        return;
-
-    }
-
-    try{
-
-        document
-        .getElementById("loginStatus")
-        .textContent =
-            "Sending OTP...";
-
-        const result =
-            await appsScriptRequest(
-                "sendOTP",
-                {email}
+          .getElementById(
+            'availableCount'
+          )
+          .textContent =
+            formatNumber(
+              result.availableCount
             );
 
-        if(
-            result.status ===
-            "OTP_SENT"
-        ){
-
-            document
-            .getElementById("otp")
-            .style.display =
-                "block";
-
-            document
-            .getElementById("verifyBtn")
-            .style.display =
-                "block";
-
-            document
-            .getElementById("loginStatus")
-            .textContent =
-                "OTP sent.";
-
-        }
-        else{
-
-            document
-            .getElementById("loginStatus")
-            .textContent =
-                result.status ||
-                "Unable to send OTP.";
-
-        }
-
-    }
-    catch(error){
 
         document
-        .getElementById("loginStatus")
-        .textContent =
-            error.message;
-
-    }
-
-}
-
-
-async function verifyOTP(){
-
-    const email =
-        document
-        .getElementById("email")
-        .value
-        .trim()
-        .toLowerCase();
-
-    const otp =
-        document
-        .getElementById("otp")
-        .value
-        .trim();
-
-    if(!email || !otp){
-
-        return;
-
-    }
-
-    try{
-
-        const result =
-            await appsScriptRequest(
-                "verifyOTP",
-                {
-                    email,
-                    otp
-                }
+          .getElementById(
+            'soldCount'
+          )
+          .textContent =
+            formatNumber(
+              result.soldCount
             );
 
-        if(
-            result.status === "OK"
-        ){
 
-            saveSession(
-                email,
-                result.sessionId
+        document
+          .getElementById(
+            'auditCount'
+          )
+          .textContent =
+            formatNumber(
+              result.auditCount
             );
 
-            showDashboard();
-
-        }
-        else{
-
-            document
-            .getElementById("loginStatus")
-            .textContent =
-                result.status ||
-                "Invalid OTP.";
-
-        }
-
-    }
-    catch(error){
-
-        document
-        .getElementById("loginStatus")
-        .textContent =
-            error.message;
-
-    }
-
-}
-
-
-/* =========================================================
-   SESSION CHECK
-========================================================= */
-
-async function checkLogin(){
-
-    const {
-        email,
-        sessionId
-    } = getSession();
-
-    if(!email || !sessionId){
-
-        return false;
-
-    }
-
-    try{
-
-        const result =
-            await appsScriptRequest(
-                "checkSession",
-                {
-                    email,
-                    sessionId
-                }
-            );
-
-        return (
-            result.status ===
-            "VALID"
-        );
-
-    }
-    catch{
-
-        return false;
-
-    }
-
-}
-
-
-/* =========================================================
-   SHOW DASHBOARD
-========================================================= */
-
-async function showDashboard(){
-
-    document
-    .getElementById("loginScreen")
-    .style.display =
-        "none";
-
-    document
-    .getElementById("dashboard")
-    .style.display =
-        "block";
-
-}
-
-
-/* =========================================================
-   LOAD DATA
-========================================================= */
-
-async function loadDashboard(){
-
-    const branch =
-        document
-        .getElementById("branchSelect")
-        .value;
-
-    const sheet =
-        document
-        .getElementById("sheetSelect")
-        .value;
-
-    const search =
-        document
-        .getElementById("searchBox")
-        .value
-        .trim();
-
-    if(!branch){
-
-        alert(
-            "Please select a branch."
-        );
-
-        return;
-
-    }
-
-    currentBranch = branch;
-
-    currentSheet = sheet;
-
-    currentSearch = search;
-
-    currentPage = 1;
-
-    setLoading();
-
-    try{
-
-        /*
-         SEARCH
-
-         Search directly through the
-         Supabase RPC already used by
-         your current backend.
-        */
-
-        if(search){
-
-            const result =
-                await supabaseRpcSearch(
-                    branch,
-                    search
-                );
-
-            currentData =
-                normalizeRows(result);
-
-        }
-        else{
-
-            currentData =
-                await loadReport(
-                    branch,
-                    sheet
-                );
-
-        }
-
-        updateCounts();
 
         renderTable();
 
-    }
-    catch(error){
+      }
+    )
 
-        console.error(error);
+    .withFailureHandler(
+      function(error){
 
-        showTableError(
-            error.message
+        hideLoading();
+
+        handleServerError(
+          error
         );
 
-    }
-
-}
-
-
-/* =========================================================
-   LOAD REPORT
-========================================================= */
-
-async function loadReport(
-    branch,
-    sheet
-){
-
-    const branches =
-        branch === "ALL"
-        ? [
-            "BAC","BIN","BIS","CAD",
-            "CAS","DGT","GAI","KAB",
-            "KAL","PAS","POT","SAN",
-            "TAB","TAN","TIS","TOL"
-          ]
-        : [branch];
-
-
-    let rows = [];
-
-    for(
-        const b of branches
-    ){
-
-        let table;
-
-        if(
-            sheet === "stocks"
-        ){
-
-            table =
-                stockTable(b);
-
-        }
-        else if(
-            sheet ===
-            "SCANRESULTS"
-        ){
-
-            table =
-                soldTable(b);
-
-        }
-        else{
-
-            table =
-                auditTable(b);
-
-        }
-
-
-        const data =
-            await supabaseRequest(
-                table +
-                "?select=*"
-            );
-
-
-        rows =
-            rows.concat(
-                normalizeRows(
-                    data,
-                    b
-                )
-            );
-
-    }
-
-
-    /*
-     AVAILABLE STOCKS
-
-     Remove sold tags from stocks.
-    */
-
-    if(
-        sheet === "stocks"
-    ){
-
-        const soldRows =
-            await loadAllSold(
-                branch
-            );
-
-        const soldSet =
-            new Set(
-                soldRows
-                .map(
-                    r =>
-                        String(
-                            r.NTAGN || ""
-                        ).trim()
-                )
-                .filter(Boolean)
-            );
-
-
-        rows =
-            rows.filter(
-                r =>
-                    r.tag &&
-                    !soldSet.has(
-                        r.tag
-                    )
-            );
-
-    }
-
-
-    return rows;
-
-}
-
-
-/* =========================================================
-   LOAD SOLD
-========================================================= */
-
-async function loadAllSold(
-    branch
-){
-
-    const branches =
-        branch === "ALL"
-        ? [
-            "BAC","BIN","BIS","CAD",
-            "CAS","DGT","GAI","KAB",
-            "KAL","PAS","POT","SAN",
-            "TAB","TAN","TIS","TOL"
-          ]
-        : [branch];
-
-
-    let rows = [];
-
-    for(
-        const b of branches
-    ){
-
-        const data =
-            await supabaseRequest(
-                soldTable(b) +
-                "?select=*"
-            );
-
-        rows =
-            rows.concat(data);
-
-    }
-
-    return rows;
-
-}
-
-
-/* =========================================================
-   SEARCH RPC
-========================================================= */
-
-async function supabaseRpcSearch(
-    branch,
-    search
-){
-
-    const response =
-        await fetch(
-            SUPABASE_URL +
-            "/rest/v1/rpc/search_inventory",
-            {
-
-                method:"POST",
-
-                headers:
-                    supabaseHeaders(),
-
-                body:JSON.stringify({
-
-                    search_branch:
-                        branch,
-
-                    search_text:
-                        search
-
-                })
-
-            }
-        );
-
-
-    const text =
-        await response.text();
-
-
-    if(!response.ok){
-
-        throw new Error(
-            "Search RPC " +
-            response.status +
-            ": " +
-            text
-        );
-
-    }
-
-
-    return text
-        ? JSON.parse(text)
-        : [];
-
-}
-
-
-/* =========================================================
-   NORMALIZE
-========================================================= */
-
-function normalizeRows(
-    rows,
-    branchFallback = ""
-){
-
-    return rows.map(
-        r => {
-
-            const branch =
-                String(
-                    r.BR ||
-                    r.br ||
-                    branchFallback ||
-                    ""
-                )
-                .trim()
-                .toUpperCase();
-
-
-            const tag =
-                String(
-                    r.NTAGN ||
-                    r.ntagn ||
-                    ""
-                )
-                .trim();
-
-
-            return {
-
-                raw:r,
-
-                branch,
-
-                lenstype:
-                    r.LENSTYPE ||
-                    r.lenstype ||
-                    "",
-
-                description:
-                    r.DESCRIPTION ||
-                    r.description ||
-                    "",
-
-                tag,
-
-                si:
-                    r["SI NO."] ??
-                    r.si_no ??
-                    "",
-
-                date:
-                    r["DATE AND TIME"] ??
-                    r.date_time ??
-                    ""
-
-            };
-
-        }
+      }
+    )
+
+    .getDashboard(
+      sessionId,
+      branch,
+      report,
+      search
     );
 
 }
 
 
-/* =========================================================
-   COUNTS
-========================================================= */
-
-async function updateCounts(){
-
-    const branch =
-        currentBranch;
-
-
-    try{
-
-        const available =
-            currentSheet ===
-            "stocks"
-            ? currentData.length
-            : 0;
-
-
-        let soldCount = 0;
-
-        let auditCount = 0;
-
-
-        const sold =
-            await loadAllSold(
-                branch
-            );
-
-        soldCount =
-            sold.length;
-
-
-        const branches =
-            branch === "ALL"
-            ? [
-                "BAC","BIN","BIS","CAD",
-                "CAS","DGT","GAI","KAB",
-                "KAL","PAS","POT","SAN",
-                "TAB","TAN","TIS","TOL"
-              ]
-            : [branch];
-
-
-        for(
-            const b of branches
-        ){
-
-            const audit =
-                await supabaseRequest(
-                    auditTable(b) +
-                    "?select=NTAGN"
-                );
-
-            auditCount +=
-                audit.length;
-
-        }
-
-
-        document
-        .getElementById(
-            "availableCount"
-        )
-        .textContent =
-            currentSheet ===
-            "stocks"
-            ? available
-            : "—";
-
-
-        document
-        .getElementById(
-            "soldCount"
-        )
-        .textContent =
-            soldCount;
-
-
-        document
-        .getElementById(
-            "auditCount"
-        )
-        .textContent =
-            auditCount;
-
-
-        document
-        .getElementById(
-            "showingCount"
-        )
-        .textContent =
-            currentData.length;
-
-    }
-    catch(error){
-
-        console.error(
-            "COUNT ERROR",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-function setLoading(){
-
-    document
-    .getElementById(
-        "tableBody"
-    )
-    .innerHTML = `
-
-        <tr>
-
-            <td
-                colspan="7"
-                style="
-                    text-align:center;
-                    padding:40px;
-                "
-            >
-                Loading...
-            </td>
-
-        </tr>
-
-    `;
-
-}
-
-
-function showTableError(
-    message
-){
-
-    document
-    .getElementById(
-        "tableBody"
-    )
-    .innerHTML = `
-
-        <tr>
-
-            <td
-                colspan="7"
-                style="
-                    text-align:center;
-                    padding:40px;
-                    color:#dc2626;
-                "
-            >
-                ❌ ${escapeHtml(message)}
-            </td>
-
-        </tr>
-
-    `;
-
-}
-
+/* ==========================================================
+   RENDER TABLE
+   ========================================================== */
 
 function renderTable(){
 
-    const body =
-        document
-        .getElementById(
-            "tableBody"
-        );
+  const tbody =
+    document
+      .getElementById(
+        'tableBody'
+      );
 
 
-    const totalPages =
-        Math.ceil(
-            currentData.length /
-            rowsPerPage
-        );
+  const total =
+    allData.length;
 
 
-    if(
-        currentPage >
-        totalPages &&
-        totalPages > 0
-    ){
-
-        currentPage =
-            totalPages;
-
-    }
+  const totalPages =
+    Math.ceil(
+      total /
+      PAGE_SIZE
+    );
 
 
-    const start =
-        (currentPage - 1) *
-        rowsPerPage;
+  if (
+    total === 0
+  ) {
+
+    tbody.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="7"
+          style="
+            text-align:center;
+            padding:40px;
+          "
+        >
+          No records found.
+        </td>
+
+      </tr>
+
+    `;
 
 
-    const pageRows =
-        currentData.slice(
-            start,
-            start + rowsPerPage
-        );
+    document
+      .getElementById(
+        'showingCount'
+      )
+      .textContent =
+        '0';
 
 
-    if(!pageRows.length){
+    updatePagination(
+      0
+    );
 
-        body.innerHTML = `
+
+    return;
+
+  }
+
+
+  if (
+    currentPage >
+    totalPages
+  ) {
+
+    currentPage =
+      totalPages;
+
+  }
+
+
+  const start =
+    (
+      currentPage - 1
+    ) *
+    PAGE_SIZE;
+
+
+  const end =
+    Math.min(
+      start +
+      PAGE_SIZE,
+      total
+    );
+
+
+  const pageRows =
+    allData.slice(
+      start,
+      end
+    );
+
+
+  tbody.innerHTML =
+    pageRows
+      .map(
+        function(item){
+
+          return `
 
             <tr>
 
-                <td
-                    colspan="7"
-                    style="
-                        text-align:center;
-                        padding:40px;
-                    "
+              <td>
+                ${escapeHtml(
+                  item.branchName ||
+                  item.branch ||
+                  ''
+                )}
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  item.lenstype ||
+                  ''
+                )}
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  item.description ||
+                  ''
+                )}
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  item.tag ||
+                  ''
+                )}
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  item.si ||
+                  ''
+                )}
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  item.date ||
+                  ''
+                )}
+              </td>
+
+              <td>
+
+                <button
+                  class="primaryBtn"
+                  onclick="
+                    openEditModal(
+                      '${jsEscape(item.branch)}',
+                      '${jsEscape(item.tag)}',
+                      '${jsEscape(item.si)}'
+                    )
+                  "
                 >
-                    No records found.
-                </td>
+                  ✏️ Edit
+                </button>
+
+              </td>
 
             </tr>
 
-        `;
+          `;
 
-    }
-    else{
-
-        body.innerHTML =
-            pageRows
-            .map(
-                r => `
-
-                    <tr>
-
-                        <td>
-                            ${escapeHtml(r.branch)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(r.lenstype)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(r.description)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(r.tag)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(r.si)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(r.date)}
-                        </td>
-
-                        <td>
-
-                            ${
-                                currentSheet ===
-                                "SCANRESULTS"
-
-                                ? `
-
-                                    <button
-                                        class="actionBtn editBtn"
-                                        onclick="openEditModal(
-                                            '${escapeJs(r.branch)}',
-                                            '${escapeJs(r.tag)}',
-                                            '${escapeJs(r.si)}'
-                                        )"
-                                    >
-                                        Edit
-                                    </button>
-
-                                    <button
-                                        class="actionBtn deleteBtn"
-                                        onclick="deleteSold(
-                                            '${escapeJs(r.branch)}',
-                                            '${escapeJs(r.tag)}'
-                                        )"
-                                    >
-                                        Delete
-                                    </button>
-
-                                `
-
-                                : ""
-
-                            }
-
-                        </td>
-
-                    </tr>
-
-                `
-            )
-            .join("");
-
-    }
+        }
+      )
+      .join('');
 
 
-    document
+  document
     .getElementById(
-        "pageInfo"
+      'showingCount'
     )
     .textContent =
-        "Page " +
-        (
-            currentData.length
-            ? currentPage
-            : 0
-        ) +
-        " / " +
-        totalPages;
+      formatNumber(
+        total
+      );
 
 
-    document
-    .getElementById(
-        "prevBtn"
-    )
-    .disabled =
-        currentPage <= 1;
-
-
-    document
-    .getElementById(
-        "nextBtn"
-    )
-    .disabled =
-        currentPage >=
-        totalPages;
+  updatePagination(
+    totalPages
+  );
 
 }
 
 
-/* =========================================================
-   EDIT SI
-========================================================= */
+/* ==========================================================
+   PAGINATION
+   ========================================================== */
 
-function openEditModal(
-    branch,
-    tag,
-    si
+function updatePagination(
+  totalPages
 ){
 
-    document
+  document
     .getElementById(
-        "editBranch"
+      'pageInfo'
+    )
+    .textContent =
+      totalPages
+        ? 'Page ' +
+          currentPage +
+          ' / ' +
+          totalPages
+        : 'Page 0 / 0';
+
+
+  document
+    .getElementById(
+      'prevBtn'
+    )
+    .disabled =
+      currentPage <= 1;
+
+
+  document
+    .getElementById(
+      'nextBtn'
+    )
+    .disabled =
+      currentPage >=
+      totalPages ||
+      totalPages === 0;
+
+}
+
+
+function previousPage(){
+
+  if (
+    currentPage > 1
+  ) {
+
+    currentPage--;
+
+    renderTable();
+
+  }
+
+}
+
+
+function nextPage(){
+
+  const totalPages =
+    Math.ceil(
+      allData.length /
+      PAGE_SIZE
+    );
+
+
+  if (
+    currentPage <
+    totalPages
+  ) {
+
+    currentPage++;
+
+    renderTable();
+
+  }
+
+}
+
+
+/* ==========================================================
+   EDIT MODAL
+   ========================================================== */
+
+function openEditModal(
+  branch,
+  tag,
+  si
+){
+
+  document
+    .getElementById(
+      'editBranch'
     )
     .value =
-        branch;
+      branch;
 
 
-    document
+  document
     .getElementById(
-        "editTag"
+      'editTag'
     )
     .value =
-        tag;
+      tag;
 
 
-    document
+  document
     .getElementById(
-        "editSI"
+      'editSI'
     )
     .value =
-        si;
+      si;
 
 
-    document
+  document
     .getElementById(
-        "editModal"
+      'editModal'
     )
     .style.display =
-        "flex";
+      'flex';
 
 }
 
 
 function closeEditModal(){
 
-    document
+  document
     .getElementById(
-        "editModal"
+      'editModal'
     )
     .style.display =
-        "none";
+      'none';
 
 }
 
 
-async function saveEdit(){
+/* ==========================================================
+   SAVE EDIT
+   ========================================================== */
 
-    const branch =
-        document
-        .getElementById(
-            "editBranch"
-        )
-        .value;
+function saveEdit(){
 
-    const tag =
-        document
-        .getElementById(
-            "editTag"
-        )
-        .value;
-
-    const si =
-        document
-        .getElementById(
-            "editSI"
-        )
-        .value
-        .trim();
+  const branch =
+    document
+      .getElementById(
+        'editBranch'
+      )
+      .value;
 
 
-    if(!branch || !tag){
-
-        return;
-
-    }
-
-
-    try{
-
-        await supabaseRequest(
-            soldTable(branch) +
-            "?NTAGN=eq." +
-            encodeURIComponent(tag),
-            {
-
-                method:"PATCH",
-
-                headers:{
-                    ...supabaseHeaders(),
-                    "Prefer":
-                        "return=minimal"
-                },
-
-                body:JSON.stringify({
-
-                    "SI NO.":si
-
-                })
-
-            }
-        );
+  const tag =
+    document
+      .getElementById(
+        'editTag'
+      )
+      .value;
 
 
-        closeEditModal();
-
-        await loadDashboard();
-
-    }
-    catch(error){
-
-        alert(
-            "UPDATE FAILED\n\n" +
-            error.message
-        );
-
-    }
-
-}
+  const newSI =
+    document
+      .getElementById(
+        'editSI'
+      )
+      .value
+      .trim();
 
 
-/* =========================================================
-   DELETE SOLD
-========================================================= */
+  if (!newSI) {
 
-async function deleteSold(
-    branch,
-    tag
-){
+    alert(
+      'SI Number is required.'
+    );
 
-    openDialog(
-        "⚠️",
-        "Delete Record",
-        "Delete this sold record?",
-        async function(){
+    return;
 
-            try{
-
-                await supabaseRequest(
-                    soldTable(branch) +
-                    "?NTAGN=eq." +
-                    encodeURIComponent(tag),
-                    {
-
-                        method:"DELETE",
-
-                        headers:{
-                            ...supabaseHeaders(),
-                            "Prefer":
-                                "return=minimal"
-                        }
-
-                    }
-                );
+  }
 
 
-                await loadDashboard();
+  closeEditModal();
 
-            }
-            catch(error){
 
-                alert(
-                    "DELETE FAILED\n\n" +
-                    error.message
-                );
+  showLoading(
+    'Updating SI in Supabase...'
+  );
 
-            }
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result){
+
+        hideLoading();
+
+
+        if (
+          !result ||
+          !result.ok
+        ) {
+
+          showError(
+            result
+              ? result.message
+              : 'Update failed.'
+          );
+
+          return;
 
         }
+
+
+        showConfirm(
+          'Updated',
+          'SI Number updated successfully.',
+          '✅',
+          function(){
+
+            refreshDashboard();
+
+          },
+          false
+        );
+
+      }
+    )
+
+    .withFailureHandler(
+      function(error){
+
+        hideLoading();
+
+        handleServerError(
+          error
+        );
+
+      }
+    )
+
+    .updateSI(
+      sessionId,
+      branch,
+      tag,
+      newSI
     );
 
 }
 
 
-/* =========================================================
-   UPDATE STOCKS
-========================================================= */
+/* ==========================================================
+   UPDATE STOCKS MODAL
+   ========================================================== */
 
 function openUpdateStockModal(){
 
-    document
+  document
     .getElementById(
-        "updateStockModal"
+      'updateStockModal'
     )
     .style.display =
-        "flex";
+      'flex';
 
 }
 
 
 function closeUpdateStockModal(){
 
-    document
+  document
     .getElementById(
-        "updateStockModal"
+      'updateStockModal'
     )
     .style.display =
-        "none";
+      'none';
 
 }
 
 
-async function updateStocks(){
+/* ==========================================================
+   UPDATE STOCKS
+   ========================================================== */
 
-    const branch =
-        document
-        .getElementById(
-            "updateBranch"
-        )
-        .value;
+function updateStocks(){
 
-    const file =
-        document
-        .getElementById(
-            "stockFile"
-        )
-        .files[0];
+  const branch =
+    document
+      .getElementById(
+        'updateBranch'
+      )
+      .value;
 
 
-    if(!branch){
+  const file =
+    document
+      .getElementById(
+        'stockFile'
+      )
+      .files[0];
 
-        alert(
-            "Select a branch."
+
+  if (!branch) {
+
+    alert(
+      'Please select a branch.'
+    );
+
+    return;
+
+  }
+
+
+  if (!file) {
+
+    alert(
+      'Please select an Excel file.'
+    );
+
+    return;
+
+  }
+
+
+  showLoading(
+    'Reading Excel file...'
+  );
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    function(event){
+
+      try {
+
+        const data =
+          new Uint8Array(
+            event.target.result
+          );
+
+
+        const workbook =
+          XLSX.read(
+            data,
+            {
+              type:
+                'array',
+
+              cellDates:
+                true
+            }
+          );
+
+
+        const firstSheet =
+          workbook.Sheets[
+            workbook.SheetNames[0]
+          ];
+
+
+        let rows =
+          XLSX.utils.sheet_to_json(
+            firstSheet,
+            {
+              header:1,
+
+              defval:'',
+
+              raw:true
+            }
+          );
+
+
+        /*
+         * Remove completely empty rows.
+         */
+
+        rows =
+          rows.filter(
+            function(row){
+
+              return row.some(
+                function(value){
+
+                  return (
+                    value !== '' &&
+                    value !== null &&
+                    value !== undefined
+                  );
+
+                }
+              );
+
+            }
+          );
+
+
+        /*
+         * Remove header row if it is present.
+         */
+
+        if (
+          rows.length &&
+          String(
+            rows[0][0] ||
+            ''
+          )
+          .trim()
+          .toUpperCase() ===
+          'SDATE'
+        ) {
+
+          rows.shift();
+
+        }
+
+
+        if (!rows.length) {
+
+          hideLoading();
+
+          alert(
+            'The Excel file contains no data.'
+          );
+
+          return;
+
+        }
+
+
+        /*
+         * Normalize each row to 27 columns.
+         */
+
+        rows =
+          rows.map(
+            function(row){
+
+              const result =
+                new Array(27)
+                  .fill('');
+
+
+              for (
+                let i = 0;
+                i < 27;
+                i++
+              ) {
+
+                if (
+                  row[i] !==
+                  undefined &&
+                  row[i] !==
+                  null
+                ) {
+
+                  result[i] =
+                    row[i];
+
+                }
+
+              }
+
+
+              return result;
+
+            }
+          );
+
+
+        showLoading(
+          'Uploading ' +
+          formatNumber(
+            rows.length
+          ) +
+          ' records to Supabase...'
         );
 
-        return;
 
-    }
+        google.script.run
 
+          .withSuccessHandler(
+            function(result){
 
-    if(!file){
-
-        alert(
-            "Select an Excel file."
-        );
-
-        return;
-
-    }
+              hideLoading();
 
 
-    /*
-     Import remains on Apps Script
-     because your current backend
-     already handles XLSX parsing,
-     Drive storage and background jobs.
-    */
+              if (
+                !result ||
+                !result.ok
+              ) {
 
-    try{
+                showError(
+                  result
+                    ? result.message
+                    : 'Update failed.'
+                );
 
-        const buffer =
-            await file.arrayBuffer();
+                return;
 
-
-        let binary = "";
-
-        const bytes =
-            new Uint8Array(
-                buffer
-            );
+              }
 
 
-        const chunk =
-            0x8000;
+              closeUpdateStockModal();
 
 
-        for(
-            let i = 0;
-            i < bytes.length;
-            i += chunk
-        ){
-
-            binary += String.fromCharCode(
-                ...bytes.subarray(
-                    i,
-                    Math.min(
-                        i + chunk,
-                        bytes.length
-                    )
+              document
+                .getElementById(
+                  'stockFile'
                 )
-            );
-
-        }
-
-
-        const base64 =
-            btoa(binary);
+                .value =
+                  '';
 
 
-        const {
-            email,
-            sessionId
-        } = getSession();
+              showConfirm(
+                'Update Complete',
+                result.message,
+                '✅',
+                function(){
+
+                  const selectedBranch =
+                    document
+                      .getElementById(
+                        'branchSelect'
+                      )
+                      .value;
 
 
-        const params =
-            new URLSearchParams();
+                  if (
+                    selectedBranch ===
+                    branch
+                  ) {
 
-        params.set(
-            "action",
-            "uploadStock"
-        );
+                    refreshDashboard();
 
-        params.set(
-            "email",
-            email
-        );
+                  }
 
-        params.set(
-            "sessionId",
-            sessionId
-        );
+                },
+                false
+              );
 
-        params.set(
-            "branch",
-            branch
-        );
+            }
+          )
 
-        params.set(
-            "fileName",
-            file.name
-        );
+          .withFailureHandler(
+            function(error){
 
-        params.set(
-            "file",
-            base64
-        );
+              hideLoading();
 
+              handleServerError(
+                error
+              );
 
-        closeUpdateStockModal();
+            }
+          )
 
+          .updateStocks(
+            sessionId,
+            branch,
+            rows
+          );
 
-        const response =
-            await fetch(
-                APPS_SCRIPT_URL +
-                "?" +
-                params.toString()
-            );
+      }
+      catch(error){
 
-
-        const result =
-            await response.json();
-
-
-        if(
-            result.status !==
-            "QUEUED"
-        ){
-
-            throw new Error(
-                result.message ||
-                result.status ||
-                "Upload failed"
-            );
-
-        }
-
+        hideLoading();
 
         alert(
-            "UPDATE STOCKS QUEUED.\n\n" +
-            "Job ID: " +
-            result.jobId
+          'Unable to read Excel file:\n\n' +
+          error.message
         );
 
+      }
 
-        monitorJob(
-            result.jobId
-        );
+    };
 
-    }
-    catch(error){
 
-        alert(
-            "UPLOAD FAILED\n\n" +
-            error.message
-        );
+  reader.onerror =
+    function(){
 
-    }
+      hideLoading();
+
+      alert(
+        'Unable to read the Excel file.'
+      );
+
+    };
+
+
+  reader.readAsArrayBuffer(
+    file
+  );
 
 }
 
 
-/* =========================================================
-   JOB MONITOR
-========================================================= */
-
-function monitorJob(
-    jobId
-){
-
-    const timer =
-        setInterval(
-            async function(){
-
-                try{
-
-                    const result =
-                        await appsScriptRequest(
-                            "getJobStatus",
-                            {
-                                jobId
-                            }
-                        );
-
-
-                    if(
-                        result.jobStatus ===
-                        "DONE"
-                    ){
-
-                        clearInterval(
-                            timer
-                        );
-
-                        alert(
-                            "UPDATE STOCKS COMPLETE."
-                        );
-
-                        await loadDashboard();
-
-                    }
-
-
-                    if(
-                        result.jobStatus ===
-                        "FAILED"
-                    ){
-
-                        clearInterval(
-                            timer
-                        );
-
-                        alert(
-                            "UPDATE STOCKS FAILED\n\n" +
-                            result.result
-                        );
-
-                    }
-
-                }
-                catch(error){
-
-                    console.error(
-                        error
-                    );
-
-                }
-
-            },
-            3000
-        );
-
-}
-
-
-/* =========================================================
+/* ==========================================================
    EXPORT
-========================================================= */
+   ========================================================== */
 
 function openExportModal(){
 
-    document
+  document
     .getElementById(
-        "exportModal"
+      'exportModal'
     )
     .style.display =
-        "flex";
+      'flex';
 
 }
 
 
 function closeExportModal(){
 
-    document
+  document
     .getElementById(
-        "exportModal"
+      'exportModal'
     )
     .style.display =
-        "none";
+      'none';
 
 }
 
 
-async function startExport(){
+function startExport(){
 
-    const branch =
-        document
-        .getElementById(
-            "exportBranch"
-        )
-        .value;
-
-
-    if(!branch){
-
-        alert(
-            "Select a branch."
-        );
-
-        return;
-
-    }
+  const branch =
+    document
+      .getElementById(
+        'exportBranch'
+      )
+      .value;
 
 
-    const {
-        email,
-        sessionId
-    } = getSession();
+  if (!branch) {
+
+    alert(
+      'Please select a branch.'
+    );
+
+    return;
+
+  }
 
 
-    try{
-
-        const result =
-            await appsScriptRequest(
-                "export",
-                {
-                    email,
-                    sessionId,
-                    branch
-                }
-            );
+  closeExportModal();
 
 
-        if(
-            result.status !==
-            "QUEUED"
-        ){
+  showLoading(
+    'Preparing Supabase export...'
+  );
 
-            throw new Error(
-                result.message ||
-                result.status
-            );
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result){
+
+        hideLoading();
+
+
+        if (
+          !result ||
+          !result.ok
+        ) {
+
+          showError(
+            result
+              ? result.message
+              : 'Export failed.'
+          );
+
+          return;
 
         }
 
 
-        closeExportModal();
+        /*
+         * Open temporary XLSX spreadsheet.
+         */
 
-
-        monitorExport(
-            result.jobId
+        window.open(
+          result.url,
+          '_blank'
         );
 
-    }
-    catch(error){
 
-        alert(
-            "EXPORT FAILED\n\n" +
-            error.message
+        showConfirm(
+          'Export Ready',
+          'The export has been created.\n\nIt contains data loaded directly from Supabase.',
+          '📥',
+          null,
+          false
         );
 
-    }
+      }
+    )
+
+    .withFailureHandler(
+      function(error){
+
+        hideLoading();
+
+        handleServerError(
+          error
+        );
+
+      }
+    )
+
+    .exportReport(
+      sessionId,
+      branch
+    );
 
 }
 
 
-function monitorExport(
-    jobId
-){
-
-    const timer =
-        setInterval(
-            async function(){
-
-                try{
-
-                    const result =
-                        await appsScriptRequest(
-                            "getJobStatus",
-                            {
-                                jobId
-                            }
-                        );
-
-
-                    if(
-                        result.jobStatus ===
-                        "DONE"
-                    ){
-
-                        clearInterval(
-                            timer
-                        );
-
-
-                        if(result.result){
-
-                            window.open(
-                                result.result,
-                                "_blank"
-                            );
-
-                        }
-                        else{
-
-                            alert(
-                                "Export completed."
-                            );
-
-                        }
-
-                    }
-
-
-                    if(
-                        result.jobStatus ===
-                        "FAILED"
-                    ){
-
-                        clearInterval(
-                            timer
-                        );
-
-                        alert(
-                            "EXPORT FAILED\n\n" +
-                            result.result
-                        );
-
-                    }
-
-                }
-                catch(error){
-
-                    console.error(
-                        error
-                    );
-
-                }
-
-            },
-            3000
-        );
-
-}
-
-
-/* =========================================================
-   CLEAR REPORT
-========================================================= */
+/* ==========================================================
+   CLEAR MODAL
+   ========================================================== */
 
 function openClearModal(){
 
-    document
+  document
     .getElementById(
-        "clearModal"
+      'clearModal'
     )
     .style.display =
-        "flex";
+      'flex';
 
 }
 
 
 function closeClearModal(){
 
-    document
+  document
     .getElementById(
-        "clearModal"
+      'clearModal'
     )
     .style.display =
-        "none";
+      'none';
 
 }
 
+
+/* ==========================================================
+   CLEAR REPORT
+   ========================================================== */
 
 function clearReport(){
 
-    const branch =
-        document
-        .getElementById(
-            "clearBranch"
+  const branch =
+    document
+      .getElementById(
+        'clearBranch'
+      )
+      .value;
+
+
+  const report =
+    document
+      .getElementById(
+        'clearSheet'
+      )
+      .value;
+
+
+  if (!branch) {
+
+    alert(
+      'Please select a branch.'
+    );
+
+    return;
+
+  }
+
+
+  if (!report) {
+
+    alert(
+      'Please select a report.'
+    );
+
+    return;
+
+  }
+
+
+  const reportName =
+    report === 'stocks'
+      ? 'Stocks'
+      : report === 'SCANRESULTS'
+        ? 'Sold Out'
+        : 'Re-Inventory';
+
+
+  showConfirm(
+    'Clear Report',
+    'WARNING!\n\nYou are about to clear:\n\n' +
+    branch +
+    ' - ' +
+    reportName +
+    '\n\nThis action cannot be undone.',
+    '⚠️',
+    function(){
+
+      closeClearModal();
+
+
+      showLoading(
+        'Clearing Supabase data...'
+      );
+
+
+      google.script.run
+
+        .withSuccessHandler(
+          function(result){
+
+            hideLoading();
+
+
+            if (
+              !result ||
+              !result.ok
+            ) {
+
+              showError(
+                result
+                  ? result.message
+                  : 'Clear failed.'
+              );
+
+              return;
+
+            }
+
+
+            showConfirm(
+              'Report Cleared',
+              result.message,
+              '✅',
+              function(){
+
+                const currentBranch =
+                  document
+                    .getElementById(
+                      'branchSelect'
+                    )
+                    .value;
+
+
+                const currentReport =
+                  document
+                    .getElementById(
+                      'sheetSelect'
+                    )
+                    .value;
+
+
+                if (
+                  currentBranch ===
+                    branch &&
+                  currentReport ===
+                    report
+                ) {
+
+                  refreshDashboard();
+
+                }
+
+              },
+              false
+            );
+
+          }
         )
-        .value;
 
-    const sheet =
-        document
-        .getElementById(
-            "clearSheet"
+        .withFailureHandler(
+          function(error){
+
+            hideLoading();
+
+            handleServerError(
+              error
+            );
+
+          }
         )
-        .value;
 
-
-    if(!branch || !sheet){
-
-        alert(
-            "Select branch and report."
+        .clearReport(
+          sessionId,
+          branch,
+          report
         );
 
-        return;
-
     }
-
-
-    openDialog(
-        "⚠️",
-        "Clear Report",
-        "This will permanently delete the selected report. Continue?",
-        async function(){
-
-            try{
-
-                const table =
-                    sheet === "stocks"
-                    ? stockTable(branch)
-                    : sheet ===
-                      "SCANRESULTS"
-                    ? soldTable(branch)
-                    : auditTable(branch);
-
-
-                await supabaseRequest(
-                    table +
-                    "?NTAGN=not.is.null",
-                    {
-
-                        method:"DELETE",
-
-                        headers:{
-                            ...supabaseHeaders(),
-                            "Prefer":
-                                "return=minimal"
-                        }
-
-                    }
-                );
-
-
-                closeClearModal();
-
-                await loadDashboard();
-
-            }
-            catch(error){
-
-                alert(
-                    "CLEAR FAILED\n\n" +
-                    error.message
-                );
-
-            }
-
-        }
-    );
+  );
 
 }
 
 
-/* =========================================================
-   DIALOG
-========================================================= */
+/* ==========================================================
+   CONFIRMATION DIALOG
+   ========================================================== */
 
-function openDialog(
-    icon,
-    title,
-    message,
-    callback
+function showConfirm(
+  title,
+  message,
+  icon,
+  callback,
+  showCancel = true
 ){
 
-    document
+  document
     .getElementById(
-        "dialogIcon"
+      'dialogIcon'
     )
     .textContent =
-        icon;
+      icon ||
+      '⚠️';
 
 
-    document
+  document
     .getElementById(
-        "dialogTitle"
+      'dialogTitle'
     )
     .textContent =
-        title;
+      title ||
+      'Confirm';
 
 
-    document
+  document
     .getElementById(
-        "dialogMessage"
+      'dialogMessage'
     )
     .textContent =
-        message;
+      message ||
+      '';
 
 
-    dialogCallback =
-        callback;
+  dialogCallback =
+    callback;
 
 
+  const modal =
     document
-    .getElementById(
-        "dialogModal"
-    )
-    .style.display =
-        "flex";
+      .getElementById(
+        'dialogModal'
+      );
+
+
+  const cancelButton =
+    modal.querySelector(
+      '.dialogButtons button:first-child'
+    );
+
+
+  cancelButton.style.display =
+    showCancel
+      ? 'inline-block'
+      : 'none';
+
+
+  modal.style.display =
+    'flex';
 
 }
 
 
 function closeDialog(){
 
-    document
+  document
     .getElementById(
-        "dialogModal"
+      'dialogModal'
     )
     .style.display =
-        "none";
-
-    dialogCallback =
-        null;
-
-}
+      'none';
 
 
-async function dialogOKClick(){
-
-    const callback =
-        dialogCallback;
-
-    closeDialog();
-
-    if(callback){
-
-        await callback();
-
-    }
+  dialogCallback =
+    null;
 
 }
 
 
-/* =========================================================
-   LOGOUT
-========================================================= */
+function dialogOKClick(){
 
-async function logout(){
-
-    const {
-        email,
-        sessionId
-    } = getSession();
+  const callback =
+    dialogCallback;
 
 
-    try{
+  closeDialog();
 
-        await appsScriptRequest(
-            "logout",
-            {
-                email,
-                sessionId
-            }
-        );
 
-    }
-    catch(error){
+  if (
+    typeof callback ===
+    'function'
+  ) {
 
-        console.error(
-            error
-        );
+    callback();
 
-    }
+  }
 
+}
+
+
+/* ==========================================================
+   LOADING
+   ========================================================== */
+
+function showLoading(
+  text
+){
+
+  document
+    .getElementById(
+      'loadingText'
+    )
+    .textContent =
+      text ||
+      'Please wait...';
+
+
+  document
+    .getElementById(
+      'loadingOverlay'
+    )
+    .style.display =
+      'flex';
+
+}
+
+
+function hideLoading(){
+
+  document
+    .getElementById(
+      'loadingOverlay'
+    )
+    .style.display =
+      'none';
+
+}
+
+
+/* ==========================================================
+   ERROR HANDLING
+   ========================================================== */
+
+function handleServerError(
+  error
+){
+
+  const message =
+    error &&
+    error.message
+      ? error.message
+      : String(error);
+
+
+  if (
+    message.indexOf(
+      'SESSION_EXPIRED'
+    ) !== -1
+  ) {
 
     clearSession();
 
-    location.reload();
+    alert(
+      'Your session has expired. Please login again.'
+    );
+
+    return;
+
+  }
+
+
+  showError(
+    message
+  );
 
 }
 
 
-/* =========================================================
-   UTILITIES
-========================================================= */
+function showError(
+  message
+){
+
+  showConfirm(
+    'Error',
+    message,
+    '❌',
+    null,
+    false
+  );
+
+}
+
+
+/* ==========================================================
+   HTML ESCAPING
+   ========================================================== */
 
 function escapeHtml(
-    value
+  value
 ){
 
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
+  return String(
+    value === undefined ||
+    value === null
+      ? ''
+      : value
+  )
+  .replace(
+    /&/g,
+    '&amp;'
+  )
+  .replace(
+    /</g,
+    '&lt;'
+  )
+  .replace(
+    />/g,
+    '&gt;'
+  )
+  .replace(
+    /"/g,
+    '&quot;'
+  )
+  .replace(
+    /'/g,
+    '&#039;'
+  );
 
 }
 
 
-function escapeJs(
-    value
+/* ==========================================================
+   JAVASCRIPT STRING ESCAPING
+   ========================================================== */
+
+function jsEscape(
+  value
 ){
 
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /\\/g,
-        "\\\\"
-    )
-    .replace(
-        /'/g,
-        "\\'"
-    )
-    .replace(
-        /\n/g,
-        "\\n"
-    )
-    .replace(
-        /\r/g,
-        "\\r"
-    );
+  return String(
+    value === undefined ||
+    value === null
+      ? ''
+      : value
+  )
+  .replace(
+    /\\/g,
+    '\\\\'
+  )
+  .replace(
+    /'/g,
+    "\\'"
+  )
+  .replace(
+    /\r/g,
+    '\\r'
+  )
+  .replace(
+    /\n/g,
+    '\\n'
+  );
 
 }
 
 
-/* =========================================================
-   BUTTON EVENTS
-========================================================= */
+/* ==========================================================
+   NUMBER FORMAT
+   ========================================================== */
 
-document
-.getElementById(
-    "searchBtn"
-)
-.addEventListener(
-    "click",
-    loadDashboard
-);
+function formatNumber(
+  value
+){
+
+  const number =
+    Number(value) || 0;
 
 
-document
-.getElementById(
-    "refreshBtn"
-)
-.addEventListener(
-    "click",
-    loadDashboard
-);
+  return number.toLocaleString();
+
+}
 
 
-document
-.getElementById(
-    "prevBtn"
-)
-.addEventListener(
-    "click",
-    function(){
+/* ==========================================================
+   CLOSE MODALS WHEN CLICKING OUTSIDE
+   ========================================================== */
 
-        if(
-            currentPage > 1
-        ){
+document.addEventListener(
+  'click',
+  function(event){
 
-            currentPage--;
+    if (
+      event.target.classList.contains(
+        'modalOverlay'
+      )
+    ) {
 
-            renderTable();
-
-        }
-
-    }
-);
-
-
-document
-.getElementById(
-    "nextBtn"
-)
-.addEventListener(
-    "click",
-    function(){
-
-        const totalPages =
-            Math.ceil(
-                currentData.length /
-                rowsPerPage
-            );
-
-
-        if(
-            currentPage <
-            totalPages
-        ){
-
-            currentPage++;
-
-            renderTable();
-
-        }
-
-    }
-);
-
-
-document
-.getElementById(
-    "updateStockBtn"
-)
-.addEventListener(
-    "click",
-    openUpdateStockModal
-);
-
-
-document
-.getElementById(
-    "exportBtn"
-)
-.addEventListener(
-    "click",
-    openExportModal
-);
-
-
-document
-.getElementById(
-    "clearBtn"
-)
-.addEventListener(
-    "click",
-    openClearModal
-);
-
-
-document
-.getElementById(
-    "logoutBtn"
-)
-.addEventListener(
-    "click",
-    logout
-);
-
-
-/* =========================================================
-   STARTUP
-========================================================= */
-
-(async function(){
-
-    const loggedIn =
-        await checkLogin();
-
-
-    if(loggedIn){
-
-        showDashboard();
+      event.target.style.display =
+        'none';
 
     }
 
-})();
+  }
+);
 
 </script>
 
 </body>
+
 </html>

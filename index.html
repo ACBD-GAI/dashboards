@@ -15,42 +15,6 @@
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
-<script>
-/* ============================================================
-   IMPORT / EXPORT DATABASE COLUMNS
-   Must match the Supabase STOCKS table column order.
-============================================================ */
-const DB_COLUMNS = [
-  'SDATE',
-  'SUPPLIER',
-  'DR',
-  'COST',
-  'ASG',
-  'CB',
-  'FD',
-  'UNITS',
-  'POWER',
-  'LENSTYPE',
-  'PUNIT',
-  'BR',
-  'NTAGN',
-  'CATEGORY',
-  'DESCRIPTION',
-  'LENSCODE',
-  'SELLINGPRICE',
-  'DELIVERYDATE',
-  'ORNUMBER',
-  'ORDATE',
-  'REMARKS',
-  'TAGPRICE',
-  'QR',
-  'SI NO.',
-  'DATE AND TIME',
-  'USER EMAIL',
-  'STATUS'
-];
-</script>
-
 <style>
 
 * {
@@ -444,61 +408,6 @@ th {
     flex:1;
   }
 
-}
-
-
-/* =========================================================
-   IMPORT / EXPORT TOAST
-   ========================================================= */
-
-#ioToast {
-  position:fixed;
-  left:50%;
-  bottom:28px;
-  transform:translate(-50%,18px);
-  width:min(440px,calc(100vw - 32px));
-  padding:13px 16px;
-  background:rgba(25,30,38,.96);
-  color:#fff;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:12px;
-  box-shadow:0 12px 35px rgba(0,0,0,.24);
-  z-index:9000;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .18s ease,transform .18s ease;
-  font-size:13px;
-  line-height:1.4;
-}
-
-#ioToast.show {
-  opacity:1;
-  transform:translate(-50%,0);
-}
-
-#ioToast.info {
-  border-left:4px solid #1677ff;
-}
-
-#ioToast.success {
-  border-left:4px solid #16803c;
-}
-
-#ioToast.error {
-  border-left:4px solid #c62828;
-}
-
-#ioToast strong {
-  display:block;
-  margin-bottom:2px;
-}
-
-
-.queueFileName {
-  margin-top:8px;
-  font-size:12px;
-  color:#64748b;
-  word-break:break-all;
 }
 
 </style>
@@ -995,22 +904,6 @@ th {
       class="fileName"
     ></div>
 
-    <div
-      style="
-        margin-top:8px;
-        padding:9px 10px;
-        background:#f5f8ff;
-        border:1px solid #dce7ff;
-        border-radius:8px;
-        font-size:12px;
-        color:#53627a;
-      "
-    >
-      📦 You can select the exported ONE XLSX file.
-      The <b>STOCKS</b> sheet is imported; SOLD and AUDIT
-      stay unchanged.
-    </div>
-
 
     <div class="modalButtons">
 
@@ -1291,7 +1184,6 @@ th {
 </div>
 
 
-<div id="ioToast" aria-live="polite"></div>
 <script>
 
 /* ============================================================
@@ -1302,7 +1194,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycbwACrxFvgpmPr3Kk_LodtX5VzuNXKSWz4eW5qTz5t-ao8TbKTY-X-g22y5f8zJxvWLINQ/exec';
+  'https://script.google.com/macros/s/AKfycbwpOUo5iAmxvhk5tM379BcKGdQvYApMzgSlN6ppRZylaFWpYP3nyyAkyJtCSNeQu5bXrA/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -1973,7 +1865,8 @@ async function searchDashboard() {
 
   if (!branch) {
 
-    alert(
+    showQueueError(
+      'EXPORT',
       'Please select a branch.'
     );
 
@@ -2608,66 +2501,11 @@ function showSelectedFile() {
         formatBytes(
           file.size
         ) +
-        ')' +
-        ' • STOCKS sheet will be imported'
+        ')'
       : '';
 
 }
 
-
-/* ============================================================
-   IMPORT / EXPORT FEEDBACK
-============================================================ */
-
-let ioToastTimer = null;
-
-function showIOToast(
-  title,
-  message,
-  type
-) {
-
-  const toast =
-    document.getElementById(
-      'ioToast'
-    );
-
-  if (!toast) {
-    return;
-  }
-
-  clearTimeout(
-    ioToastTimer
-  );
-
-  toast.className =
-    'show ' +
-    (
-      type ||
-      'info'
-    );
-
-  toast.innerHTML =
-    '<strong>' +
-    escapeHtml(
-      title || 'Inventory'
-    ) +
-    '</strong>' +
-    escapeHtml(
-      message || ''
-    );
-
-  ioToastTimer =
-    setTimeout(
-      function() {
-        toast.classList.remove(
-          'show'
-        );
-      },
-      4200
-    );
-
-}
 
 /* ============================================================
    IMPORT
@@ -2677,10 +2515,8 @@ async function updateStocks() {
 
   if (importRunning) {
 
-    showIOToast(
-      'Import already running',
-      'Please wait for the current background import to finish.',
-      'info'
+    alert(
+      'An import is already running.'
     );
 
     return;
@@ -2703,10 +2539,8 @@ async function updateStocks() {
 
   if (!branch) {
 
-    showIOToast(
-      'Branch required',
-      'Please select a branch before starting the import.',
-      'info'
+    alert(
+      'Please select a branch.'
     );
 
     return;
@@ -2715,10 +2549,8 @@ async function updateStocks() {
 
   if (!file) {
 
-    showIOToast(
-      'File required',
-      'Please choose an Excel or CSV inventory file.',
-      'info'
+    alert(
+      'Please select an Excel or CSV file.'
     );
 
     return;
@@ -2738,13 +2570,10 @@ async function updateStocks() {
 
   try {
 
-    const importFile =
+    const rows =
       await readImportFile(
         file
       );
-
-    const rows =
-      importFile.rows || [];
 
     if (
       !rows.length
@@ -2947,7 +2776,8 @@ function readImportFile(
   return new Promise(
     function(resolve, reject) {
 
-      const reader = new FileReader();
+      const reader =
+        new FileReader();
 
       reader.onload =
         function(event) {
@@ -2969,45 +2799,35 @@ function readImportFile(
                 }
               );
 
-            if (!workbook.SheetNames.length) {
+            if (
+              !workbook.SheetNames.length
+            ) {
+
               reject(
                 new Error(
                   'No worksheet found.'
                 )
               );
+
               return;
+
             }
 
             /*
-             * Export files contain ONE workbook with:
-             * STOCKS, SOLD, AUDIT.
-             *
-             * Update Stocks intentionally imports STOCKS only.
-             * SOLD and AUDIT are left untouched so the existing
-             * dashboard behavior is not changed.
-             *
-             * A normal single-sheet Excel/CSV file is also
-             * supported exactly as before.
+             * The export is ONE XLSX containing STOCKS, SOLD and AUDIT.
+             * Update Stocks must import only the STOCKS worksheet.
+             * Fall back to the first worksheet for older files that do
+             * not contain a STOCKS sheet.
              */
-            let selectedSheetName =
-              workbook.SheetNames[0];
-
-            const stocksSheetName =
-              workbook.SheetNames.find(
-                function(name) {
-                  return String(name || '')
-                    .trim()
-                    .toUpperCase() === 'STOCKS';
-                }
-              );
-
-            if (stocksSheetName) {
-              selectedSheetName =
-                stocksSheetName;
-            }
+            const importSheetName =
+              workbook.SheetNames.indexOf('STOCKS') !== -1
+                ? 'STOCKS'
+                : workbook.SheetNames[0];
 
             const sheet =
-              workbook.Sheets[selectedSheetName];
+              workbook.Sheets[
+                importSheetName
+              ];
 
             const rows =
               XLSX.utils.sheet_to_json(
@@ -3019,22 +2839,12 @@ function readImportFile(
                 }
               );
 
-            if (!rows.length) {
-              reject(
-                new Error(
-                  'The STOCKS worksheet is empty.'
-                )
-              );
-              return;
-            }
-
-            resolve({
-              rows: rows,
-              sheetName: selectedSheetName,
-              sheetNames: workbook.SheetNames
-            });
+            resolve(
+              rows
+            );
 
           }
+
           catch (err) {
 
             reject(
@@ -3050,19 +2860,61 @@ function readImportFile(
 
       reader.onerror =
         function() {
+
           reject(
             new Error(
               'Unable to read selected file.'
             )
           );
+
         };
 
-      reader.readAsArrayBuffer(file);
+      reader.readAsArrayBuffer(
+        file
+      );
 
     }
   );
 
 }
+
+
+/* ============================================================
+   NORMALIZE IMPORT ROWS
+============================================================ */
+
+const DB_COLUMNS = [
+
+  'SDATE',
+  'SUPPLIER',
+  'DR',
+  'COST',
+  'ASG',
+  'CB',
+  'FD',
+  'UNITS',
+  'POWER',
+  'LENSTYPE',
+  'PUNIT',
+  'BR',
+  'NTAGN',
+  'CATEGORY',
+  'DESCRIPTION',
+  'LENSCODE',
+  'SELLINGPRICE',
+  'DELIVERYDATE',
+  'ORNUMBER',
+  'ORDATE',
+  'REMARKS',
+  'TAGPRICE',
+  'QR',
+  'SI NO.',
+  'DATE AND TIME',
+  'USER EMAIL',
+  'STATUS'
+
+];
+
 
 function normalizeImportRows(
   rows
@@ -3545,10 +3397,10 @@ async function startExport() {
 
   if (exportRunning) {
 
-    showIOToast(
+    showQueue(
+      'EXPORT',
       'Export already running',
-      'Please wait for the current background export to finish.',
-      'info'
+      ''
     );
 
     return;
@@ -3564,10 +3416,8 @@ async function startExport() {
 
   if (!branch) {
 
-    showIOToast(
-      'Branch required',
-      'Please select a branch before starting the export.',
-      'info'
+    alert(
+      'Please select a branch.'
     );
 
     return;
@@ -3630,7 +3480,7 @@ async function startExport() {
       'Export queued...',
       branch,
       0,
-      'ONE XLSX • 3 sheets • Waiting for background worker'
+      'Waiting for background worker'
     );
 
     startQueuePolling();
@@ -3893,23 +3743,8 @@ async function pollCurrentJob() {
 
         stopQueuePolling();
 
-        window.lastCompletedExportJobId =
-          result.jobId ||
-          (currentJob && currentJob.jobId) ||
-          '';
-
         showExportComplete(
-          Object.assign(
-            {},
-            result,
-            {
-              exportJobId:
-                result.jobId ||
-                (currentJob && currentJob.jobId) ||
-                window.lastCompletedExportJobId ||
-                ''
-            }
-          )
+          result
         );
 
         currentJob =
@@ -4028,7 +3863,7 @@ function exportStatusText(
       return 'Processing export...';
 
     case 'creating_xlsx':
-      return 'Creating ONE XLSX with 3 sheets...';
+      return 'Creating one XLSX file...';
 
     case 'completed':
       return 'Export complete';
@@ -4298,14 +4133,15 @@ function showQueueError(
 }
 
 
-async function showExportComplete(
+function showExportComplete(
   result
 ) {
 
   const box =
-    document.getElementById(
-      'jobQueue'
-    );
+    document
+      .getElementById(
+        'jobQueue'
+      );
 
   box.style.display =
     'block';
@@ -4350,130 +4186,187 @@ async function showExportComplete(
       'queueDetails'
     )
     .textContent =
-    (result.branch || '') +
+    (
+      result.branch ||
+      ''
+    ) +
     ' • ONE XLSX • 3 sheets • ' +
-    Number(result.stocksRows || 0).toLocaleString() +
+    Number(
+      result.stocksRows || 0
+    ).toLocaleString() +
     ' stocks • ' +
-    Number(result.soldRows || 0).toLocaleString() +
+    Number(
+      result.soldRows || 0
+    ).toLocaleString() +
     ' sold • ' +
-    Number(result.auditRows || 0).toLocaleString() +
+    Number(
+      result.auditRows || 0
+    ).toLocaleString() +
     ' audit';
 
   document
     .getElementById(
       'queueCancelArea'
     )
-    .classList.add('hidden');
+    .classList.add(
+      'hidden'
+    );
 
   const links =
-    document.getElementById('queueLinks');
+    document
+      .getElementById(
+        'queueLinks'
+      );
 
-  links.innerHTML = '';
-
-  /*
-   * First use the completed export response itself.
-   */
-  let fileId = String(result.xlsxFileId || '').trim();
-  let fileName = String(result.xlsxFileName || '').trim();
-  let downloadUrl = String(result.xlsxDownloadUrl || '').trim();
-  let viewUrl = String(result.xlsxViewUrl || '').trim();
-
-  if (!fileId && Array.isArray(result.files)) {
-    const found = result.files.find(function(file) {
-      return file &&
-        String(file.name || '').toLowerCase().endsWith('.xlsx') &&
-        (file.id || file.url);
-    });
-
-    if (found) {
-      fileId = String(found.id || '').trim();
-      fileName = String(found.name || '').trim();
-      downloadUrl = String(found.url || '').trim();
-      viewUrl = String(found.viewUrl || '').trim();
-    }
-  }
-
-  /*
-   * IMPORTANT FALLBACK:
-   * Ask Apps Script for the actual completed Drive file by job ID.
-   * This is deliberately a separate request, so the download no
-   * longer depends on files[] being returned by exportStatus.
-   */
-  if (!fileId && !downloadUrl && currentJob === null) {
-    /* currentJob is cleared by pollExportStatus() after this call in
-       older versions, so use the job ID saved on the result if present. */
-  }
-
-  const jobId =
-    result.exportJobId ||
-    result.jobId ||
-    window.lastCompletedExportJobId ||
+  links.innerHTML =
     '';
 
-  if (!fileId && !downloadUrl && jobId) {
-    try {
-      const downloadResult =
-        await api(
-          'getExportDownload',
-          {
-            session: session,
-            jobId: jobId
-          }
-        );
+  /* Prefer the authoritative XLSX URL returned by Apps Script. */
+  let url =
+    String(
+      result.xlsxDownloadUrl ||
+      ''
+    ).trim();
 
-      if (downloadResult && downloadResult.ok) {
-        fileId = String(downloadResult.xlsxFileId || '').trim();
-        fileName = String(downloadResult.xlsxFileName || '').trim();
-        downloadUrl = String(downloadResult.xlsxDownloadUrl || '').trim();
-        viewUrl = String(downloadResult.xlsxViewUrl || '').trim();
-      }
-    }
-    catch (err) {
-      /* Show the real retrieval error below instead of a fake success. */
-      const warning = document.createElement('div');
-      warning.className = 'queueFileName';
-      warning.textContent = 'Export completed, but the XLSX could not be retrieved: ' + err.message;
-      links.appendChild(warning);
-      return;
+  const viewUrl =
+    String(
+      result.xlsxViewUrl ||
+      ''
+    ).trim();
+
+  const fileId =
+    String(
+      result.xlsxFileId ||
+      ''
+    ).trim();
+
+  const files =
+    Array.isArray(result.files)
+      ? result.files
+      : [];
+
+  if (!url) {
+    const xlsx =
+      files.find(
+        function(file) {
+          return file &&
+            String(
+              file.name || ''
+            ).toLowerCase()
+              .endsWith('.xlsx') &&
+            file.url;
+        }
+      );
+
+    if (xlsx) {
+      url =
+        String(
+          xlsx.url
+        );
     }
   }
 
-  if (downloadUrl || fileId) {
+  /* Last-resort URL construction from the real Drive file ID. */
+  if (!url && fileId) {
+    url =
+      'https://drive.google.com/uc?export=download&id=' +
+      encodeURIComponent(
+        fileId
+      );
+  }
 
-    const a = document.createElement('a');
+  if (url) {
+
+    const a =
+      document.createElement(
+        'a'
+      );
 
     a.href =
-      downloadUrl ||
-      ('https://drive.google.com/uc?export=download&id=' +
-       encodeURIComponent(fileId));
+      url;
 
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.className = 'queueLink';
-    a.textContent = '⬇ Download ONE XLSX • 3 Sheets';
+    a.target =
+      '_blank';
 
-    links.appendChild(a);
+    a.rel =
+      'noopener';
 
-    const fileNameEl = document.createElement('div');
-    fileNameEl.className = 'queueFileName';
-    fileNameEl.textContent =
-      fileName ||
-      ('ACEBEDO_' + (result.branch || 'EXPORT') + '_EXPORT.xlsx');
+    a.className =
+      'queueLink';
 
-    links.appendChild(fileNameEl);
+    a.style.fontSize =
+      '13px';
+
+    a.style.padding =
+      '9px 12px';
+
+    a.textContent =
+      '⬇ Download ONE XLSX • 3 Sheets';
+
+    links.appendChild(
+      a
+    );
+
+    const name =
+      document.createElement(
+        'div'
+      );
+
+    name.className =
+      'fileName';
+
+    name.textContent =
+      result.xlsxFileName ||
+      'ACEBEDO_' +
+      (result.branch || '') +
+      '_EXPORT.xlsx';
+
+    links.appendChild(
+      name
+    );
+
+    if (viewUrl) {
+      const view =
+        document.createElement(
+          'a'
+        );
+
+      view.href =
+        viewUrl;
+
+      view.target =
+        '_blank';
+
+      view.rel =
+        'noopener';
+
+      view.className =
+        'fileName';
+
+      view.textContent =
+        'Open in Google Drive';
+
+      links.appendChild(
+        view
+      );
+    }
 
   }
   else {
 
-    const warning = document.createElement('div');
-    warning.className = 'queueFileName';
-    warning.textContent =
-      'Export completed, but Apps Script did not return a valid XLSX file ID.';
-    links.appendChild(warning);
+    links.innerHTML =
+      '<div class="errorText" style="font-size:12px;">' +
+      'XLSX was created, but no download information was returned.' +
+      '</div>';
 
   }
 
 }
+
+/* ============================================================
+   CLOSE QUEUE
+============================================================ */
+
 function closeQueueBox() {
 
   /*

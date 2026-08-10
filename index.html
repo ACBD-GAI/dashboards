@@ -1302,7 +1302,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycbxyJSh1M7VZKpkeR1116NMZ36tvZW-OjdrERMXdevY0e3x6iwqTsCQICfSgcpODrcUmkQ/exec';
+  'https://script.google.com/macros/s/AKfycbyP7HAEw6q2JTZg9fbi_mn0gkZELakQCm4qdPAFH07oaHUdiDZK45z4bHIISyVqtqJC/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -3893,6 +3893,11 @@ async function pollCurrentJob() {
 
         stopQueuePolling();
 
+        window.lastCompletedExportJobId =
+          result.jobId ||
+          (currentJob && currentJob.jobId) ||
+          '';
+
         showExportComplete(
           result
         );
@@ -4283,7 +4288,7 @@ function showQueueError(
 }
 
 
-function showExportComplete(
+async function showExportComplete(
   result
 ) {
 
@@ -4335,165 +4340,128 @@ function showExportComplete(
       'queueDetails'
     )
     .textContent =
-    (
-      result.branch ||
-      ''
-    ) +
+    (result.branch || '') +
     ' • ONE XLSX • 3 sheets • ' +
-    Number(
-      result.stocksRows || 0
-    ).toLocaleString() +
+    Number(result.stocksRows || 0).toLocaleString() +
     ' stocks • ' +
-    Number(
-      result.soldRows || 0
-    ).toLocaleString() +
+    Number(result.soldRows || 0).toLocaleString() +
     ' sold • ' +
-    Number(
-      result.auditRows || 0
-    ).toLocaleString() +
+    Number(result.auditRows || 0).toLocaleString() +
     ' audit';
 
   document
     .getElementById(
       'queueCancelArea'
     )
-    .classList.add(
-      'hidden'
-    );
+    .classList.add('hidden');
 
   const links =
-    document.getElementById(
-      'queueLinks'
-    );
+    document.getElementById('queueLinks');
 
-  links.innerHTML =
-    '';
-
-  const files =
-    result.files || [];
+  links.innerHTML = '';
 
   /*
-   * The server returns exactly ONE XLSX.
-   * Do not show CSV files or an export-folder link.
+   * First use the completed export response itself.
    */
-  let xlsxFile =
-    files.find(
-      function(file) {
+  let fileId = String(result.xlsxFileId || '').trim();
+  let fileName = String(result.xlsxFileName || '').trim();
+  let downloadUrl = String(result.xlsxDownloadUrl || '').trim();
+  let viewUrl = String(result.xlsxViewUrl || '').trim();
 
-        return (
-          file &&
-          (file.url || file.id) &&
-          String(
-            file.name || ''
-          )
-            .toLowerCase()
-            .endsWith(
-              '.xlsx'
-            )
-        );
+  if (!fileId && Array.isArray(result.files)) {
+    const found = result.files.find(function(file) {
+      return file &&
+        String(file.name || '').toLowerCase().endsWith('.xlsx') &&
+        (file.id || file.url);
+    });
 
-      }
-    );
-
-  /*
-   * Strong fallback: Apps Script may return the file ID even when
-   * the files array/URL is stripped or delayed. Build the download
-   * URL directly from the returned XLSX file ID.
-   */
-  /*
-   * The preferred source is the explicit server-side XLSX fields.
-   * This is independent of result.files[].
-   */
-  if (!xlsxFile && (result.xlsxFileId || result.xlsxDownloadUrl)) {
-
-    xlsxFile = {
-      id:
-        result.xlsxFileId || '',
-      url:
-        result.xlsxDownloadUrl || '',
-      viewUrl:
-        result.xlsxViewUrl || '',
-      name:
-        result.xlsxFileName ||
-        ('ACEBEDO_' +
-         (result.branch || 'EXPORT') +
-         '_EXPORT.xlsx')
-    };
-
+    if (found) {
+      fileId = String(found.id || '').trim();
+      fileName = String(found.name || '').trim();
+      downloadUrl = String(found.url || '').trim();
+      viewUrl = String(found.viewUrl || '').trim();
+    }
   }
 
-  if (xlsxFile) {
+  /*
+   * IMPORTANT FALLBACK:
+   * Ask Apps Script for the actual completed Drive file by job ID.
+   * This is deliberately a separate request, so the download no
+   * longer depends on files[] being returned by exportStatus.
+   */
+  if (!fileId && !downloadUrl && currentJob === null) {
+    /* currentJob is cleared by pollExportStatus() after this call in
+       older versions, so use the job ID saved on the result if present. */
+  }
 
-    const a =
-      document.createElement(
-        'a'
-      );
+  const jobId =
+    result.jobId ||
+    (window.lastCompletedExportJobId || '');
 
-    /*
-     * Prefer the server-provided URL. If the browser receives only
-     * the Drive file ID, build a direct Drive download URL locally.
-     */
+  if (!fileId && !downloadUrl && jobId) {
+    try {
+      const downloadResult =
+        await api(
+          'getExportDownload',
+          {
+            session: session,
+            jobId: jobId
+          }
+        );
+
+      if (downloadResult && downloadResult.ok) {
+        fileId = String(downloadResult.xlsxFileId || '').trim();
+        fileName = String(downloadResult.xlsxFileName || '').trim();
+        downloadUrl = String(downloadResult.xlsxDownloadUrl || '').trim();
+        viewUrl = String(downloadResult.xlsxViewUrl || '').trim();
+      }
+    }
+    catch (err) {
+      /* Show the real retrieval error below instead of a fake success. */
+      const warning = document.createElement('div');
+      warning.className = 'queueFileName';
+      warning.textContent = 'Export completed, but the XLSX could not be retrieved: ' + err.message;
+      links.appendChild(warning);
+      return;
+    }
+  }
+
+  if (downloadUrl || fileId) {
+
+    const a = document.createElement('a');
+
     a.href =
-      xlsxFile.url ||
-      (xlsxFile.id
-        ? 'https://drive.google.com/uc?export=download&id=' +
-          encodeURIComponent(xlsxFile.id)
-        : '#');
+      downloadUrl ||
+      ('https://drive.google.com/uc?export=download&id=' +
+       encodeURIComponent(fileId));
 
-    a.target =
-      '_blank';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.className = 'queueLink';
+    a.textContent = '⬇ Download ONE XLSX • 3 Sheets';
 
-    a.rel =
-      'noopener';
+    links.appendChild(a);
 
-    a.className =
-      'queueLink';
+    const fileNameEl = document.createElement('div');
+    fileNameEl.className = 'queueFileName';
+    fileNameEl.textContent =
+      fileName ||
+      ('ACEBEDO_' + (result.branch || 'EXPORT') + '_EXPORT.xlsx');
 
-    a.textContent =
-      '⬇ Download ONE XLSX • 3 Sheets';
-
-    links.appendChild(
-      a
-    );
-
-    const fileName =
-      document.createElement(
-        'div'
-      );
-
-    fileName.className =
-      'queueFileName';
-
-    fileName.textContent =
-      xlsxFile.name ||
-      'ACEBEDO_EXPORT.xlsx';
-
-    links.appendChild(
-      fileName
-    );
+    links.appendChild(fileNameEl);
 
   }
   else {
 
-    const warning =
-      document.createElement(
-        'div'
-      );
-
-    warning.className =
-      'queueFileName';
-
+    const warning = document.createElement('div');
+    warning.className = 'queueFileName';
     warning.textContent =
-      'Export finished, but no XLSX download link was returned.';
-
-    links.appendChild(
-      warning
-    );
+      'Export completed, but Apps Script did not return a valid XLSX file ID.';
+    links.appendChild(warning);
 
   }
 
 }
-
 function closeQueueBox() {
 
   /*

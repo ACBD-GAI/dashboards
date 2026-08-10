@@ -2,16 +2,15 @@
 <html>
 <head>
 
-<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
->
+<title>ACEBEDO OPTICAL INVENTORY</title>
 
-<title>Acebedo Optical Inventory</title>
-
-<!-- SheetJS - Excel/CSV reader in browser -->
+<!-- =========================================================
+     SHEETJS
+     Used only in the browser to read XLSX/XLS/CSV.
+     NO Google Sheets.
+     ========================================================= -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -20,21 +19,25 @@
   box-sizing: border-box;
 }
 
-html,
 body {
   margin: 0;
-  padding: 0;
-  min-height: 100%;
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   background: #f4f6f8;
   color: #222;
 }
 
-body {
-  padding: 20px;
+button,
+input,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* =========================================================
@@ -42,86 +45,73 @@ body {
    ========================================================= */
 
 #loginScreen {
-  min-height: 90vh;
+  min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
-.loginCard {
+.loginBox {
   width: 100%;
-  max-width: 430px;
+  max-width: 420px;
   background: white;
+  padding: 30px;
   border-radius: 16px;
-  padding: 35px;
-  box-shadow:
-    0 10px 35px rgba(0,0,0,.12);
+  box-shadow: 0 8px 30px rgba(0,0,0,.12);
   text-align: center;
 }
 
-.loginCard h2 {
-  margin: 0 0 8px;
+.loginBox h2 {
+  margin-top: 0;
 }
 
-.loginCard p {
-  color: #666;
-}
-
-.loginCard input {
+.loginBox input {
   width: 100%;
   padding: 13px;
   margin-top: 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 15px;
 }
 
 /* =========================================================
    MAIN APP
    ========================================================= */
 
-#dashboardScreen {
+#appScreen {
   display: none;
+  min-height: 100vh;
 }
 
-.app {
-  max-width: 1500px;
-  margin: auto;
-}
-
-/* =========================================================
-   HEADER
-   ========================================================= */
-
-.header {
+.appHeader {
   background: white;
-  border-radius: 14px;
-  padding: 18px;
+  padding: 15px 20px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  box-shadow:
-    0 3px 15px rgba(0,0,0,.07);
-  margin-bottom: 18px;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .headerLeft img {
-  width: 65px;
-  height: 65px;
+  width: 55px;
+  height: 55px;
   object-fit: contain;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .headerLeft h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: 21px;
 }
 
 .headerLeft small {
@@ -131,46 +121,28 @@ body {
 .headerButtons {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 7px;
+}
+
+.headerButtons button {
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 7px;
+  padding: 9px 12px;
+}
+
+.headerButtons button:hover {
+  background: #f0f0f0;
 }
 
 /* =========================================================
-   BUTTONS
+   CONTAINER
    ========================================================= */
 
-button {
-  border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
-  cursor: pointer;
-  background: #e9ecef;
-  color: #222;
-  font-weight: 600;
-}
-
-button:hover {
-  filter: brightness(.96);
-}
-
-button:disabled {
-  opacity: .55;
-  cursor: not-allowed;
-}
-
-.primaryBtn {
-  background: #1677ff;
-  color: white;
-}
-
-.dangerBtn {
-  background: #dc3545;
-  color: white;
-}
-
-.searchBtn {
-  background: #1677ff;
-  color: white;
-  min-width: 110px;
+.container {
+  max-width: 1600px;
+  margin: auto;
+  padding: 20px;
 }
 
 /* =========================================================
@@ -178,45 +150,51 @@ button:disabled {
    ========================================================= */
 
 .filters {
-  background: white;
-  border-radius: 14px;
-  padding: 18px;
   display: grid;
   grid-template-columns:
-    1fr
-    1fr
-    2fr
+    minmax(180px,1fr)
+    minmax(180px,1fr)
+    minmax(250px,2fr)
     auto;
+
   gap: 12px;
   align-items: end;
-  box-shadow:
-    0 3px 15px rgba(0,0,0,.07);
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
-.field label,
-.modal label {
+.field label {
   font-size: 13px;
   font-weight: bold;
   color: #555;
 }
 
-select,
-input[type="text"],
-input[type="email"],
-input[type="number"],
-input[type="file"] {
+.field input,
+.field select,
+.modal input,
+.modal select {
   width: 100%;
   padding: 11px;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 7px;
   background: white;
-  font-size: 14px;
+}
+
+.searchBtn {
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 7px;
+  background: #1976d2;
+  color: white;
+  font-weight: bold;
 }
 
 /* =========================================================
@@ -225,41 +203,38 @@ input[type="file"] {
 
 .cards {
   display: grid;
-  grid-template-columns:
-    repeat(4, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(4,1fr);
+  gap: 15px;
   margin: 18px 0;
 }
 
 .card {
   background: white;
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 18px;
-  box-shadow:
-    0 3px 15px rgba(0,0,0,.07);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
 
 .card h3 {
   margin: 0;
-  color: #777;
+  color: #666;
   font-size: 14px;
 }
 
 .card h1 {
   margin: 8px 0 0;
-  font-size: 32px;
+  font-size: 30px;
 }
 
 /* =========================================================
    TABLE
    ========================================================= */
 
-.tableWrap {
+.tableWrapper {
   background: white;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow-x: auto;
-  box-shadow:
-    0 3px 15px rgba(0,0,0,.07);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
 
 table {
@@ -268,38 +243,36 @@ table {
   min-width: 850px;
 }
 
-thead {
-  background: #f0f2f5;
-}
-
 th,
 td {
-  padding: 12px;
+  padding: 11px;
   border-bottom: 1px solid #eee;
   text-align: left;
-  font-size: 14px;
 }
 
 th {
-  font-weight: bold;
+  background: #f7f7f7;
+  font-size: 13px;
 }
 
-tbody tr:hover {
-  background: #fafafa;
+td {
+  font-size: 13px;
 }
 
-.actionButtons {
-  display: flex;
-  gap: 5px;
+.actionBtn {
+  padding: 6px 9px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
+  margin-right: 4px;
 }
 
-.editBtn {
-  background: #ffc107;
+.actionBtn:hover {
+  background: #f0f0f0;
 }
 
 .deleteBtn {
-  background: #dc3545;
-  color: white;
+  color: #c62828;
 }
 
 /* =========================================================
@@ -314,129 +287,193 @@ tbody tr:hover {
   padding: 18px;
 }
 
-#pageInfo {
-  font-weight: bold;
+.pagination button {
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  background: white;
+}
+
+.pagination button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 
 /* =========================================================
-   MODALS
+   MODAL BACKDROP
    ========================================================= */
 
-.modalOverlay {
+.modalBackdrop {
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.55);
-  display: none;
-  align-items: center;
+  z-index: 1000;
   justify-content: center;
-  z-index: 5000;
+  align-items: center;
   padding: 20px;
 }
 
 .modal {
+  background: white;
   width: 100%;
   max-width: 500px;
-  background: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow:
-    0 20px 60px rgba(0,0,0,.25);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 15px 50px rgba(0,0,0,.25);
 }
 
 .modal h3 {
   margin-top: 0;
 }
 
-.modal select,
-.modal input {
-  margin-top: 6px;
-  margin-bottom: 15px;
+.modal label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 5px;
+  font-size: 13px;
+  font-weight: bold;
 }
 
 .modalButtons {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 18px;
+}
+
+.modalButtons button {
+  padding: 9px 15px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  background: white;
+}
+
+.primaryBtn {
+  background: #1976d2 !important;
+  color: white !important;
+  border: 0 !important;
+}
+
+.dangerBtn {
+  background: #d32f2f !important;
+  color: white !important;
+  border: 0 !important;
 }
 
 /* =========================================================
-   CONFIRM DIALOG
+   DIALOG
    ========================================================= */
-
-#dialogOverlay {
-  z-index: 7000;
-}
-
-.dialog {
-  max-width: 430px;
-  text-align: center;
-}
 
 .dialogIcon {
   font-size: 45px;
-  margin-bottom: 10px;
+  text-align: center;
+  margin-bottom: 8px;
 }
 
 .dialogTitle {
-  font-size: 21px;
+  font-size: 20px;
   font-weight: bold;
+  text-align: center;
 }
 
 .dialogMessage {
-  margin: 15px 0;
-  color: #555;
+  text-align: center;
+  margin-top: 10px;
   white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 .dialogButtons {
   display: flex;
   justify-content: center;
   gap: 10px;
+  margin-top: 20px;
+}
+
+.dialogButtons button {
+  padding: 9px 18px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  background: white;
 }
 
 /* =========================================================
-   LOADING / BACKGROUND JOB
+   LOADING / JOB MODAL
    ========================================================= */
 
-#loadingOverlay {
-  z-index: 8000;
-}
-
-.loadingModal {
-  max-width: 520px;
-  text-align: center;
+.jobModal {
+  max-width: 550px;
 }
 
 .loadingIcon {
-  font-size: 50px;
+  text-align: center;
+  font-size: 45px;
   margin-bottom: 10px;
 }
 
 #loadingText {
-  font-size: 18px;
+  text-align: center;
+  font-size: 19px;
   font-weight: bold;
 }
 
 .progressOuter {
   width: 100%;
   height: 22px;
-  margin-top: 20px;
+  background: #e5e5e5;
   border-radius: 20px;
-  background: #e5e7eb;
   overflow: hidden;
+  margin-top: 20px;
 }
 
 .progressInner {
   width: 0%;
   height: 100%;
-  background: #1677ff;
+  background: #1976d2;
   transition: width .2s ease;
 }
 
 .progressText {
+  text-align: center;
   margin-top: 8px;
   font-weight: bold;
+}
+
+.jobDetails {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f7f7f7;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.fileName {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+/* =========================================================
+   RESULT LINKS
+   ========================================================= */
+
+.exportLinks {
+  margin-top: 15px;
+}
+
+.exportLinks a {
+  display: block;
+  margin-top: 8px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 7px;
+  text-decoration: none;
+  color: #1976d2;
 }
 
 /* =========================================================
@@ -444,55 +481,32 @@ tbody tr:hover {
    ========================================================= */
 
 .status {
-  min-height: 22px;
-  margin-top: 10px;
+  min-height: 20px;
+  font-size: 13px;
 }
 
 .status.error {
-  color: #dc3545;
+  color: #c62828;
 }
 
 .status.success {
-  color: #198754;
+  color: #2e7d32;
 }
 
 /* =========================================================
-   IMPORT DETAILS
-   ========================================================= */
-
-.jobDetails {
-  margin-top: 15px;
-  text-align: left;
-  background: #f7f8fa;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.fileName {
-  margin-top: 5px;
-  color: #555;
-  word-break: break-word;
-}
-
-/* =========================================================
-   MOBILE
+   RESPONSIVE
    ========================================================= */
 
 @media (max-width: 900px) {
 
-  .header {
+  .appHeader {
+    position: static;
     flex-direction: column;
     align-items: stretch;
   }
 
   .headerButtons {
-    justify-content: stretch;
-  }
-
-  .headerButtons button {
-    flex: 1;
+    justify-content: center;
   }
 
   .filters {
@@ -500,29 +514,19 @@ tbody tr:hover {
   }
 
   .cards {
-    grid-template-columns:
-      repeat(2, 1fr);
+    grid-template-columns: repeat(2,1fr);
   }
 
 }
 
 @media (max-width: 550px) {
 
-  body {
-    padding: 10px;
-  }
-
   .cards {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: 1fr;
   }
 
-  .card {
-    padding: 12px;
-  }
-
-  .card h1 {
-    font-size: 25px;
+  .container {
+    padding: 10px;
   }
 
   .headerLeft h2 {
@@ -532,6 +536,7 @@ tbody tr:hover {
 }
 
 </style>
+
 </head>
 
 <body>
@@ -542,7 +547,7 @@ tbody tr:hover {
 
 <div id="loginScreen">
 
-  <div class="loginCard">
+  <div class="loginBox">
 
     <h2>
       🔐 ADMIN LOGIN
@@ -600,17 +605,14 @@ tbody tr:hover {
 
 
 <!-- =========================================================
-     DASHBOARD
+     MAIN APPLICATION
      ========================================================= -->
 
-<div
-  id="dashboardScreen"
-  class="app"
->
+<div id="appScreen">
 
   <!-- HEADER -->
 
-  <div class="header">
+  <div class="appHeader">
 
     <div class="headerLeft">
 
@@ -671,218 +673,230 @@ tbody tr:hover {
   </div>
 
 
-  <!-- FILTERS -->
+  <div class="container">
 
-  <div class="filters">
+    <!-- =====================================================
+         FILTERS
+         ===================================================== -->
 
-    <div class="field">
+    <div class="filters">
 
-      <label>
-        Branch
-      </label>
+      <div class="field">
 
-      <select id="branchSelect">
+        <label>
+          Branch
+        </label>
 
-        <option value="">
-          -- Select Branch --
-        </option>
+        <select id="branchSelect">
 
-        <option value="GAI">🏢 Gaisano Iloilo</option>
-        <option value="CAS">🏢 Casa Plaza</option>
-        <option value="BAC">🏢 Bacolod</option>
-        <option value="BIN">🏢 Binalbagan</option>
-        <option value="BIS">🏢 Bislig</option>
-        <option value="CAD">🏢 Cadiz</option>
-        <option value="DGT">🏢 Dumaguete</option>
-        <option value="KAB">🏢 Kabankalan</option>
-        <option value="KAL">🏢 Kalibo</option>
-        <option value="PAS">🏢 Passi</option>
-        <option value="POT">🏢 Pototan</option>
-        <option value="SAN">🏢 San Carlos</option>
-        <option value="TAB">🏢 Tabunok</option>
-        <option value="TAN">🏢 Tandag</option>
-        <option value="TIS">🏢 Tisa</option>
-        <option value="TOL">🏢 Toledo</option>
+          <option value="">
+            -- Select Branch --
+          </option>
 
-      </select>
+          <option value="GAI">🏢 Gaisano Iloilo</option>
+          <option value="CAS">🏢 Casa Plaza</option>
+          <option value="BAC">🏢 Bacolod</option>
+          <option value="BIN">🏢 Binalbagan</option>
+          <option value="BIS">🏢 Bislig</option>
+          <option value="CAD">🏢 Cadiz</option>
+          <option value="DGT">🏢 Dumaguete</option>
+          <option value="KAB">🏢 Kabankalan</option>
+          <option value="KAL">🏢 Kalibo</option>
+          <option value="PAS">🏢 Passi</option>
+          <option value="POT">🏢 Pototan</option>
+          <option value="SAN">🏢 San Carlos</option>
+          <option value="TAB">🏢 Tabunok</option>
+          <option value="TAN">🏢 Tandag</option>
+          <option value="TIS">🏢 Tisa</option>
+          <option value="TOL">🏢 Toledo</option>
 
-    </div>
+        </select>
 
-
-    <div class="field">
-
-      <label>
-        Select Report
-      </label>
-
-      <select id="sheetSelect">
-
-        <option value="stocks">
-          📦 Stocks
-        </option>
-
-        <option value="SCANRESULTS">
-          💰 Sold Out
-        </option>
-
-        <option value="AUDIT">
-          🔄 Re-Inventory
-        </option>
-
-      </select>
-
-    </div>
+      </div>
 
 
-    <div class="field">
+      <div class="field">
 
-      <label>
-        Search
-      </label>
+        <label>
+          Select Report
+        </label>
 
-      <input
-        id="searchBox"
-        placeholder="Tag, SI, Description"
-        onkeydown="searchKeyDown(event)"
+        <select id="sheetSelect">
+
+          <option value="stocks">
+            📦 Stocks
+          </option>
+
+          <option value="SCANRESULTS">
+            💰 Sold Out
+          </option>
+
+          <option value="AUDIT">
+            🔄 Re-Inventory
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Search
+        </label>
+
+        <input
+          id="searchBox"
+          placeholder="Tag, SI, Description"
+          onkeydown="searchKeyDown(event)"
+        >
+
+      </div>
+
+
+      <button
+        class="searchBtn"
+        onclick="searchDashboard()"
       >
+        🔍 Search
+      </button>
 
     </div>
 
 
-    <button
-      class="searchBtn"
-      onclick="searchDashboard()"
-    >
-      🔍 Search
-    </button>
+    <!-- =====================================================
+         CARDS
+         ===================================================== -->
 
-  </div>
+    <div class="cards">
+
+      <div class="card">
+
+        <h3>
+          Available
+        </h3>
+
+        <h1 id="availableCount">
+          0
+        </h1>
+
+      </div>
 
 
-  <!-- CARDS -->
+      <div class="card">
 
-  <div class="cards">
+        <h3>
+          Sold Out
+        </h3>
 
-    <div class="card">
+        <h1 id="soldCount">
+          0
+        </h1>
 
-      <h3>
-        Available
-      </h3>
+      </div>
 
-      <h1 id="availableCount">
-        0
-      </h1>
+
+      <div class="card">
+
+        <h3>
+          Audited
+        </h3>
+
+        <h1 id="auditCount">
+          0
+        </h1>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Showing
+        </h3>
+
+        <h1 id="showingCount">
+          0
+        </h1>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLE
+         ===================================================== -->
+
+    <div class="tableWrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Branch</th>
+            <th>Lenstype</th>
+            <th>Description</th>
+            <th>Tag</th>
+            <th>SI</th>
+            <th>Date</th>
+            <th>Actions</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="tableBody">
+
+          <tr>
+
+            <td
+              colspan="7"
+              style="
+                text-align:center;
+                padding:40px;
+              "
+            >
+              Select a branch and click SEARCH.
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
 
     </div>
 
 
-    <div class="card">
+    <!-- =====================================================
+         PAGINATION
+         ===================================================== -->
 
-      <h3>
-        Sold Out
-      </h3>
+    <div class="pagination">
 
-      <h1 id="soldCount">
-        0
-      </h1>
+      <button
+        id="prevBtn"
+        onclick="previousPage()"
+      >
+        ◀ Previous
+      </button>
 
-    </div>
+      <span id="pageInfo">
+        Page 0 / 0
+      </span>
 
-
-    <div class="card">
-
-      <h3>
-        Audited
-      </h3>
-
-      <h1 id="auditCount">
-        0
-      </h1>
-
-    </div>
-
-
-    <div class="card">
-
-      <h3>
-        Showing
-      </h3>
-
-      <h1 id="showingCount">
-        0
-      </h1>
+      <button
+        id="nextBtn"
+        onclick="nextPage()"
+      >
+        Next ▶
+      </button>
 
     </div>
-
-  </div>
-
-
-  <!-- TABLE -->
-
-  <div class="tableWrap">
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>Branch</th>
-          <th>Lenstype</th>
-          <th>Description</th>
-          <th>Tag</th>
-          <th>SI</th>
-          <th>Date</th>
-          <th>Actions</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="tableBody">
-
-        <tr>
-
-          <td
-            colspan="7"
-            style="
-              text-align:center;
-              padding:40px;
-            "
-          >
-            Select a branch and click SEARCH.
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-
-  <!-- PAGINATION -->
-
-  <div class="pagination">
-
-    <button
-      id="prevBtn"
-      onclick="previousPage()"
-    >
-      ◀ Previous
-    </button>
-
-    <span id="pageInfo">
-      Page 0 / 0
-    </span>
-
-    <button
-      id="nextBtn"
-      onclick="nextPage()"
-    >
-      Next ▶
-    </button>
 
   </div>
 
@@ -895,7 +909,7 @@ tbody tr:hover {
 
 <div
   id="editModal"
-  class="modalOverlay"
+  class="modalBackdrop"
 >
 
   <div class="modal">
@@ -952,7 +966,7 @@ tbody tr:hover {
 
 <div
   id="updateStockModal"
-  class="modalOverlay"
+  class="modalBackdrop"
 >
 
   <div class="modal">
@@ -990,6 +1004,7 @@ tbody tr:hover {
 
     </select>
 
+
     <label>
       Select Excel File
     </label>
@@ -1004,6 +1019,7 @@ tbody tr:hover {
       id="importFileInfo"
       class="fileName"
     ></div>
+
 
     <div class="modalButtons">
 
@@ -1029,12 +1045,12 @@ tbody tr:hover {
 
 
 <!-- =========================================================
-     CLEAR MODAL
+     CLEAR REPORT MODAL
      ========================================================= -->
 
 <div
   id="clearModal"
-  class="modalOverlay"
+  class="modalBackdrop"
 >
 
   <div class="modal">
@@ -1072,6 +1088,7 @@ tbody tr:hover {
 
     </select>
 
+
     <label>
       Select Report
     </label>
@@ -1095,6 +1112,7 @@ tbody tr:hover {
       </option>
 
     </select>
+
 
     <div class="modalButtons">
 
@@ -1124,7 +1142,7 @@ tbody tr:hover {
 
 <div
   id="exportModal"
-  class="modalOverlay"
+  class="modalBackdrop"
 >
 
   <div class="modal">
@@ -1162,6 +1180,7 @@ tbody tr:hover {
 
     </select>
 
+
     <div class="modalButtons">
 
       <button
@@ -1189,11 +1208,11 @@ tbody tr:hover {
      ========================================================= -->
 
 <div
-  id="dialogOverlay"
-  class="modalOverlay"
+  id="dialogModal"
+  class="modalBackdrop"
 >
 
-  <div class="modal dialog">
+  <div class="modal">
 
     <div
       id="dialogIcon"
@@ -1240,15 +1259,15 @@ tbody tr:hover {
 
 
 <!-- =========================================================
-     BACKGROUND JOB LOADING
+     JOB PROGRESS MODAL
      ========================================================= -->
 
 <div
-  id="loadingOverlay"
-  class="modalOverlay"
+  id="loadingModal"
+  class="modalBackdrop"
 >
 
-  <div class="modal loadingModal">
+  <div class="modal jobModal">
 
     <div class="loadingIcon">
       ⏳
@@ -1280,6 +1299,11 @@ tbody tr:hover {
     >
       Starting...
     </div>
+
+    <div
+      id="exportLinks"
+      class="exportLinks"
+    ></div>
 
     <div
       id="loadingButtons"
@@ -1317,75 +1341,77 @@ tbody tr:hover {
    ============================================================ */
 
 /*
- * CHANGE THIS ONLY.
+ * IMPORTANT:
+ *
+ * Replace this with your deployed Apps Script WEB APP URL.
  *
  * Example:
- *
  * https://script.google.com/macros/s/XXXXXXXXXXXX/exec
  */
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbxf_1-wvztICXGfXc5knWBdL_2a414eofSdADfW43VNKx0sM3wcNmCx7YY0cosHvQxD/exec';
-
-
-/*
- * Dashboard pagination.
- *
- * This only controls how many rows are DISPLAYED
- * in the browser at once.
- *
- * It is NOT a database limit.
- */
-
-const ROWS_PER_PAGE = 20;
-
-
-/*
- * Import chunk size.
- *
- * This is intentionally independent from
- * database row limits.
- */
-
-const IMPORT_CHUNK_SIZE = 500;
-
-
-/*
- * Number of chunks uploading simultaneously.
- */
-
-const IMPORT_CONCURRENCY = 4;
+  'https://script.google.com/macros/s/AKfycbwGtq0DjEBhzz1sTRRXKH4618ZGiEokYlf7iN7gA5-anIk1_oo2rMld0VBmeOzGBNtidA/exec';
 
 
 /* ============================================================
-   APPLICATION STATE
+   IMPORT CONFIG
+   ============================================================ */
+
+const IMPORT_CHUNK_SIZE = 500;
+
+const IMPORT_CONCURRENT_REQUESTS = 4;
+
+
+/* ============================================================
+   APP STATE
    ============================================================ */
 
 let session = '';
 
 let currentEmail = '';
 
-let currentData = [];
+let dashboardData = [];
 
 let currentPage = 1;
 
-let totalPages = 0;
+const ROWS_PER_PAGE = 20;
+
+let currentJobType = '';
+
+let currentJobId = '';
+
+let jobPollTimer = null;
 
 let dialogCallback = null;
 
-let currentJobId = null;
 
-let currentJobType = null;
+/* ============================================================
+   IMPORT STATE
+   ============================================================ */
 
-let exportPollTimer = null;
+let importState = {
 
-let importRunning = false;
+  rows: [],
 
-let importCancelled = false;
+  chunks: [],
+
+  completed: 0,
+
+  failed: 0,
+
+  totalChunks: 0,
+
+  totalRows: 0,
+
+  cancelled: false,
+
+  active: 0
+
+};
 
 
 /* ============================================================
-   INITIALIZATION
+   STARTUP
    ============================================================ */
 
 document.addEventListener(
@@ -1397,39 +1423,32 @@ document.addEventListener(
         'inventorySession'
       );
 
-    if (savedSession) {
+    const savedEmail =
+      localStorage.getItem(
+        'inventoryEmail'
+      );
+
+    if (
+      savedSession
+    ) {
 
       session =
         savedSession;
+
+      currentEmail =
+        savedEmail || '';
 
       checkExistingSession();
 
     }
 
     document
-      .getElementById('stockFile')
+      .getElementById(
+        'stockFile'
+      )
       .addEventListener(
         'change',
-        function() {
-
-          const file =
-            this.files &&
-            this.files[0];
-
-          document
-            .getElementById(
-              'importFileInfo'
-            )
-            .textContent =
-            file
-              ? file.name +
-                ' — ' +
-                formatBytes(
-                  file.size
-                )
-              : '';
-
-        }
+        showSelectedFile
       );
 
   }
@@ -1437,58 +1456,60 @@ document.addEventListener(
 
 
 /* ============================================================
-   API URL CHECK
-   ============================================================ */
-
-function ensureApiUrl() {
-
-  if (
-    !API_URL ||
-    API_URL.indexOf(
-      'PASTE_YOUR'
-    ) !== -1
-  ) {
-
-    throw new Error(
-      'API_URL has not been configured.'
-    );
-
-  }
-
-}
-
-
-/* ============================================================
-   GET API
+   API GET / JSONP
    ============================================================ */
 
 function apiGet(
-  params
+  action,
+  params = {}
 ) {
-
-  ensureApiUrl();
 
   return new Promise(
     function(resolve, reject) {
 
-      const callback =
-        'apiCallback_' +
+      const callbackName =
+        '__acebedo_cb_' +
         Date.now() +
         '_' +
         Math.floor(
-          Math.random() *
-          100000
+          Math.random() * 100000
         );
 
       const query =
-        new URLSearchParams(
-          params || {}
-        );
+        new URLSearchParams();
+
+      query.set(
+        'action',
+        action
+      );
 
       query.set(
         'callback',
-        callback
+        callbackName
       );
+
+      Object.keys(params)
+        .forEach(
+          function(key) {
+
+            if (
+              params[key] !==
+              undefined &&
+              params[key] !==
+              null
+            ) {
+
+              query.set(
+                key,
+                String(
+                  params[key]
+                )
+              );
+
+            }
+
+          }
+        );
 
       const script =
         document.createElement(
@@ -1511,28 +1532,70 @@ function apiGet(
 
             reject(
               new Error(
-                'API request timed out.'
+                'Request timed out.'
               )
             );
 
           },
-          60000
+          30000
         );
+
+      window[
+        callbackName
+      ] =
+        function(data) {
+
+          if (finished) {
+            return;
+          }
+
+          finished = true;
+
+          clearTimeout(
+            timeout
+          );
+
+          cleanup();
+
+          resolve(
+            data
+          );
+
+        };
+
+      script.onerror =
+        function() {
+
+          if (finished) {
+            return;
+          }
+
+          finished = true;
+
+          clearTimeout(
+            timeout
+          );
+
+          cleanup();
+
+          reject(
+            new Error(
+              'Unable to connect to Apps Script.'
+            )
+          );
+
+        };
 
       function cleanup() {
-
-        clearTimeout(
-          timeout
-        );
 
         try {
 
           delete window[
-            callback
+            callbackName
           ];
 
         }
-        catch (e) {}
+        catch (err) {}
 
         if (
           script.parentNode
@@ -1547,70 +1610,14 @@ function apiGet(
 
       }
 
-      window[callback] =
-        function(data) {
-
-          if (finished) {
-            return;
-          }
-
-          finished = true;
-
-          cleanup();
-
-          if (
-            data &&
-            data.ok === false
-          ) {
-
-            reject(
-              new Error(
-                data.error ||
-                'API request failed.'
-              )
-            );
-
-            return;
-
-          }
-
-          resolve(data);
-
-        };
-
-      script.onerror =
-        function() {
-
-          if (finished) {
-            return;
-          }
-
-          finished = true;
-
-          cleanup();
-
-          reject(
-            new Error(
-              'Unable to connect to Apps Script.'
-            )
-          );
-
-        };
-
       script.src =
         API_URL +
-        (
-          API_URL.indexOf('?') >= 0
-            ? '&'
-            : '?'
-        ) +
+        '?' +
         query.toString();
 
-      document
-        .head
-        .appendChild(
-          script
-        );
+      document.body.appendChild(
+        script
+      );
 
     }
   );
@@ -1619,113 +1626,134 @@ function apiGet(
 
 
 /* ============================================================
-   POST API
+   API POST
    ============================================================ */
 
 async function apiPost(
-  body,
-  timeoutMs = 120000
+  body
 ) {
 
-  ensureApiUrl();
+  const response =
+    await fetch(
+      API_URL,
+      {
 
-  const controller =
-    new AbortController();
+        method:
+          'POST',
 
-  const timer =
-    setTimeout(
-      function() {
+        mode:
+          'cors',
 
-        controller.abort();
+        cache:
+          'no-store',
 
-      },
-      timeoutMs
+        headers: {
+
+          'Content-Type':
+            'text/plain;charset=UTF-8'
+
+        },
+
+        body:
+          JSON.stringify(
+            body
+          )
+
+      }
     );
+
+  if (
+    !response.ok
+  ) {
+
+    throw new Error(
+      'HTTP ' +
+      response.status
+    );
+
+  }
+
+  const text =
+    await response.text();
+
+  let data;
 
   try {
 
-    const response =
-      await fetch(
-        API_URL,
+    data =
+      JSON.parse(
+        text
+      );
+
+  }
+
+  catch (err) {
+
+    throw new Error(
+      'Invalid Apps Script response: ' +
+      text.substring(
+        0,
+        300
+      )
+    );
+
+  }
+
+  if (
+    !data.ok
+  ) {
+
+    throw new Error(
+      data.error ||
+      'Request failed.'
+    );
+
+  }
+
+  return data;
+
+}
+
+
+/* ============================================================
+   SESSION CHECK
+   ============================================================ */
+
+async function checkExistingSession() {
+
+  try {
+
+    const result =
+      await apiGet(
+        'checkSession',
         {
-          method: 'POST',
-
-          headers: {
-            'Content-Type':
-              'text/plain;charset=utf-8'
-          },
-
-          body:
-            JSON.stringify(
-              body
-            ),
-
-          signal:
-            controller.signal
+          session:
+            session
         }
       );
 
-    const text =
-      await response.text();
-
-    let data;
-
-    try {
-
-      data =
-        JSON.parse(
-          text
-        );
-
-    }
-    catch (err) {
-
-      throw new Error(
-        'Invalid API response: ' +
-        text.substring(
-          0,
-          500
-        )
-      );
-
-    }
-
     if (
-      data &&
-      data.ok === false
+      result.ok
     ) {
 
-      throw new Error(
-        data.error ||
-        'API request failed.'
-      );
+      currentEmail =
+        result.email ||
+        currentEmail;
+
+      showApp();
+
+    }
+    else {
+
+      clearSession();
 
     }
 
-    return data;
-
   }
+
   catch (err) {
 
-    if (
-      err.name ===
-      'AbortError'
-    ) {
-
-      throw new Error(
-        'API request timed out.'
-      );
-
-    }
-
-    throw err;
-
-  }
-  finally {
-
-    clearTimeout(
-      timer
-    );
+    clearSession();
 
   }
 
@@ -1740,20 +1768,17 @@ async function sendOTP() {
 
   const email =
     document
-      .getElementById('email')
+      .getElementById(
+        'email'
+      )
       .value
-      .trim();
+      .trim()
+      .toLowerCase();
 
   const status =
     document
       .getElementById(
         'loginStatus'
-      );
-
-  const button =
-    document
-      .getElementById(
-        'sendOtpBtn'
       );
 
   if (!email) {
@@ -1768,7 +1793,14 @@ async function sendOTP() {
 
   }
 
-  button.disabled = true;
+  const button =
+    document
+      .getElementById(
+        'sendOtpBtn'
+      );
+
+  button.disabled =
+    true;
 
   status.className =
     'status';
@@ -1779,24 +1811,21 @@ async function sendOTP() {
   try {
 
     const result =
-      await apiGet({
-        action:
-          'sendOTP',
-
-        email:
-          email
-      });
+      await apiGet(
+        'sendOTP',
+        {
+          email:
+            email
+        }
+      );
 
     if (
-      !result ||
       !result.ok
     ) {
 
       throw new Error(
-        result &&
-        result.error
-          ? result.error
-          : 'Unable to send OTP.'
+        result.error ||
+        'Unable to send OTP.'
       );
 
     }
@@ -1819,15 +1848,10 @@ async function sendOTP() {
       'status success';
 
     status.textContent =
-      'OTP sent. Check your Gmail.';
-
-    document
-      .getElementById(
-        'otp'
-      )
-      .focus();
+      'OTP sent. Check your email.';
 
   }
+
   catch (err) {
 
     status.className =
@@ -1837,9 +1861,11 @@ async function sendOTP() {
       err.message;
 
   }
+
   finally {
 
-    button.disabled = false;
+    button.disabled =
+      false;
 
   }
 
@@ -1854,13 +1880,18 @@ async function verifyOTP() {
 
   const email =
     document
-      .getElementById('email')
+      .getElementById(
+        'email'
+      )
       .value
-      .trim();
+      .trim()
+      .toLowerCase();
 
   const otp =
     document
-      .getElementById('otp')
+      .getElementById(
+        'otp'
+      )
       .value
       .trim();
 
@@ -1876,7 +1907,10 @@ async function verifyOTP() {
         'verifyBtn'
       );
 
-  if (!email || !otp) {
+  if (
+    !email ||
+    !otp
+  ) {
 
     status.className =
       'status error';
@@ -1888,7 +1922,8 @@ async function verifyOTP() {
 
   }
 
-  button.disabled = true;
+  button.disabled =
+    true;
 
   status.className =
     'status';
@@ -1899,28 +1934,24 @@ async function verifyOTP() {
   try {
 
     const result =
-      await apiGet({
-        action:
-          'verifyOTP',
+      await apiGet(
+        'verifyOTP',
+        {
+          email:
+            email,
 
-        email:
-          email,
-
-        otp:
-          otp
-      });
+          otp:
+            otp
+        }
+      );
 
     if (
-      !result ||
-      !result.ok ||
-      !result.session
+      !result.ok
     ) {
 
       throw new Error(
-        result &&
-        result.error
-          ? result.error
-          : 'Login failed.'
+        result.error ||
+        'Invalid OTP.'
       );
 
     }
@@ -1942,9 +1973,10 @@ async function verifyOTP() {
       currentEmail
     );
 
-    showDashboard();
+    showApp();
 
   }
+
   catch (err) {
 
     status.className =
@@ -1954,9 +1986,11 @@ async function verifyOTP() {
       err.message;
 
   }
+
   finally {
 
-    button.disabled = false;
+    button.disabled =
+      false;
 
   }
 
@@ -1964,55 +1998,10 @@ async function verifyOTP() {
 
 
 /* ============================================================
-   CHECK EXISTING SESSION
+   SHOW APP
    ============================================================ */
 
-async function checkExistingSession() {
-
-  try {
-
-    const result =
-      await apiGet({
-        action:
-          'checkSession',
-
-        session:
-          session
-      });
-
-    if (
-      result &&
-      result.ok
-    ) {
-
-      currentEmail =
-        result.email ||
-        localStorage.getItem(
-          'inventoryEmail'
-        ) ||
-        '';
-
-      showDashboard();
-
-      return;
-
-    }
-
-  }
-  catch (err) {
-
-  }
-
-  clearSession();
-
-}
-
-
-/* ============================================================
-   SHOW DASHBOARD
-   ============================================================ */
-
-function showDashboard() {
+function showApp() {
 
   document
     .getElementById(
@@ -2023,7 +2012,7 @@ function showDashboard() {
 
   document
     .getElementById(
-      'dashboardScreen'
+      'appScreen'
     )
     .style.display =
     'block';
@@ -2039,29 +2028,40 @@ async function logoutUser() {
 
   try {
 
-    await apiGet({
-      action:
+    if (
+      session
+    ) {
+
+      await apiGet(
         'logout',
+        {
+          session:
+            session
+        }
+      );
 
-      session:
-        session
-    });
+    }
 
   }
-  catch (err) {
 
-  }
+  catch (err) {}
 
   clearSession();
 
 }
 
 
+/* ============================================================
+   CLEAR SESSION
+   ============================================================ */
+
 function clearSession() {
 
-  session = '';
+  session =
+    '';
 
-  currentEmail = '';
+  currentEmail =
+    '';
 
   localStorage.removeItem(
     'inventorySession'
@@ -2073,7 +2073,7 @@ function clearSession() {
 
   document
     .getElementById(
-      'dashboardScreen'
+      'appScreen'
     )
     .style.display =
     'none';
@@ -2089,32 +2089,18 @@ function clearSession() {
 
 
 /* ============================================================
-   SEARCH
+   DASHBOARD SEARCH
    ============================================================ */
-
-function searchKeyDown(
-  event
-) {
-
-  if (
-    event.key ===
-    'Enter'
-  ) {
-
-    searchDashboard();
-
-  }
-
-}
-
 
 async function searchDashboard() {
 
   if (!session) {
 
-    showLoginMessage(
-      'Session expired. Please login again.'
+    alert(
+      'Your session has expired.'
     );
+
+    clearSession();
 
     return;
 
@@ -2146,8 +2132,8 @@ async function searchDashboard() {
 
     showDialog(
       '⚠️',
-      'Branch Required',
-      'Please select a branch.',
+      'Select Branch',
+      'Please select a branch first.',
       null
     );
 
@@ -2155,79 +2141,136 @@ async function searchDashboard() {
 
   }
 
-  setTableMessage(
-    'Loading...'
-  );
+  const tbody =
+    document
+      .getElementById(
+        'tableBody'
+      );
+
+  tbody.innerHTML =
+    `
+      <tr>
+        <td colspan="7"
+            style="text-align:center;padding:40px;">
+          🔄 Searching...
+        </td>
+      </tr>
+    `;
 
   try {
 
     const result =
-      await apiGet({
+      await apiGet(
+        'dashboard',
+        {
 
-        action:
-          'dashboard',
+          session:
+            session,
 
-        session:
-          session,
+          branch:
+            branch,
 
-        branch:
-          branch,
+          report:
+            report,
 
-        report:
-          report,
+          search:
+            search
 
-        search:
-          search
-
-      });
+        }
+      );
 
     if (
-      !result ||
       !result.ok
     ) {
 
       throw new Error(
-        result &&
-        result.error
-          ? result.error
-          : 'Unable to load dashboard.'
+        result.error ||
+        'Unable to load dashboard.'
       );
 
     }
 
-    currentData =
+    dashboardData =
       Array.isArray(
         result.data
       )
         ? result.data
         : [];
 
-    currentPage = 1;
+    currentPage =
+      1;
 
-    updateCounts(
-      result
-    );
+    document
+      .getElementById(
+        'availableCount'
+      )
+      .textContent =
+      formatNumber(
+        result.availableCount
+      );
+
+    document
+      .getElementById(
+        'soldCount'
+      )
+      .textContent =
+      formatNumber(
+        result.soldCount
+      );
+
+    document
+      .getElementById(
+        'auditCount'
+      )
+      .textContent =
+      formatNumber(
+        result.auditCount
+      );
+
+    document
+      .getElementById(
+        'showingCount'
+      )
+      .textContent =
+      formatNumber(
+        result.showingCount
+      );
 
     renderTable();
 
   }
+
   catch (err) {
 
-    if (
-      err.message ===
-      'SESSION_EXPIRED'
-    ) {
+    tbody.innerHTML =
+      `
+        <tr>
+          <td colspan="7"
+              style="text-align:center;padding:40px;color:#c62828;">
+            ❌ ${escapeHTML(err.message)}
+          </td>
+        </tr>
+      `;
 
-      clearSession();
+  }
 
-      return;
+}
 
-    }
 
-    setTableMessage(
-      '❌ ' +
-      err.message
-    );
+/* ============================================================
+   KEYBOARD SEARCH
+   ============================================================ */
+
+function searchKeyDown(
+  event
+) {
+
+  if (
+    event.key ===
+    'Enter'
+  ) {
+
+    searchDashboard();
 
   }
 
@@ -2246,92 +2289,36 @@ function refreshDashboard() {
 
 
 /* ============================================================
-   COUNTS
-   ============================================================ */
-
-function updateCounts(
-  result
-) {
-
-  document
-    .getElementById(
-      'availableCount'
-    )
-    .textContent =
-    Number(
-      result.availableCount || 0
-    ).toLocaleString();
-
-  document
-    .getElementById(
-      'soldCount'
-    )
-    .textContent =
-    Number(
-      result.soldCount || 0
-    ).toLocaleString();
-
-  document
-    .getElementById(
-      'auditCount'
-    )
-    .textContent =
-    Number(
-      result.auditCount || 0
-    ).toLocaleString();
-
-  document
-    .getElementById(
-      'showingCount'
-    )
-    .textContent =
-    Number(
-      result.showingCount || 0
-    ).toLocaleString();
-
-}
-
-
-/* ============================================================
-   TABLE
+   TABLE RENDER
    ============================================================ */
 
 function renderTable() {
 
-  const body =
+  const tbody =
     document
       .getElementById(
         'tableBody'
       );
 
-  totalPages =
-    Math.max(
-      1,
-      Math.ceil(
-        currentData.length /
-        ROWS_PER_PAGE
+  const report =
+    document
+      .getElementById(
+        'sheetSelect'
       )
-    );
+      .value;
 
   if (
-    currentData.length === 0
+    !dashboardData.length
   ) {
 
-    currentPage = 1;
-
-    body.innerHTML =
+    tbody.innerHTML =
       `
-      <tr>
-        <td
-          colspan="7"
-          style="
-            text-align:center;
-            padding:40px;
-          "
-        >
-          No records found.
-        </td>
-      </tr>
+        <tr>
+          <td colspan="7"
+              style="text-align:center;padding:40px;">
+            No records found.
+          </td>
+        </tr>
       `;
 
     updatePagination();
@@ -2339,6 +2326,12 @@ function renderTable() {
     return;
 
   }
+
+  const totalPages =
+    Math.ceil(
+      dashboardData.length /
+      ROWS_PER_PAGE
+    );
 
   if (
     currentPage >
@@ -2357,141 +2350,116 @@ function renderTable() {
     ) *
     ROWS_PER_PAGE;
 
-  const end =
-    Math.min(
-      start +
-      ROWS_PER_PAGE,
-      currentData.length
-    );
-
   const rows =
-    currentData.slice(
+    dashboardData.slice(
       start,
-      end
+      start +
+      ROWS_PER_PAGE
     );
 
-  body.innerHTML =
-    rows.map(
-      function(row) {
+  tbody.innerHTML =
+    rows
+      .map(
+        function(row) {
 
-        const editable =
-          row.editable === true;
+          const editable =
+            report ===
+            'SCANRESULTS';
 
-        const actions =
-          editable
-            ? `
-              <div class="actionButtons">
-
+          const actions =
+            editable
+              ? `
                 <button
-                  class="editBtn"
-                  onclick="openEditModal(
-                    '${escapeJs(row.branch)}',
-                    '${escapeJs(row.tag)}',
-                    '${escapeJs(row.si)}'
-                  )"
+                  class="actionBtn"
+                  onclick='openEditModal(
+                    ${JSON.stringify(
+                      row.branch
+                    )},
+                    ${JSON.stringify(
+                      row.tag
+                    )},
+                    ${JSON.stringify(
+                      row.si
+                    )}
+                  )'
                 >
                   ✏️ Edit
                 </button>
 
                 <button
-                  class="deleteBtn"
-                  onclick="deleteSoldRecord(
-                    '${escapeJs(row.branch)}',
-                    '${escapeJs(row.tag)}'
-                  )"
+                  class="actionBtn deleteBtn"
+                  onclick='deleteSoldRecord(
+                    ${JSON.stringify(
+                      row.branch
+                    )},
+                    ${JSON.stringify(
+                      row.tag
+                    )}
+                  )'
                 >
                   🗑 Delete
                 </button>
+              `
+              : '';
 
-              </div>
-            `
-            : '—';
+          return `
+            <tr>
 
-        return `
-          <tr>
+              <td>
+                ${escapeHTML(
+                  row.branchName ||
+                  row.branch ||
+                  ''
+                )}
+              </td>
 
-            <td>
-              ${escapeHtml(
-                row.branchName ||
-                row.branch ||
-                ''
-              )}
-            </td>
+              <td>
+                ${escapeHTML(
+                  row.lenstype ||
+                  ''
+                )}
+              </td>
 
-            <td>
-              ${escapeHtml(
-                row.lenstype || ''
-              )}
-            </td>
+              <td>
+                ${escapeHTML(
+                  row.description ||
+                  ''
+                )}
+              </td>
 
-            <td>
-              ${escapeHtml(
-                row.description || ''
-              )}
-            </td>
+              <td>
+                ${escapeHTML(
+                  row.tag ||
+                  ''
+                )}
+              </td>
 
-            <td>
-              ${escapeHtml(
-                row.tag || ''
-              )}
-            </td>
+              <td>
+                ${escapeHTML(
+                  row.si ||
+                  ''
+                )}
+              </td>
 
-            <td>
-              ${escapeHtml(
-                row.si || ''
-              )}
-            </td>
+              <td>
+                ${escapeHTML(
+                  row.date ||
+                  ''
+                )}
+              </td>
 
-            <td>
-              ${escapeHtml(
-                formatDate(
-                  row.date
-                )
-              )}
-            </td>
+              <td>
+                ${actions}
+              </td>
 
-            <td>
-              ${actions}
-            </td>
+            </tr>
+          `;
 
-          </tr>
-        `;
-
-      }
-    )
-    .join('');
+        }
+      )
+      .join('');
 
   updatePagination();
-
-}
-
-
-/* ============================================================
-   TABLE MESSAGE
-   ============================================================ */
-
-function setTableMessage(
-  message
-) {
-
-  document
-    .getElementById(
-      'tableBody'
-    )
-    .innerHTML =
-    `
-    <tr>
-      <td
-        colspan="7"
-        style="
-          text-align:center;
-          padding:40px;
-        "
-      >
-        ${escapeHtml(message)}
-      </td>
-    </tr>
-    `;
 
 }
 
@@ -2502,12 +2470,18 @@ function setTableMessage(
 
 function updatePagination() {
 
+  const totalPages =
+    Math.ceil(
+      dashboardData.length /
+      ROWS_PER_PAGE
+    );
+
   document
     .getElementById(
       'pageInfo'
     )
     .textContent =
-    currentData.length
+    totalPages
       ? `Page ${currentPage} / ${totalPages}`
       : 'Page 0 / 0';
 
@@ -2532,30 +2506,36 @@ function updatePagination() {
 function previousPage() {
 
   if (
-    currentPage <= 1
+    currentPage > 1
   ) {
-    return;
+
+    currentPage--;
+
+    renderTable();
+
   }
-
-  currentPage--;
-
-  renderTable();
 
 }
 
 
 function nextPage() {
 
+  const totalPages =
+    Math.ceil(
+      dashboardData.length /
+      ROWS_PER_PAGE
+    );
+
   if (
-    currentPage >=
+    currentPage <
     totalPages
   ) {
-    return;
+
+    currentPage++;
+
+    renderTable();
+
   }
-
-  currentPage++;
-
-  renderTable();
 
 }
 
@@ -2575,14 +2555,14 @@ function openEditModal(
       'editBranch'
     )
     .value =
-    branch;
+    branch || '';
 
   document
     .getElementById(
       'editTag'
     )
     .value =
-    tag;
+    tag || '';
 
   document
     .getElementById(
@@ -2613,6 +2593,10 @@ function closeEditModal() {
 }
 
 
+/* ============================================================
+   SAVE EDIT
+   ============================================================ */
+
 async function saveEdit() {
 
   const branch =
@@ -2639,11 +2623,8 @@ async function saveEdit() {
 
   if (!si) {
 
-    showDialog(
-      '⚠️',
-      'SI Required',
-      'Please enter an SI Number.',
-      null
+    alert(
+      'SI Number is required.'
     );
 
     return;
@@ -2652,71 +2633,47 @@ async function saveEdit() {
 
   try {
 
-    showLoading(
-      'Updating SI Number...',
-      20,
-      'Updating Supabase record...'
-    );
-
     const result =
-      await apiGet({
+      await apiGet(
+        'editSold',
+        {
 
-        action:
-          'editSold',
+          session:
+            session,
 
-        session:
-          session,
+          branch:
+            branch,
 
-        branch:
-          branch,
+          tag:
+            tag,
 
-        tag:
-          tag,
+          si:
+            si
 
-        si:
-          si
-
-      });
-
-    closeLoading();
+        }
+      );
 
     if (
-      !result ||
       !result.ok
     ) {
 
       throw new Error(
-        result &&
-        result.error
-          ? result.error
-          : 'Unable to update record.'
+        result.error ||
+        'Unable to update SI.'
       );
 
     }
 
     closeEditModal();
 
-    showDialog(
-      '✅',
-      'Updated',
-      'SI Number updated successfully.',
-      function() {
-
-        searchDashboard();
-
-      }
-    );
+    await searchDashboard();
 
   }
+
   catch (err) {
 
-    closeLoading();
-
-    showDialog(
-      '❌',
-      'Update Failed',
-      err.message,
-      null
+    alert(
+      err.message
     );
 
   }
@@ -2734,75 +2691,50 @@ function deleteSoldRecord(
 ) {
 
   showDialog(
-    '⚠️',
+    '🗑',
     'Delete Sold Record',
-    'Delete sold record with tag "' +
-    tag +
-    '"?',
+    'Are you sure you want to delete this sold record?\n\nTag: ' +
+    tag,
     async function() {
 
       try {
 
-        showLoading(
-          'Deleting record...',
-          30,
-          'Deleting from Supabase...'
-        );
-
         const result =
-          await apiGet({
+          await apiGet(
+            'deleteSold',
+            {
 
-            action:
-              'deleteSold',
+              session:
+                session,
 
-            session:
-              session,
+              branch:
+                branch,
 
-            branch:
-              branch,
+              tag:
+                tag
 
-            tag:
-              tag
-
-          });
-
-        closeLoading();
+            }
+          );
 
         if (
-          !result ||
           !result.ok
         ) {
 
           throw new Error(
-            result &&
-            result.error
-              ? result.error
-              : 'Delete failed.'
+            result.error ||
+            'Delete failed.'
           );
 
         }
 
-        showDialog(
-          '✅',
-          'Deleted',
-          'Sold record deleted successfully.',
-          function() {
-
-            searchDashboard();
-
-          }
-        );
+        await searchDashboard();
 
       }
+
       catch (err) {
 
-        closeLoading();
-
-        showDialog(
-          '❌',
-          'Delete Failed',
-          err.message,
-          null
+        alert(
+          err.message
         );
 
       }
@@ -2831,10 +2763,6 @@ function openUpdateStockModal() {
 
 function closeUpdateStockModal() {
 
-  if (importRunning) {
-    return;
-  }
-
   document
     .getElementById(
       'updateStockModal'
@@ -2846,14 +2774,46 @@ function closeUpdateStockModal() {
 
 
 /* ============================================================
-   IMPORT STOCKS
+   SELECTED FILE
+   ============================================================ */
+
+function showSelectedFile(
+  event
+) {
+
+  const file =
+    event.target.files[0];
+
+  const info =
+    document
+      .getElementById(
+        'importFileInfo'
+      );
+
+  if (!file) {
+
+    info.textContent =
+      '';
+
+    return;
+
+  }
+
+  info.textContent =
+    file.name +
+    ' — ' +
+    formatBytes(
+      file.size
+    );
+
+}
+
+
+/* ============================================================
+   UPDATE STOCKS
    ============================================================ */
 
 async function updateStocks() {
-
-  if (importRunning) {
-    return;
-  }
 
   const branch =
     document
@@ -2862,23 +2822,17 @@ async function updateStocks() {
       )
       .value;
 
-  const fileInput =
+  const file =
     document
       .getElementById(
         'stockFile'
-      );
-
-  const file =
-    fileInput.files &&
-    fileInput.files[0];
+      )
+      .files[0];
 
   if (!branch) {
 
-    showDialog(
-      '⚠️',
-      'Branch Required',
-      'Please select a branch.',
-      null
+    alert(
+      'Please select a branch.'
     );
 
     return;
@@ -2887,118 +2841,160 @@ async function updateStocks() {
 
   if (!file) {
 
-    showDialog(
-      '⚠️',
-      'File Required',
-      'Please select an Excel or CSV file.',
-      null
+    alert(
+      'Please select an Excel or CSV file.'
     );
 
     return;
 
   }
 
-  showDialog(
-    '📤',
-    'Start Import',
-    'Import "' +
-    file.name +
-    '" into ' +
-    branch +
-    '?\n\n' +
-    'The file will be processed in background chunks.',
-    async function() {
-
-      await runImport(
-        branch,
-        file
+  const button =
+    document
+      .getElementById(
+        'updateStocksBtn'
       );
 
-    }
-  );
-
-}
-
-
-/* ============================================================
-   RUN IMPORT
-   ============================================================ */
-
-async function runImport(
-  branch,
-  file
-) {
-
-  importRunning = true;
-
-  importCancelled = false;
-
-  document
-    .getElementById(
-      'updateStocksBtn'
-    )
-    .disabled =
+  button.disabled =
     true;
-
-  showLoading(
-    'Preparing import...',
-    0,
-    'Reading Excel file...'
-  );
-
-  document
-    .getElementById(
-      'cancelJobBtn'
-    )
-    .style.display =
-    'inline-block';
 
   try {
 
+    /*
+     * STEP 1
+     *
+     * Ask Apps Script to clear the branch stocks.
+     */
+
+    showJobModal(
+      'IMPORT',
+      '',
+      'Preparing Import',
+      'Preparing database...'
+    );
+
+    const jobId =
+      crypto.randomUUID
+        ? crypto.randomUUID()
+        : (
+          Date.now() +
+          '_' +
+          Math.random()
+        );
+
+    const prepare =
+      await apiGet(
+        'prepareImport',
+        {
+
+          session:
+            session,
+
+          branch:
+            branch,
+
+          jobId:
+            jobId
+
+        }
+      );
+
+    if (
+      !prepare.ok
+    ) {
+
+      throw new Error(
+        prepare.error ||
+        'Unable to prepare import.'
+      );
+
+    }
+
+    currentJobId =
+      prepare.jobId;
+
+    /*
+     * Close the Update Stocks modal immediately.
+     *
+     * The actual upload runs from the background-style
+     * progress window.
+     */
+
+    closeUpdateStockModal();
+
+    /*
+     * STEP 2
+     *
+     * Read Excel in browser.
+     */
+
+    setJobProgress(
+      0,
+      'Reading Excel file...',
+      'Opening ' +
+      file.name
+    );
+
     const rows =
-      await readExcelFile(
+      await readSpreadsheetFile(
         file
       );
 
     if (
-      !rows ||
       !rows.length
     ) {
 
       throw new Error(
-        'The selected file contains no rows.'
+        'The selected file contains no data rows.'
       );
 
     }
 
-    const dataRows =
-      normalizeImportRows(
-        rows
-      );
+    /*
+     * STEP 3
+     *
+     * Prepare chunks.
+     */
 
-    if (
-      !dataRows.length
-    ) {
+    importState = {
 
-      throw new Error(
-        'No usable data rows were found.'
-      );
+      rows:
+        rows,
 
-    }
+      chunks:
+        [],
 
-    const totalRows =
-      dataRows.length;
+      completed:
+        0,
 
-    const chunks = [];
+      failed:
+        0,
+
+      totalChunks:
+        Math.ceil(
+          rows.length /
+          IMPORT_CHUNK_SIZE
+        ),
+
+      totalRows:
+        rows.length,
+
+      cancelled:
+        false,
+
+      active:
+        0
+
+    };
 
     for (
       let i = 0;
-      i < totalRows;
+      i < rows.length;
       i += IMPORT_CHUNK_SIZE
     ) {
 
-      chunks.push(
-        dataRows.slice(
+      importState.chunks.push(
+        rows.slice(
           i,
           i +
           IMPORT_CHUNK_SIZE
@@ -3007,232 +3003,76 @@ async function runImport(
 
     }
 
-    const totalChunks =
-      chunks.length;
-
-    let completedChunks = 0;
-
-    let completedRows = 0;
-
-    updateLoading(
+    setJobProgress(
       0,
-      'Importing ' +
-      totalRows.toLocaleString() +
-      ' rows...',
-      `
-        <b>Branch:</b> ${escapeHtml(branch)}<br>
-        <b>Rows:</b> ${totalRows.toLocaleString()}<br>
-        <b>Chunks:</b> ${totalChunks.toLocaleString()}<br>
-        <b>Workers:</b> ${IMPORT_CONCURRENCY}
-      `
+      'Uploading stocks...',
+      rows.length.toLocaleString() +
+      ' rows • ' +
+      importState.totalChunks.toLocaleString() +
+      ' chunks • ' +
+      IMPORT_CONCURRENT_REQUESTS +
+      ' concurrent uploads'
     );
 
     /*
-     * Multiple chunks are uploaded concurrently.
+     * STEP 4
      *
-     * This keeps the browser busy while avoiding
-     * one giant request.
+     * Upload chunks concurrently.
      */
 
-    let nextChunkIndex = 0;
-
-    async function worker(
-      workerNumber
-    ) {
-
-      while (true) {
-
-        if (
-          importCancelled
-        ) {
-
-          return;
-
-        }
-
-        const index =
-          nextChunkIndex++;
-
-        if (
-          index >=
-          totalChunks
-        ) {
-
-          return;
-
-        }
-
-        const chunk =
-          chunks[index];
-
-        await uploadImportChunk(
-          branch,
-          chunk,
-          index,
-          totalChunks
-        );
-
-        completedChunks++;
-
-        completedRows +=
-          chunk.length;
-
-        const percent =
-          Math.round(
-            completedRows /
-            totalRows *
-            100
-          );
-
-        updateLoading(
-          percent,
-          'Importing stocks...',
-          `
-            <b>Branch:</b> ${escapeHtml(branch)}<br>
-            <b>Rows:</b>
-            ${completedRows.toLocaleString()}
-            /
-            ${totalRows.toLocaleString()}<br>
-            <b>Chunks:</b>
-            ${completedChunks.toLocaleString()}
-            /
-            ${totalChunks.toLocaleString()}<br>
-            <b>Workers:</b>
-            ${IMPORT_CONCURRENCY}
-          `
-        );
-
-      }
-
-    }
-
-    const workers = [];
-
-    const workerCount =
-      Math.min(
-        IMPORT_CONCURRENCY,
-        totalChunks
-      );
-
-    for (
-      let i = 0;
-      i < workerCount;
-      i++
-    ) {
-
-      workers.push(
-        worker(i + 1)
-      );
-
-    }
-
-    await Promise.all(
-      workers
-    );
+    await uploadImportChunks();
 
     if (
-      importCancelled
+      importState.cancelled
     ) {
 
-      updateLoading(
-        0,
-        'Import cancelled',
-        'The current import was cancelled.'
+      throw new Error(
+        'Import cancelled.'
       );
-
-      document
-        .getElementById(
-          'cancelJobBtn'
-        )
-        .style.display =
-        'none';
-
-      document
-        .getElementById(
-          'closeLoadingBtn'
-        )
-        .style.display =
-        'inline-block';
-
-      return;
 
     }
 
-    updateLoading(
+    /*
+     * STEP 5
+     *
+     * Wait until Apps Script confirms the job.
+     */
+
+    setJobProgress(
       100,
-      'Import completed',
-      `
-        <b>Branch:</b> ${escapeHtml(branch)}<br>
-        <b>Rows uploaded:</b>
-        ${totalRows.toLocaleString()}<br>
-        <b>Chunks:</b>
-        ${totalChunks.toLocaleString()}<br>
-        <b>Status:</b> Completed
-      `
+      'Import upload completed',
+      'Verifying database status...'
     );
 
-    document
-      .getElementById(
-        'cancelJobBtn'
-      )
-      .style.display =
-      'none';
-
-    document
-      .getElementById(
-        'closeLoadingBtn'
-      )
-      .style.display =
-      'inline-block';
-
-    /*
-     * Close the update modal after import succeeds.
-     */
-
-    document
-      .getElementById(
-        'updateStockModal'
-      )
-      .style.display =
-      'none';
-
-    /*
-     * Refresh the dashboard after import.
-     */
-
-    const dashboardBranch =
-      document
-        .getElementById(
-          'branchSelect'
-        )
-        .value;
-
-    if (
-      dashboardBranch ===
-      branch
-    ) {
-
-      setTimeout(
-        function() {
-
-          searchDashboard();
-
-        },
-        300
-      );
-
-    }
+    await waitForImportCompletion();
 
   }
+
   catch (err) {
 
-    updateLoading(
-      0,
-      'Import failed',
-      escapeHtml(
+    if (
+      String(
         err.message
-      )
-    );
+      ) ===
+      'Import cancelled.'
+    ) {
+
+      setJobProgress(
+        0,
+        'Import cancelled',
+        'The import job was cancelled.'
+      );
+
+    }
+    else {
+
+      setJobProgress(
+        0,
+        'Import failed',
+        err.message
+      );
+
+    }
 
     document
       .getElementById(
@@ -3249,15 +3089,10 @@ async function runImport(
       'inline-block';
 
   }
+
   finally {
 
-    importRunning = false;
-
-    document
-      .getElementById(
-        'updateStocksBtn'
-      )
-      .disabled =
+    button.disabled =
       false;
 
   }
@@ -3266,119 +3101,10 @@ async function runImport(
 
 
 /* ============================================================
-   UPLOAD ONE IMPORT CHUNK
+   READ SPREADSHEET
    ============================================================ */
 
-async function uploadImportChunk(
-  branch,
-  rows,
-  index,
-  totalChunks
-) {
-
-  /*
-   * Base64 is used because the Apps Script backend
-   * already expects the chunk in body.chunk.
-   */
-
-  const json =
-    JSON.stringify(
-      rows
-    );
-
-  const encoded =
-    arrayBufferToBase64(
-      new TextEncoder()
-        .encode(
-          json
-        )
-    );
-
-  let attempts = 0;
-
-  const maxAttempts = 3;
-
-  while (
-    attempts <
-    maxAttempts
-  ) {
-
-    attempts++;
-
-    try {
-
-      const result =
-        await apiPost(
-          {
-            action:
-              'uploadChunk',
-
-            session:
-              session,
-
-            branch:
-              branch,
-
-            chunk:
-              encoded
-          },
-          180000
-        );
-
-      if (
-        !result ||
-        !result.ok
-      ) {
-
-        throw new Error(
-          result &&
-          result.error
-            ? result.error
-            : 'Chunk upload failed.'
-        );
-
-      }
-
-      return result;
-
-    }
-    catch (err) {
-
-      if (
-        attempts >=
-        maxAttempts
-      ) {
-
-        throw new Error(
-          'Chunk ' +
-          (index + 1) +
-          '/' +
-          totalChunks +
-          ' failed after ' +
-          maxAttempts +
-          ' attempts: ' +
-          err.message
-        );
-
-      }
-
-      await sleep(
-        1000 *
-        attempts
-      );
-
-    }
-
-  }
-
-}
-
-
-/* ============================================================
-   READ EXCEL / CSV
-   ============================================================ */
-
-function readExcelFile(
+function readSpreadsheetFile(
   file
 ) {
 
@@ -3402,9 +3128,14 @@ function readExcelFile(
               XLSX.read(
                 data,
                 {
-                  type: 'array',
-                  cellDates: true,
-                  raw: false
+                  type:
+                    'array',
+
+                  cellDates:
+                    false,
+
+                  raw:
+                    false
                 }
               );
 
@@ -3412,13 +3143,9 @@ function readExcelFile(
               !workbook.SheetNames.length
             ) {
 
-              reject(
-                new Error(
-                  'No worksheet found.'
-                )
+              throw new Error(
+                'No worksheet found.'
               );
-
-              return;
 
             }
 
@@ -3431,24 +3158,94 @@ function readExcelFile(
               XLSX.utils.sheet_to_json(
                 sheet,
                 {
-                  header: 1,
-                  defval: '',
-                  raw: false
+                  header:
+                    1,
+
+                  defval:
+                    '',
+
+                  raw:
+                    false
                 }
               );
 
+            if (
+              !rows.length
+            ) {
+
+              resolve([]);
+
+              return;
+
+            }
+
+            /*
+             * First row is assumed to be the header.
+             *
+             * The Apps Script backend expects the
+             * exact 27-column order.
+             */
+
+            const dataRows =
+              rows.slice(1);
+
+            const normalized =
+              dataRows
+                .filter(
+                  function(row) {
+
+                    return row.some(
+                      function(value) {
+
+                        return String(
+                          value ===
+                          undefined ||
+                          value ===
+                          null
+                            ? ''
+                            : value
+                        ).trim() !== '';
+
+                      }
+                    );
+
+                  }
+                )
+                .map(
+                  function(row) {
+
+                    const output =
+                      new Array(27)
+                        .fill('');
+
+                    for (
+                      let i = 0;
+                      i < 27;
+                      i++
+                    ) {
+
+                      output[i] =
+                        normalizeImportValue(
+                          row[i]
+                        );
+
+                    }
+
+                    return output;
+
+                  }
+                );
+
             resolve(
-              rows
+              normalized
             );
 
           }
+
           catch (err) {
 
             reject(
-              new Error(
-                'Unable to read Excel file: ' +
-                err.message
-              )
+              err
             );
 
           }
@@ -3460,7 +3257,7 @@ function readExcelFile(
 
           reject(
             new Error(
-              'Unable to read selected file.'
+              'Unable to read the selected file.'
             )
           );
 
@@ -3477,324 +3274,18 @@ function readExcelFile(
 
 
 /* ============================================================
-   NORMALIZE IMPORT ROWS
+   IMPORT VALUE NORMALIZATION
    ============================================================ */
 
-function normalizeImportRows(
-  rows
-) {
-
-  if (
-    !Array.isArray(rows) ||
-    rows.length === 0
-  ) {
-
-    return [];
-
-  }
-
-  /*
-   * The Apps Script backend expects the exact
-   * COLUMNS order:
-   *
-   * 0  SDATE
-   * 1  SUPPLIER
-   * 2  DR
-   * ...
-   * 23 SI NO.
-   * 24 DATE AND TIME
-   * 25 USER EMAIL
-   * 26 STATUS
-   */
-
-  const expectedHeaders = [
-
-    'SDATE',
-    'SUPPLIER',
-    'DR',
-    'COST',
-    'ASG',
-    'CB',
-    'FD',
-    'UNITS',
-    'POWER',
-    'LENSTYPE',
-    'PUNIT',
-    'BR',
-    'NTAGN',
-    'CATEGORY',
-    'DESCRIPTION',
-    'LENSCODE',
-    'SELLINGPRICE',
-    'DELIVERYDATE',
-    'ORNUMBER',
-    'ORDATE',
-    'REMARKS',
-    'TAGPRICE',
-    'QR',
-    'SI NO.',
-    'DATE AND TIME',
-    'USER EMAIL',
-    'STATUS'
-
-  ];
-
-  const firstRow =
-    rows[0] || [];
-
-  const normalizedHeader =
-    firstRow.map(
-      normalizeHeader
-    );
-
-  const headerLooksValid =
-    expectedHeaders.some(
-      function(header) {
-
-        return normalizedHeader.indexOf(
-          normalizeHeader(
-            header
-          )
-        ) !== -1;
-
-      }
-    );
-
-  let startRow =
-    headerLooksValid
-      ? 1
-      : 0;
-
-  /*
-   * If the spreadsheet already has the correct
-   * 27-column order, preserve it.
-   */
-
-  if (
-    !headerLooksValid
-  ) {
-
-    return rows
-      .slice(startRow)
-      .filter(
-        function(row) {
-
-          return (
-            Array.isArray(row) &&
-            row.some(
-              function(value) {
-
-                return String(
-                  value === undefined ||
-                  value === null
-                    ? ''
-                    : value
-                ).trim() !== '';
-
-              }
-            )
-          );
-
-        }
-      )
-      .map(
-        function(row) {
-
-          const output =
-            [];
-
-          for (
-            let i = 0;
-            i < 27;
-            i++
-          ) {
-
-            output.push(
-              cleanCell(
-                row[i]
-              )
-            );
-
-          }
-
-          return output;
-
-        }
-      );
-
-  }
-
-  /*
-   * Header-based mapping.
-   *
-   * This makes the importer safer if the columns
-   * are rearranged in the Excel file.
-   */
-
-  const indexes = {};
-
-  expectedHeaders.forEach(
-    function(header) {
-
-      const target =
-        normalizeHeader(
-          header
-        );
-
-      let index =
-        normalizedHeader.indexOf(
-          target
-        );
-
-      if (
-        index === -1
-      ) {
-
-        /*
-         * Handle SI NO. variations.
-         */
-
-        if (
-          target ===
-          normalizeHeader(
-            'SI NO.'
-          )
-        ) {
-
-          const alternatives = [
-            'SI',
-            'SI NO',
-            'SINO',
-            'SI NUMBER'
-          ];
-
-          for (
-            let i = 0;
-            i < alternatives.length;
-            i++
-          ) {
-
-            index =
-              normalizedHeader.indexOf(
-                normalizeHeader(
-                  alternatives[i]
-                )
-              );
-
-            if (
-              index !== -1
-            ) {
-
-              break;
-
-            }
-
-          }
-
-        }
-
-      }
-
-      indexes[header] =
-        index;
-
-    }
-  );
-
-  const output = [];
-
-  rows
-    .slice(startRow)
-    .forEach(
-      function(row) {
-
-        if (
-          !Array.isArray(row)
-        ) {
-          return;
-        }
-
-        const hasData =
-          row.some(
-            function(value) {
-
-              return cleanCell(
-                value
-              ) !== '';
-
-            }
-          );
-
-        if (!hasData) {
-          return;
-        }
-
-        const outputRow =
-          expectedHeaders.map(
-            function(header) {
-
-              const index =
-                indexes[header];
-
-              if (
-                index === undefined ||
-                index < 0
-              ) {
-
-                return '';
-
-              }
-
-              return cleanCell(
-                row[index]
-              );
-
-            }
-          );
-
-        output.push(
-          outputRow
-        );
-
-      }
-    );
-
-  return output;
-
-}
-
-
-/* ============================================================
-   IMPORT HELPERS
-   ============================================================ */
-
-function normalizeHeader(
-  value
-) {
-
-  return String(
-    value === undefined ||
-    value === null
-      ? ''
-      : value
-  )
-    .trim()
-    .toUpperCase()
-    .replace(
-      /\s+/g,
-      ' '
-    );
-
-}
-
-
-function cleanCell(
+function normalizeImportValue(
   value
 ) {
 
   if (
-    value === undefined ||
-    value === null
+    value ===
+    undefined ||
+    value ===
+    null
   ) {
 
     return '';
@@ -3805,7 +3296,8 @@ function cleanCell(
     value instanceof Date
   ) {
 
-    return value.toISOString();
+    return value
+      .toISOString();
 
   }
 
@@ -3817,7 +3309,398 @@ function cleanCell(
 
 
 /* ============================================================
-   EXPORT
+   UPLOAD IMPORT CHUNKS
+   ============================================================ */
+
+async function uploadImportChunks() {
+
+  let nextIndex =
+    0;
+
+  async function worker() {
+
+    while (true) {
+
+      if (
+        importState.cancelled
+      ) {
+
+        return;
+
+      }
+
+      const index =
+        nextIndex++;
+
+      if (
+        index >=
+        importState.chunks.length
+      ) {
+
+        return;
+
+      }
+
+      const chunk =
+        importState.chunks[
+          index
+        ];
+
+      importState.active++;
+
+      try {
+
+        /*
+         * JSON -> UTF-8 -> Base64
+         *
+         * This matches uploadChunk() in Code.gs.
+         */
+
+        const json =
+          JSON.stringify(
+            chunk
+          );
+
+        const base64 =
+          uint8ToBase64(
+            new TextEncoder()
+              .encode(
+                json
+              )
+          );
+
+        await apiPost(
+          {
+
+            action:
+              'uploadChunk',
+
+            session:
+              session,
+
+            branch:
+              document
+                .getElementById(
+                  'updateBranch'
+                )
+                .value,
+
+            chunk:
+              base64,
+
+            chunkIndex:
+              index,
+
+            totalChunks:
+              importState.totalChunks
+
+          }
+        );
+
+        importState.completed++;
+
+        const percent =
+          Math.round(
+            (
+              importState.completed /
+              importState.totalChunks
+            ) *
+            100
+          );
+
+        setJobProgress(
+          percent,
+          'Uploading stocks...',
+          'Chunk ' +
+          (
+            index + 1
+          ).toLocaleString() +
+          ' / ' +
+          importState.totalChunks.toLocaleString() +
+          ' completed\n' +
+          importState.completedRows?.toLocaleString?.() ||
+          ''
+        );
+
+        /*
+         * Update details separately because the expression
+         * above intentionally handles older browsers.
+         */
+
+        document
+          .getElementById(
+            'jobDetails'
+          )
+          .textContent =
+          'Rows: ' +
+          (
+            Math.min(
+              importState.completed *
+              IMPORT_CHUNK_SIZE,
+              importState.totalRows
+            )
+          ).toLocaleString() +
+          ' / ' +
+          importState.totalRows.toLocaleString() +
+          '\nChunks: ' +
+          importState.completed.toLocaleString() +
+          ' / ' +
+          importState.totalChunks.toLocaleString() +
+          '\nConcurrent workers: ' +
+          IMPORT_CONCURRENT_REQUESTS;
+
+      }
+
+      catch (err) {
+
+        importState.failed++;
+
+        throw new Error(
+          'Chunk ' +
+          (
+            index + 1
+          ) +
+          ' failed: ' +
+          err.message
+        );
+
+      }
+
+      finally {
+
+        importState.active--;
+
+      }
+
+    }
+
+  }
+
+  const workers = [];
+
+  const workerCount =
+    Math.min(
+      IMPORT_CONCURRENT_REQUESTS,
+      importState.totalChunks
+    );
+
+  for (
+    let i = 0;
+    i < workerCount;
+    i++
+  ) {
+
+    workers.push(
+      worker()
+    );
+
+  }
+
+  await Promise.all(
+    workers
+  );
+
+}
+
+
+/* ============================================================
+   BASE64 BYTE CONVERSION
+   ============================================================ */
+
+function uint8ToBase64(
+  bytes
+) {
+
+  let binary = '';
+
+  const chunkSize =
+    0x8000;
+
+  for (
+    let i = 0;
+    i < bytes.length;
+    i += chunkSize
+  ) {
+
+    binary += String.fromCharCode
+      .apply(
+        null,
+        bytes.subarray(
+          i,
+          i +
+          chunkSize
+        )
+      );
+
+  }
+
+  return btoa(
+    binary
+  );
+
+}
+
+
+/* ============================================================
+   IMPORT COMPLETION
+   ============================================================ */
+
+async function waitForImportCompletion() {
+
+  /*
+   * The upload itself has completed.
+   *
+   * The Apps Script status is still queried so that the
+   * browser knows the server accepted the job.
+   */
+
+  for (
+    let attempt = 0;
+    attempt < 10;
+    attempt++
+  ) {
+
+    if (
+      importState.cancelled
+    ) {
+
+      return;
+
+    }
+
+    try {
+
+      const result =
+        await apiGet(
+          'importStatus',
+          {
+
+            session:
+              session,
+
+            jobId:
+              currentJobId
+
+          }
+        );
+
+      if (
+        result.status ===
+        'cancelled'
+      ) {
+
+        throw new Error(
+          'Import cancelled by user.'
+        );
+
+      }
+
+      if (
+        result.status ===
+        'error'
+      ) {
+
+        throw new Error(
+          result.error ||
+          'Import failed on server.'
+        );
+
+      }
+
+      /*
+       * uploadChunk() does not currently update
+       * processedRows on the server, so successful browser
+       * uploads are the authoritative progress indicator.
+       */
+
+      if (
+        result.status ===
+        'uploading' ||
+        result.status ===
+        'waiting_for_chunks'
+      ) {
+
+        await sleep(
+          700
+        );
+
+        continue;
+
+      }
+
+      break;
+
+    }
+
+    catch (err) {
+
+      if (
+        attempt === 9
+      ) {
+
+        throw err;
+
+      }
+
+      await sleep(
+        700
+      );
+
+    }
+
+  }
+
+  setJobProgress(
+    100,
+    'Import completed',
+    importState.totalRows.toLocaleString() +
+    ' rows uploaded successfully.\n' +
+    importState.totalChunks.toLocaleString() +
+    ' chunks completed.'
+  );
+
+  document
+    .getElementById(
+      'cancelJobBtn'
+    )
+    .style.display =
+    'none';
+
+  document
+    .getElementById(
+      'closeLoadingBtn'
+    )
+    .style.display =
+    'inline-block';
+
+  /*
+   * Keep dashboard available.
+   *
+   * Only refresh if the user already selected a branch.
+   */
+
+  if (
+    document
+      .getElementById(
+        'branchSelect'
+      )
+      .value ===
+    document
+      .getElementById(
+        'updateBranch'
+      )
+      .value
+  ) {
+
+    searchDashboard();
+
+  }
+
+}
+
+
+/* ============================================================
+   EXPORT MODAL
    ============================================================ */
 
 function openExportModal() {
@@ -3848,7 +3731,7 @@ function closeExportModal() {
    START EXPORT
    ============================================================ */
 
-function startExport() {
+async function startExport() {
 
   const branch =
     document
@@ -3859,88 +3742,55 @@ function startExport() {
 
   if (!branch) {
 
-    showDialog(
-      '⚠️',
-      'Branch Required',
-      'Please select a branch.',
-      null
+    alert(
+      'Please select a branch.'
     );
 
     return;
 
   }
 
-  showDialog(
-    '📥',
-    'Export Inventory',
-    'Start background export for ' +
-    branch +
-    '?\n\n' +
-    'The dashboard will remain available while the export is processed.',
-    async function() {
-
-      closeExportModal();
-
-      await beginExport(
-        branch
-      );
-
-    }
-  );
-
-}
-
-
-/* ============================================================
-   BEGIN EXPORT
-   ============================================================ */
-
-async function beginExport(
-  branch
-) {
-
   try {
 
-    showLoading(
-      'Queueing export...',
-      0,
+    showJobModal(
+      'EXPORT',
+      '',
+      'Queueing Export',
       'Creating background export job...'
     );
 
-    currentJobType =
-      'export';
-
     const result =
-      await apiGet({
+      await apiGet(
+        'startExport',
+        {
 
-        action:
-          'startExport',
+          session:
+            session,
 
-        session:
-          session,
+          branch:
+            branch
 
-        branch:
-          branch
-
-      });
+        }
+      );
 
     if (
-      !result ||
-      !result.ok ||
-      !result.jobId
+      !result.ok
     ) {
 
       throw new Error(
-        result &&
-        result.error
-          ? result.error
-          : 'Unable to start export.'
+        result.error ||
+        'Unable to start export.'
       );
 
     }
 
+    currentJobType =
+      'EXPORT';
+
     currentJobId =
       result.jobId;
+
+    closeExportModal();
 
     document
       .getElementById(
@@ -3949,28 +3799,30 @@ async function beginExport(
       .style.display =
       'inline-block';
 
-    updateLoading(
-      1,
+    document
+      .getElementById(
+        'closeLoadingBtn'
+      )
+      .style.display =
+      'none';
+
+    setJobProgress(
+      0,
       'Export queued...',
-      `
-        <b>Branch:</b>
-        ${escapeHtml(branch)}<br>
-        <b>Status:</b>
-        Waiting for background worker...
-      `
+      'The export is running in the background.\n' +
+      'You can continue using the dashboard.'
     );
 
-    pollExportStatus();
+    startJobPolling();
 
   }
+
   catch (err) {
 
-    updateLoading(
+    setJobProgress(
       0,
       'Export failed',
-      escapeHtml(
-        err.message
-      )
+      err.message
     );
 
     document
@@ -3993,86 +3845,207 @@ async function beginExport(
 
 
 /* ============================================================
-   EXPORT STATUS POLLING
+   EXPORT POLLING
    ============================================================ */
 
-async function pollExportStatus() {
+function startJobPolling() {
 
-  if (!currentJobId) {
+  stopJobPolling();
+
+  pollExportJob();
+
+  jobPollTimer =
+    setInterval(
+      pollExportJob,
+      3000
+    );
+
+}
+
+
+function stopJobPolling() {
+
+  if (
+    jobPollTimer
+  ) {
+
+    clearInterval(
+      jobPollTimer
+    );
+
+    jobPollTimer =
+      null;
+
+  }
+
+}
+
+
+async function pollExportJob() {
+
+  if (
+    currentJobType !==
+    'EXPORT' ||
+    !currentJobId
+  ) {
+
+    stopJobPolling();
+
     return;
+
   }
 
   try {
 
     const result =
-      await apiGet({
+      await apiGet(
+        'exportStatus',
+        {
 
-        action:
-          'exportStatus',
+          session:
+            session,
 
-        session:
-          session,
+          jobId:
+            currentJobId
 
-        jobId:
-          currentJobId
-
-      });
+        }
+      );
 
     if (
-      !result ||
       !result.ok
     ) {
 
       throw new Error(
-        result &&
-        result.error
-          ? result.error
-          : 'Unable to read export status.'
+        result.error ||
+        'Unable to read export status.'
       );
 
     }
 
-    updateExportProgress(
-      result
-    );
+    const totalRows =
+      (
+        Number(
+          result.stocksRows
+        ) +
+        Number(
+          result.soldRows
+        ) +
+        Number(
+          result.auditRows
+        )
+      );
+
+    const pages =
+      (
+        Number(
+          result.stocksPages
+        ) +
+        Number(
+          result.soldPages
+        ) +
+        Number(
+          result.auditPages
+        )
+      );
+
+    /*
+     * There is no artificial 760/1000/100000 limit.
+     *
+     * Progress is based on actual processed rows when
+     * available.
+     */
+
+    let percent =
+      0;
 
     if (
       result.status ===
       'completed'
     ) {
 
-      finishExport(
-        result
-      );
+      percent =
+        100;
 
-      return;
+    }
+    else if (
+      result.stage ===
+      'sold'
+    ) {
+
+      percent =
+        totalRows
+          ? Math.min(
+              60,
+              Math.round(
+                (
+                  Number(
+                    result.stocksRows
+                  ) /
+                  Math.max(
+                    Number(
+                      result.stocksRows
+                    ) +
+                    1,
+                    1
+                  )
+                ) *
+                60
+              )
+            )
+          : 20;
+
+    }
+    else if (
+      result.stage ===
+      'audit'
+    ) {
+
+      percent =
+        70;
+
+    }
+    else if (
+      result.stage ===
+      'processing'
+    ) {
+
+      percent =
+        90;
+
+    }
+    else {
+
+      percent =
+        Math.min(
+          20,
+          pages
+            ? 10 +
+              (
+                pages % 10
+              )
+            : 5
+        );
 
     }
 
     if (
       result.status ===
-      'error'
+      'completed'
     ) {
 
-      failExport(
-        result.error ||
-        'Export failed.'
+      setJobProgress(
+        100,
+        'Export completed',
+        buildExportDetails(
+          result
+        )
       );
 
-      return;
-
-    }
-
-    if (
-      result.status ===
-      'cancelled'
-    ) {
-
-      updateLoading(
-        0,
-        'Export cancelled',
-        'The export job was cancelled.'
+      showExportLinks(
+        result.files || []
       );
+
+      stopJobPolling();
 
       document
         .getElementById(
@@ -4088,424 +4061,74 @@ async function pollExportStatus() {
         .style.display =
         'inline-block';
 
-      currentJobId = null;
+      return;
+
+    }
+
+    if (
+      result.status ===
+      'cancelled'
+    ) {
+
+      setJobProgress(
+        0,
+        'Export cancelled',
+        'The background export was cancelled.'
+      );
+
+      stopJobPolling();
+
+      document
+        .getElementById(
+          'cancelJobBtn'
+        )
+        .style.display =
+        'none';
+
+      document
+        .getElementById(
+          'closeLoadingBtn'
+        )
+        .style.display =
+        'inline-block';
 
       return;
 
     }
 
-    exportPollTimer =
-      setTimeout(
-        pollExportStatus,
-        2000
-      );
-
-  }
-  catch (err) {
-
-    /*
-     * Do not immediately kill the export.
-     *
-     * Temporary network errors should not destroy
-     * the background job.
-     */
-
-    exportPollTimer =
-      setTimeout(
-        pollExportStatus,
-        4000
-      );
-
-  }
-
-}
-
-
-/* ============================================================
-   EXPORT PROGRESS
-   ============================================================ */
-
-function updateExportProgress(
-  job
-) {
-
-  const stocksRows =
-    Number(
-      job.stocksRows || 0
-    );
-
-  const soldRows =
-    Number(
-      job.soldRows || 0
-    );
-
-  const auditRows =
-    Number(
-      job.auditRows || 0
-    );
-
-  const stocksPages =
-    Number(
-      job.stocksPages || 0
-    );
-
-  const soldPages =
-    Number(
-      job.soldPages || 0
-    );
-
-  const auditPages =
-    Number(
-      job.auditPages || 0
-    );
-
-  let percent = 0;
-
-  if (
-    job.stage ===
-    'starting'
-  ) {
-
-    percent = 2;
-
-  }
-  else if (
-    job.stage ===
-    'stocks'
-  ) {
-
-    percent =
-      5 +
-      Math.min(
-        30,
-        stocksPages
-      );
-
-  }
-  else if (
-    job.stage ===
-    'sold'
-  ) {
-
-    percent =
-      35 +
-      Math.min(
-        25,
-        soldPages
-      );
-
-  }
-  else if (
-    job.stage ===
-    'audit'
-  ) {
-
-    percent =
-      60 +
-      Math.min(
-        20,
-        auditPages
-      );
-
-  }
-  else if (
-    job.stage ===
-    'processing'
-  ) {
-
-    percent = 85;
-
-  }
-  else if (
-    job.stage ===
-    'creating_files'
-  ) {
-
-    percent = 92;
-
-  }
-  else {
-
-    percent = 95;
-
-  }
-
-  percent =
-    Math.min(
-      99,
-      percent
-    );
-
-  let stageText =
-    'Processing...';
-
-  switch (
-    job.stage
-  ) {
-
-    case 'starting':
-      stageText =
-        'Starting export...';
-      break;
-
-    case 'stocks':
-      stageText =
-        'Exporting stocks...';
-      break;
-
-    case 'sold':
-      stageText =
-        'Exporting sold records...';
-      break;
-
-    case 'audit':
-      stageText =
-        'Exporting audit records...';
-      break;
-
-    case 'processing':
-      stageText =
-        'Processing inventory...';
-      break;
-
-    case 'creating_files':
-      stageText =
-        'Creating CSV files...';
-      break;
-
-  }
-
-  updateLoading(
-    percent,
-    stageText,
-    `
-      <b>Stage:</b>
-      ${escapeHtml(job.stage || '')}<br>
-
-      <b>Stocks:</b>
-      ${stocksRows.toLocaleString()}
-      rows /
-      ${stocksPages.toLocaleString()}
-      pages<br>
-
-      <b>Sold:</b>
-      ${soldRows.toLocaleString()}
-      rows /
-      ${soldPages.toLocaleString()}
-      pages<br>
-
-      <b>Audit:</b>
-      ${auditRows.toLocaleString()}
-      rows /
-      ${auditPages.toLocaleString()}
-      pages
-    `
-  );
-
-}
-
-
-/* ============================================================
-   FINISH EXPORT
-   ============================================================ */
-
-function finishExport(
-  job
-) {
-
-  updateLoading(
-    100,
-    'Export completed',
-    `
-      <b>Branch:</b>
-      ${escapeHtml(job.branch)}<br>
-
-      <b>Available:</b>
-      ${Number(
-        job.availableRows || 0
-      ).toLocaleString()}<br>
-
-      <b>Sold:</b>
-      ${Number(
-        job.soldRows || 0
-      ).toLocaleString()}<br>
-
-      <b>Audit:</b>
-      ${Number(
-        job.auditRows || 0
-      ).toLocaleString()}<br>
-
-      <b>Missing:</b>
-      ${Number(
-        job.missingRows || 0
-      ).toLocaleString()}
-    `
-  );
-
-  document
-    .getElementById(
-      'cancelJobBtn'
-    )
-    .style.display =
-    'none';
-
-  document
-    .getElementById(
-      'closeLoadingBtn'
-    )
-    .style.display =
-    'inline-block';
-
-  currentJobId = null;
-
-  /*
-   * Show generated files.
-   */
-
-  if (
-    Array.isArray(
-      job.files
-    ) &&
-    job.files.length
-  ) {
-
-    const details =
-      document
-        .getElementById(
-          'jobDetails'
-        );
-
-    details.innerHTML +=
-      '<hr>' +
-      '<b>Download Files:</b><br>' +
-      job.files.map(
-        function(file) {
-
-          return `
-            <div
-              style="
-                margin-top:8px;
-              "
-            >
-              📄
-              ${escapeHtml(
-                file.name
-              )}
-              —
-              ${Number(
-                file.rows || 0
-              ).toLocaleString()}
-              rows
-              <br>
-
-              <a
-                href="${escapeAttribute(
-                  file.url
-                )}"
-                target="_blank"
-                rel="noopener"
-              >
-                Download
-              </a>
-            </div>
-          `;
-
-        }
-      ).join('');
-
-  }
-
-}
-
-
-/* ============================================================
-   EXPORT ERROR
-   ============================================================ */
-
-function failExport(
-  message
-) {
-
-  updateLoading(
-    0,
-    'Export failed',
-    escapeHtml(
-      message
-    )
-  );
-
-  document
-    .getElementById(
-      'cancelJobBtn'
-    )
-    .style.display =
-    'none';
-
-  document
-    .getElementById(
-      'closeLoadingBtn'
-    )
-    .style.display =
-    'inline-block';
-
-  currentJobId = null;
-
-}
-
-
-/* ============================================================
-   CANCEL BACKGROUND JOB
-   ============================================================ */
-
-async function cancelCurrentJob() {
-
-  if (
-    currentJobType ===
-    'export' &&
-    currentJobId
-  ) {
-
-    try {
-
-      await apiGet({
-
-        action:
-          'cancelExport',
-
-        session:
-          session,
-
-        jobId:
-          currentJobId
-
-      });
-
-    }
-    catch (err) {
-
-    }
-
     if (
-      exportPollTimer
+      result.status ===
+      'error'
     ) {
 
-      clearTimeout(
-        exportPollTimer
+      throw new Error(
+        result.error ||
+        'Export worker failed.'
       );
-
-      exportPollTimer =
-        null;
 
     }
 
-    currentJobId =
-      null;
-
-    updateLoading(
-      0,
-      'Export cancelled',
-      'The background export was cancelled.'
+    setJobProgress(
+      percent,
+      getExportStageText(
+        result.stage
+      ),
+      buildExportDetails(
+        result
+      )
     );
+
+  }
+
+  catch (err) {
+
+    setJobProgress(
+      0,
+      'Export error',
+      err.message
+    );
+
+    stopJobPolling();
 
     document
       .getElementById(
@@ -4521,29 +4144,40 @@ async function cancelCurrentJob() {
       .style.display =
       'inline-block';
 
-    return;
-
   }
 
-  if (
-    importRunning
+}
+
+
+/* ============================================================
+   EXPORT STAGE TEXT
+   ============================================================ */
+
+function getExportStageText(
+  stage
+) {
+
+  switch (
+    stage
   ) {
 
-    importCancelled =
-      true;
+    case 'stocks':
+      return 'Exporting Stocks...';
 
-    document
-      .getElementById(
-        'cancelJobBtn'
-      )
-      .disabled =
-      true;
+    case 'sold':
+      return 'Exporting Sold Out...';
 
-    updateLoading(
-      0,
-      'Cancelling import...',
-      'Waiting for active upload chunks to finish.'
-    );
+    case 'audit':
+      return 'Exporting Re-Inventory...';
+
+    case 'processing':
+      return 'Creating Export Files...';
+
+    case 'creating_files':
+      return 'Creating Export Files...';
+
+    default:
+      return 'Export running...';
 
   }
 
@@ -4551,7 +4185,118 @@ async function cancelCurrentJob() {
 
 
 /* ============================================================
-   CLEAR REPORT
+   EXPORT DETAILS
+   ============================================================ */
+
+function buildExportDetails(
+  result
+) {
+
+  return (
+    'Stocks: ' +
+    Number(
+      result.stocksRows || 0
+    ).toLocaleString() +
+    ' rows / ' +
+    Number(
+      result.stocksPages || 0
+    ).toLocaleString() +
+    ' pages\n' +
+
+    'Sold Out: ' +
+    Number(
+      result.soldRows || 0
+    ).toLocaleString() +
+    ' rows / ' +
+    Number(
+      result.soldPages || 0
+    ).toLocaleString() +
+    ' pages\n' +
+
+    'Audit: ' +
+    Number(
+      result.auditRows || 0
+    ).toLocaleString() +
+    ' rows / ' +
+    Number(
+      result.auditPages || 0
+    ).toLocaleString() +
+    ' pages\n' +
+
+    'Available: ' +
+    Number(
+      result.availableRows || 0
+    ).toLocaleString()
+  );
+
+}
+
+
+/* ============================================================
+   EXPORT LINKS
+   ============================================================ */
+
+function showExportLinks(
+  files
+) {
+
+  const container =
+    document
+      .getElementById(
+        'exportLinks'
+      );
+
+  if (
+    !Array.isArray(
+      files
+    ) ||
+    !files.length
+  ) {
+
+    container.innerHTML =
+      '<div>No download files were generated.</div>';
+
+    return;
+
+  }
+
+  container.innerHTML =
+    files
+      .map(
+        function(file) {
+
+          if (
+            !file.url
+          ) {
+
+            return '';
+
+          }
+
+          return `
+            <a
+              href="${escapeAttribute(
+                file.url
+              )}"
+              target="_blank"
+              rel="noopener"
+            >
+              📥 ${escapeHTML(
+                file.name ||
+                'Export File'
+              )}
+            </a>
+          `;
+
+        }
+      )
+      .join('');
+
+}
+
+
+/* ============================================================
+   CLEAR REPORT MODAL
    ============================================================ */
 
 function openClearModal() {
@@ -4578,6 +4323,10 @@ function closeClearModal() {
 }
 
 
+/* ============================================================
+   CLEAR REPORT
+   ============================================================ */
+
 function clearReportAction() {
 
   const branch =
@@ -4596,11 +4345,8 @@ function clearReportAction() {
 
   if (!branch) {
 
-    showDialog(
-      '⚠️',
-      'Branch Required',
-      'Please select a branch.',
-      null
+    alert(
+      'Please select a branch.'
     );
 
     return;
@@ -4609,11 +4355,8 @@ function clearReportAction() {
 
   if (!report) {
 
-    showDialog(
-      '⚠️',
-      'Report Required',
-      'Please select a report.',
-      null
+    alert(
+      'Please select a report.'
     );
 
     return;
@@ -4623,78 +4366,69 @@ function clearReportAction() {
   showDialog(
     '⚠️',
     'Clear Report',
-    'This will permanently delete the ' +
-    report +
-    ' data for ' +
+    'This will permanently delete all records from:\n\n' +
     branch +
-    '.\n\nContinue?',
+    ' → ' +
+    report +
+    '\n\nContinue?',
     async function() {
 
       try {
 
-        showLoading(
-          'Clearing report...',
-          30,
-          'Deleting records from Supabase...'
-        );
-
         const result =
-          await apiGet({
+          await apiGet(
+            'clearReport',
+            {
 
-            action:
-              'clearReport',
+              session:
+                session,
 
-            session:
-              session,
+              branch:
+                branch,
 
-            branch:
-              branch,
+              report:
+                report
 
-            report:
-              report
-
-          });
-
-        closeLoading();
-
-        closeClearModal();
+            }
+          );
 
         if (
-          !result ||
           !result.ok
         ) {
 
           throw new Error(
-            result &&
-            result.error
-              ? result.error
-              : 'Clear failed.'
+            result.error ||
+            'Clear failed.'
           );
 
         }
 
-        showDialog(
-          '✅',
-          'Report Cleared',
+        closeClearModal();
+
+        alert(
           result.message ||
-          'Report cleared successfully.',
-          function() {
-
-            searchDashboard();
-
-          }
+          'Report cleared successfully.'
         );
 
+        if (
+          document
+            .getElementById(
+              'branchSelect'
+            )
+            .value ===
+          branch
+        ) {
+
+          searchDashboard();
+
+        }
+
       }
+
       catch (err) {
 
-        closeLoading();
-
-        showDialog(
-          '❌',
-          'Clear Failed',
-          err.message,
-          null
+        alert(
+          err.message
         );
 
       }
@@ -4706,18 +4440,25 @@ function clearReportAction() {
 
 
 /* ============================================================
-   LOADING MODAL
+   JOB MODAL
    ============================================================ */
 
-function showLoading(
-  text,
-  percent,
+function showJobModal(
+  type,
+  jobId,
+  title,
   details
 ) {
 
+  currentJobType =
+    type || '';
+
+  currentJobId =
+    jobId || '';
+
   document
     .getElementById(
-      'loadingOverlay'
+      'loadingModal'
     )
     .style.display =
     'flex';
@@ -4727,7 +4468,80 @@ function showLoading(
       'loadingText'
     )
     .textContent =
-    text ||
+    title ||
+    'Please wait...';
+
+  document
+    .getElementById(
+      'jobDetails'
+    )
+    .textContent =
+    details ||
+    'Starting...';
+
+  document
+    .getElementById(
+      'loadingProgress'
+    )
+    .style.width =
+    '0%';
+
+  document
+    .getElementById(
+      'loadingProgressText'
+    )
+    .textContent =
+    '0%';
+
+  document
+    .getElementById(
+      'exportLinks'
+    )
+    .innerHTML =
+    '';
+
+  document
+    .getElementById(
+      'cancelJobBtn'
+    )
+    .style.display =
+    type === 'EXPORT'
+      ? 'inline-block'
+      : 'inline-block';
+
+  document
+    .getElementById(
+      'closeLoadingBtn'
+    )
+    .style.display =
+    'none';
+
+}
+
+
+function setJobProgress(
+  percent,
+  title,
+  details
+) {
+
+  const safePercent =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        Number(
+          percent || 0
+        )
+      )
+    );
+
+  document
+    .getElementById(
+      'loadingText'
+    )
+    .textContent =
+    title ||
     'Please wait...';
 
   document
@@ -4735,13 +4549,7 @@ function showLoading(
       'loadingProgress'
     )
     .style.width =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        percent || 0
-      )
-    ) +
+    safePercent +
     '%';
 
   document
@@ -4750,7 +4558,7 @@ function showLoading(
     )
     .textContent =
     Math.round(
-      percent || 0
+      safePercent
     ) +
     '%';
 
@@ -4758,41 +4566,146 @@ function showLoading(
     .getElementById(
       'jobDetails'
     )
-    .innerHTML =
+    .textContent =
     details ||
     '';
 
 }
 
 
-function updateLoading(
-  percent,
-  text,
-  details
-) {
+/* ============================================================
+   CANCEL CURRENT JOB
+   ============================================================ */
 
-  showLoading(
-    text,
-    percent,
-    details
-  );
-
-}
-
-
-function closeLoading() {
+async function cancelCurrentJob() {
 
   if (
-    importRunning
+    !currentJobId
   ) {
+
+    closeLoading();
 
     return;
 
   }
 
+  const confirmed =
+    confirm(
+      'Cancel this background job?'
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
   document
     .getElementById(
-      'loadingOverlay'
+      'cancelJobBtn'
+    )
+    .disabled =
+    true;
+
+  try {
+
+    if (
+      currentJobType ===
+      'IMPORT'
+    ) {
+
+      importState.cancelled =
+        true;
+
+      await apiGet(
+        'cancelImport',
+        {
+
+          session:
+            session,
+
+          jobId:
+            currentJobId
+
+        }
+      );
+
+    }
+    else if (
+      currentJobType ===
+      'EXPORT'
+    ) {
+
+      await apiGet(
+        'cancelExport',
+        {
+
+          session:
+            session,
+
+          jobId:
+            currentJobId
+
+        }
+      );
+
+      stopJobPolling();
+
+    }
+
+    setJobProgress(
+      0,
+      'Job cancelled',
+      'The background operation has been cancelled.'
+    );
+
+    document
+      .getElementById(
+        'cancelJobBtn'
+      )
+      .style.display =
+      'none';
+
+    document
+      .getElementById(
+        'closeLoadingBtn'
+      )
+      .style.display =
+      'inline-block';
+
+  }
+
+  catch (err) {
+
+    alert(
+      err.message
+    );
+
+  }
+
+  finally {
+
+    document
+      .getElementById(
+        'cancelJobBtn'
+      )
+      .disabled =
+      false;
+
+  }
+
+}
+
+
+/* ============================================================
+   CLOSE LOADING
+   ============================================================ */
+
+function closeLoading() {
+
+  stopJobPolling();
+
+  document
+    .getElementById(
+      'loadingModal'
     )
     .style.display =
     'none';
@@ -4801,14 +4714,34 @@ function closeLoading() {
     .getElementById(
       'cancelJobBtn'
     )
-    .disabled =
-    false;
+    .style.display =
+    'none';
+
+  document
+    .getElementById(
+      'closeLoadingBtn'
+    )
+    .style.display =
+    'none';
+
+  document
+    .getElementById(
+      'exportLinks'
+    )
+    .innerHTML =
+    '';
+
+  currentJobType =
+    '';
+
+  currentJobId =
+    '';
 
 }
 
 
 /* ============================================================
-   DIALOG
+   CONFIRM DIALOG
    ============================================================ */
 
 function showDialog(
@@ -4847,7 +4780,7 @@ function showDialog(
 
   document
     .getElementById(
-      'dialogOverlay'
+      'dialogModal'
     )
     .style.display =
     'flex';
@@ -4856,12 +4789,12 @@ function showDialog(
 
 
 function closeDialog(
-  executeCallback
+  result
 ) {
 
   document
     .getElementById(
-      'dialogOverlay'
+      'dialogModal'
     )
     .style.display =
     'none';
@@ -4873,7 +4806,7 @@ function closeDialog(
     null;
 
   if (
-    executeCallback &&
+    result &&
     typeof callback ===
     'function'
   ) {
@@ -4895,46 +4828,66 @@ function dialogOKClick() {
 
 
 /* ============================================================
-   LOGIN STATUS
+   HELPERS
    ============================================================ */
 
-function showLoginMessage(
-  message
+function escapeHTML(
+  value
 ) {
 
-  const status =
-    document
-      .getElementById(
-        'loginStatus'
-      );
-
-  status.className =
-    'status error';
-
-  status.textContent =
-    message;
+  return String(
+    value ===
+    undefined ||
+    value ===
+    null
+      ? ''
+      : value
+  )
+  .replace(
+    /&/g,
+    '&amp;'
+  )
+  .replace(
+    /</g,
+    '&lt;'
+  )
+  .replace(
+    />/g,
+    '&gt;'
+  )
+  .replace(
+    /"/g,
+    '&quot;'
+  )
+  .replace(
+    /'/g,
+    '&#039;'
+  );
 
 }
 
 
-/* ============================================================
-   UTILITIES
-   ============================================================ */
-
-function sleep(
-  ms
+function escapeAttribute(
+  value
 ) {
 
-  return new Promise(
-    function(resolve) {
-
-      setTimeout(
-        resolve,
-        ms
-      );
-
-    }
+  return escapeHTML(
+    value
   );
+
+}
+
+
+function formatNumber(
+  value
+) {
+
+  const number =
+    Number(
+      value || 0
+    );
+
+  return number.toLocaleString();
 
 }
 
@@ -4943,8 +4896,12 @@ function formatBytes(
   bytes
 ) {
 
-  if (!bytes) {
+  if (
+    !bytes
+  ) {
+
     return '0 B';
+
   }
 
   const units = [
@@ -4966,215 +4923,69 @@ function formatBytes(
       1024,
       index
     )
-  ).toFixed(
-    2
-  ) +
-  ' ' +
-  units[
-    index
-  ];
+  )
+    .toFixed(
+      index === 0
+        ? 0
+        : 2
+    ) +
+    ' ' +
+    units[index];
 
 }
 
 
-function formatDate(
-  value
+function sleep(
+  milliseconds
 ) {
 
-  if (!value) {
-    return '';
-  }
+  return new Promise(
+    function(resolve) {
 
-  const date =
-    new Date(
-      value
-    );
-
-  if (
-    isNaN(
-      date.getTime()
-    )
-  ) {
-
-    return String(
-      value
-    );
-
-  }
-
-  return date.toLocaleString();
-
-}
-
-
-/* ============================================================
-   BASE64
-   ============================================================ */
-
-function arrayBufferToBase64(
-  bytes
-) {
-
-  let binary = '';
-
-  const chunkSize =
-    0x8000;
-
-  for (
-    let i = 0;
-    i < bytes.length;
-    i += chunkSize
-  ) {
-
-    const chunk =
-      bytes.subarray(
-        i,
-        Math.min(
-          i +
-          chunkSize,
-          bytes.length
-        )
+      setTimeout(
+        resolve,
+        milliseconds
       );
 
-    binary +=
-      String.fromCharCode.apply(
-        null,
-        chunk
-      );
-
-  }
-
-  return btoa(
-    binary
+    }
   );
 
 }
 
 
 /* ============================================================
-   HTML ESCAPING
+   CLOSE MODALS WHEN CLICKING BACKDROP
    ============================================================ */
 
-function escapeHtml(
-  value
-) {
-
-  return String(
-    value === undefined ||
-    value === null
-      ? ''
-      : value
-  )
-    .replace(
-      /&/g,
-      '&amp;'
-    )
-    .replace(
-      /</g,
-      '&lt;'
-    )
-    .replace(
-      />/g,
-      '&gt;'
-    )
-    .replace(
-      /"/g,
-      '&quot;'
-    )
-    .replace(
-      /'/g,
-      '&#039;'
-    );
-
-}
-
-
-function escapeAttribute(
-  value
-) {
-
-  return escapeHtml(
-    value
-  );
-
-}
-
-
-function escapeJs(
-  value
-) {
-
-  return String(
-    value === undefined ||
-    value === null
-      ? ''
-      : value
-  )
-    .replace(
-      /\\/g,
-      '\\\\'
-    )
-    .replace(
-      /'/g,
-      "\\'"
-    )
-    .replace(
-      /\r/g,
-      '\\r'
-    )
-    .replace(
-      /\n/g,
-      '\\n'
-    );
-
-}
-
-
-/* ============================================================
-   WINDOW CLICK - CLOSE MODALS
-   ============================================================ */
-
-window.addEventListener(
+document.addEventListener(
   'click',
   function(event) {
 
-    const modalIds = [
-      'editModal',
-      'updateStockModal',
-      'clearModal',
-      'exportModal'
-    ];
+    if (
+      event.target.classList
+        .contains(
+          'modalBackdrop'
+        )
+    ) {
 
-    modalIds.forEach(
-      function(id) {
+      /*
+       * Do not automatically close the job modal while
+       * an import/export operation is running.
+       */
 
-        const modal =
-          document.getElementById(
-            id
-          );
+      if (
+        event.target.id ===
+        'loadingModal'
+      ) {
 
-        if (
-          event.target ===
-          modal
-        ) {
-
-          if (
-            id ===
-            'updateStockModal' &&
-            importRunning
-          ) {
-
-            return;
-
-          }
-
-          modal.style.display =
-            'none';
-
-        }
+        return;
 
       }
-    );
+
+      event.target.style.display =
+        'none';
+
+    }
 
   }
 );

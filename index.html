@@ -9,17 +9,10 @@
   content="width=device-width,initial-scale=1"
 >
 
-<title>
-  ACEBEDO OPTICAL INVENTORY
-</title>
+<title>Acebedo Optical Inventory</title>
 
-
-<!-- =========================================================
-     XLSX
-========================================================= -->
-
+<!-- SheetJS - Excel/CSV reader in browser -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
 
 <style>
 
@@ -27,279 +20,371 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  padding: 0;
+  min-height: 100%;
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
   background: #f4f6f8;
   color: #222;
 }
 
-button,
-input,
-select {
-  font: inherit;
+body {
+  padding: 20px;
 }
 
-button {
-  cursor: pointer;
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+#loginScreen {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.loginCard {
+  width: 100%;
+  max-width: 430px;
+  background: white;
+  border-radius: 16px;
+  padding: 35px;
+  box-shadow:
+    0 10px 35px rgba(0,0,0,.12);
+  text-align: center;
+}
+
+.loginCard h2 {
+  margin: 0 0 8px;
+}
+
+.loginCard p {
+  color: #666;
+}
+
+.loginCard input {
+  width: 100%;
+  padding: 13px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+/* =========================================================
+   MAIN APP
+   ========================================================= */
+
+#dashboardScreen {
+  display: none;
+}
+
+.app {
+  max-width: 1500px;
+  margin: auto;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .header {
-  background: #111827;
-  color: white;
-  padding: 14px 18px;
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
+  gap: 20px;
+  box-shadow:
+    0 3px 15px rgba(0,0,0,.07);
+  margin-bottom: 18px;
 }
 
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .headerLeft img {
-  width: 55px;
-  height: 55px;
+  width: 65px;
+  height: 65px;
   object-fit: contain;
-  border-radius: 8px;
-  background: white;
+  border-radius: 10px;
 }
 
 .headerLeft h2 {
   margin: 0;
-  font-size: 19px;
+  font-size: 22px;
 }
 
 .headerLeft small {
-  opacity: .75;
+  color: #777;
 }
 
 .headerButtons {
   display: flex;
-  gap: 7px;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
-.headerButtons button {
-  border: 0;
-  padding: 9px 12px;
-  border-radius: 7px;
-  background: #374151;
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: #e9ecef;
+  color: #222;
+  font-weight: 600;
+}
+
+button:hover {
+  filter: brightness(.96);
+}
+
+button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.primaryBtn {
+  background: #1677ff;
   color: white;
 }
 
-.headerButtons button:hover {
-  background: #4b5563;
+.dangerBtn {
+  background: #dc3545;
+  color: white;
 }
 
-.container {
-  padding: 15px;
+.searchBtn {
+  background: #1677ff;
+  color: white;
+  min-width: 110px;
 }
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
 
 .filters {
   background: white;
-  padding: 15px;
-  border-radius: 10px;
-  display: flex;
-  gap: 10px;
+  border-radius: 14px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns:
+    1fr
+    1fr
+    2fr
+    auto;
+  gap: 12px;
   align-items: end;
-  flex-wrap: wrap;
-  box-shadow: 0 2px 7px rgba(0,0,0,.08);
+  box-shadow:
+    0 3px 15px rgba(0,0,0,.07);
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .field label,
 .modal label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
+  color: #555;
 }
 
-input,
-select {
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-  padding: 10px;
+select,
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="file"] {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
   background: white;
+  font-size: 14px;
 }
 
-.field input {
-  min-width: 240px;
-}
-
-.searchBtn,
-.primaryBtn {
-  border: 0;
-  border-radius: 7px;
-  padding: 10px 15px;
-  background: #2563eb;
-  color: white;
-  font-weight: bold;
-}
-
-.searchBtn:hover,
-.primaryBtn:hover {
-  background: #1d4ed8;
-}
+/* =========================================================
+   CARDS
+   ========================================================= */
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin: 15px 0;
+  grid-template-columns:
+    repeat(4, 1fr);
+  gap: 14px;
+  margin: 18px 0;
 }
 
 .card {
   background: white;
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 2px 7px rgba(0,0,0,.08);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow:
+    0 3px 15px rgba(0,0,0,.07);
 }
 
 .card h3 {
   margin: 0;
+  color: #777;
   font-size: 14px;
-  color: #6b7280;
 }
 
 .card h1 {
-  margin: 7px 0 0;
+  margin: 8px 0 0;
+  font-size: 32px;
 }
+
+/* =========================================================
+   TABLE
+   ========================================================= */
 
 .tableWrap {
   background: white;
-  border-radius: 10px;
-  overflow: auto;
-  box-shadow: 0 2px 7px rgba(0,0,0,.08);
+  border-radius: 14px;
+  overflow-x: auto;
+  box-shadow:
+    0 3px 15px rgba(0,0,0,.07);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 850px;
+}
+
+thead {
+  background: #f0f2f5;
 }
 
 th,
 td {
-  padding: 10px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
   text-align: left;
-  white-space: nowrap;
+  font-size: 14px;
 }
 
 th {
-  background: #f9fafb;
-  font-size: 12px;
+  font-weight: bold;
 }
 
-td {
-  font-size: 13px;
+tbody tr:hover {
+  background: #fafafa;
 }
 
-.actionBtn {
-  border: 0;
-  border-radius: 5px;
-  padding: 6px 9px;
-  margin-right: 4px;
+.actionButtons {
+  display: flex;
+  gap: 5px;
 }
 
 .editBtn {
-  background: #f59e0b;
-  color: white;
+  background: #ffc107;
 }
 
 .deleteBtn {
-  background: #dc2626;
+  background: #dc3545;
   color: white;
 }
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 15px;
-  padding: 15px;
+  padding: 18px;
 }
 
-.pagination button {
-  border: 0;
-  border-radius: 6px;
-  padding: 8px 12px;
+#pageInfo {
+  font-weight: bold;
 }
 
-.modalBackdrop {
+/* =========================================================
+   MODALS
+   ========================================================= */
+
+.modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.5);
+  background: rgba(0,0,0,.55);
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 5000;
+  padding: 20px;
 }
 
 .modal {
+  width: 100%;
+  max-width: 500px;
   background: white;
-  width: min(500px, 92vw);
-  max-height: 90vh;
-  overflow: auto;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 15px 50px rgba(0,0,0,.25);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.25);
 }
 
 .modal h3 {
   margin-top: 0;
 }
 
-.modal input,
-.modal select {
-  width: 100%;
-  margin: 5px 0 12px;
+.modal select,
+.modal input {
+  margin-top: 6px;
+  margin-bottom: 15px;
 }
 
 .modalButtons {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
-.modalButtons button {
-  border: 0;
-  border-radius: 7px;
-  padding: 9px 14px;
-}
+/* =========================================================
+   CONFIRM DIALOG
+   ========================================================= */
 
-.dangerBtn {
-  background: #dc2626;
-  color: white;
+#dialogOverlay {
+  z-index: 7000;
 }
 
 .dialog {
-  background: white;
-  width: min(420px, 90vw);
-  border-radius: 12px;
-  padding: 25px;
+  max-width: 430px;
   text-align: center;
 }
 
 .dialogIcon {
-  font-size: 38px;
+  font-size: 45px;
+  margin-bottom: 10px;
 }
 
 .dialogTitle {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: bold;
-  margin: 10px 0;
 }
 
 .dialogMessage {
+  margin: 15px 0;
   color: #555;
   white-space: pre-wrap;
 }
@@ -308,134 +393,94 @@ td {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 20px;
 }
 
-.dialogButtons button {
-  border: 0;
-  border-radius: 7px;
-  padding: 9px 18px;
+/* =========================================================
+   LOADING / BACKGROUND JOB
+   ========================================================= */
+
+#loadingOverlay {
+  z-index: 8000;
 }
 
-.loadingBackdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.5);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.loadingBox {
-  background: white;
-  width: min(430px, 90vw);
-  border-radius: 12px;
-  padding: 25px;
+.loadingModal {
+  max-width: 520px;
   text-align: center;
 }
 
 .loadingIcon {
-  font-size: 40px;
+  font-size: 50px;
+  margin-bottom: 10px;
+}
+
+#loadingText {
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .progressOuter {
-  height: 12px;
-  background: #e5e7eb;
+  width: 100%;
+  height: 22px;
+  margin-top: 20px;
   border-radius: 20px;
+  background: #e5e7eb;
   overflow: hidden;
-  margin-top: 15px;
 }
 
 .progressInner {
-  height: 100%;
   width: 0%;
-  background: #2563eb;
-  transition: width .2s;
+  height: 100%;
+  background: #1677ff;
+  transition: width .2s ease;
 }
 
 .progressText {
   margin-top: 8px;
-  font-size: 13px;
-  color: #555;
-}
-
-.backgroundJobs {
-  position: fixed;
-  right: 15px;
-  bottom: 15px;
-  width: min(350px, calc(100vw - 30px));
-  z-index: 1500;
-}
-
-.jobCard {
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.2);
-  padding: 13px;
-  margin-top: 8px;
-  border-left: 4px solid #2563eb;
-}
-
-.jobTitle {
   font-weight: bold;
 }
 
-.jobText {
-  font-size: 12px;
-  color: #555;
-  margin-top: 5px;
-}
-
-.jobProgress {
-  margin-top: 8px;
-  height: 7px;
-  background: #e5e7eb;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.jobProgress div {
-  height: 100%;
-  width: 0;
-  background: #2563eb;
-}
-
-.loginPage {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #111827;
-}
-
-.loginBox {
-  background: white;
-  width: min(380px, 92vw);
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 15px 50px rgba(0,0,0,.3);
-}
-
-.loginBox h2 {
-  margin-top: 0;
-}
-
-.loginBox input {
-  width: 100%;
-  margin: 7px 0;
-}
+/* =========================================================
+   STATUS
+   ========================================================= */
 
 .status {
-  min-height: 20px;
+  min-height: 22px;
+  margin-top: 10px;
+}
+
+.status.error {
+  color: #dc3545;
+}
+
+.status.success {
+  color: #198754;
+}
+
+/* =========================================================
+   IMPORT DETAILS
+   ========================================================= */
+
+.jobDetails {
+  margin-top: 15px;
+  text-align: left;
+  background: #f7f8fa;
+  border-radius: 8px;
+  padding: 12px;
   font-size: 13px;
+  line-height: 1.7;
 }
 
-.hidden {
-  display: none !important;
+.fileName {
+  margin-top: 5px;
+  color: #555;
+  word-break: break-word;
 }
 
-@media(max-width: 800px) {
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 900px) {
 
   .header {
     flex-direction: column;
@@ -450,48 +495,54 @@ td {
     flex: 1;
   }
 
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
   .cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+      repeat(2, 1fr);
   }
 
 }
 
-@media(max-width: 500px) {
+@media (max-width: 550px) {
+
+  body {
+    padding: 10px;
+  }
 
   .cards {
     grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 
-  .field {
-    width: 100%;
+  .card {
+    padding: 12px;
   }
 
-  .field input,
-  .field select,
-  .searchBtn {
-    width: 100%;
+  .card h1 {
+    font-size: 25px;
+  }
+
+  .headerLeft h2 {
+    font-size: 17px;
   }
 
 }
 
 </style>
-
 </head>
-
 
 <body>
 
-
 <!-- =========================================================
-     LOGIN
-========================================================= -->
+     LOGIN SCREEN
+     ========================================================= -->
 
-<div
-  id="loginPage"
-  class="loginPage"
->
+<div id="loginScreen">
 
-  <div class="loginBox">
+  <div class="loginCard">
 
     <h2>
       🔐 ADMIN LOGIN
@@ -501,7 +552,6 @@ td {
       Dashboard Access
     </p>
 
-
     <input
       id="email"
       type="email"
@@ -509,16 +559,14 @@ td {
       autocomplete="email"
     >
 
-
     <button
       id="sendOtpBtn"
       class="primaryBtn"
       onclick="sendOTP()"
-      style="width:100%;"
+      style="width:100%;margin-top:10px;"
     >
       SEND OTP
     </button>
-
 
     <input
       id="otp"
@@ -527,7 +575,6 @@ td {
       autocomplete="one-time-code"
       style="display:none;"
     >
-
 
     <button
       id="verifyBtn"
@@ -542,7 +589,6 @@ td {
       VERIFY OTP
     </button>
 
-
     <p
       id="loginStatus"
       class="status"
@@ -555,13 +601,14 @@ td {
 
 <!-- =========================================================
      DASHBOARD
-========================================================= -->
+     ========================================================= -->
 
 <div
-  id="dashboardPage"
-  class="hidden"
+  id="dashboardScreen"
+  class="app"
 >
 
+  <!-- HEADER -->
 
   <div class="header">
 
@@ -595,13 +642,11 @@ td {
         🔄 Refresh
       </button>
 
-
       <button
         onclick="openUpdateStockModal()"
       >
         📤 Update Stocks
       </button>
-
 
       <button
         onclick="openClearModal()"
@@ -609,13 +654,11 @@ td {
         🗑 Clear Report
       </button>
 
-
       <button
         onclick="openExportModal()"
       >
         📥 Export
       </button>
-
 
       <button
         onclick="logoutUser()"
@@ -628,252 +671,218 @@ td {
   </div>
 
 
-  <div class="container">
+  <!-- FILTERS -->
+
+  <div class="filters">
+
+    <div class="field">
+
+      <label>
+        Branch
+      </label>
+
+      <select id="branchSelect">
+
+        <option value="">
+          -- Select Branch --
+        </option>
+
+        <option value="GAI">🏢 Gaisano Iloilo</option>
+        <option value="CAS">🏢 Casa Plaza</option>
+        <option value="BAC">🏢 Bacolod</option>
+        <option value="BIN">🏢 Binalbagan</option>
+        <option value="BIS">🏢 Bislig</option>
+        <option value="CAD">🏢 Cadiz</option>
+        <option value="DGT">🏢 Dumaguete</option>
+        <option value="KAB">🏢 Kabankalan</option>
+        <option value="KAL">🏢 Kalibo</option>
+        <option value="PAS">🏢 Passi</option>
+        <option value="POT">🏢 Pototan</option>
+        <option value="SAN">🏢 San Carlos</option>
+        <option value="TAB">🏢 Tabunok</option>
+        <option value="TAN">🏢 Tandag</option>
+        <option value="TIS">🏢 Tisa</option>
+        <option value="TOL">🏢 Toledo</option>
+
+      </select>
+
+    </div>
 
 
-    <!-- FILTERS -->
+    <div class="field">
 
-    <div class="filters">
+      <label>
+        Select Report
+      </label>
 
+      <select id="sheetSelect">
 
-      <div class="field">
+        <option value="stocks">
+          📦 Stocks
+        </option>
 
-        <label>
-          Branch
-        </label>
+        <option value="SCANRESULTS">
+          💰 Sold Out
+        </option>
 
+        <option value="AUDIT">
+          🔄 Re-Inventory
+        </option>
 
-        <select id="branchSelect">
+      </select>
 
-          <option value="">
-            -- Select Branch --
-          </option>
-
-          <option value="GAI">🏢 Gaisano Iloilo</option>
-          <option value="CAS">🏢 Casa Plaza</option>
-          <option value="BAC">🏢 Bacolod</option>
-          <option value="BIN">🏢 Binalbagan</option>
-          <option value="BIS">🏢 Bislig</option>
-          <option value="CAD">🏢 Cadiz</option>
-          <option value="DGT">🏢 Dumaguete</option>
-          <option value="KAB">🏢 Kabankalan</option>
-          <option value="KAL">🏢 Kalibo</option>
-          <option value="PAS">🏢 Passi</option>
-          <option value="POT">🏢 Pototan</option>
-          <option value="SAN">🏢 San Carlos</option>
-          <option value="TAB">🏢 Tabunok</option>
-          <option value="TAN">🏢 Tandag</option>
-          <option value="TIS">🏢 Tisa</option>
-          <option value="TOL">🏢 Toledo</option>
-
-        </select>
-
-      </div>
+    </div>
 
 
-      <div class="field">
+    <div class="field">
 
-        <label>
-          Select Report
-        </label>
+      <label>
+        Search
+      </label>
 
-
-        <select id="sheetSelect">
-
-          <option value="stocks">
-            📦 Stocks
-          </option>
-
-          <option value="SCANRESULTS">
-            💰 Sold Out
-          </option>
-
-          <option value="AUDIT">
-            🔄 Re-Inventory
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Search
-        </label>
-
-
-        <input
-          id="searchBox"
-          placeholder="Tag, SI, Description"
-          onkeydown="searchKeyDown(event)"
-        >
-
-      </div>
-
-
-      <button
-        class="searchBtn"
-        onclick="searchDashboard()"
+      <input
+        id="searchBox"
+        placeholder="Tag, SI, Description"
+        onkeydown="searchKeyDown(event)"
       >
-        🔍 Search
-      </button>
 
     </div>
 
 
-    <!-- CARDS -->
+    <button
+      class="searchBtn"
+      onclick="searchDashboard()"
+    >
+      🔍 Search
+    </button>
 
-    <div class="cards">
-
-
-      <div class="card">
-
-        <h3>
-          Available
-        </h3>
-
-        <h1 id="availableCount">
-          0
-        </h1>
-
-      </div>
+  </div>
 
 
-      <div class="card">
+  <!-- CARDS -->
 
-        <h3>
-          Sold Out
-        </h3>
+  <div class="cards">
 
-        <h1 id="soldCount">
-          0
-        </h1>
+    <div class="card">
 
-      </div>
+      <h3>
+        Available
+      </h3>
 
-
-      <div class="card">
-
-        <h3>
-          Audited
-        </h3>
-
-        <h1 id="auditCount">
-          0
-        </h1>
-
-      </div>
-
-
-      <div class="card">
-
-        <h3>
-          Showing
-        </h3>
-
-        <h1 id="showingCount">
-          0
-        </h1>
-
-      </div>
-
+      <h1 id="availableCount">
+        0
+      </h1>
 
     </div>
 
 
-    <!-- TABLE -->
+    <div class="card">
 
-    <div class="tableWrap">
+      <h3>
+        Sold Out
+      </h3>
 
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>
-              Branch
-            </th>
-
-            <th>
-              Lenstype
-            </th>
-
-            <th>
-              Description
-            </th>
-
-            <th>
-              Tag
-            </th>
-
-            <th>
-              SI
-            </th>
-
-            <th>
-              Date
-            </th>
-
-            <th>
-              Actions
-            </th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody id="tableBody">
-
-          <tr>
-
-            <td
-              colspan="7"
-              style="
-                text-align:center;
-                padding:40px;
-              "
-            >
-              Select a branch and click SEARCH.
-            </td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
+      <h1 id="soldCount">
+        0
+      </h1>
 
     </div>
 
 
-    <!-- PAGINATION -->
+    <div class="card">
 
-    <div class="pagination">
+      <h3>
+        Audited
+      </h3>
 
-      <button
-        id="prevBtn"
-        onclick="previousPage()"
-      >
-        ◀ Previous
-      </button>
-
-
-      <span id="pageInfo">
-        Page 0 / 0
-      </span>
-
-
-      <button
-        id="nextBtn"
-        onclick="nextPage()"
-      >
-        Next ▶
-      </button>
+      <h1 id="auditCount">
+        0
+      </h1>
 
     </div>
+
+
+    <div class="card">
+
+      <h3>
+        Showing
+      </h3>
+
+      <h1 id="showingCount">
+        0
+      </h1>
+
+    </div>
+
+  </div>
+
+
+  <!-- TABLE -->
+
+  <div class="tableWrap">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>Branch</th>
+          <th>Lenstype</th>
+          <th>Description</th>
+          <th>Tag</th>
+          <th>SI</th>
+          <th>Date</th>
+          <th>Actions</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="tableBody">
+
+        <tr>
+
+          <td
+            colspan="7"
+            style="
+              text-align:center;
+              padding:40px;
+            "
+          >
+            Select a branch and click SEARCH.
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <!-- PAGINATION -->
+
+  <div class="pagination">
+
+    <button
+      id="prevBtn"
+      onclick="previousPage()"
+    >
+      ◀ Previous
+    </button>
+
+    <span id="pageInfo">
+      Page 0 / 0
+    </span>
+
+    <button
+      id="nextBtn"
+      onclick="nextPage()"
+    >
+      Next ▶
+    </button>
 
   </div>
 
@@ -881,12 +890,12 @@ td {
 
 
 <!-- =========================================================
-     EDIT MODAL
-========================================================= -->
+     EDIT SOLD MODAL
+     ========================================================= -->
 
 <div
   id="editModal"
-  class="modalBackdrop"
+  class="modalOverlay"
 >
 
   <div class="modal">
@@ -895,30 +904,25 @@ td {
       Edit Sold Record
     </h3>
 
-
     <input
       type="hidden"
       id="editBranch"
     >
-
 
     <input
       type="hidden"
       id="editTag"
     >
 
-
     <label>
       SI Number
     </label>
-
 
     <input
       id="editSI"
       type="text"
       placeholder="Enter SI Number"
     >
-
 
     <div class="modalButtons">
 
@@ -927,7 +931,6 @@ td {
       >
         Cancel
       </button>
-
 
       <button
         class="primaryBtn"
@@ -944,12 +947,12 @@ td {
 
 
 <!-- =========================================================
-     UPDATE STOCK MODAL
-========================================================= -->
+     UPDATE STOCKS MODAL
+     ========================================================= -->
 
 <div
   id="updateStockModal"
-  class="modalBackdrop"
+  class="modalOverlay"
 >
 
   <div class="modal">
@@ -958,11 +961,9 @@ td {
       Update Stocks
     </h3>
 
-
     <label>
       Select Branch
     </label>
-
 
     <select id="updateBranch">
 
@@ -989,11 +990,9 @@ td {
 
     </select>
 
-
     <label>
       Select Excel File
     </label>
-
 
     <input
       type="file"
@@ -1001,6 +1000,10 @@ td {
       accept=".xlsx,.xls,.csv"
     >
 
+    <div
+      id="importFileInfo"
+      class="fileName"
+    ></div>
 
     <div class="modalButtons">
 
@@ -1010,8 +1013,8 @@ td {
         Cancel
       </button>
 
-
       <button
+        id="updateStocksBtn"
         class="primaryBtn"
         onclick="updateStocks()"
       >
@@ -1027,11 +1030,11 @@ td {
 
 <!-- =========================================================
      CLEAR MODAL
-========================================================= -->
+     ========================================================= -->
 
 <div
   id="clearModal"
-  class="modalBackdrop"
+  class="modalOverlay"
 >
 
   <div class="modal">
@@ -1040,11 +1043,9 @@ td {
       Clear Report
     </h3>
 
-
     <label>
       Select Branch
     </label>
-
 
     <select id="clearBranch">
 
@@ -1071,11 +1072,9 @@ td {
 
     </select>
 
-
     <label>
       Select Report
     </label>
-
 
     <select id="clearSheet">
 
@@ -1097,7 +1096,6 @@ td {
 
     </select>
 
-
     <div class="modalButtons">
 
       <button
@@ -1105,7 +1103,6 @@ td {
       >
         Cancel
       </button>
-
 
       <button
         class="dangerBtn"
@@ -1123,11 +1120,11 @@ td {
 
 <!-- =========================================================
      EXPORT MODAL
-========================================================= -->
+     ========================================================= -->
 
 <div
   id="exportModal"
-  class="modalBackdrop"
+  class="modalOverlay"
 >
 
   <div class="modal">
@@ -1136,11 +1133,9 @@ td {
       Export Inventory
     </h3>
 
-
     <label>
       Select Branch
     </label>
-
 
     <select id="exportBranch">
 
@@ -1167,7 +1162,6 @@ td {
 
     </select>
 
-
     <div class="modalButtons">
 
       <button
@@ -1175,7 +1169,6 @@ td {
       >
         Cancel
       </button>
-
 
       <button
         class="primaryBtn"
@@ -1193,14 +1186,14 @@ td {
 
 <!-- =========================================================
      CONFIRM DIALOG
-========================================================= -->
+     ========================================================= -->
 
 <div
-  id="dialogBackdrop"
-  class="modalBackdrop"
+  id="dialogOverlay"
+  class="modalOverlay"
 >
 
-  <div class="dialog">
+  <div class="modal dialog">
 
     <div
       id="dialogIcon"
@@ -1209,14 +1202,12 @@ td {
       ⚠️
     </div>
 
-
     <div
       id="dialogTitle"
       class="dialogTitle"
     >
       Confirm
     </div>
-
 
     <div
       id="dialogMessage"
@@ -1225,7 +1216,6 @@ td {
       Message
     </div>
 
-
     <div class="dialogButtons">
 
       <button
@@ -1233,7 +1223,6 @@ td {
       >
         Cancel
       </button>
-
 
       <button
         id="dialogOK"
@@ -1251,25 +1240,23 @@ td {
 
 
 <!-- =========================================================
-     LOADING
-========================================================= -->
+     BACKGROUND JOB LOADING
+     ========================================================= -->
 
 <div
-  id="loadingBackdrop"
-  class="loadingBackdrop"
+  id="loadingOverlay"
+  class="modalOverlay"
 >
 
-  <div class="loadingBox">
+  <div class="modal loadingModal">
 
     <div class="loadingIcon">
       ⏳
     </div>
 
-
     <div id="loadingText">
       Please wait...
     </div>
-
 
     <div class="progressOuter">
 
@@ -1280,7 +1267,6 @@ td {
 
     </div>
 
-
     <div
       id="loadingProgressText"
       class="progressText"
@@ -1288,196 +1274,475 @@ td {
       0%
     </div>
 
+    <div
+      id="jobDetails"
+      class="jobDetails"
+    >
+      Starting...
+    </div>
+
+    <div
+      id="loadingButtons"
+      class="modalButtons"
+      style="justify-content:center;"
+    >
+
+      <button
+        id="cancelJobBtn"
+        onclick="cancelCurrentJob()"
+        style="display:none;"
+      >
+        Cancel Job
+      </button>
+
+      <button
+        id="closeLoadingBtn"
+        onclick="closeLoading()"
+        style="display:none;"
+      >
+        Close
+      </button>
+
+    </div>
+
   </div>
 
 </div>
 
 
-<!-- =========================================================
-     BACKGROUND JOBS
-========================================================= -->
-
-<div
-  id="backgroundJobs"
-  class="backgroundJobs"
-></div>
-
-
 <script>
 
-/****************************************************************
- * CONFIG
- ****************************************************************/
+/* ============================================================
+   CONFIGURATION
+   ============================================================ */
+
+/*
+ * CHANGE THIS ONLY.
+ *
+ * Example:
+ *
+ * https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+ */
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbx6ySkXxNGRWBCX2uYLgNTmMbR-t1WxGrnTg4taOOWB79cT5vFVRA0-jf3Rgg_VN6VXHw/exec';
+  'https://script.google.com/macros/s/AKfycbyW5kkZHUTpQ66b9J3nGF8FeyiYRCsWur_abJIAf9DlR35k4O7a1MfS7olrSbBntYBYzQ/exec';
 
 
-const IMPORT_CHUNK_SIZE =
-  500;
+/*
+ * Dashboard pagination.
+ *
+ * This only controls how many rows are DISPLAYED
+ * in the browser at once.
+ *
+ * It is NOT a database limit.
+ */
+
+const ROWS_PER_PAGE = 20;
 
 
-const IMPORT_CONCURRENCY =
-  4;
+/*
+ * Import chunk size.
+ *
+ * This is intentionally independent from
+ * database row limits.
+ */
+
+const IMPORT_CHUNK_SIZE = 500;
 
 
-const ROWS_PER_PAGE =
-  20;
+/*
+ * Number of chunks uploading simultaneously.
+ */
+
+const IMPORT_CONCURRENCY = 4;
 
 
-/****************************************************************
- * STATE
- ****************************************************************/
+/* ============================================================
+   APPLICATION STATE
+   ============================================================ */
 
-let session =
-  localStorage.getItem(
-    'inventorySession'
-  ) || '';
+let session = '';
 
+let currentEmail = '';
 
-let currentData =
-  [];
+let currentData = [];
 
+let currentPage = 1;
 
-let currentPage =
-  1;
+let totalPages = 0;
 
+let dialogCallback = null;
 
-let currentSearch =
-  '';
+let currentJobId = null;
 
+let currentJobType = null;
 
-let currentDialogCallback =
-  null;
+let exportPollTimer = null;
 
+let importRunning = false;
 
-let exportPollingTimers =
-  {};
+let importCancelled = false;
 
 
-/****************************************************************
- * API
- ****************************************************************/
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
 
-async function api(
-  action,
-  params = {}
-) {
+document.addEventListener(
+  'DOMContentLoaded',
+  function() {
 
-  const url =
-    new URL(
-      API_URL
-    );
+    const savedSession =
+      localStorage.getItem(
+        'inventorySession'
+      );
 
+    if (savedSession) {
 
-  url.searchParams.set(
-    'action',
-    action
-  );
+      session =
+        savedSession;
 
-
-  if (
-    session
-  ) {
-
-    url.searchParams.set(
-      'session',
-      session
-    );
-
-  }
-
-
-  Object.keys(
-    params
-  ).forEach(
-    function(key) {
-
-      if (
-        params[key] !==
-        undefined &&
-        params[key] !==
-        null
-      ) {
-
-        url.searchParams.set(
-          key,
-          params[key]
-        );
-
-      }
+      checkExistingSession();
 
     }
-  );
 
+    document
+      .getElementById('stockFile')
+      .addEventListener(
+        'change',
+        function() {
 
-  const response =
-    await fetch(
-      url.toString(),
-      {
-        method: 'GET',
-        cache: 'no-store'
-      }
-    );
+          const file =
+            this.files &&
+            this.files[0];
 
+          document
+            .getElementById(
+              'importFileInfo'
+            )
+            .textContent =
+            file
+              ? file.name +
+                ' — ' +
+                formatBytes(
+                  file.size
+                )
+              : '';
 
-  const text =
-    await response.text();
-
-
-  let data;
-
-
-  try {
-
-    data =
-      JSON.parse(
-        text
+        }
       );
 
   }
+);
 
-  catch (err) {
 
-    throw new Error(
-      text ||
-      'Invalid server response.'
-    );
+/* ============================================================
+   API URL CHECK
+   ============================================================ */
 
-  }
-
+function ensureApiUrl() {
 
   if (
-    !data.ok
+    !API_URL ||
+    API_URL.indexOf(
+      'PASTE_YOUR'
+    ) !== -1
   ) {
 
     throw new Error(
-      data.error ||
-      'Request failed.'
+      'API_URL has not been configured.'
     );
 
   }
-
-
-  return data;
 
 }
 
 
-/****************************************************************
- * LOGIN
- ****************************************************************/
+/* ============================================================
+   GET API
+   ============================================================ */
+
+function apiGet(
+  params
+) {
+
+  ensureApiUrl();
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const callback =
+        'apiCallback_' +
+        Date.now() +
+        '_' +
+        Math.floor(
+          Math.random() *
+          100000
+        );
+
+      const query =
+        new URLSearchParams(
+          params || {}
+        );
+
+      query.set(
+        'callback',
+        callback
+      );
+
+      const script =
+        document.createElement(
+          'script'
+        );
+
+      let finished = false;
+
+      const timeout =
+        setTimeout(
+          function() {
+
+            if (finished) {
+              return;
+            }
+
+            finished = true;
+
+            cleanup();
+
+            reject(
+              new Error(
+                'API request timed out.'
+              )
+            );
+
+          },
+          60000
+        );
+
+      function cleanup() {
+
+        clearTimeout(
+          timeout
+        );
+
+        try {
+
+          delete window[
+            callback
+          ];
+
+        }
+        catch (e) {}
+
+        if (
+          script.parentNode
+        ) {
+
+          script.parentNode
+            .removeChild(
+              script
+            );
+
+        }
+
+      }
+
+      window[callback] =
+        function(data) {
+
+          if (finished) {
+            return;
+          }
+
+          finished = true;
+
+          cleanup();
+
+          if (
+            data &&
+            data.ok === false
+          ) {
+
+            reject(
+              new Error(
+                data.error ||
+                'API request failed.'
+              )
+            );
+
+            return;
+
+          }
+
+          resolve(data);
+
+        };
+
+      script.onerror =
+        function() {
+
+          if (finished) {
+            return;
+          }
+
+          finished = true;
+
+          cleanup();
+
+          reject(
+            new Error(
+              'Unable to connect to Apps Script.'
+            )
+          );
+
+        };
+
+      script.src =
+        API_URL +
+        (
+          API_URL.indexOf('?') >= 0
+            ? '&'
+            : '?'
+        ) +
+        query.toString();
+
+      document
+        .head
+        .appendChild(
+          script
+        );
+
+    }
+  );
+
+}
+
+
+/* ============================================================
+   POST API
+   ============================================================ */
+
+async function apiPost(
+  body,
+  timeoutMs = 120000
+) {
+
+  ensureApiUrl();
+
+  const controller =
+    new AbortController();
+
+  const timer =
+    setTimeout(
+      function() {
+
+        controller.abort();
+
+      },
+      timeoutMs
+    );
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body:
+            JSON.stringify(
+              body
+            ),
+
+          signal:
+            controller.signal
+        }
+      );
+
+    const text =
+      await response.text();
+
+    let data;
+
+    try {
+
+      data =
+        JSON.parse(
+          text
+        );
+
+    }
+    catch (err) {
+
+      throw new Error(
+        'Invalid API response: ' +
+        text.substring(
+          0,
+          500
+        )
+      );
+
+    }
+
+    if (
+      data &&
+      data.ok === false
+    ) {
+
+      throw new Error(
+        data.error ||
+        'API request failed.'
+      );
+
+    }
+
+    return data;
+
+  }
+  catch (err) {
+
+    if (
+      err.name ===
+      'AbortError'
+    ) {
+
+      throw new Error(
+        'API request timed out.'
+      );
+
+    }
+
+    throw err;
+
+  }
+  finally {
+
+    clearTimeout(
+      timer
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
 
 async function sendOTP() {
 
   const email =
     document
-      .getElementById(
-        'email'
-      )
+      .getElementById('email')
       .value
       .trim();
-
 
   const status =
     document
@@ -1485,25 +1750,56 @@ async function sendOTP() {
         'loginStatus'
       );
 
+  const button =
+    document
+      .getElementById(
+        'sendOtpBtn'
+      );
+
+  if (!email) {
+
+    status.className =
+      'status error';
+
+    status.textContent =
+      'Please enter your Gmail address.';
+
+    return;
+
+  }
+
+  button.disabled = true;
+
+  status.className =
+    'status';
 
   status.textContent =
     'Sending OTP...';
 
-
   try {
 
-    await api(
-      'sendOTP',
-      {
+    const result =
+      await apiGet({
+        action:
+          'sendOTP',
+
         email:
           email
-      }
-    );
+      });
 
+    if (
+      !result ||
+      !result.ok
+    ) {
 
-    status.textContent =
-      'OTP sent. Check your Gmail.';
+      throw new Error(
+        result &&
+        result.error
+          ? result.error
+          : 'Unable to send OTP.'
+      );
 
+    }
 
     document
       .getElementById(
@@ -1511,7 +1807,6 @@ async function sendOTP() {
       )
       .style.display =
       'block';
-
 
     document
       .getElementById(
@@ -1520,38 +1815,54 @@ async function sendOTP() {
       .style.display =
       'block';
 
+    status.className =
+      'status success';
+
+    status.textContent =
+      'OTP sent. Check your Gmail.';
+
+    document
+      .getElementById(
+        'otp'
+      )
+      .focus();
 
   }
-
   catch (err) {
+
+    status.className =
+      'status error';
 
     status.textContent =
       err.message;
+
+  }
+  finally {
+
+    button.disabled = false;
 
   }
 
 }
 
 
+/* ============================================================
+   VERIFY OTP
+   ============================================================ */
+
 async function verifyOTP() {
 
   const email =
     document
-      .getElementById(
-        'email'
-      )
+      .getElementById('email')
       .value
       .trim();
-
 
   const otp =
     document
-      .getElementById(
-        'otp'
-      )
+      .getElementById('otp')
       .value
       .trim();
-
 
   const status =
     document
@@ -1559,293 +1870,227 @@ async function verifyOTP() {
         'loginStatus'
       );
 
+  const button =
+    document
+      .getElementById(
+        'verifyBtn'
+      );
+
+  if (!email || !otp) {
+
+    status.className =
+      'status error';
+
+    status.textContent =
+      'Enter your email and OTP.';
+
+    return;
+
+  }
+
+  button.disabled = true;
+
+  status.className =
+    'status';
 
   status.textContent =
     'Verifying...';
 
-
   try {
 
     const result =
-      await api(
-        'verifyOTP',
-        {
-          email:
-            email,
+      await apiGet({
+        action:
+          'verifyOTP',
 
-          otp:
-            otp
-        }
+        email:
+          email,
+
+        otp:
+          otp
+      });
+
+    if (
+      !result ||
+      !result.ok ||
+      !result.session
+    ) {
+
+      throw new Error(
+        result &&
+        result.error
+          ? result.error
+          : 'Login failed.'
       );
 
+    }
 
     session =
       result.session;
 
+    currentEmail =
+      result.email ||
+      email;
 
     localStorage.setItem(
       'inventorySession',
       session
     );
 
+    localStorage.setItem(
+      'inventoryEmail',
+      currentEmail
+    );
 
-    document
-      .getElementById(
-        'loginPage'
-      )
-      .classList.add(
-        'hidden'
-      );
-
-
-    document
-      .getElementById(
-        'dashboardPage'
-      )
-      .classList.remove(
-        'hidden'
-      );
-
+    showDashboard();
 
   }
-
   catch (err) {
+
+    status.className =
+      'status error';
 
     status.textContent =
       err.message;
 
   }
+  finally {
+
+    button.disabled = false;
+
+  }
 
 }
 
+
+/* ============================================================
+   CHECK EXISTING SESSION
+   ============================================================ */
 
 async function checkExistingSession() {
-
-  if (!session) {
-    return;
-  }
-
-
-  try {
-
-    await api(
-      'checkSession'
-    );
-
-
-    document
-      .getElementById(
-        'loginPage'
-      )
-      .classList.add(
-        'hidden'
-      );
-
-
-    document
-      .getElementById(
-        'dashboardPage'
-      )
-      .classList.remove(
-        'hidden'
-      );
-
-  }
-
-  catch (err) {
-
-    session = '';
-
-    localStorage.removeItem(
-      'inventorySession'
-    );
-
-  }
-
-}
-
-
-async function logoutUser() {
-
-  try {
-
-    await api(
-      'logout'
-    );
-
-  }
-
-  catch (err) {
-
-  }
-
-
-  session = '';
-
-
-  localStorage.removeItem(
-    'inventorySession'
-  );
-
-
-  location.reload();
-
-}
-
-
-/****************************************************************
- * DASHBOARD
- ****************************************************************/
-
-async function searchDashboard() {
-
-  const branch =
-    document
-      .getElementById(
-        'branchSelect'
-      )
-      .value;
-
-
-  const report =
-    document
-      .getElementById(
-        'sheetSelect'
-      )
-      .value;
-
-
-  const search =
-    document
-      .getElementById(
-        'searchBox'
-      )
-      .value
-      .trim();
-
-
-  if (!branch) {
-
-    showDialog(
-      '⚠️',
-      'Branch Required',
-      'Please select a branch.'
-    );
-
-    return;
-
-  }
-
-
-  currentSearch =
-    search;
-
-
-  setTableLoading();
-
 
   try {
 
     const result =
-      await api(
-        'dashboard',
-        {
-          branch:
-            branch,
+      await apiGet({
+        action:
+          'checkSession',
 
-          report:
-            report,
-
-          search:
-            search
-        }
-      );
-
-
-    currentData =
-      result.data ||
-      [];
-
-
-    currentPage =
-      1;
-
-
-    document
-      .getElementById(
-        'availableCount'
-      )
-      .textContent =
-      formatNumber(
-        result.availableCount
-      );
-
-
-    document
-      .getElementById(
-        'soldCount'
-      )
-      .textContent =
-      formatNumber(
-        result.soldCount
-      );
-
-
-    document
-      .getElementById(
-        'auditCount'
-      )
-      .textContent =
-      formatNumber(
-        result.auditCount
-      );
-
-
-    document
-      .getElementById(
-        'showingCount'
-      )
-      .textContent =
-      formatNumber(
-        result.showingCount
-      );
-
-
-    renderTable();
-
-  }
-
-  catch (err) {
+        session:
+          session
+      });
 
     if (
-      err.message ===
-      'SESSION_EXPIRED'
+      result &&
+      result.ok
     ) {
 
-      logoutUser();
+      currentEmail =
+        result.email ||
+        localStorage.getItem(
+          'inventoryEmail'
+        ) ||
+        '';
+
+      showDashboard();
 
       return;
 
     }
 
-
-    showDialog(
-      '❌',
-      'Dashboard Error',
-      err.message
-    );
+  }
+  catch (err) {
 
   }
 
-}
-
-
-function refreshDashboard() {
-
-  searchDashboard();
+  clearSession();
 
 }
 
+
+/* ============================================================
+   SHOW DASHBOARD
+   ============================================================ */
+
+function showDashboard() {
+
+  document
+    .getElementById(
+      'loginScreen'
+    )
+    .style.display =
+    'none';
+
+  document
+    .getElementById(
+      'dashboardScreen'
+    )
+    .style.display =
+    'block';
+
+}
+
+
+/* ============================================================
+   LOGOUT
+   ============================================================ */
+
+async function logoutUser() {
+
+  try {
+
+    await apiGet({
+      action:
+        'logout',
+
+      session:
+        session
+    });
+
+  }
+  catch (err) {
+
+  }
+
+  clearSession();
+
+}
+
+
+function clearSession() {
+
+  session = '';
+
+  currentEmail = '';
+
+  localStorage.removeItem(
+    'inventorySession'
+  );
+
+  localStorage.removeItem(
+    'inventoryEmail'
+  );
+
+  document
+    .getElementById(
+      'dashboardScreen'
+    )
+    .style.display =
+    'none';
+
+  document
+    .getElementById(
+      'loginScreen'
+    )
+    .style.display =
+    'flex';
+
+}
+
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
 
 function searchKeyDown(
   event
@@ -1863,9 +2108,193 @@ function searchKeyDown(
 }
 
 
-/****************************************************************
- * TABLE
- ****************************************************************/
+async function searchDashboard() {
+
+  if (!session) {
+
+    showLoginMessage(
+      'Session expired. Please login again.'
+    );
+
+    return;
+
+  }
+
+  const branch =
+    document
+      .getElementById(
+        'branchSelect'
+      )
+      .value;
+
+  const report =
+    document
+      .getElementById(
+        'sheetSelect'
+      )
+      .value;
+
+  const search =
+    document
+      .getElementById(
+        'searchBox'
+      )
+      .value
+      .trim();
+
+  if (!branch) {
+
+    showDialog(
+      '⚠️',
+      'Branch Required',
+      'Please select a branch.',
+      null
+    );
+
+    return;
+
+  }
+
+  setTableMessage(
+    'Loading...'
+  );
+
+  try {
+
+    const result =
+      await apiGet({
+
+        action:
+          'dashboard',
+
+        session:
+          session,
+
+        branch:
+          branch,
+
+        report:
+          report,
+
+        search:
+          search
+
+      });
+
+    if (
+      !result ||
+      !result.ok
+    ) {
+
+      throw new Error(
+        result &&
+        result.error
+          ? result.error
+          : 'Unable to load dashboard.'
+      );
+
+    }
+
+    currentData =
+      Array.isArray(
+        result.data
+      )
+        ? result.data
+        : [];
+
+    currentPage = 1;
+
+    updateCounts(
+      result
+    );
+
+    renderTable();
+
+  }
+  catch (err) {
+
+    if (
+      err.message ===
+      'SESSION_EXPIRED'
+    ) {
+
+      clearSession();
+
+      return;
+
+    }
+
+    setTableMessage(
+      '❌ ' +
+      err.message
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   REFRESH
+   ============================================================ */
+
+function refreshDashboard() {
+
+  searchDashboard();
+
+}
+
+
+/* ============================================================
+   COUNTS
+   ============================================================ */
+
+function updateCounts(
+  result
+) {
+
+  document
+    .getElementById(
+      'availableCount'
+    )
+    .textContent =
+    Number(
+      result.availableCount || 0
+    ).toLocaleString();
+
+  document
+    .getElementById(
+      'soldCount'
+    )
+    .textContent =
+    Number(
+      result.soldCount || 0
+    ).toLocaleString();
+
+  document
+    .getElementById(
+      'auditCount'
+    )
+    .textContent =
+    Number(
+      result.auditCount || 0
+    ).toLocaleString();
+
+  document
+    .getElementById(
+      'showingCount'
+    )
+    .textContent =
+    Number(
+      result.showingCount || 0
+    ).toLocaleString();
+
+}
+
+
+/* ============================================================
+   TABLE
+   ============================================================ */
 
 function renderTable() {
 
@@ -1875,8 +2304,7 @@ function renderTable() {
         'tableBody'
       );
 
-
-  const totalPages =
+  totalPages =
     Math.max(
       1,
       Math.ceil(
@@ -1885,37 +2313,14 @@ function renderTable() {
       )
     );
 
-
   if (
-    currentPage >
-    totalPages
+    currentData.length === 0
   ) {
 
-    currentPage =
-      totalPages;
+    currentPage = 1;
 
-  }
-
-
-  const start =
-    (
-      currentPage -
-      1
-    ) *
-    ROWS_PER_PAGE;
-
-
-  const rows =
-    currentData.slice(
-      start,
-      start +
-      ROWS_PER_PAGE
-    );
-
-
-  if (!rows.length) {
-
-    body.innerHTML = `
+    body.innerHTML =
+      `
       <tr>
         <td
           colspan="7"
@@ -1927,120 +2332,184 @@ function renderTable() {
           No records found.
         </td>
       </tr>
+      `;
+
+    updatePagination();
+
+    return;
+
+  }
+
+  if (
+    currentPage >
+    totalPages
+  ) {
+
+    currentPage =
+      totalPages;
+
+  }
+
+  const start =
+    (
+      currentPage -
+      1
+    ) *
+    ROWS_PER_PAGE;
+
+  const end =
+    Math.min(
+      start +
+      ROWS_PER_PAGE,
+      currentData.length
+    );
+
+  const rows =
+    currentData.slice(
+      start,
+      end
+    );
+
+  body.innerHTML =
+    rows.map(
+      function(row) {
+
+        const editable =
+          row.editable === true;
+
+        const actions =
+          editable
+            ? `
+              <div class="actionButtons">
+
+                <button
+                  class="editBtn"
+                  onclick="openEditModal(
+                    '${escapeJs(row.branch)}',
+                    '${escapeJs(row.tag)}',
+                    '${escapeJs(row.si)}'
+                  )"
+                >
+                  ✏️ Edit
+                </button>
+
+                <button
+                  class="deleteBtn"
+                  onclick="deleteSoldRecord(
+                    '${escapeJs(row.branch)}',
+                    '${escapeJs(row.tag)}'
+                  )"
+                >
+                  🗑 Delete
+                </button>
+
+              </div>
+            `
+            : '—';
+
+        return `
+          <tr>
+
+            <td>
+              ${escapeHtml(
+                row.branchName ||
+                row.branch ||
+                ''
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                row.lenstype || ''
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                row.description || ''
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                row.tag || ''
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                row.si || ''
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                formatDate(
+                  row.date
+                )
+              )}
+            </td>
+
+            <td>
+              ${actions}
+            </td>
+
+          </tr>
+        `;
+
+      }
+    )
+    .join('');
+
+  updatePagination();
+
+}
+
+
+/* ============================================================
+   TABLE MESSAGE
+   ============================================================ */
+
+function setTableMessage(
+  message
+) {
+
+  document
+    .getElementById(
+      'tableBody'
+    )
+    .innerHTML =
+    `
+    <tr>
+      <td
+        colspan="7"
+        style="
+          text-align:center;
+          padding:40px;
+        "
+      >
+        ${escapeHtml(message)}
+      </td>
+    </tr>
     `;
 
-  }
-
-  else {
-
-    body.innerHTML =
-      rows
-        .map(
-          function(row) {
-
-            let actions =
-              '';
+}
 
 
-            if (
-              row.editable
-            ) {
+/* ============================================================
+   PAGINATION
+   ============================================================ */
 
-              actions = `
-
-                <button
-                  class="actionBtn editBtn"
-                  onclick="openEditModal(
-                    '${escapeAttr(row.branch)}',
-                    '${escapeAttr(row.tag)}',
-                    '${escapeAttr(row.si)}'
-                  )"
-                >
-                  Edit
-                </button>
-
-
-                <button
-                  class="actionBtn deleteBtn"
-                  onclick="deleteSoldRecord(
-                    '${escapeAttr(row.branch)}',
-                    '${escapeAttr(row.tag)}'
-                  )"
-                >
-                  Delete
-                </button>
-
-              `;
-
-            }
-
-
-            return `
-
-              <tr>
-
-                <td>
-                  ${escapeHtml(
-                    row.branchName ||
-                    row.branch
-                  )}
-                </td>
-
-                <td>
-                  ${escapeHtml(
-                    row.lenstype
-                  )}
-                </td>
-
-                <td>
-                  ${escapeHtml(
-                    row.description
-                  )}
-                </td>
-
-                <td>
-                  ${escapeHtml(
-                    row.tag
-                  )}
-                </td>
-
-                <td>
-                  ${escapeHtml(
-                    row.si
-                  )}
-                </td>
-
-                <td>
-                  ${escapeHtml(
-                    row.date
-                  )}
-                </td>
-
-                <td>
-                  ${actions}
-                </td>
-
-              </tr>
-
-            `;
-
-          }
-        )
-        .join('');
-
-  }
-
+function updatePagination() {
 
   document
     .getElementById(
       'pageInfo'
     )
     .textContent =
-    'Page ' +
-    currentPage +
-    ' / ' +
-    totalPages;
-
+    currentData.length
+      ? `Page ${currentPage} / ${totalPages}`
+      : 'Page 0 / 0';
 
   document
     .getElementById(
@@ -2049,13 +2518,13 @@ function renderTable() {
     .disabled =
     currentPage <= 1;
 
-
   document
     .getElementById(
       'nextBtn'
     )
     .disabled =
-    currentPage >= totalPages;
+    currentPage >=
+    totalPages;
 
 }
 
@@ -2063,48 +2532,37 @@ function renderTable() {
 function previousPage() {
 
   if (
-    currentPage >
-    1
+    currentPage <= 1
   ) {
-
-    currentPage--;
-
-    renderTable();
-
+    return;
   }
+
+  currentPage--;
+
+  renderTable();
 
 }
 
 
 function nextPage() {
 
-  const totalPages =
-    Math.max(
-      1,
-      Math.ceil(
-        currentData.length /
-        ROWS_PER_PAGE
-      )
-    );
-
-
   if (
-    currentPage <
+    currentPage >=
     totalPages
   ) {
-
-    currentPage++;
-
-    renderTable();
-
+    return;
   }
+
+  currentPage++;
+
+  renderTable();
 
 }
 
 
-/****************************************************************
- * EDIT
- ****************************************************************/
+/* ============================================================
+   EDIT MODAL
+   ============================================================ */
 
 function openEditModal(
   branch,
@@ -2119,7 +2577,6 @@ function openEditModal(
     .value =
     branch;
 
-
   document
     .getElementById(
       'editTag'
@@ -2127,14 +2584,12 @@ function openEditModal(
     .value =
     tag;
 
-
   document
     .getElementById(
       'editSI'
     )
     .value =
     si || '';
-
 
   document
     .getElementById(
@@ -2167,14 +2622,12 @@ async function saveEdit() {
       )
       .value;
 
-
   const tag =
     document
       .getElementById(
         'editTag'
       )
       .value;
-
 
   const si =
     document
@@ -2184,12 +2637,36 @@ async function saveEdit() {
       .value
       .trim();
 
+  if (!si) {
+
+    showDialog(
+      '⚠️',
+      'SI Required',
+      'Please enter an SI Number.',
+      null
+    );
+
+    return;
+
+  }
 
   try {
 
-    await api(
-      'editSold',
-      {
+    showLoading(
+      'Updating SI Number...',
+      20,
+      'Updating Supabase record...'
+    );
+
+    const result =
+      await apiGet({
+
+        action:
+          'editSold',
+
+        session:
+          session,
+
         branch:
           branch,
 
@@ -2198,24 +2675,48 @@ async function saveEdit() {
 
         si:
           si
-      }
-    );
 
+      });
+
+    closeLoading();
+
+    if (
+      !result ||
+      !result.ok
+    ) {
+
+      throw new Error(
+        result &&
+        result.error
+          ? result.error
+          : 'Unable to update record.'
+      );
+
+    }
 
     closeEditModal();
 
+    showDialog(
+      '✅',
+      'Updated',
+      'SI Number updated successfully.',
+      function() {
 
-    await searchDashboard();
+        searchDashboard();
 
+      }
+    );
 
   }
-
   catch (err) {
+
+    closeLoading();
 
     showDialog(
       '❌',
       'Update Failed',
-      err.message
+      err.message,
+      null
     );
 
   }
@@ -2223,9 +2724,9 @@ async function saveEdit() {
 }
 
 
-/****************************************************************
- * DELETE
- ****************************************************************/
+/* ============================================================
+   DELETE SOLD
+   ============================================================ */
 
 function deleteSoldRecord(
   branch,
@@ -2235,33 +2736,73 @@ function deleteSoldRecord(
   showDialog(
     '⚠️',
     'Delete Sold Record',
-    'Are you sure you want to delete this sold record?',
+    'Delete sold record with tag "' +
+    tag +
+    '"?',
     async function() {
 
       try {
 
-        await api(
-          'deleteSold',
-          {
+        showLoading(
+          'Deleting record...',
+          30,
+          'Deleting from Supabase...'
+        );
+
+        const result =
+          await apiGet({
+
+            action:
+              'deleteSold',
+
+            session:
+              session,
+
             branch:
               branch,
 
             tag:
               tag
+
+          });
+
+        closeLoading();
+
+        if (
+          !result ||
+          !result.ok
+        ) {
+
+          throw new Error(
+            result &&
+            result.error
+              ? result.error
+              : 'Delete failed.'
+          );
+
+        }
+
+        showDialog(
+          '✅',
+          'Deleted',
+          'Sold record deleted successfully.',
+          function() {
+
+            searchDashboard();
+
           }
         );
 
-
-        await searchDashboard();
-
       }
-
       catch (err) {
+
+        closeLoading();
 
         showDialog(
           '❌',
           'Delete Failed',
-          err.message
+          err.message,
+          null
         );
 
       }
@@ -2272,9 +2813,9 @@ function deleteSoldRecord(
 }
 
 
-/****************************************************************
- * UPDATE STOCK MODAL
- ****************************************************************/
+/* ============================================================
+   UPDATE STOCK MODAL
+   ============================================================ */
 
 function openUpdateStockModal() {
 
@@ -2290,6 +2831,10 @@ function openUpdateStockModal() {
 
 function closeUpdateStockModal() {
 
+  if (importRunning) {
+    return;
+  }
+
   document
     .getElementById(
       'updateStockModal'
@@ -2300,17 +2845,15 @@ function closeUpdateStockModal() {
 }
 
 
-/****************************************************************
- * IMPORT
- *
- * IMPORTANT:
- *
- * The modal closes immediately after validation.
- *
- * Upload continues in the background.
- ****************************************************************/
+/* ============================================================
+   IMPORT STOCKS
+   ============================================================ */
 
 async function updateStocks() {
+
+  if (importRunning) {
+    return;
+  }
 
   const branch =
     document
@@ -2319,64 +2862,96 @@ async function updateStocks() {
       )
       .value;
 
-
-  const file =
+  const fileInput =
     document
       .getElementById(
         'stockFile'
-      )
-      .files[0];
+      );
 
+  const file =
+    fileInput.files &&
+    fileInput.files[0];
 
   if (!branch) {
 
     showDialog(
       '⚠️',
       'Branch Required',
-      'Please select a branch.'
+      'Please select a branch.',
+      null
     );
 
     return;
 
   }
-
 
   if (!file) {
 
     showDialog(
       '⚠️',
       'File Required',
-      'Please select an Excel file.'
+      'Please select an Excel or CSV file.',
+      null
     );
 
     return;
 
   }
 
+  showDialog(
+    '📤',
+    'Start Import',
+    'Import "' +
+    file.name +
+    '" into ' +
+    branch +
+    '?\n\n' +
+    'The file will be processed in background chunks.',
+    async function() {
 
-  /*
-   * Close modal immediately.
-   */
+      await runImport(
+        branch,
+        file
+      );
 
-  closeUpdateStockModal();
-
-
-  /*
-   * Background job card.
-   */
-
-  const jobId =
-    'IMPORT_' +
-    Date.now();
-
-
-  createBackgroundJobCard(
-    jobId,
-    '📤 Importing Stocks',
-    'Reading Excel file...',
-    true
+    }
   );
 
+}
+
+
+/* ============================================================
+   RUN IMPORT
+   ============================================================ */
+
+async function runImport(
+  branch,
+  file
+) {
+
+  importRunning = true;
+
+  importCancelled = false;
+
+  document
+    .getElementById(
+      'updateStocksBtn'
+    )
+    .disabled =
+    true;
+
+  showLoading(
+    'Preparing import...',
+    0,
+    'Reading Excel file...'
+  );
+
+  document
+    .getElementById(
+      'cancelJobBtn'
+    )
+    .style.display =
+    'inline-block';
 
   try {
 
@@ -2385,60 +2960,45 @@ async function updateStocks() {
         file
       );
 
-
     if (
+      !rows ||
       !rows.length
     ) {
 
       throw new Error(
-        'The Excel file contains no data rows.'
+        'The selected file contains no rows.'
       );
 
     }
 
+    const dataRows =
+      normalizeImportRows(
+        rows
+      );
 
-    updateJobCard(
-      jobId,
-      '📤 Importing Stocks',
-      'Uploading ' +
-      formatNumber(
-        rows.length
-      ) +
-      ' rows...',
-      0
-    );
+    if (
+      !dataRows.length
+    ) {
 
+      throw new Error(
+        'No usable data rows were found.'
+      );
 
-    /*
-     * IMPORTANT:
-     *
-     * No maximum row count is checked here.
-     *
-     * 760 rows:
-     *      works
-     *
-     * 7,600 rows:
-     *      works
-     *
-     * 76,000 rows:
-     *      works
-     *
-     * 100,000+ rows:
-     *      processed in chunks
-     */
+    }
+
+    const totalRows =
+      dataRows.length;
 
     const chunks = [];
 
-
     for (
       let i = 0;
-      i < rows.length;
-      i +=
-        IMPORT_CHUNK_SIZE
+      i < totalRows;
+      i += IMPORT_CHUNK_SIZE
     ) {
 
       chunks.push(
-        rows.slice(
+        dataRows.slice(
           i,
           i +
           IMPORT_CHUNK_SIZE
@@ -2447,105 +3007,112 @@ async function updateStocks() {
 
     }
 
+    const totalChunks =
+      chunks.length;
 
-    let completedRows =
-      0;
+    let completedChunks = 0;
 
+    let completedRows = 0;
 
-    let nextChunk =
-      0;
-
+    updateLoading(
+      0,
+      'Importing ' +
+      totalRows.toLocaleString() +
+      ' rows...',
+      `
+        <b>Branch:</b> ${escapeHtml(branch)}<br>
+        <b>Rows:</b> ${totalRows.toLocaleString()}<br>
+        <b>Chunks:</b> ${totalChunks.toLocaleString()}<br>
+        <b>Workers:</b> ${IMPORT_CONCURRENCY}
+      `
+    );
 
     /*
-     * Worker pool.
+     * Multiple chunks are uploaded concurrently.
      *
-     * Four chunks can upload concurrently.
+     * This keeps the browser busy while avoiding
+     * one giant request.
      */
 
-    async function worker() {
+    let nextChunkIndex = 0;
 
-      while (
-        true
-      ) {
+    async function worker(
+      workerNumber
+    ) {
 
-        const index =
-          nextChunk++;
-
+      while (true) {
 
         if (
-          index >=
-          chunks.length
+          importCancelled
         ) {
 
           return;
 
         }
 
+        const index =
+          nextChunkIndex++;
+
+        if (
+          index >=
+          totalChunks
+        ) {
+
+          return;
+
+        }
 
         const chunk =
           chunks[index];
 
-
-        const json =
-          JSON.stringify(
-            chunk
-          );
-
-
-        const encoded =
-          base64EncodeUTF8(
-            json
-          );
-
-
-        await api(
-          'uploadChunk',
-          {
-            branch:
-              branch,
-
-            chunk:
-              encoded
-          }
+        await uploadImportChunk(
+          branch,
+          chunk,
+          index,
+          totalChunks
         );
 
+        completedChunks++;
 
         completedRows +=
           chunk.length;
 
-
         const percent =
           Math.round(
             completedRows /
-            rows.length *
+            totalRows *
             100
           );
 
-
-        updateJobCard(
-          jobId,
-          '📤 Importing Stocks',
-          completedRows.toLocaleString() +
-          ' / ' +
-          rows.length.toLocaleString() +
-          ' rows uploaded',
-          percent
+        updateLoading(
+          percent,
+          'Importing stocks...',
+          `
+            <b>Branch:</b> ${escapeHtml(branch)}<br>
+            <b>Rows:</b>
+            ${completedRows.toLocaleString()}
+            /
+            ${totalRows.toLocaleString()}<br>
+            <b>Chunks:</b>
+            ${completedChunks.toLocaleString()}
+            /
+            ${totalChunks.toLocaleString()}<br>
+            <b>Workers:</b>
+            ${IMPORT_CONCURRENCY}
+          `
         );
 
       }
 
     }
 
-
     const workers = [];
-
 
     const workerCount =
       Math.min(
         IMPORT_CONCURRENCY,
-        chunks.length
+        totalChunks
       );
-
 
     for (
       let i = 0;
@@ -2554,78 +3121,272 @@ async function updateStocks() {
     ) {
 
       workers.push(
-        worker()
+        worker(i + 1)
       );
 
     }
-
 
     await Promise.all(
       workers
     );
 
+    if (
+      importCancelled
+    ) {
 
-    updateJobCard(
-      jobId,
-      '✅ Import Complete',
-      rows.length.toLocaleString() +
-      ' rows uploaded to ' +
-      branch,
-      100
+      updateLoading(
+        0,
+        'Import cancelled',
+        'The current import was cancelled.'
+      );
+
+      document
+        .getElementById(
+          'cancelJobBtn'
+        )
+        .style.display =
+        'none';
+
+      document
+        .getElementById(
+          'closeLoadingBtn'
+        )
+        .style.display =
+        'inline-block';
+
+      return;
+
+    }
+
+    updateLoading(
+      100,
+      'Import completed',
+      `
+        <b>Branch:</b> ${escapeHtml(branch)}<br>
+        <b>Rows uploaded:</b>
+        ${totalRows.toLocaleString()}<br>
+        <b>Chunks:</b>
+        ${totalChunks.toLocaleString()}<br>
+        <b>Status:</b> Completed
+      `
     );
 
+    document
+      .getElementById(
+        'cancelJobBtn'
+      )
+      .style.display =
+      'none';
+
+    document
+      .getElementById(
+        'closeLoadingBtn'
+      )
+      .style.display =
+      'inline-block';
 
     /*
-     * Refresh only after import completes.
+     * Close the update modal after import succeeds.
      */
 
-    if (
+    document
+      .getElementById(
+        'updateStockModal'
+      )
+      .style.display =
+      'none';
+
+    /*
+     * Refresh the dashboard after import.
+     */
+
+    const dashboardBranch =
       document
         .getElementById(
           'branchSelect'
         )
-        .value ===
+        .value;
+
+    if (
+      dashboardBranch ===
       branch
     ) {
 
-      await searchDashboard();
+      setTimeout(
+        function() {
+
+          searchDashboard();
+
+        },
+        300
+      );
 
     }
 
-
   }
-
   catch (err) {
 
-    updateJobCard(
-      jobId,
-      '❌ Import Failed',
-      err.message,
-      0
+    updateLoading(
+      0,
+      'Import failed',
+      escapeHtml(
+        err.message
+      )
     );
+
+    document
+      .getElementById(
+        'cancelJobBtn'
+      )
+      .style.display =
+      'none';
+
+    document
+      .getElementById(
+        'closeLoadingBtn'
+      )
+      .style.display =
+      'inline-block';
+
+  }
+  finally {
+
+    importRunning = false;
+
+    document
+      .getElementById(
+        'updateStocksBtn'
+      )
+      .disabled =
+      false;
 
   }
 
 }
 
 
-/****************************************************************
- * READ EXCEL
- ****************************************************************/
+/* ============================================================
+   UPLOAD ONE IMPORT CHUNK
+   ============================================================ */
+
+async function uploadImportChunk(
+  branch,
+  rows,
+  index,
+  totalChunks
+) {
+
+  /*
+   * Base64 is used because the Apps Script backend
+   * already expects the chunk in body.chunk.
+   */
+
+  const json =
+    JSON.stringify(
+      rows
+    );
+
+  const encoded =
+    arrayBufferToBase64(
+      new TextEncoder()
+        .encode(
+          json
+        )
+    );
+
+  let attempts = 0;
+
+  const maxAttempts = 3;
+
+  while (
+    attempts <
+    maxAttempts
+  ) {
+
+    attempts++;
+
+    try {
+
+      const result =
+        await apiPost(
+          {
+            action:
+              'uploadChunk',
+
+            session:
+              session,
+
+            branch:
+              branch,
+
+            chunk:
+              encoded
+          },
+          180000
+        );
+
+      if (
+        !result ||
+        !result.ok
+      ) {
+
+        throw new Error(
+          result &&
+          result.error
+            ? result.error
+            : 'Chunk upload failed.'
+        );
+
+      }
+
+      return result;
+
+    }
+    catch (err) {
+
+      if (
+        attempts >=
+        maxAttempts
+      ) {
+
+        throw new Error(
+          'Chunk ' +
+          (index + 1) +
+          '/' +
+          totalChunks +
+          ' failed after ' +
+          maxAttempts +
+          ' attempts: ' +
+          err.message
+        );
+
+      }
+
+      await sleep(
+        1000 *
+        attempts
+      );
+
+    }
+
+  }
+
+}
+
+
+/* ============================================================
+   READ EXCEL / CSV
+   ============================================================ */
 
 function readExcelFile(
   file
 ) {
 
   return new Promise(
-    function(
-      resolve,
-      reject
-    ) {
+    function(resolve, reject) {
 
       const reader =
         new FileReader();
-
 
       reader.onload =
         function(event) {
@@ -2637,199 +3398,73 @@ function readExcelFile(
                 event.target.result
               );
 
-
             const workbook =
               XLSX.read(
                 data,
                 {
-                  type:
-                    'array',
-
-                  cellDates:
-                    false,
-
-                  raw:
-                    false
+                  type: 'array',
+                  cellDates: true,
+                  raw: false
                 }
               );
 
+            if (
+              !workbook.SheetNames.length
+            ) {
+
+              reject(
+                new Error(
+                  'No worksheet found.'
+                )
+              );
+
+              return;
+
+            }
 
             const sheet =
               workbook.Sheets[
                 workbook.SheetNames[0]
               ];
 
-
             const rows =
               XLSX.utils.sheet_to_json(
                 sheet,
                 {
-                  header:
-                    1,
-
-                  defval:
-                    '',
-
-                  raw:
-                    false
+                  header: 1,
+                  defval: '',
+                  raw: false
                 }
               );
-
-
-            /*
-             * Remove completely empty rows.
-             */
-
-            const cleaned =
-              rows.filter(
-                function(row) {
-
-                  return (
-                    Array.isArray(row) &&
-                    row.some(
-                      function(value) {
-
-                        return String(
-                          value ?? ''
-                        ).trim() !== '';
-
-                      }
-                    )
-                  );
-
-                }
-              );
-
-
-            /*
-             * Detect header row.
-             *
-             * If the first row contains
-             * database column names, remove it.
-             */
-
-            if (
-              cleaned.length
-            ) {
-
-              const first =
-                cleaned[0]
-                  .map(
-                    function(v) {
-
-                      return String(
-                        v
-                      )
-                        .trim()
-                        .toUpperCase();
-
-                    }
-                  );
-
-
-              const matches =
-                first.filter(
-                  function(value) {
-
-                    return [
-                      'SDATE',
-                      'SUPPLIER',
-                      'DR',
-                      'COST',
-                      'NTAGN',
-                      'DESCRIPTION',
-                      'LENSTYPE',
-                      'SI NO.',
-                      'STATUS'
-                    ]
-                    .indexOf(
-                      value
-                    ) !== -1;
-
-                  }
-                ).length;
-
-
-              if (
-                matches >= 2
-              ) {
-
-                cleaned.shift();
-
-              }
-
-            }
-
-
-            /*
-             * Make every row exactly the number
-             * of database columns.
-             */
-
-            const normalized =
-              cleaned.map(
-                function(row) {
-
-                  const output =
-                    new Array(
-                      27
-                    )
-                    .fill('');
-
-
-                  for (
-                    let i = 0;
-                    i < 27;
-                    i++
-                  ) {
-
-                    output[i] =
-                      row[i] ===
-                        undefined ||
-                      row[i] ===
-                        null
-                        ? ''
-                        : String(
-                            row[i]
-                          );
-
-                  }
-
-
-                  return output;
-
-                }
-              );
-
 
             resolve(
-              normalized
+              rows
             );
 
           }
-
           catch (err) {
 
             reject(
-              err
+              new Error(
+                'Unable to read Excel file: ' +
+                err.message
+              )
             );
 
           }
 
         };
-
 
       reader.onerror =
         function() {
 
           reject(
             new Error(
-              'Unable to read Excel file.'
+              'Unable to read selected file.'
             )
           );
 
         };
-
 
       reader.readAsArrayBuffer(
         file
@@ -2841,59 +3476,349 @@ function readExcelFile(
 }
 
 
-/****************************************************************
- * BASE64 UTF-8
- ****************************************************************/
+/* ============================================================
+   NORMALIZE IMPORT ROWS
+   ============================================================ */
 
-function base64EncodeUTF8(
-  text
+function normalizeImportRows(
+  rows
 ) {
 
-  const bytes =
-    new TextEncoder()
-      .encode(
-        text
-      );
-
-
-  let binary =
-    '';
-
-
-  const chunkSize =
-    0x8000;
-
-
-  for (
-    let i = 0;
-    i < bytes.length;
-    i +=
-      chunkSize
+  if (
+    !Array.isArray(rows) ||
+    rows.length === 0
   ) {
 
-    binary +=
-      String.fromCharCode.apply(
-        null,
-        bytes.subarray(
-          i,
-          i +
-          chunkSize
-        )
+    return [];
+
+  }
+
+  /*
+   * The Apps Script backend expects the exact
+   * COLUMNS order:
+   *
+   * 0  SDATE
+   * 1  SUPPLIER
+   * 2  DR
+   * ...
+   * 23 SI NO.
+   * 24 DATE AND TIME
+   * 25 USER EMAIL
+   * 26 STATUS
+   */
+
+  const expectedHeaders = [
+
+    'SDATE',
+    'SUPPLIER',
+    'DR',
+    'COST',
+    'ASG',
+    'CB',
+    'FD',
+    'UNITS',
+    'POWER',
+    'LENSTYPE',
+    'PUNIT',
+    'BR',
+    'NTAGN',
+    'CATEGORY',
+    'DESCRIPTION',
+    'LENSCODE',
+    'SELLINGPRICE',
+    'DELIVERYDATE',
+    'ORNUMBER',
+    'ORDATE',
+    'REMARKS',
+    'TAGPRICE',
+    'QR',
+    'SI NO.',
+    'DATE AND TIME',
+    'USER EMAIL',
+    'STATUS'
+
+  ];
+
+  const firstRow =
+    rows[0] || [];
+
+  const normalizedHeader =
+    firstRow.map(
+      normalizeHeader
+    );
+
+  const headerLooksValid =
+    expectedHeaders.some(
+      function(header) {
+
+        return normalizedHeader.indexOf(
+          normalizeHeader(
+            header
+          )
+        ) !== -1;
+
+      }
+    );
+
+  let startRow =
+    headerLooksValid
+      ? 1
+      : 0;
+
+  /*
+   * If the spreadsheet already has the correct
+   * 27-column order, preserve it.
+   */
+
+  if (
+    !headerLooksValid
+  ) {
+
+    return rows
+      .slice(startRow)
+      .filter(
+        function(row) {
+
+          return (
+            Array.isArray(row) &&
+            row.some(
+              function(value) {
+
+                return String(
+                  value === undefined ||
+                  value === null
+                    ? ''
+                    : value
+                ).trim() !== '';
+
+              }
+            )
+          );
+
+        }
+      )
+      .map(
+        function(row) {
+
+          const output =
+            [];
+
+          for (
+            let i = 0;
+            i < 27;
+            i++
+          ) {
+
+            output.push(
+              cleanCell(
+                row[i]
+              )
+            );
+
+          }
+
+          return output;
+
+        }
       );
 
   }
 
+  /*
+   * Header-based mapping.
+   *
+   * This makes the importer safer if the columns
+   * are rearranged in the Excel file.
+   */
 
-  return btoa(
-    binary
+  const indexes = {};
+
+  expectedHeaders.forEach(
+    function(header) {
+
+      const target =
+        normalizeHeader(
+          header
+        );
+
+      let index =
+        normalizedHeader.indexOf(
+          target
+        );
+
+      if (
+        index === -1
+      ) {
+
+        /*
+         * Handle SI NO. variations.
+         */
+
+        if (
+          target ===
+          normalizeHeader(
+            'SI NO.'
+          )
+        ) {
+
+          const alternatives = [
+            'SI',
+            'SI NO',
+            'SINO',
+            'SI NUMBER'
+          ];
+
+          for (
+            let i = 0;
+            i < alternatives.length;
+            i++
+          ) {
+
+            index =
+              normalizedHeader.indexOf(
+                normalizeHeader(
+                  alternatives[i]
+                )
+              );
+
+            if (
+              index !== -1
+            ) {
+
+              break;
+
+            }
+
+          }
+
+        }
+
+      }
+
+      indexes[header] =
+        index;
+
+    }
   );
+
+  const output = [];
+
+  rows
+    .slice(startRow)
+    .forEach(
+      function(row) {
+
+        if (
+          !Array.isArray(row)
+        ) {
+          return;
+        }
+
+        const hasData =
+          row.some(
+            function(value) {
+
+              return cleanCell(
+                value
+              ) !== '';
+
+            }
+          );
+
+        if (!hasData) {
+          return;
+        }
+
+        const outputRow =
+          expectedHeaders.map(
+            function(header) {
+
+              const index =
+                indexes[header];
+
+              if (
+                index === undefined ||
+                index < 0
+              ) {
+
+                return '';
+
+              }
+
+              return cleanCell(
+                row[index]
+              );
+
+            }
+          );
+
+        output.push(
+          outputRow
+        );
+
+      }
+    );
+
+  return output;
 
 }
 
 
-/****************************************************************
- * EXPORT MODAL
- ****************************************************************/
+/* ============================================================
+   IMPORT HELPERS
+   ============================================================ */
+
+function normalizeHeader(
+  value
+) {
+
+  return String(
+    value === undefined ||
+    value === null
+      ? ''
+      : value
+  )
+    .trim()
+    .toUpperCase()
+    .replace(
+      /\s+/g,
+      ' '
+    );
+
+}
+
+
+function cleanCell(
+  value
+) {
+
+  if (
+    value === undefined ||
+    value === null
+  ) {
+
+    return '';
+
+  }
+
+  if (
+    value instanceof Date
+  ) {
+
+    return value.toISOString();
+
+  }
+
+  return String(
+    value
+  ).trim();
+
+}
+
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
 
 function openExportModal() {
 
@@ -2919,11 +3844,11 @@ function closeExportModal() {
 }
 
 
-/****************************************************************
- * START BACKGROUND EXPORT
- ****************************************************************/
+/* ============================================================
+   START EXPORT
+   ============================================================ */
 
-async function startExport() {
+function startExport() {
 
   const branch =
     document
@@ -2932,598 +3857,702 @@ async function startExport() {
       )
       .value;
 
-
   if (!branch) {
 
     showDialog(
       '⚠️',
       'Branch Required',
-      'Please select a branch.'
+      'Please select a branch.',
+      null
     );
 
     return;
 
   }
 
+  showDialog(
+    '📥',
+    'Export Inventory',
+    'Start background export for ' +
+    branch +
+    '?\n\n' +
+    'The dashboard will remain available while the export is processed.',
+    async function() {
 
-  closeExportModal();
+      closeExportModal();
 
+      await beginExport(
+        branch
+      );
 
-  const cardId =
-    'EXPORT_' +
-    Date.now();
-
-
-  createBackgroundJobCard(
-    cardId,
-    '📥 Exporting Inventory',
-    'Queueing export...',
-    true
+    }
   );
 
+}
+
+
+/* ============================================================
+   BEGIN EXPORT
+   ============================================================ */
+
+async function beginExport(
+  branch
+) {
+
+  try {
+
+    showLoading(
+      'Queueing export...',
+      0,
+      'Creating background export job...'
+    );
+
+    currentJobType =
+      'export';
+
+    const result =
+      await apiGet({
+
+        action:
+          'startExport',
+
+        session:
+          session,
+
+        branch:
+          branch
+
+      });
+
+    if (
+      !result ||
+      !result.ok ||
+      !result.jobId
+    ) {
+
+      throw new Error(
+        result &&
+        result.error
+          ? result.error
+          : 'Unable to start export.'
+      );
+
+    }
+
+    currentJobId =
+      result.jobId;
+
+    document
+      .getElementById(
+        'cancelJobBtn'
+      )
+      .style.display =
+      'inline-block';
+
+    updateLoading(
+      1,
+      'Export queued...',
+      `
+        <b>Branch:</b>
+        ${escapeHtml(branch)}<br>
+        <b>Status:</b>
+        Waiting for background worker...
+      `
+    );
+
+    pollExportStatus();
+
+  }
+  catch (err) {
+
+    updateLoading(
+      0,
+      'Export failed',
+      escapeHtml(
+        err.message
+      )
+    );
+
+    document
+      .getElementById(
+        'cancelJobBtn'
+      )
+      .style.display =
+      'none';
+
+    document
+      .getElementById(
+        'closeLoadingBtn'
+      )
+      .style.display =
+      'inline-block';
+
+  }
+
+}
+
+
+/* ============================================================
+   EXPORT STATUS POLLING
+   ============================================================ */
+
+async function pollExportStatus() {
+
+  if (!currentJobId) {
+    return;
+  }
 
   try {
 
     const result =
-      await api(
-        'startExport',
-        {
-          branch:
-            branch
-        }
+      await apiGet({
+
+        action:
+          'exportStatus',
+
+        session:
+          session,
+
+        jobId:
+          currentJobId
+
+      });
+
+    if (
+      !result ||
+      !result.ok
+    ) {
+
+      throw new Error(
+        result &&
+        result.error
+          ? result.error
+          : 'Unable to read export status.'
       );
 
+    }
 
-    const jobId =
-      result.jobId;
-
-
-    updateJobCard(
-      cardId,
-      '📥 Exporting Inventory',
-      'Export queued. Dashboard remains available.',
-      0
+    updateExportProgress(
+      result
     );
 
+    if (
+      result.status ===
+      'completed'
+    ) {
 
-    pollExportJob(
-      jobId,
-      cardId
-    );
+      finishExport(
+        result
+      );
+
+      return;
+
+    }
+
+    if (
+      result.status ===
+      'error'
+    ) {
+
+      failExport(
+        result.error ||
+        'Export failed.'
+      );
+
+      return;
+
+    }
+
+    if (
+      result.status ===
+      'cancelled'
+    ) {
+
+      updateLoading(
+        0,
+        'Export cancelled',
+        'The export job was cancelled.'
+      );
+
+      document
+        .getElementById(
+          'cancelJobBtn'
+        )
+        .style.display =
+        'none';
+
+      document
+        .getElementById(
+          'closeLoadingBtn'
+        )
+        .style.display =
+        'inline-block';
+
+      currentJobId = null;
+
+      return;
+
+    }
+
+    exportPollTimer =
+      setTimeout(
+        pollExportStatus,
+        2000
+      );
 
   }
-
   catch (err) {
 
-    updateJobCard(
-      cardId,
-      '❌ Export Failed',
-      err.message,
-      0
-    );
+    /*
+     * Do not immediately kill the export.
+     *
+     * Temporary network errors should not destroy
+     * the background job.
+     */
+
+    exportPollTimer =
+      setTimeout(
+        pollExportStatus,
+        4000
+      );
 
   }
 
 }
 
 
-/****************************************************************
- * EXPORT POLLING
- ****************************************************************/
+/* ============================================================
+   EXPORT PROGRESS
+   ============================================================ */
 
-function pollExportJob(
-  jobId,
-  cardId
+function updateExportProgress(
+  job
 ) {
 
-  if (
-    exportPollingTimers[
-      jobId
-    ]
-  ) {
-
-    clearTimeout(
-      exportPollingTimers[
-        jobId
-      ]
+  const stocksRows =
+    Number(
+      job.stocksRows || 0
     );
 
-  }
+  const soldRows =
+    Number(
+      job.soldRows || 0
+    );
 
+  const auditRows =
+    Number(
+      job.auditRows || 0
+    );
 
-  async function check() {
+  const stocksPages =
+    Number(
+      job.stocksPages || 0
+    );
 
-    try {
+  const soldPages =
+    Number(
+      job.soldPages || 0
+    );
 
-      const result =
-        await api(
-          'exportStatus',
-          {
-            jobId:
-              jobId
-          }
-        );
+  const auditPages =
+    Number(
+      job.auditPages || 0
+    );
 
-
-      let percent =
-        0;
-
-
-      if (
-        result.status ===
-        'queued'
-      ) {
-
-        percent = 0;
-
-      }
-
-      else if (
-        result.status ===
-        'running'
-      ) {
-
-        if (
-          result.stage ===
-          'stocks'
-        ) {
-
-          percent = 20;
-
-        }
-
-        else if (
-          result.stage ===
-          'sold'
-        ) {
-
-          percent = 45;
-
-        }
-
-        else if (
-          result.stage ===
-          'audit'
-        ) {
-
-          percent = 65;
-
-        }
-
-        else if (
-          result.stage ===
-          'processing'
-        ) {
-
-          percent = 80;
-
-        }
-
-        else if (
-          result.stage ===
-          'creating_files'
-        ) {
-
-          percent = 90;
-
-        }
-
-      }
-
-
-      if (
-        result.status ===
-        'completed'
-      ) {
-
-        updateJobCard(
-          cardId,
-          '✅ Export Complete',
-          'Stocks: ' +
-          formatNumber(
-            result.availableRows
-          ) +
-          '\n' +
-          'Sold: ' +
-          formatNumber(
-            result.soldRows
-          ) +
-          '\n' +
-          'Audit: ' +
-          formatNumber(
-            result.auditRows
-          ),
-          100,
-          result.files
-        );
-
-
-        return;
-
-      }
-
-
-      if (
-        result.status ===
-        'error'
-      ) {
-
-        updateJobCard(
-          cardId,
-          '❌ Export Failed',
-          result.error ||
-          'Export failed.',
-          0
-        );
-
-
-        return;
-
-      }
-
-
-      if (
-        result.status ===
-        'cancelled'
-      ) {
-
-        updateJobCard(
-          cardId,
-          '⚠️ Export Cancelled',
-          'The export was cancelled.',
-          0
-        );
-
-
-        return;
-
-      }
-
-
-      updateJobCard(
-        cardId,
-        '📥 Exporting Inventory',
-        formatExportStage(
-          result
-        ),
-        percent
-      );
-
-
-      exportPollingTimers[
-        jobId
-      ] =
-        setTimeout(
-          check,
-          2000
-        );
-
-    }
-
-    catch (err) {
-
-      updateJobCard(
-        cardId,
-        '❌ Export Status Error',
-        err.message,
-        0
-      );
-
-    }
-
-  }
-
-
-  check();
-
-}
-
-
-/****************************************************************
- * EXPORT STAGE TEXT
- ****************************************************************/
-
-function formatExportStage(
-  result
-) {
-
-  const stage =
-    result.stage;
-
+  let percent = 0;
 
   if (
-    stage ===
+    job.stage ===
     'starting'
   ) {
 
-    return 'Starting export...';
+    percent = 2;
 
   }
-
-
-  if (
-    stage ===
+  else if (
+    job.stage ===
     'stocks'
   ) {
 
-    return (
-      'Reading ALL stocks... ' +
-      formatNumber(
-        result.stocksRows
-      ) +
-      ' rows'
-    );
+    percent =
+      5 +
+      Math.min(
+        30,
+        stocksPages
+      );
 
   }
-
-
-  if (
-    stage ===
+  else if (
+    job.stage ===
     'sold'
   ) {
 
-    return (
-      'Reading ALL sold records... ' +
-      formatNumber(
-        result.soldRows
-      ) +
-      ' rows'
-    );
+    percent =
+      35 +
+      Math.min(
+        25,
+        soldPages
+      );
 
   }
-
-
-  if (
-    stage ===
+  else if (
+    job.stage ===
     'audit'
   ) {
 
-    return (
-      'Reading ALL audit records... ' +
-      formatNumber(
-        result.auditRows
-      ) +
-      ' rows'
-    );
+    percent =
+      60 +
+      Math.min(
+        20,
+        auditPages
+      );
 
   }
-
-
-  if (
-    stage ===
+  else if (
+    job.stage ===
     'processing'
   ) {
 
-    return 'Removing sold tags from available stocks...';
+    percent = 85;
 
   }
-
-
-  if (
-    stage ===
+  else if (
+    job.stage ===
     'creating_files'
   ) {
 
-    return 'Creating CSV files...';
+    percent = 92;
+
+  }
+  else {
+
+    percent = 95;
 
   }
 
-
-  return 'Processing...';
-
-}
-
-
-/****************************************************************
- * BACKGROUND JOB UI
- ****************************************************************/
-
-function createBackgroundJobCard(
-  id,
-  title,
-  text,
-  showProgress
-) {
-
-  const container =
-    document
-      .getElementById(
-        'backgroundJobs'
-      );
-
-
-  const card =
-    document.createElement(
-      'div'
+  percent =
+    Math.min(
+      99,
+      percent
     );
 
+  let stageText =
+    'Processing...';
 
-  card.className =
-    'jobCard';
+  switch (
+    job.stage
+  ) {
 
+    case 'starting':
+      stageText =
+        'Starting export...';
+      break;
 
-  card.id =
-    id;
+    case 'stocks':
+      stageText =
+        'Exporting stocks...';
+      break;
 
+    case 'sold':
+      stageText =
+        'Exporting sold records...';
+      break;
 
-  card.innerHTML = `
+    case 'audit':
+      stageText =
+        'Exporting audit records...';
+      break;
 
-    <div class="jobTitle">
-      ${escapeHtml(title)}
-    </div>
+    case 'processing':
+      stageText =
+        'Processing inventory...';
+      break;
 
-    <div
-      class="jobText"
-      id="${id}_text"
-    >
-      ${escapeHtml(text)}
-    </div>
+    case 'creating_files':
+      stageText =
+        'Creating CSV files...';
+      break;
 
-    ${
-      showProgress
-        ? `
-          <div class="jobProgress">
-            <div
-              id="${id}_progress"
-            ></div>
-          </div>
-        `
-        : ''
-    }
+  }
 
-  `;
+  updateLoading(
+    percent,
+    stageText,
+    `
+      <b>Stage:</b>
+      ${escapeHtml(job.stage || '')}<br>
 
+      <b>Stocks:</b>
+      ${stocksRows.toLocaleString()}
+      rows /
+      ${stocksPages.toLocaleString()}
+      pages<br>
 
-  container.appendChild(
-    card
+      <b>Sold:</b>
+      ${soldRows.toLocaleString()}
+      rows /
+      ${soldPages.toLocaleString()}
+      pages<br>
+
+      <b>Audit:</b>
+      ${auditRows.toLocaleString()}
+      rows /
+      ${auditPages.toLocaleString()}
+      pages
+    `
   );
 
 }
 
 
-function updateJobCard(
-  id,
-  title,
-  text,
-  percent,
-  files
+/* ============================================================
+   FINISH EXPORT
+   ============================================================ */
+
+function finishExport(
+  job
 ) {
 
-  const card =
-    document
-      .getElementById(
-        id
-      );
+  updateLoading(
+    100,
+    'Export completed',
+    `
+      <b>Branch:</b>
+      ${escapeHtml(job.branch)}<br>
 
+      <b>Available:</b>
+      ${Number(
+        job.availableRows || 0
+      ).toLocaleString()}<br>
 
-  if (!card) {
-    return;
-  }
+      <b>Sold:</b>
+      ${Number(
+        job.soldRows || 0
+      ).toLocaleString()}<br>
 
+      <b>Audit:</b>
+      ${Number(
+        job.auditRows || 0
+      ).toLocaleString()}<br>
 
-  const titleEl =
-    card.querySelector(
-      '.jobTitle'
-    );
+      <b>Missing:</b>
+      ${Number(
+        job.missingRows || 0
+      ).toLocaleString()}
+    `
+  );
 
+  document
+    .getElementById(
+      'cancelJobBtn'
+    )
+    .style.display =
+    'none';
 
-  const textEl =
-    card.querySelector(
-      '.jobText'
-    );
+  document
+    .getElementById(
+      'closeLoadingBtn'
+    )
+    .style.display =
+    'inline-block';
 
+  currentJobId = null;
 
-  if (titleEl) {
-
-    titleEl.textContent =
-      title;
-
-  }
-
-
-  if (textEl) {
-
-    textEl.textContent =
-      text;
-
-  }
-
-
-  const progress =
-    document
-      .getElementById(
-        id +
-        '_progress'
-      );
-
-
-  if (progress) {
-
-    progress.style.width =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          percent || 0
-        )
-      ) +
-      '%';
-
-  }
-
+  /*
+   * Show generated files.
+   */
 
   if (
-    files &&
-    files.length
+    Array.isArray(
+      job.files
+    ) &&
+    job.files.length
   ) {
 
-    const links =
-      files
-        .map(
-          function(file) {
+    const details =
+      document
+        .getElementById(
+          'jobDetails'
+        );
 
-            return `
+    details.innerHTML +=
+      '<hr>' +
+      '<b>Download Files:</b><br>' +
+      job.files.map(
+        function(file) {
+
+          return `
+            <div
+              style="
+                margin-top:8px;
+              "
+            >
+              📄
+              ${escapeHtml(
+                file.name
+              )}
+              —
+              ${Number(
+                file.rows || 0
+              ).toLocaleString()}
+              rows
+              <br>
+
               <a
-                href="${escapeAttr(
+                href="${escapeAttribute(
                   file.url
                 )}"
                 target="_blank"
                 rel="noopener"
-                style="
-                  display:block;
-                  margin-top:7px;
-                  color:#2563eb;
-                  text-decoration:none;
-                  font-weight:bold;
-                "
               >
-                ⬇ ${escapeHtml(
-                  file.name
-                )}
+                Download
               </a>
-            `;
+            </div>
+          `;
 
-          }
-        )
-        .join('');
-
-
-    let linksBox =
-      card.querySelector(
-        '.jobFiles'
-      );
-
-
-    if (!linksBox) {
-
-      linksBox =
-        document.createElement(
-          'div'
-        );
-
-
-      linksBox.className =
-        'jobFiles';
-
-
-      card.appendChild(
-        linksBox
-      );
-
-    }
-
-
-    linksBox.innerHTML =
-      links;
+        }
+      ).join('');
 
   }
 
 }
 
 
-/****************************************************************
- * CLEAR
- ****************************************************************/
+/* ============================================================
+   EXPORT ERROR
+   ============================================================ */
+
+function failExport(
+  message
+) {
+
+  updateLoading(
+    0,
+    'Export failed',
+    escapeHtml(
+      message
+    )
+  );
+
+  document
+    .getElementById(
+      'cancelJobBtn'
+    )
+    .style.display =
+    'none';
+
+  document
+    .getElementById(
+      'closeLoadingBtn'
+    )
+    .style.display =
+    'inline-block';
+
+  currentJobId = null;
+
+}
+
+
+/* ============================================================
+   CANCEL BACKGROUND JOB
+   ============================================================ */
+
+async function cancelCurrentJob() {
+
+  if (
+    currentJobType ===
+    'export' &&
+    currentJobId
+  ) {
+
+    try {
+
+      await apiGet({
+
+        action:
+          'cancelExport',
+
+        session:
+          session,
+
+        jobId:
+          currentJobId
+
+      });
+
+    }
+    catch (err) {
+
+    }
+
+    if (
+      exportPollTimer
+    ) {
+
+      clearTimeout(
+        exportPollTimer
+      );
+
+      exportPollTimer =
+        null;
+
+    }
+
+    currentJobId =
+      null;
+
+    updateLoading(
+      0,
+      'Export cancelled',
+      'The background export was cancelled.'
+    );
+
+    document
+      .getElementById(
+        'cancelJobBtn'
+      )
+      .style.display =
+      'none';
+
+    document
+      .getElementById(
+        'closeLoadingBtn'
+      )
+      .style.display =
+      'inline-block';
+
+    return;
+
+  }
+
+  if (
+    importRunning
+  ) {
+
+    importCancelled =
+      true;
+
+    document
+      .getElementById(
+        'cancelJobBtn'
+      )
+      .disabled =
+      true;
+
+    updateLoading(
+      0,
+      'Cancelling import...',
+      'Waiting for active upload chunks to finish.'
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   CLEAR REPORT
+   ============================================================ */
 
 function openClearModal() {
 
@@ -3558,7 +4587,6 @@ function clearReportAction() {
       )
       .value;
 
-
   const report =
     document
       .getElementById(
@@ -3566,63 +4594,107 @@ function clearReportAction() {
       )
       .value;
 
-
-  if (
-    !branch ||
-    !report
-  ) {
+  if (!branch) {
 
     showDialog(
       '⚠️',
-      'Missing Selection',
-      'Select both branch and report.'
+      'Branch Required',
+      'Please select a branch.',
+      null
     );
 
     return;
 
   }
 
+  if (!report) {
+
+    showDialog(
+      '⚠️',
+      'Report Required',
+      'Please select a report.',
+      null
+    );
+
+    return;
+
+  }
 
   showDialog(
     '⚠️',
-    'Confirm Clear',
-    'This will permanently delete the selected report. Continue?',
+    'Clear Report',
+    'This will permanently delete the ' +
+    report +
+    ' data for ' +
+    branch +
+    '.\n\nContinue?',
     async function() {
 
       try {
 
-        await api(
-          'clearReport',
-          {
+        showLoading(
+          'Clearing report...',
+          30,
+          'Deleting records from Supabase...'
+        );
+
+        const result =
+          await apiGet({
+
+            action:
+              'clearReport',
+
+            session:
+              session,
+
             branch:
               branch,
 
             report:
               report
-          }
-        );
 
+          });
+
+        closeLoading();
 
         closeClearModal();
 
+        if (
+          !result ||
+          !result.ok
+        ) {
+
+          throw new Error(
+            result &&
+            result.error
+              ? result.error
+              : 'Clear failed.'
+          );
+
+        }
 
         showDialog(
           '✅',
-          'Completed',
-          'Report cleared successfully.'
+          'Report Cleared',
+          result.message ||
+          'Report cleared successfully.',
+          function() {
+
+            searchDashboard();
+
+          }
         );
 
-
-        await searchDashboard();
-
       }
-
       catch (err) {
+
+        closeLoading();
 
         showDialog(
           '❌',
           'Clear Failed',
-          err.message
+          err.message,
+          null
         );
 
       }
@@ -3633,9 +4705,111 @@ function clearReportAction() {
 }
 
 
-/****************************************************************
- * DIALOG
- ****************************************************************/
+/* ============================================================
+   LOADING MODAL
+   ============================================================ */
+
+function showLoading(
+  text,
+  percent,
+  details
+) {
+
+  document
+    .getElementById(
+      'loadingOverlay'
+    )
+    .style.display =
+    'flex';
+
+  document
+    .getElementById(
+      'loadingText'
+    )
+    .textContent =
+    text ||
+    'Please wait...';
+
+  document
+    .getElementById(
+      'loadingProgress'
+    )
+    .style.width =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        percent || 0
+      )
+    ) +
+    '%';
+
+  document
+    .getElementById(
+      'loadingProgressText'
+    )
+    .textContent =
+    Math.round(
+      percent || 0
+    ) +
+    '%';
+
+  document
+    .getElementById(
+      'jobDetails'
+    )
+    .innerHTML =
+    details ||
+    '';
+
+}
+
+
+function updateLoading(
+  percent,
+  text,
+  details
+) {
+
+  showLoading(
+    text,
+    percent,
+    details
+  );
+
+}
+
+
+function closeLoading() {
+
+  if (
+    importRunning
+  ) {
+
+    return;
+
+  }
+
+  document
+    .getElementById(
+      'loadingOverlay'
+    )
+    .style.display =
+    'none';
+
+  document
+    .getElementById(
+      'cancelJobBtn'
+    )
+    .disabled =
+    false;
+
+}
+
+
+/* ============================================================
+   DIALOG
+   ============================================================ */
 
 function showDialog(
   icon,
@@ -3644,38 +4818,36 @@ function showDialog(
   callback
 ) {
 
-  currentDialogCallback =
-    callback ||
-    null;
-
+  dialogCallback =
+    callback;
 
   document
     .getElementById(
       'dialogIcon'
     )
     .textContent =
-    icon;
-
+    icon ||
+    '⚠️';
 
   document
     .getElementById(
       'dialogTitle'
     )
     .textContent =
-    title;
-
+    title ||
+    'Confirm';
 
   document
     .getElementById(
       'dialogMessage'
     )
     .textContent =
-    message;
-
+    message ||
+    '';
 
   document
     .getElementById(
-      'dialogBackdrop'
+      'dialogOverlay'
     )
     .style.display =
     'flex';
@@ -3684,68 +4856,214 @@ function showDialog(
 
 
 function closeDialog(
-  confirmed
+  executeCallback
 ) {
 
   document
     .getElementById(
-      'dialogBackdrop'
+      'dialogOverlay'
     )
     .style.display =
     'none';
 
+  const callback =
+    dialogCallback;
 
-  currentDialogCallback =
+  dialogCallback =
     null;
 
-}
-
-
-async function dialogOKClick() {
-
-  const callback =
-    currentDialogCallback;
-
-
-  closeDialog(
-    true
-  );
-
-
   if (
-    callback
+    executeCallback &&
+    typeof callback ===
+    'function'
   ) {
 
-    await callback();
+    callback();
 
   }
 
 }
 
 
-/****************************************************************
- * HELPERS
- ****************************************************************/
+function dialogOKClick() {
 
-function formatNumber(
-  value
-) {
-
-  return Number(
-    value || 0
-  )
-    .toLocaleString();
+  closeDialog(
+    true
+  );
 
 }
 
+
+/* ============================================================
+   LOGIN STATUS
+   ============================================================ */
+
+function showLoginMessage(
+  message
+) {
+
+  const status =
+    document
+      .getElementById(
+        'loginStatus'
+      );
+
+  status.className =
+    'status error';
+
+  status.textContent =
+    message;
+
+}
+
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+function sleep(
+  ms
+) {
+
+  return new Promise(
+    function(resolve) {
+
+      setTimeout(
+        resolve,
+        ms
+      );
+
+    }
+  );
+
+}
+
+
+function formatBytes(
+  bytes
+) {
+
+  if (!bytes) {
+    return '0 B';
+  }
+
+  const units = [
+    'B',
+    'KB',
+    'MB',
+    'GB'
+  ];
+
+  const index =
+    Math.floor(
+      Math.log(bytes) /
+      Math.log(1024)
+    );
+
+  return (
+    bytes /
+    Math.pow(
+      1024,
+      index
+    )
+  ).toFixed(
+    2
+  ) +
+  ' ' +
+  units[
+    index
+  ];
+
+}
+
+
+function formatDate(
+  value
+) {
+
+  if (!value) {
+    return '';
+  }
+
+  const date =
+    new Date(
+      value
+    );
+
+  if (
+    isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return String(
+      value
+    );
+
+  }
+
+  return date.toLocaleString();
+
+}
+
+
+/* ============================================================
+   BASE64
+   ============================================================ */
+
+function arrayBufferToBase64(
+  bytes
+) {
+
+  let binary = '';
+
+  const chunkSize =
+    0x8000;
+
+  for (
+    let i = 0;
+    i < bytes.length;
+    i += chunkSize
+  ) {
+
+    const chunk =
+      bytes.subarray(
+        i,
+        Math.min(
+          i +
+          chunkSize,
+          bytes.length
+        )
+      );
+
+    binary +=
+      String.fromCharCode.apply(
+        null,
+        chunk
+      );
+
+  }
+
+  return btoa(
+    binary
+  );
+
+}
+
+
+/* ============================================================
+   HTML ESCAPING
+   ============================================================ */
 
 function escapeHtml(
   value
 ) {
 
   return String(
-    value ??
-    ''
+    value === undefined ||
+    value === null
+      ? ''
+      : value
   )
     .replace(
       /&/g,
@@ -3771,7 +5089,7 @@ function escapeHtml(
 }
 
 
-function escapeAttr(
+function escapeAttribute(
   value
 ) {
 
@@ -3782,42 +5100,81 @@ function escapeAttr(
 }
 
 
-function setTableLoading() {
+function escapeJs(
+  value
+) {
 
-  document
-    .getElementById(
-      'tableBody'
+  return String(
+    value === undefined ||
+    value === null
+      ? ''
+      : value
+  )
+    .replace(
+      /\\/g,
+      '\\\\'
     )
-    .innerHTML = `
-
-      <tr>
-
-        <td
-          colspan="7"
-          style="
-            text-align:center;
-            padding:40px;
-          "
-        >
-          🔄 Searching Supabase...
-        </td>
-
-      </tr>
-
-    `;
+    .replace(
+      /'/g,
+      "\\'"
+    )
+    .replace(
+      /\r/g,
+      '\\r'
+    )
+    .replace(
+      /\n/g,
+      '\\n'
+    );
 
 }
 
 
-/****************************************************************
- * INITIALIZE
- ****************************************************************/
+/* ============================================================
+   WINDOW CLICK - CLOSE MODALS
+   ============================================================ */
 
-document.addEventListener(
-  'DOMContentLoaded',
-  function() {
+window.addEventListener(
+  'click',
+  function(event) {
 
-    checkExistingSession();
+    const modalIds = [
+      'editModal',
+      'updateStockModal',
+      'clearModal',
+      'exportModal'
+    ];
+
+    modalIds.forEach(
+      function(id) {
+
+        const modal =
+          document.getElementById(
+            id
+          );
+
+        if (
+          event.target ===
+          modal
+        ) {
+
+          if (
+            id ===
+            'updateStockModal' &&
+            importRunning
+          ) {
+
+            return;
+
+          }
+
+          modal.style.display =
+            'none';
+
+        }
+
+      }
+    );
 
   }
 );

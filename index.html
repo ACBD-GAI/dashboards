@@ -1302,7 +1302,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycby5Yj5ypu7p0RvrOq9gGlU9SWBc9hhFV1x-bD_rJ-Q-lYuvJ3OsAd222jJ3MZI0Manusg/exec';
+  'https://script.google.com/macros/s/AKfycbxyJSh1M7VZKpkeR1116NMZ36tvZW-OjdrERMXdevY0e3x6iwqTsCQICfSgcpODrcUmkQ/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -4400,11 +4400,19 @@ function showExportComplete(
    * the files array/URL is stripped or delayed. Build the download
    * URL directly from the returned XLSX file ID.
    */
-  if (!xlsxFile && result.xlsxFileId) {
+  /*
+   * The preferred source is the explicit server-side XLSX fields.
+   * This is independent of result.files[].
+   */
+  if (!xlsxFile && (result.xlsxFileId || result.xlsxDownloadUrl)) {
 
     xlsxFile = {
       id:
-        result.xlsxFileId,
+        result.xlsxFileId || '',
+      url:
+        result.xlsxDownloadUrl || '',
+      viewUrl:
+        result.xlsxViewUrl || '',
       name:
         result.xlsxFileName ||
         ('ACEBEDO_' +

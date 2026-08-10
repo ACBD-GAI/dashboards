@@ -1,6 +1,5 @@
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -12,17 +11,13 @@
     content="width=device-width,initial-scale=1"
 >
 
-<title>
-    ACEBEDO OPTICAL INVENTORY
-</title>
-
+<title>ACEBEDO OPTICAL INVENTORY</title>
 
 <style>
 
 * {
     box-sizing: border-box;
 }
-
 
 body {
     margin: 0;
@@ -34,103 +29,106 @@ body {
 
 /* ============================================================
    LOGIN
-   ============================================================ */
+============================================================ */
 
-.loginScreen {
+#loginScreen {
     min-height: 100vh;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     padding: 20px;
 }
 
-
 .loginBox {
     width: 100%;
-    max-width: 420px;
+    max-width: 400px;
     background: white;
     padding: 30px;
     border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    box-shadow: 0 8px 30px rgba(0,0,0,.12);
+    text-align: center;
 }
-
 
 .loginBox h2 {
     margin-top: 0;
-    text-align: center;
 }
 
-
-.loginBox p {
-    text-align: center;
-}
-
-
-input,
-select {
+.loginBox input {
     width: 100%;
-    padding: 11px;
+    padding: 12px;
+    margin: 7px 0;
     border: 1px solid #ccc;
     border-radius: 7px;
-    margin: 6px 0 12px;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 
+/* ============================================================
+   BUTTONS
+============================================================ */
+
 button {
-    border: none;
+    border: 0;
     border-radius: 7px;
     padding: 10px 14px;
     cursor: pointer;
-    background: #e5e7eb;
-    font-size: 14px;
+    background: #e7eaf0;
+    font-weight: bold;
 }
-
 
 button:hover {
-    opacity: .9;
+    opacity: .88;
 }
-
-
-button:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-}
-
 
 .primaryBtn {
-    background: #2563eb;
+    background: #1769aa;
     color: white;
 }
-
 
 .dangerBtn {
-    background: #dc2626;
+    background: #d93025;
     color: white;
 }
 
+.editBtn {
+    background: #f0ad00;
+    color: white;
+    margin: 2px;
+}
 
-.status {
-    min-height: 20px;
-    color: #d00;
+.deleteBtn {
+    background: #d93025;
+    color: white;
+    margin: 2px;
+}
+
+.searchBtn {
+    background: #1769aa;
+    color: white;
+    height: 42px;
 }
 
 
 /* ============================================================
    HEADER
-   ============================================================ */
+============================================================ */
+
+#dashboardScreen {
+    display: none;
+}
 
 .header {
-    background: #111827;
+    background: #173b63;
     color: white;
-    padding: 14px 20px;
+    min-height: 75px;
+    padding: 12px 20px;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap;
-}
 
+    gap: 20px;
+}
 
 .headerLeft {
     display: flex;
@@ -138,227 +136,246 @@ button:disabled {
     gap: 12px;
 }
 
-
 .headerLeft img {
     width: 55px;
     height: 55px;
     object-fit: contain;
     border-radius: 8px;
-    background: white;
 }
-
 
 .headerLeft h2 {
     margin: 0;
     font-size: 20px;
 }
 
-
 .headerLeft small {
-    opacity: .75;
+    opacity: .8;
 }
-
 
 .headerButtons {
     display: flex;
-    gap: 7px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
-
 .headerButtons button {
-    background: #374151;
-    color: white;
+    background: white;
+    color: #173b63;
 }
 
 
 /* ============================================================
    MAIN
-   ============================================================ */
+============================================================ */
 
 .main {
     padding: 20px;
+    max-width: 1800px;
+    margin: auto;
 }
 
 
 /* ============================================================
    FILTERS
-   ============================================================ */
+============================================================ */
 
 .filters {
     background: white;
     padding: 15px;
-    border-radius: 12px;
-    display: grid;
-    grid-template-columns:
-        1fr
-        1fr
-        2fr
-        auto;
-    gap: 12px;
+    border-radius: 10px;
+
+    display: flex;
     align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
 
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
 
 .field label {
-    display: block;
-    font-weight: bold;
     font-size: 13px;
+    font-weight: bold;
 }
 
+.field select,
+.field input {
+    height: 42px;
+    min-width: 190px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    background: white;
+}
 
-.searchBtn {
-    background: #2563eb;
-    color: white;
-    height: 40px;
+#searchBox {
+    min-width: 260px;
 }
 
 
 /* ============================================================
    CARDS
-   ============================================================ */
+============================================================ */
 
 .cards {
     display: grid;
-    grid-template-columns:
-        repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
-    margin: 18px 0;
+    margin: 20px 0;
 }
-
 
 .card {
     background: white;
+    border-radius: 10px;
     padding: 18px;
-    border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
-
 
 .card h3 {
     margin: 0;
     font-size: 14px;
-    color: #666;
+    color: #777;
 }
-
 
 .card h1 {
     margin: 8px 0 0;
+    font-size: 30px;
 }
 
 
 /* ============================================================
    TABLE
-   ============================================================ */
+============================================================ */
 
 .tableWrap {
     background: white;
-    border-radius: 12px;
+    border-radius: 10px;
     overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
-
 
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 900px;
 }
 
+thead {
+    background: #173b63;
+    color: white;
+}
 
 th,
 td {
-    padding: 11px;
-    border-bottom: 1px solid #eee;
+    padding: 11px 10px;
+    border-bottom: 1px solid #e5e5e5;
     text-align: left;
-    white-space: nowrap;
+    font-size: 13px;
 }
 
-
-th {
-    background: #f3f4f6;
-}
-
-
-td button {
-    margin-right: 5px;
-    padding: 7px 10px;
+tbody tr:hover {
+    background: #f6f9fc;
 }
 
 
 /* ============================================================
    PAGINATION
-   ============================================================ */
+============================================================ */
 
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 15px;
-    padding: 18px;
+    margin: 20px 0;
 }
 
 
 /* ============================================================
    MODAL
-   ============================================================ */
+============================================================ */
 
 .modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.5);
+
+    background: rgba(0,0,0,.55);
+
     display: none;
+
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    z-index: 1000;
-}
 
+    padding: 20px;
+
+    z-index: 5000;
+}
 
 .modal {
-    background: white;
     width: 100%;
     max-width: 500px;
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 20px 50px rgba(0,0,0,.3);
-}
 
+    background: white;
+
+    border-radius: 12px;
+
+    padding: 25px;
+
+    box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
 
 .modal h3 {
     margin-top: 0;
 }
 
+.modal label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.modal input,
+.modal select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+}
 
 .modalButtons {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 
 /* ============================================================
    DIALOG
-   ============================================================ */
+============================================================ */
 
 .dialogIcon {
     font-size: 40px;
     text-align: center;
 }
 
-
 .dialogTitle {
     font-size: 20px;
     font-weight: bold;
     text-align: center;
-    margin-top: 8px;
+    margin: 10px 0;
 }
-
 
 .dialogMessage {
     text-align: center;
-    margin: 15px 0;
+    margin-bottom: 20px;
 }
-
 
 .dialogButtons {
     display: flex;
@@ -369,27 +386,29 @@ td button {
 
 /* ============================================================
    LOADING
-   ============================================================ */
+============================================================ */
 
-.loadingOverlay {
+#loadingOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(255,255,255,.75);
+
+    background: rgba(0,0,0,.45);
+
     display: none;
+
     align-items: center;
     justify-content: center;
-    z-index: 2000;
-}
 
+    z-index: 10000;
+}
 
 .loadingBox {
     background: white;
-    padding: 25px 35px;
     border-radius: 12px;
+    padding: 25px 35px;
     text-align: center;
-    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    box-shadow: 0 8px 30px rgba(0,0,0,.25);
 }
-
 
 .loadingIcon {
     font-size: 35px;
@@ -398,38 +417,80 @@ td button {
 
 
 /* ============================================================
+   STATUS
+============================================================ */
+
+.status {
+    min-height: 20px;
+    font-size: 14px;
+}
+
+.status.error {
+    color: #d93025;
+}
+
+.status.success {
+    color: #188038;
+}
+
+
+/* ============================================================
    MOBILE
-   ============================================================ */
+============================================================ */
 
-@media (
-    max-width: 800px
-) {
-
-    .filters {
-        grid-template-columns: 1fr;
-    }
-
-
-    .cards {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
-
+@media (max-width: 900px) {
 
     .header {
         align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .headerButtons {
+        width: 100%;
+    }
+
+    .headerButtons button {
+        flex: 1;
+    }
+
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
     }
 
 }
 
+@media (max-width: 600px) {
 
-@media (
-    max-width: 500px
-) {
+    .main {
+        padding: 10px;
+    }
 
     .cards {
-        grid-template-columns:
-            1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .card {
+        padding: 12px;
+    }
+
+    .filters {
+        display: block;
+    }
+
+    .field {
+        margin-bottom: 10px;
+    }
+
+    .field select,
+    .field input,
+    #searchBox {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .searchBtn {
+        width: 100%;
     }
 
 }
@@ -442,14 +503,11 @@ td button {
 <body>
 
 
-<!-- =========================================================
-     LOGIN
-     ========================================================= -->
+<!-- ============================================================
+     LOGIN SCREEN
+============================================================ -->
 
-<div
-    id="loginScreen"
-    class="loginScreen"
->
+<div id="loginScreen">
 
     <div class="loginBox">
 
@@ -513,14 +571,12 @@ td button {
 </div>
 
 
-<!-- =========================================================
-     DASHBOARD
-     ========================================================= -->
 
-<div
-    id="dashboardScreen"
-    style="display:none;"
->
+<!-- ============================================================
+     DASHBOARD
+============================================================ -->
+
+<div id="dashboardScreen">
 
 
     <!-- HEADER -->
@@ -590,6 +646,7 @@ td button {
     </div>
 
 
+
     <div class="main">
 
 
@@ -610,7 +667,6 @@ td button {
                     <option value="">
                         -- Select Branch --
                     </option>
-
 
                     <option value="GAI">
                         🏢 Gaisano Iloilo
@@ -681,6 +737,7 @@ td button {
             </div>
 
 
+
             <div class="field">
 
                 <label>
@@ -694,11 +751,9 @@ td button {
                         📦 Stocks
                     </option>
 
-
                     <option value="SCANRESULTS">
                         💰 Sold Out
                     </option>
-
 
                     <option value="AUDIT">
                         🔄 Re-Inventory
@@ -707,6 +762,7 @@ td button {
                 </select>
 
             </div>
+
 
 
             <div class="field">
@@ -735,10 +791,10 @@ td button {
         </div>
 
 
+
         <!-- CARDS -->
 
         <div class="cards">
-
 
             <div class="card">
 
@@ -792,6 +848,7 @@ td button {
             </div>
 
         </div>
+
 
 
         <!-- TABLE -->
@@ -860,6 +917,7 @@ td button {
         </div>
 
 
+
         <!-- PAGINATION -->
 
         <div class="pagination">
@@ -891,76 +949,91 @@ td button {
 </div>
 
 
-<!-- =========================================================
+
+<!-- ============================================================
      EDIT MODAL
-     ========================================================= -->
+============================================================ -->
 
 <div
-    id="editModalOverlay"
-    class="modalOverlay"
->
-
-   <div class="modal">
-
-    <h3>
-        Edit Sold Record
-    </h3>
-
-    <input
-        type="hidden"
-        id="editBranch"
-    >
-
-    <input
-        type="hidden"
-        id="editTag"
-    >
-
-    <label>
-        SI Number
-    </label>
-
-    <input
-        id="editSI"
-        type="text"
-        placeholder="Enter SI Number"
-    >
-
-    <div class="modalButtons">
-
-        <button
-            onclick="closeEditModal()"
-        >
-            Cancel
-        </button>
-
-        <button
-            class="primaryBtn"
-            onclick="saveEdit()"
-        >
-            Save
-        </button>
-
-    </div>
-
-</div>
-
-</div>
-
-
-<!-- =========================================================
-     UPDATE STOCK MODAL
-     ========================================================= -->
-
-<div
-    id="updateModalOverlay"
+    id="editModal"
     class="modalOverlay"
 >
 
     <div class="modal">
 
         <h3>
-            Update Stocks
+            ✏️ Edit Sold Record
+        </h3>
+
+
+        <!--
+            TAG IS HIDDEN.
+
+            It is ONLY used to locate the record.
+            It is NEVER edited.
+        -->
+
+        <input
+            type="hidden"
+            id="editBranch"
+        >
+
+
+        <input
+            type="hidden"
+            id="editTag"
+        >
+
+
+        <label>
+            SI Number
+        </label>
+
+
+        <input
+            id="editSI"
+            type="text"
+            placeholder="Enter SI Number"
+        >
+
+
+        <div class="modalButtons">
+
+            <button
+                onclick="closeEditModal()"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                class="primaryBtn"
+                onclick="saveEdit()"
+            >
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ============================================================
+     UPDATE STOCKS MODAL
+============================================================ -->
+
+<div
+    id="updateStockModal"
+    class="modalOverlay"
+>
+
+    <div class="modal">
+
+        <h3>
+            📤 Update Stocks
         </h3>
 
 
@@ -1030,19 +1103,20 @@ td button {
 </div>
 
 
-<!-- =========================================================
+
+<!-- ============================================================
      CLEAR MODAL
-     ========================================================= -->
+============================================================ -->
 
 <div
-    id="clearModalOverlay"
+    id="clearModal"
     class="modalOverlay"
 >
 
     <div class="modal">
 
         <h3>
-            Clear Report
+            🗑 Clear Report
         </h3>
 
 
@@ -1114,7 +1188,7 @@ td button {
 
             <button
                 class="dangerBtn"
-                onclick="clearReport()"
+                onclick="clearReportAction()"
             >
                 Clear
             </button>
@@ -1126,19 +1200,20 @@ td button {
 </div>
 
 
-<!-- =========================================================
+
+<!-- ============================================================
      EXPORT MODAL
-     ========================================================= -->
+============================================================ -->
 
 <div
-    id="exportModalOverlay"
+    id="exportModal"
     class="modalOverlay"
 >
 
     <div class="modal">
 
         <h3>
-            Export Inventory
+            📥 Export Inventory
         </h3>
 
 
@@ -1196,12 +1271,13 @@ td button {
 </div>
 
 
-<!-- =========================================================
-     CONFIRM DIALOG
-     ========================================================= -->
+
+<!-- ============================================================
+     CONFIRMATION DIALOG
+============================================================ -->
 
 <div
-    id="dialogOverlay"
+    id="dialogModal"
     class="modalOverlay"
 >
 
@@ -1255,13 +1331,13 @@ td button {
 </div>
 
 
-<!-- =========================================================
+
+<!-- ============================================================
      LOADING
-     ========================================================= -->
+============================================================ -->
 
 <div
     id="loadingOverlay"
-    class="loadingOverlay"
 >
 
     <div class="loadingBox">
@@ -1280,112 +1356,222 @@ td button {
 </div>
 
 
+
+<!-- ============================================================
+     XLSX LIBRARY
+============================================================ -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+></script>
+
+
+
 <script>
 
-
 /* ============================================================
+   APPS SCRIPT WEB APP URL
+
    IMPORTANT:
-   PUT YOUR GOOGLE APPS SCRIPT WEB APP /exec URL HERE
-   ============================================================ */
+   Replace this with your deployed Apps Script Web App URL.
+
+   Example:
+   https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+============================================================ */
 
 const API_URL =
-    "https://script.google.com/macros/s/AKfycbwFg9L-0_LoOjg0hl5oC0MPkzd72x9t_idnOVs1h52IB1Jlg0BToNLnxaeY3DcSutktoA/exec";
+    "https://script.google.com/macros/s/AKfycbw7_gRciuqdXfO_W-wdLWFErVbkwqWE5XY_7oDFg4ppNdbgd3nojcAXOUCApP5Hk32UzA/exec";
 
 
 /* ============================================================
-   VARIABLES
-   ============================================================ */
+   SESSION
+============================================================ */
 
-let dashboardData = [];
+let session =
+    localStorage.getItem(
+        "inventorySession"
+    ) || "";
+
+
+/* ============================================================
+   DASHBOARD DATA
+============================================================ */
+
+let dashboardRows = [];
 
 let currentPage = 1;
 
 const rowsPerPage = 20;
+
+
+/* ============================================================
+   DIALOG CALLBACK
+============================================================ */
 
 let dialogCallback = null;
 
 
 /* ============================================================
    API REQUEST
-   ============================================================ */
 
-async function apiRequest(
+   Apps Script returns JSONP.
+
+   We use JSONP so GitHub Pages can communicate
+   with the Apps Script Web App without CORS problems.
+============================================================ */
+
+function apiRequest(
     action,
     params = {}
 ) {
 
-    const url =
-        new URL(
-            API_URL
-        );
+    return new Promise(
+        function(resolve, reject) {
 
-
-    url.searchParams.set(
-        "action",
-        action
-    );
-
-
-    const session =
-        localStorage.getItem(
-            "inventorySession"
-        );
-
-
-    if (session) {
-
-        url.searchParams.set(
-            "session",
-            session
-        );
-
-    }
-
-
-    Object.keys(params)
-        .forEach(
-            function(key) {
-
-                url.searchParams.set(
-                    key,
-                    params[key] ?? ""
+            const callbackName =
+                "apiCallback_" +
+                Date.now() +
+                "_" +
+                Math.floor(
+                    Math.random() * 100000
                 );
 
+
+            const script =
+                document.createElement("script");
+
+
+            const query =
+                new URLSearchParams();
+
+
+            query.set(
+                "action",
+                action
+            );
+
+
+            query.set(
+                "callback",
+                callbackName
+            );
+
+
+            Object.keys(params).forEach(
+                function(key) {
+
+                    if (
+                        params[key] !== undefined &&
+                        params[key] !== null
+                    ) {
+
+                        query.set(
+                            key,
+                            String(params[key])
+                        );
+
+                    }
+
+                }
+            );
+
+
+            const timeout =
+                setTimeout(
+                    function() {
+
+                        cleanup();
+
+                        reject(
+                            new Error(
+                                "Request timed out."
+                            )
+                        );
+
+                    },
+                    30000
+                );
+
+
+            window[callbackName] =
+                function(data) {
+
+                    clearTimeout(timeout);
+
+                    cleanup();
+
+                    resolve(data);
+
+                };
+
+
+            script.onerror =
+                function() {
+
+                    clearTimeout(timeout);
+
+                    cleanup();
+
+                    reject(
+                        new Error(
+                            "Failed to fetch Apps Script API."
+                        )
+                    );
+
+                };
+
+
+            function cleanup() {
+
+                try {
+
+                    delete window[
+                        callbackName
+                    ];
+
+                }
+                catch (e) {}
+
+                if (
+                    script.parentNode
+                ) {
+
+                    script.parentNode.removeChild(
+                        script
+                    );
+
+                }
+
             }
-        );
 
 
-    const response =
-        await fetch(
-            url.toString()
-        );
+            script.src =
+                API_URL +
+                "?" +
+                query.toString();
 
 
-    if (!response.ok) {
+            document.body.appendChild(
+                script
+            );
 
-        throw new Error(
-            "HTTP " +
-            response.status
-        );
-
-    }
-
-
-    return await response.json();
+        }
+    );
 
 }
 
 
 /* ============================================================
    LOGIN
-   ============================================================ */
+============================================================ */
 
 async function sendOTP() {
 
     const email =
-        document.getElementById(
-            "email"
-        ).value.trim();
+        document
+            .getElementById("email")
+            .value
+            .trim();
 
 
     const status =
@@ -1396,6 +1582,9 @@ async function sendOTP() {
 
     if (!email) {
 
+        status.className =
+            "status error";
+
         status.textContent =
             "Please enter your Gmail address.";
 
@@ -1404,59 +1593,87 @@ async function sendOTP() {
     }
 
 
+    const button =
+        document.getElementById(
+            "sendOtpBtn"
+        );
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "SENDING...";
+
+
+    status.className =
+        "status";
+
+    status.textContent =
+        "Sending OTP...";
+
+
     try {
-
-        status.textContent =
-            "Sending OTP...";
-
 
         const result =
             await apiRequest(
                 "sendOTP",
                 {
-                    email:
-                        email
+                    email: email
                 }
             );
 
 
-        if (!result.ok) {
+        if (
+            !result ||
+            !result.ok
+        ) {
 
             throw new Error(
+                result &&
                 result.error
+                    ? result.error
+                    : "OTP failed."
             );
 
         }
 
 
+        document
+            .getElementById("otp")
+            .style.display =
+                "block";
+
+
+        document
+            .getElementById("verifyBtn")
+            .style.display =
+                "block";
+
+
+        status.className =
+            "status success";
+
         status.textContent =
             "OTP sent. Check your Gmail.";
 
 
-        document.getElementById(
-            "otp"
-        ).style.display =
-            "block";
-
-
-        document.getElementById(
-            "verifyBtn"
-        ).style.display =
-            "block";
-
-
-        document.getElementById(
-            "sendOtpBtn"
-        ).disabled =
-            true;
-
     }
-
     catch (error) {
+
+        status.className =
+            "status error";
 
         status.textContent =
             error.message ||
-            String(error);
+            "OTP failed to fetch.";
+
+    }
+    finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            "SEND OTP";
 
     }
 
@@ -1465,20 +1682,22 @@ async function sendOTP() {
 
 /* ============================================================
    VERIFY OTP
-   ============================================================ */
+============================================================ */
 
 async function verifyOTP() {
 
     const email =
-        document.getElementById(
-            "email"
-        ).value.trim();
+        document
+            .getElementById("email")
+            .value
+            .trim();
 
 
     const otp =
-        document.getElementById(
-            "otp"
-        ).value.trim();
+        document
+            .getElementById("otp")
+            .value
+            .trim();
 
 
     const status =
@@ -1489,6 +1708,9 @@ async function verifyOTP() {
 
     if (!email || !otp) {
 
+        status.className =
+            "status error";
+
         status.textContent =
             "Enter your email and OTP.";
 
@@ -1497,129 +1719,93 @@ async function verifyOTP() {
     }
 
 
+    const button =
+        document.getElementById(
+            "verifyBtn"
+        );
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "VERIFYING...";
+
+
     try {
-
-        status.textContent =
-            "Verifying...";
-
 
         const result =
             await apiRequest(
                 "verifyOTP",
                 {
-                    email:
-                        email,
-
-                    otp:
-                        otp
+                    email: email,
+                    otp: otp
                 }
             );
 
 
-        if (!result.ok) {
+        if (
+            !result ||
+            !result.ok
+        ) {
 
             throw new Error(
+                result &&
                 result.error
+                    ? result.error
+                    : "Invalid OTP."
             );
 
         }
 
 
+        session =
+            result.session;
+
+
         localStorage.setItem(
             "inventorySession",
-            result.session
-        );
-
-
-        localStorage.setItem(
-            "inventoryEmail",
-            result.email
+            session
         );
 
 
         showDashboard();
 
-    }
 
+    }
     catch (error) {
+
+        status.className =
+            "status error";
 
         status.textContent =
             error.message ||
-            String(error);
+            "OTP verification failed.";
 
     }
+    finally {
 
-}
+        button.disabled = false;
 
-
-/* ============================================================
-   SHOW DASHBOARD
-   ============================================================ */
-
-function showDashboard() {
-
-    document.getElementById(
-        "loginScreen"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "dashboardScreen"
-    ).style.display =
-        "block";
-
-}
-
-
-/* ============================================================
-   LOGOUT
-   ============================================================ */
-
-async function logoutUser() {
-
-    try {
-
-        await apiRequest(
-            "logout"
-        );
+        button.textContent =
+            "VERIFY OTP";
 
     }
-
-    catch (error) {
-
-    }
-
-
-    localStorage.removeItem(
-        "inventorySession"
-    );
-
-
-    localStorage.removeItem(
-        "inventoryEmail"
-    );
-
-
-    location.reload();
 
 }
 
 
 /* ============================================================
    SESSION CHECK
-   ============================================================ */
+============================================================ */
 
-async function checkExistingSession() {
-
-    const session =
-        localStorage.getItem(
-            "inventorySession"
-        );
-
+async function checkLoginSession() {
 
     if (!session) {
+
+        showLogin();
+
         return;
+
     }
 
 
@@ -1627,22 +1813,32 @@ async function checkExistingSession() {
 
         const result =
             await apiRequest(
-                "checkSession"
+                "checkSession",
+                {
+                    session:
+                        session
+                }
             );
 
 
         if (
             result &&
-            result.ok === true
+            result.ok
         ) {
 
             showDashboard();
 
         }
+        else {
+
+            logoutLocal();
+
+        }
 
     }
-
     catch (error) {
+
+        logoutLocal();
 
     }
 
@@ -1650,16 +1846,94 @@ async function checkExistingSession() {
 
 
 /* ============================================================
-   SEARCH KEY
-   ============================================================ */
+   SHOW LOGIN
+============================================================ */
 
-function searchKeyDown(
-    event
-) {
+function showLogin() {
+
+    document
+        .getElementById("loginScreen")
+        .style.display =
+            "flex";
+
+
+    document
+        .getElementById("dashboardScreen")
+        .style.display =
+            "none";
+
+}
+
+
+/* ============================================================
+   SHOW DASHBOARD
+============================================================ */
+
+function showDashboard() {
+
+    document
+        .getElementById("loginScreen")
+        .style.display =
+            "none";
+
+
+    document
+        .getElementById("dashboardScreen")
+        .style.display =
+            "block";
+
+}
+
+
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+async function logoutUser() {
+
+    try {
+
+        if (session) {
+
+            await apiRequest(
+                "logout",
+                {
+                    session:
+                        session
+                }
+            );
+
+        }
+
+    }
+    catch (error) {}
+
+    logoutLocal();
+
+}
+
+
+function logoutLocal() {
+
+    session = "";
+
+    localStorage.removeItem(
+        "inventorySession"
+    );
+
+    showLogin();
+
+}
+
+
+/* ============================================================
+   SEARCH
+============================================================ */
+
+function searchKeyDown(event) {
 
     if (
-        event.key ===
-        "Enter"
+        event.key === "Enter"
     ) {
 
         searchDashboard();
@@ -1669,28 +1943,27 @@ function searchKeyDown(
 }
 
 
-/* ============================================================
-   SEARCH DASHBOARD
-   ============================================================ */
-
 async function searchDashboard() {
 
     const branch =
-        document.getElementById(
-            "branchSelect"
-        ).value;
+        document
+            .getElementById("branchSelect")
+            .value
+            .trim()
+            .toUpperCase();
 
 
     const report =
-        document.getElementById(
-            "sheetSelect"
-        ).value;
+        document
+            .getElementById("sheetSelect")
+            .value;
 
 
     const search =
-        document.getElementById(
-            "searchBox"
-        ).value.trim();
+        document
+            .getElementById("searchBox")
+            .value
+            .trim();
 
 
     if (!branch) {
@@ -1704,17 +1977,23 @@ async function searchDashboard() {
     }
 
 
+    currentPage = 1;
+
+
+    showLoading(
+        "Loading inventory..."
+    );
+
+
     try {
-
-        showLoading(
-            "Searching..."
-        );
-
 
         const result =
             await apiRequest(
                 "dashboard",
                 {
+                    session:
+                        session,
+
                     branch:
                         branch,
 
@@ -1727,44 +2006,22 @@ async function searchDashboard() {
             );
 
 
-        hideLoading();
-
-
         if (
             !result ||
-            result.ok !== true
+            !result.ok
         ) {
 
             throw new Error(
-                result?.error ||
-                "Unable to load dashboard."
+                result &&
+                result.error
+                    ? result.error
+                    : "Unable to load dashboard."
             );
 
         }
 
 
-        document.getElementById(
-            "availableCount"
-        ).textContent =
-            result.availableCount ??
-            0;
-
-
-        document.getElementById(
-            "soldCount"
-        ).textContent =
-            result.soldCount ??
-            0;
-
-
-        document.getElementById(
-            "auditCount"
-        ).textContent =
-            result.auditCount ??
-            0;
-
-
-        dashboardData =
+        dashboardRows =
             Array.isArray(
                 result.data
             )
@@ -1772,22 +2029,51 @@ async function searchDashboard() {
                 : [];
 
 
-        currentPage = 1;
+        document
+            .getElementById(
+                "availableCount"
+            )
+            .textContent =
+                Number(
+                    result.availableCount || 0
+                ).toLocaleString();
+
+
+        document
+            .getElementById(
+                "soldCount"
+            )
+            .textContent =
+                Number(
+                    result.soldCount || 0
+                ).toLocaleString();
+
+
+        document
+            .getElementById(
+                "auditCount"
+            )
+            .textContent =
+                Number(
+                    result.auditCount || 0
+                ).toLocaleString();
 
 
         renderCurrentPage();
 
+
     }
-
     catch (error) {
-
-        hideLoading();
-
 
         alert(
             error.message ||
-            String(error)
+            "Unable to load dashboard."
         );
+
+    }
+    finally {
+
+        hideLoading();
 
     }
 
@@ -1796,7 +2082,7 @@ async function searchDashboard() {
 
 /* ============================================================
    REFRESH
-   ============================================================ */
+============================================================ */
 
 function refreshDashboard() {
 
@@ -1807,7 +2093,7 @@ function refreshDashboard() {
 
 /* ============================================================
    RENDER TABLE
-   ============================================================ */
+============================================================ */
 
 function renderCurrentPage() {
 
@@ -1817,10 +2103,52 @@ function renderCurrentPage() {
         );
 
 
+    tbody.innerHTML = "";
+
+
+    const totalRows =
+        dashboardRows.length;
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                totalRows /
+                rowsPerPage
+            )
+        );
+
+
     if (
-        !dashboardData ||
-        dashboardData.length === 0
+        currentPage >
+        totalPages
     ) {
+
+        currentPage =
+            totalPages;
+
+    }
+
+
+    const start =
+        (currentPage - 1) *
+        rowsPerPage;
+
+
+    const end =
+        start +
+        rowsPerPage;
+
+
+    const pageRows =
+        dashboardRows.slice(
+            start,
+            end
+        );
+
+
+    if (!pageRows.length) {
 
         tbody.innerHTML = `
 
@@ -1840,264 +2168,258 @@ function renderCurrentPage() {
 
         `;
 
-
-        document.getElementById(
-            "pageInfo"
-        ).textContent =
-            "Page 0 / 0";
-
-
-        document.getElementById(
-            "prevBtn"
-        ).disabled =
-            true;
-
-
-        document.getElementById(
-            "nextBtn"
-        ).disabled =
-            true;
-
-
-        document.getElementById(
-            "showingCount"
-        ).textContent =
-            "0";
-
-
-        return;
-
     }
-
-
-    const totalPages =
-        Math.ceil(
-            dashboardData.length /
-            rowsPerPage
-        );
-
-
-    if (
-        currentPage < 1
-    ) {
-
-        currentPage = 1;
-
-    }
-
-
-    if (
-        currentPage >
-        totalPages
-    ) {
-
-        currentPage =
-            totalPages;
-
-    }
-
-
-    const start =
-        (
-            currentPage -
-            1
-        ) *
-        rowsPerPage;
-
-
-    const end =
-        Math.min(
-            start +
-            rowsPerPage,
-            dashboardData.length
-        );
-
-
-    const pageRows =
-        dashboardData.slice(
-            start,
-            end
-        );
-
-
-    let html = "";
 
 
     pageRows.forEach(
         function(row) {
 
-            const branch =
-                escapeHtml(
-                    row.branch || ""
+            const tr =
+                document.createElement(
+                    "tr"
                 );
 
 
-            const lenstype =
-                escapeHtml(
-                    row.lenstype || ""
+            const tdBranch =
+                document.createElement(
+                    "td"
                 );
 
+            tdBranch.textContent =
+                row.branchName ||
+                row.branch ||
+                "";
 
-            const description =
-                escapeHtml(
-                    row.description || ""
+
+
+            const tdLenstype =
+                document.createElement(
+                    "td"
                 );
 
+            tdLenstype.textContent =
+                row.lenstype || "";
 
-            const tag =
-                escapeHtml(
-                    row.tag || ""
+
+
+            const tdDescription =
+                document.createElement(
+                    "td"
                 );
 
+            tdDescription.textContent =
+                row.description || "";
 
-            const si =
-                escapeHtml(
-                    row.si || ""
+
+
+            const tdTag =
+                document.createElement(
+                    "td"
                 );
 
+            tdTag.textContent =
+                row.tag || "";
 
-            const date =
-                escapeHtml(
-                    row.date || ""
+
+
+            const tdSI =
+                document.createElement(
+                    "td"
                 );
 
+            tdSI.textContent =
+                row.si || "";
 
-            let actions = "";
+
+
+            const tdDate =
+                document.createElement(
+                    "td"
+                );
+
+            tdDate.textContent =
+                row.date || "";
+
+
+
+            const tdActions =
+                document.createElement(
+                    "td"
+                );
 
 
             /*
-             * THIS IS THE KEY FIX.
-             *
-             * Apps Script sends:
-             *
-             * editable: true
-             *
-             * only for SCANRESULTS.
+             * EDIT AND DELETE ARE ONLY
+             * FOR SOLD OUT RECORDS.
              */
 
             if (
-                row.editable === true
+                row.editable
             ) {
 
-                actions = `
 
-                    <button
-                        class="primaryBtn"
-                        onclick="openEditRecord(
-                            '${escapeJs(row.branch || "")}',
-                            '${escapeJs(row.tag || "")}',
-                            '${escapeJs(row.si || "")}'
-                        )"
-                    >
-                        ✏️ Edit
-                    </button>
+                /* -----------------------------------------
+                   EDIT BUTTON
+                   -----------------------------------------
+
+                   IMPORTANT:
+
+                   branch = tells Apps Script which table
+                   tag    = finds the existing row
+                   si     = NEW SI NUMBER
+
+                   The tag itself is NEVER changed.
+                */
+
+                const editButton =
+                    document.createElement(
+                        "button"
+                    );
 
 
-                    <button
-                        class="dangerBtn"
-                        onclick="deleteSoldRecord(
-                            '${escapeJs(row.branch || "")}',
-                            '${escapeJs(row.tag || "")}'
-                        )"
-                    >
-                        🗑 Delete
-                    </button>
+                editButton.className =
+                    "editBtn";
 
-                `;
+
+                editButton.textContent =
+                    "✏️ Edit";
+
+
+                editButton.onclick =
+                    function() {
+
+                        openEditModal(
+                            row.branch,
+                            row.tag,
+                            row.si
+                        );
+
+                    };
+
+
+                tdActions.appendChild(
+                    editButton
+                );
+
+
+
+                /* -----------------------------------------
+                   DELETE BUTTON
+                ----------------------------------------- */
+
+                const deleteButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                deleteButton.className =
+                    "deleteBtn";
+
+
+                deleteButton.textContent =
+                    "🗑 Delete";
+
+
+                deleteButton.onclick =
+                    function() {
+
+                        deleteSoldRecord(
+                            row.branch,
+                            row.tag
+                        );
+
+                    };
+
+
+                tdActions.appendChild(
+                    deleteButton
+                );
 
             }
 
-            else {
 
-                actions = "—";
+            tr.appendChild(
+                tdBranch
+            );
 
-            }
+            tr.appendChild(
+                tdLenstype
+            );
+
+            tr.appendChild(
+                tdDescription
+            );
+
+            tr.appendChild(
+                tdTag
+            );
+
+            tr.appendChild(
+                tdSI
+            );
+
+            tr.appendChild(
+                tdDate
+            );
+
+            tr.appendChild(
+                tdActions
+            );
 
 
-            html += `
-
-                <tr>
-
-                    <td>
-                        ${branch}
-                    </td>
-
-                    <td>
-                        ${lenstype}
-                    </td>
-
-                    <td>
-                        ${description}
-                    </td>
-
-                    <td>
-                        ${tag}
-                    </td>
-
-                    <td>
-                        ${si}
-                    </td>
-
-                    <td>
-                        ${date}
-                    </td>
-
-                    <td>
-                        ${actions}
-                    </td>
-
-                </tr>
-
-            `;
+            tbody.appendChild(
+                tr
+            );
 
         }
     );
 
 
-    tbody.innerHTML =
-        html;
+    document
+        .getElementById(
+            "showingCount"
+        )
+        .textContent =
+            totalRows.toLocaleString();
 
 
-    document.getElementById(
-        "pageInfo"
-    ).textContent =
-        "Page " +
-        currentPage +
-        " / " +
-        totalPages;
+    document
+        .getElementById(
+            "pageInfo"
+        )
+        .textContent =
+            "Page " +
+            currentPage +
+            " / " +
+            totalPages;
 
 
-    document.getElementById(
-        "prevBtn"
-    ).disabled =
-        currentPage <= 1;
+    document
+        .getElementById(
+            "prevBtn"
+        )
+        .disabled =
+            currentPage <= 1;
 
 
-    document.getElementById(
-        "nextBtn"
-    ).disabled =
-        currentPage >= totalPages;
-
-
-    document.getElementById(
-        "showingCount"
-    ).textContent =
-        String(
-            pageRows.length
-        );
+    document
+        .getElementById(
+            "nextBtn"
+        )
+        .disabled =
+            currentPage >= totalPages;
 
 }
 
 
 /* ============================================================
-   PREVIOUS
-   ============================================================ */
+   PAGINATION
+============================================================ */
 
 function previousPage() {
 
-    if (
-        currentPage > 1
-    ) {
+    if (currentPage > 1) {
 
         currentPage--;
 
@@ -2108,16 +2430,15 @@ function previousPage() {
 }
 
 
-/* ============================================================
-   NEXT
-   ============================================================ */
-
 function nextPage() {
 
     const totalPages =
-        Math.ceil(
-            dashboardData.length /
-            rowsPerPage
+        Math.max(
+            1,
+            Math.ceil(
+                dashboardRows.length /
+                rowsPerPage
+            )
         );
 
 
@@ -2136,83 +2457,116 @@ function nextPage() {
 
 
 /* ============================================================
-   EDIT
-   ============================================================ */
+   EDIT MODAL
+============================================================ */
 
-function openEditRecord(
+function openEditModal(
     branch,
     tag,
     si
 ) {
 
-    document.getElementById(
-        "editBranch"
-    ).value =
-        branch;
+    /*
+     * Branch and Tag are hidden.
+
+     * Tag is ONLY used to identify
+     * the database row.
+
+     * SI is the ONLY editable value.
+     */
+
+    document
+        .getElementById(
+            "editBranch"
+        )
+        .value =
+            branch || "";
 
 
-    document.getElementById(
-        "editTag"
-    ).value =
-        tag;
+    document
+        .getElementById(
+            "editTag"
+        )
+        .value =
+            tag || "";
 
 
-    document.getElementById(
-        "editTagDisplay"
-    ).value =
-        tag;
+    document
+        .getElementById(
+            "editSI"
+        )
+        .value =
+            si || "";
 
 
-    document.getElementById(
-        "editSI"
-    ).value =
-        si;
+    document
+        .getElementById(
+            "editModal"
+        )
+        .style.display =
+            "flex";
 
 
-    document.getElementById(
-        "editModalOverlay"
-    ).style.display =
-        "flex";
+    setTimeout(
+        function() {
+
+            document
+                .getElementById(
+                    "editSI"
+                )
+                .focus();
+
+        },
+        50
+    );
 
 }
 
 
-/* ============================================================
-   CLOSE EDIT
-   ============================================================ */
-
 function closeEditModal() {
 
-    document.getElementById(
-        "editModalOverlay"
-    ).style.display =
-        "none";
+    document
+        .getElementById(
+            "editModal"
+        )
+        .style.display =
+            "none";
 
 }
 
 
 /* ============================================================
    SAVE EDIT
-   ============================================================ */
+============================================================ */
 
 async function saveEdit() {
 
     const branch =
-        document.getElementById(
-            "editBranch"
-        ).value.trim();
+        document
+            .getElementById(
+                "editBranch"
+            )
+            .value
+            .trim()
+            .toUpperCase();
 
 
     const tag =
-        document.getElementById(
-            "editTag"
-        ).value.trim();
+        document
+            .getElementById(
+                "editTag"
+            )
+            .value
+            .trim();
 
 
-    const si =
-        document.getElementById(
-            "editSI"
-        ).value.trim();
+    const newSI =
+        document
+            .getElementById(
+                "editSI"
+            )
+            .value
+            .trim();
 
 
     if (!branch) {
@@ -2237,10 +2591,10 @@ async function saveEdit() {
     }
 
 
-    if (!si) {
+    if (!newSI) {
 
         alert(
-            "Please enter an SI Number."
+            "Please enter the SI Number."
         );
 
         return;
@@ -2248,17 +2602,32 @@ async function saveEdit() {
     }
 
 
+    /*
+     * IMPORTANT:
+
+     * We send:
+     *
+     * branch = branch
+     * tag    = existing tag
+     * si     = NEW SI
+     *
+     * We DO NOT send a new tag.
+     */
+
+    showLoading(
+        "Updating SI Number..."
+    );
+
+
     try {
-
-        showLoading(
-            "Saving..."
-        );
-
 
         const result =
             await apiRequest(
                 "editSold",
                 {
+                    session:
+                        session,
+
                     branch:
                         branch,
 
@@ -2266,22 +2635,21 @@ async function saveEdit() {
                         tag,
 
                     si:
-                        si
+                        newSI
                 }
             );
 
 
-        hideLoading();
-
-
         if (
             !result ||
-            result.ok !== true
+            !result.ok
         ) {
 
             throw new Error(
-                result?.error ||
-                "Unable to update record."
+                result &&
+                result.error
+                    ? result.error
+                    : "Unable to update SI Number."
             );
 
         }
@@ -2290,24 +2658,31 @@ async function saveEdit() {
         closeEditModal();
 
 
-        alert(
-            "Sold record updated successfully."
-        );
-
+        /*
+         * Refresh the current report
+         * so the new SI immediately appears.
+         */
 
         await searchDashboard();
 
+
+        alert(
+            "SI Number updated successfully."
+        );
+
+
     }
-
     catch (error) {
-
-        hideLoading();
-
 
         alert(
             error.message ||
-            String(error)
+            "Failed to update SI Number."
         );
+
+    }
+    finally {
+
+        hideLoading();
 
     }
 
@@ -2316,126 +2691,135 @@ async function saveEdit() {
 
 /* ============================================================
    DELETE SOLD
-   ============================================================ */
+============================================================ */
 
-async function deleteSoldRecord(
+function deleteSoldRecord(
     branch,
     tag
 ) {
 
-    const confirmed =
-        confirm(
-            "Delete sold record with Tag:\n\n" +
-            tag +
-            "\n\nThis cannot be undone."
-        );
+    showDialog(
+        "🗑",
+        "Delete Sold Record",
+        "Delete this sold record?",
+        async function() {
+
+            showLoading(
+                "Deleting sold record..."
+            );
 
 
-    if (!confirmed) {
-        return;
-    }
+            try {
+
+                const result =
+                    await apiRequest(
+                        "deleteSold",
+                        {
+                            session:
+                                session,
+
+                            branch:
+                                branch,
+
+                            tag:
+                                tag
+                        }
+                    );
 
 
-    try {
+                if (
+                    !result ||
+                    !result.ok
+                ) {
 
-        showLoading(
-            "Deleting sold record..."
-        );
+                    throw new Error(
+                        result &&
+                        result.error
+                            ? result.error
+                            : "Unable to delete record."
+                    );
 
-
-        const result =
-            await apiRequest(
-                "deleteSold",
-                {
-                    branch:
-                        branch,
-
-                    tag:
-                        tag
                 }
-            );
 
 
-        hideLoading();
+                await searchDashboard();
 
 
-        if (
-            !result ||
-            result.ok !== true
-        ) {
+                alert(
+                    "Sold record deleted successfully."
+                );
 
-            throw new Error(
-                result?.error ||
-                "Unable to delete sold record."
-            );
+            }
+            catch (error) {
+
+                alert(
+                    error.message ||
+                    "Failed to delete record."
+                );
+
+            }
+            finally {
+
+                hideLoading();
+
+            }
 
         }
-
-
-        alert(
-            "Sold record deleted successfully."
-        );
-
-
-        await searchDashboard();
-
-    }
-
-    catch (error) {
-
-        hideLoading();
-
-
-        alert(
-            error.message ||
-            String(error)
-        );
-
-    }
+    );
 
 }
 
 
 /* ============================================================
    UPDATE STOCK MODAL
-   ============================================================ */
+============================================================ */
 
 function openUpdateStockModal() {
 
-    document.getElementById(
-        "updateModalOverlay"
-    ).style.display =
-        "flex";
+    document
+        .getElementById(
+            "updateStockModal"
+        )
+        .style.display =
+            "flex";
 
 }
 
 
 function closeUpdateStockModal() {
 
-    document.getElementById(
-        "updateModalOverlay"
-    ).style.display =
-        "none";
+    document
+        .getElementById(
+            "updateStockModal"
+        )
+        .style.display =
+            "none";
 
 }
 
 
 /* ============================================================
    UPDATE STOCKS
-   ============================================================ */
+============================================================ */
 
 async function updateStocks() {
 
     const branch =
-        document.getElementById(
-            "updateBranch"
-        ).value;
+        document
+            .getElementById(
+                "updateBranch"
+            )
+            .value
+            .trim()
+            .toUpperCase();
 
 
     const file =
-        document.getElementById(
-            "stockFile"
-        ).files[0];
+        document
+            .getElementById(
+                "stockFile"
+            )
+            .files[0];
 
 
     if (!branch) {
@@ -2460,53 +2844,257 @@ async function updateStocks() {
     }
 
 
-    alert(
-        "The stock upload endpoint is ready. Your existing Excel parsing/upload process should be connected here."
+    showLoading(
+        "Reading Excel file..."
     );
+
+
+    try {
+
+        const buffer =
+            await file.arrayBuffer();
+
+
+        const workbook =
+            XLSX.read(
+                buffer,
+                {
+                    type: "array"
+                }
+            );
+
+
+        const firstSheet =
+            workbook.Sheets[
+                workbook.SheetNames[0]
+            ];
+
+
+        const rows =
+            XLSX.utils.sheet_to_json(
+                firstSheet,
+                {
+                    header: 1,
+                    defval: ""
+                }
+            );
+
+
+        if (
+            !rows.length
+        ) {
+
+            throw new Error(
+                "Excel file is empty."
+            );
+
+        }
+
+
+        /*
+         * Upload in chunks.
+
+         * This prevents one enormous
+         * request from being sent.
+         */
+
+        const chunkSize =
+            500;
+
+
+        let uploaded =
+            0;
+
+
+        for (
+            let i = 0;
+            i < rows.length;
+            i += chunkSize
+        ) {
+
+            const chunkRows =
+                rows.slice(
+                    i,
+                    i + chunkSize
+                );
+
+
+            const json =
+                JSON.stringify(
+                    chunkRows
+                );
+
+
+            const encoded =
+                btoa(
+                    unescape(
+                        encodeURIComponent(
+                            json
+                        )
+                    )
+                );
+
+
+            document
+                .getElementById(
+                    "loadingText"
+                )
+                .textContent =
+                    "Uploading " +
+                    Math.min(
+                        i + chunkRows.length,
+                        rows.length
+                    ) +
+                    " / " +
+                    rows.length;
+
+
+            const result =
+                await apiRequest(
+                    "uploadChunk",
+                    {
+                        session:
+                            session,
+
+                        branch:
+                            branch,
+
+                        chunk:
+                            encoded
+                    }
+                );
+
+
+            if (
+                !result ||
+                !result.ok
+            ) {
+
+                throw new Error(
+                    result &&
+                    result.error
+                        ? result.error
+                        : "Upload failed."
+                );
+
+            }
+
+
+            uploaded +=
+                chunkRows.length;
+
+        }
+
+
+        closeUpdateStockModal();
+
+
+        document
+            .getElementById(
+                "stockFile"
+            )
+            .value =
+                "";
+
+
+        alert(
+            uploaded.toLocaleString() +
+            " rows uploaded successfully."
+        );
+
+
+        /*
+         * Refresh only if the current
+         * dashboard is showing this branch.
+         */
+
+        const currentBranch =
+            document
+                .getElementById(
+                    "branchSelect"
+                )
+                .value
+                .trim()
+                .toUpperCase();
+
+
+        if (
+            currentBranch === branch
+        ) {
+
+            await searchDashboard();
+
+        }
+
+
+    }
+    catch (error) {
+
+        alert(
+            error.message ||
+            "Stock update failed."
+        );
+
+    }
+    finally {
+
+        hideLoading();
+
+    }
 
 }
 
 
 /* ============================================================
    CLEAR MODAL
-   ============================================================ */
+============================================================ */
 
 function openClearModal() {
 
-    document.getElementById(
-        "clearModalOverlay"
-    ).style.display =
-        "flex";
+    document
+        .getElementById(
+            "clearModal"
+        )
+        .style.display =
+            "flex";
 
 }
 
 
 function closeClearModal() {
 
-    document.getElementById(
-        "clearModalOverlay"
-    ).style.display =
-        "none";
+    document
+        .getElementById(
+            "clearModal"
+        )
+        .style.display =
+            "none";
 
 }
 
 
 /* ============================================================
    CLEAR REPORT
-   ============================================================ */
+============================================================ */
 
-async function clearReport() {
+function clearReportAction() {
 
     const branch =
-        document.getElementById(
-            "clearBranch"
-        ).value;
+        document
+            .getElementById(
+                "clearBranch"
+            )
+            .value
+            .trim()
+            .toUpperCase();
 
 
     const report =
-        document.getElementById(
-            "clearSheet"
-        ).value;
+        document
+            .getElementById(
+                "clearSheet"
+            )
+            .value;
 
 
     if (!branch) {
@@ -2531,115 +3119,149 @@ async function clearReport() {
     }
 
 
-    const confirmed =
-        confirm(
-            "Clear " +
-            report +
-            " for " +
-            branch +
-            "?\n\nThis cannot be undone."
-        );
+    showDialog(
+        "⚠️",
+        "Clear Report",
+        "This will permanently delete all records in the selected report. Continue?",
+        async function() {
+
+            showLoading(
+                "Clearing report..."
+            );
 
 
-    if (!confirmed) {
-        return;
-    }
+            try {
+
+                const result =
+                    await apiRequest(
+                        "clearReport",
+                        {
+                            session:
+                                session,
+
+                            branch:
+                                branch,
+
+                            report:
+                                report
+                        }
+                    );
 
 
-    try {
+                if (
+                    !result ||
+                    !result.ok
+                ) {
 
-        showLoading(
-            "Clearing report..."
-        );
+                    throw new Error(
+                        result &&
+                        result.error
+                            ? result.error
+                            : "Clear failed."
+                    );
 
-
-        const result =
-            await apiRequest(
-                "clearReport",
-                {
-                    branch:
-                        branch,
-
-                    report:
-                        report
                 }
-            );
 
 
-        hideLoading();
+                closeClearModal();
 
 
-        if (
-            !result ||
-            result.ok !== true
-        ) {
+                alert(
+                    result.message ||
+                    "Report cleared successfully."
+                );
 
-            throw new Error(
-                result?.error ||
-                "Unable to clear report."
-            );
+
+                const currentBranch =
+                    document
+                        .getElementById(
+                            "branchSelect"
+                        )
+                        .value
+                        .trim()
+                        .toUpperCase();
+
+
+                const currentReport =
+                    document
+                        .getElementById(
+                            "sheetSelect"
+                        )
+                        .value;
+
+
+                if (
+                    currentBranch === branch &&
+                    currentReport === report
+                ) {
+
+                    await searchDashboard();
+
+                }
+
+            }
+            catch (error) {
+
+                alert(
+                    error.message ||
+                    "Clear failed."
+                );
+
+            }
+            finally {
+
+                hideLoading();
+
+            }
 
         }
-
-
-        closeClearModal();
-
-
-        alert(
-            result.message ||
-            "Report cleared successfully."
-        );
-
-
-        searchDashboard();
-
-    }
-
-    catch (error) {
-
-        hideLoading();
-
-
-        alert(
-            error.message ||
-            String(error)
-        );
-
-    }
+    );
 
 }
 
 
 /* ============================================================
-   EXPORT
-   ============================================================ */
+   EXPORT MODAL
+============================================================ */
 
 function openExportModal() {
 
-    document.getElementById(
-        "exportModalOverlay"
-    ).style.display =
-        "flex";
+    document
+        .getElementById(
+            "exportModal"
+        )
+        .style.display =
+            "flex";
 
 }
 
 
 function closeExportModal() {
 
-    document.getElementById(
-        "exportModalOverlay"
-    ).style.display =
-        "none";
+    document
+        .getElementById(
+            "exportModal"
+        )
+        .style.display =
+            "none";
 
 }
 
 
+/* ============================================================
+   EXPORT
+============================================================ */
+
 async function startExport() {
 
     const branch =
-        document.getElementById(
-            "exportBranch"
-        ).value;
+        document
+            .getElementById(
+                "exportBranch"
+            )
+            .value
+            .trim()
+            .toUpperCase();
 
 
     if (!branch) {
@@ -2653,34 +3275,36 @@ async function startExport() {
     }
 
 
+    showLoading(
+        "Preparing export..."
+    );
+
+
     try {
-
-        showLoading(
-            "Preparing export..."
-        );
-
 
         const result =
             await apiRequest(
                 "export",
                 {
+                    session:
+                        session,
+
                     branch:
                         branch
                 }
             );
 
 
-        hideLoading();
-
-
         if (
             !result ||
-            result.ok !== true
+            !result.ok
         ) {
 
             throw new Error(
-                result?.error ||
-                "Export failed."
+                result &&
+                result.error
+                    ? result.error
+                    : "Export failed."
             );
 
         }
@@ -2690,7 +3314,8 @@ async function startExport() {
 
 
         /*
-         * Download returned CSV files.
+         * Apps Script returns CSV contents.
+         * Download each file separately.
          */
 
         if (
@@ -2713,21 +3338,18 @@ async function startExport() {
         }
 
 
-        alert(
-            "Export completed."
-        );
-
     }
-
     catch (error) {
-
-        hideLoading();
-
 
         alert(
             error.message ||
-            String(error)
+            "Export failed."
         );
+
+    }
+    finally {
+
+        hideLoading();
 
     }
 
@@ -2735,8 +3357,8 @@ async function startExport() {
 
 
 /* ============================================================
-   DOWNLOAD TEXT
-   ============================================================ */
+   DOWNLOAD FILE
+============================================================ */
 
 function downloadTextFile(
     filename,
@@ -2745,13 +3367,10 @@ function downloadTextFile(
 
     const blob =
         new Blob(
-            [
-                "\uFEFF" +
-                content
-            ],
+            [content],
             {
                 type:
-                    "text/csv;charset=utf-8;"
+                    "text/csv;charset=utf-8"
             }
         );
 
@@ -2787,139 +3406,215 @@ function downloadTextFile(
     a.remove();
 
 
-    URL.revokeObjectURL(
-        url
+    setTimeout(
+        function() {
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        },
+        1000
     );
+
+}
+
+
+/* ============================================================
+   DIALOG
+============================================================ */
+
+function showDialog(
+    icon,
+    title,
+    message,
+    callback
+) {
+
+    document
+        .getElementById(
+            "dialogIcon"
+        )
+        .textContent =
+            icon;
+
+
+    document
+        .getElementById(
+            "dialogTitle"
+        )
+        .textContent =
+            title;
+
+
+    document
+        .getElementById(
+            "dialogMessage"
+        )
+        .textContent =
+            message;
+
+
+    dialogCallback =
+        callback;
+
+
+    document
+        .getElementById(
+            "dialogModal"
+        )
+        .style.display =
+            "flex";
+
+}
+
+
+function dialogOKClick() {
+
+    const callback =
+        dialogCallback;
+
+
+    dialogCallback =
+        null;
+
+
+    closeDialog(
+        true
+    );
+
+
+    if (
+        typeof callback ===
+        "function"
+    ) {
+
+        callback();
+
+    }
+
+}
+
+
+function closeDialog(
+    result
+) {
+
+    document
+        .getElementById(
+            "dialogModal"
+        )
+        .style.display =
+            "none";
+
+
+    if (!result) {
+
+        dialogCallback =
+            null;
+
+    }
 
 }
 
 
 /* ============================================================
    LOADING
-   ============================================================ */
+============================================================ */
 
 function showLoading(
-    message
+    text
 ) {
 
-    document.getElementById(
-        "loadingText"
-    ).textContent =
-        message ||
-        "Please wait...";
+    document
+        .getElementById(
+            "loadingText"
+        )
+        .textContent =
+            text ||
+            "Please wait...";
 
 
-    document.getElementById(
-        "loadingOverlay"
-    ).style.display =
-        "flex";
+    document
+        .getElementById(
+            "loadingOverlay"
+        )
+        .style.display =
+            "flex";
 
 }
 
 
 function hideLoading() {
 
-    document.getElementById(
-        "loadingOverlay"
-    ).style.display =
-        "none";
+    document
+        .getElementById(
+            "loadingOverlay"
+        )
+        .style.display =
+            "none";
 
 }
 
 
 /* ============================================================
-   ESCAPE HTML
-   ============================================================ */
+   CLOSE MODALS WHEN CLICKING OUTSIDE
+============================================================ */
 
-function escapeHtml(
-    value
-) {
+document.addEventListener(
+    "click",
+    function(event) {
 
-    return String(
-        value === undefined ||
-        value === null
-            ? ""
-            : value
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
+        const modalIds = [
+            "editModal",
+            "updateStockModal",
+            "clearModal",
+            "exportModal",
+            "dialogModal"
+        ];
 
 
-/* ============================================================
-   ESCAPE JAVASCRIPT
-   ============================================================ */
+        modalIds.forEach(
+            function(id) {
 
-function escapeJs(
-    value
-) {
+                const modal =
+                    document.getElementById(
+                        id
+                    );
 
-    return String(
-        value === undefined ||
-        value === null
-            ? ""
-            : value
-    )
-    .replace(
-        /\\/g,
-        "\\\\"
-    )
-    .replace(
-        /'/g,
-        "\\'"
-    )
-    .replace(
-        /"/g,
-        '\\"'
-    )
-    .replace(
-        /\r/g,
-        "\\r"
-    )
-    .replace(
-        /\n/g,
-        "\\n"
-    );
 
-}
+                if (
+                    event.target ===
+                    modal
+                ) {
+
+                    modal.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+    }
+);
 
 
 /* ============================================================
-   INITIALIZE
-   ============================================================ */
+   START
+============================================================ */
 
 document.addEventListener(
     "DOMContentLoaded",
     function() {
 
-        checkExistingSession();
+        checkLoginSession();
 
     }
 );
 
 </script>
 
-
 </body>
-
 </html>
 

@@ -6,766 +6,476 @@
 <meta charset="UTF-8">
 
 <meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
+    name="viewport"
+    content="width=device-width,initial-scale=1"
 >
 
 <title>
-ACEBEDO OPTICAL INVENTORY
+    ACEBEDO OPTICAL INVENTORY
 </title>
-
-
-<!-- =====================================================
-     XLSX LIBRARY
-     Used only to read the uploaded Excel file.
-     The database remains Supabase.
-     ===================================================== -->
-
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-
 
 <style>
 
-/* =====================================================
-   GLOBAL
-   ===================================================== */
-
 *{
-  box-sizing:border-box;
+    box-sizing:border-box;
 }
 
 body{
-
-  margin:0;
-
-  font-family:
-    Arial,
-    sans-serif;
-
-  background:#eef2f7;
-
-  color:#333;
-
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#eef2f7;
+    color:#333;
 }
 
-
-/* =====================================================
-   LOGIN
-   ===================================================== */
-
-#loginScreen{
-
-  min-height:100vh;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  padding:20px;
-
+button,
+input,
+select{
+    font:inherit;
 }
-
-
-.loginBox{
-
-  width:100%;
-
-  max-width:420px;
-
-  background:white;
-
-  padding:35px;
-
-  border-radius:16px;
-
-  box-shadow:
-    0 10px 35px
-    rgba(0,0,0,.12);
-
-  text-align:center;
-
-}
-
-
-.loginBox h2{
-
-  margin-top:0;
-
-}
-
-
-.loginBox input{
-
-  width:100%;
-
-  padding:13px;
-
-  margin:
-    8px 0;
-
-  border:
-    1px solid #ccc;
-
-  border-radius:8px;
-
-  font-size:15px;
-
-}
-
-
-/* =====================================================
-   BUTTONS
-   ===================================================== */
 
 button{
+    cursor:pointer;
+}
 
-  border:0;
-
-  border-radius:8px;
-
-  padding:
-    10px 15px;
-
-  cursor:pointer;
-
-  background:#e5e7eb;
-
-  font-size:14px;
-
+.hidden{
+    display:none !important;
 }
 
 
-button:hover{
+/* =========================================================
+   LOGIN
+   ========================================================= */
 
-  opacity:.9;
-
+#loginScreen{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
 }
 
-
-button:disabled{
-
-  opacity:.5;
-
-  cursor:not-allowed;
-
+.loginBox{
+    width:100%;
+    max-width:420px;
+    background:#fff;
+    padding:35px;
+    border-radius:16px;
+    box-shadow:0 10px 35px rgba(0,0,0,.12);
+    text-align:center;
 }
 
+.loginBox h2{
+    margin:0 0 8px;
+}
+
+.loginBox p{
+    color:#777;
+}
+
+.loginBox input{
+    width:100%;
+    padding:13px;
+    margin:8px 0;
+    border:1px solid #ccd3dc;
+    border-radius:8px;
+}
 
 .primaryBtn{
-
-  background:#2563eb;
-
-  color:white;
-
+    background:#1976d2;
+    color:#fff;
+    border:0;
+    padding:12px 18px;
+    border-radius:8px;
 }
 
-
-.dangerBtn{
-
-  background:#dc2626;
-
-  color:white;
-
+.primaryBtn:hover{
+    background:#125ea8;
 }
-
-
-.searchBtn{
-
-  background:#2563eb;
-
-  color:white;
-
-  height:42px;
-
-}
-
-
-/* =====================================================
-   LOGIN STATUS
-   ===================================================== */
 
 .status{
-
-  min-height:20px;
-
-  margin-top:12px;
-
+    min-height:22px;
+    margin-top:12px;
+    font-size:14px;
 }
 
 
-.success{
-
-  color:#15803d;
-
-}
-
-
-.error{
-
-  color:#dc2626;
-
-}
-
-
-/* =====================================================
+/* =========================================================
    APP
-   ===================================================== */
+   ========================================================= */
 
-#app{
-
-  display:none;
-
+#appScreen{
+    min-height:100vh;
 }
-
-
-/* =====================================================
-   HEADER
-   ===================================================== */
 
 .header{
-
-  background:white;
-
-  padding:
-    12px 20px;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  gap:15px;
-
-  box-shadow:
-    0 2px 8px
-    rgba(0,0,0,.08);
-
+    background:#fff;
+    padding:15px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
-
 
 .headerLeft{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:12px;
-
+    display:flex;
+    align-items:center;
+    gap:14px;
 }
-
 
 .headerLeft img{
-
-  width:55px;
-
-  height:55px;
-
-  object-fit:contain;
-
+    width:60px;
+    height:60px;
+    object-fit:contain;
+    border-radius:8px;
 }
-
 
 .headerLeft h2{
-
-  margin:0;
-
-  font-size:20px;
-
+    margin:0;
+    font-size:21px;
 }
-
 
 .headerLeft small{
-
-  color:#777;
-
+    color:#777;
 }
-
 
 .headerButtons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
 
-  display:flex;
+.headerButtons button{
+    border:0;
+    padding:10px 14px;
+    border-radius:7px;
+    background:#edf1f5;
+}
 
-  flex-wrap:wrap;
+.headerButtons button:hover{
+    background:#dce3ea;
+}
 
-  gap:7px;
-
+#logoutBtn{
+    background:#dc3545;
+    color:white;
 }
 
 
-/* =====================================================
+/* =========================================================
    MAIN
-   ===================================================== */
+   ========================================================= */
 
 .main{
-
-  padding:20px;
-
+    padding:20px;
+    max-width:1600px;
+    margin:auto;
 }
 
 
-/* =====================================================
+/* =========================================================
    FILTERS
-   ===================================================== */
+   ========================================================= */
 
 .filters{
-
-  background:white;
-
-  padding:15px;
-
-  border-radius:12px;
-
-  display:flex;
-
-  flex-wrap:wrap;
-
-  align-items:end;
-
-  gap:12px;
-
-  box-shadow:
-    0 2px 8px
-    rgba(0,0,0,.06);
-
+    background:#fff;
+    padding:18px;
+    border-radius:12px;
+    display:flex;
+    align-items:end;
+    gap:12px;
+    flex-wrap:wrap;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
 }
-
 
 .field{
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:5px;
-
-  min-width:200px;
-
+    display:flex;
+    flex-direction:column;
+    gap:6px;
 }
-
 
 .field label{
+    font-size:13px;
+    font-weight:bold;
+}
 
-  font-size:13px;
+.field select,
+.field input{
+    min-width:210px;
+    padding:11px;
+    border:1px solid #ccd3dc;
+    border-radius:7px;
+}
 
-  font-weight:bold;
-
+.searchBtn{
+    padding:11px 20px;
+    background:#1976d2;
+    color:#fff;
+    border:0;
+    border-radius:7px;
 }
 
 
-select,
-input{
-
-  padding:10px;
-
-  border:
-    1px solid #ccc;
-
-  border-radius:7px;
-
-  background:white;
-
-}
-
-
-/* =====================================================
+/* =========================================================
    CARDS
-   ===================================================== */
+   ========================================================= */
 
 .cards{
-
-  display:grid;
-
-  grid-template-columns:
-    repeat(4,1fr);
-
-  gap:15px;
-
-  margin:
-    18px 0;
-
+    display:grid;
+    grid-template-columns:
+        repeat(4,minmax(150px,1fr));
+    gap:15px;
+    margin:20px 0;
 }
-
 
 .card{
-
-  background:white;
-
-  padding:18px;
-
-  border-radius:12px;
-
-  box-shadow:
-    0 2px 8px
-    rgba(0,0,0,.06);
-
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
 }
-
 
 .card h3{
-
-  margin:
-    0 0 8px;
-
-  color:#666;
-
-  font-size:14px;
-
+    margin:0 0 8px;
+    font-size:15px;
+    color:#777;
 }
-
 
 .card h1{
-
-  margin:0;
-
-  font-size:30px;
-
+    margin:0;
+    font-size:32px;
 }
 
 
-/* =====================================================
+/* =========================================================
    TABLE
-   ===================================================== */
+   ========================================================= */
 
 .tableWrap{
-
-  background:white;
-
-  border-radius:12px;
-
-  overflow:auto;
-
-  box-shadow:
-    0 2px 8px
-    rgba(0,0,0,.06);
-
+    background:#fff;
+    border-radius:12px;
+    overflow:auto;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
 }
-
 
 table{
-
-  width:100%;
-
-  border-collapse:collapse;
-
-  min-width:850px;
-
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
 }
 
+th{
+    background:#f5f7fa;
+    font-size:13px;
+}
 
 th,
 td{
+    padding:12px;
+    border-bottom:1px solid #e8ebef;
+    text-align:left;
+}
 
-  padding:
-    11px 12px;
+tr:hover td{
+    background:#fafbfd;
+}
 
-  border-bottom:
-    1px solid #eee;
-
-  text-align:left;
-
+.actionBtn{
+    border:0;
+    padding:7px 10px;
+    border-radius:6px;
+    background:#1976d2;
+    color:white;
 }
 
 
-th{
-
-  background:#f8fafc;
-
-  font-size:13px;
-
-}
-
-
-td{
-
-  font-size:13px;
-
-}
-
-
-/* =====================================================
+/* =========================================================
    PAGINATION
-   ===================================================== */
+   ========================================================= */
 
 .pagination{
+    margin-top:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:15px;
+}
 
-  display:flex;
+.pagination button{
+    border:0;
+    padding:9px 14px;
+    border-radius:7px;
+    background:#fff;
+}
 
-  align-items:center;
-
-  justify-content:center;
-
-  gap:15px;
-
-  padding:18px;
-
+.pagination button:disabled{
+    opacity:.4;
+    cursor:not-allowed;
 }
 
 
-/* =====================================================
+/* =========================================================
    MODAL
-   ===================================================== */
+   ========================================================= */
 
 .modalOverlay{
-
-  display:none;
-
-  position:fixed;
-
-  inset:0;
-
-  background:
-    rgba(0,0,0,.45);
-
-  align-items:center;
-
-  justify-content:center;
-
-  z-index:1000;
-
-  padding:20px;
-
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:1000;
 }
-
 
 .modal{
-
-  background:white;
-
-  width:100%;
-
-  max-width:500px;
-
-  max-height:
-    90vh;
-
-  overflow:auto;
-
-  padding:25px;
-
-  border-radius:14px;
-
-  box-shadow:
-    0 20px 60px
-    rgba(0,0,0,.25);
-
+    width:100%;
+    max-width:500px;
+    background:#fff;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 15px 50px rgba(0,0,0,.25);
 }
-
 
 .modal h3{
-
-  margin-top:0;
-
+    margin-top:0;
 }
-
 
 .modal label{
-
-  display:block;
-
-  margin:
-    12px 0 5px;
-
-  font-weight:bold;
-
-  font-size:13px;
-
+    display:block;
+    margin-top:12px;
+    margin-bottom:6px;
+    font-weight:bold;
 }
-
 
 .modal input,
 .modal select{
-
-  width:100%;
-
+    width:100%;
+    padding:11px;
+    border:1px solid #ccd3dc;
+    border-radius:7px;
 }
-
 
 .modalButtons{
+    margin-top:20px;
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+}
 
-  display:flex;
+.modalButtons button{
+    padding:10px 16px;
+    border:0;
+    border-radius:7px;
+}
 
-  justify-content:flex-end;
-
-  gap:8px;
-
-  margin-top:20px;
-
+.dangerBtn{
+    background:#dc3545;
+    color:white;
 }
 
 
-/* =====================================================
+/* =========================================================
    DIALOG
-   ===================================================== */
+   ========================================================= */
 
 .dialogIcon{
-
-  text-align:center;
-
-  font-size:45px;
-
+    text-align:center;
+    font-size:42px;
 }
-
 
 .dialogTitle{
-
-  text-align:center;
-
-  font-size:20px;
-
-  font-weight:bold;
-
-  margin:
-    10px 0;
-
+    text-align:center;
+    font-size:21px;
+    font-weight:bold;
+    margin-top:8px;
 }
-
 
 .dialogMessage{
-
-  text-align:center;
-
-  color:#555;
-
-  white-space:pre-wrap;
-
+    text-align:center;
+    margin:15px 0;
+    white-space:pre-wrap;
 }
-
 
 .dialogButtons{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
 
-  display:flex;
+.dialogButtons button{
+    padding:10px 18px;
+    border:0;
+    border-radius:7px;
+}
 
-  justify-content:center;
-
-  gap:10px;
-
-  margin-top:20px;
-
+.dialogCancel{
+    background:#e9ecef;
 }
 
 
-/* =====================================================
+/* =========================================================
    LOADING
-   ===================================================== */
+   ========================================================= */
 
 #loadingOverlay{
-
-  display:none;
-
-  position:fixed;
-
-  inset:0;
-
-  background:
-    rgba(255,255,255,.82);
-
-  z-index:2000;
-
-  align-items:center;
-
-  justify-content:center;
-
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,.75);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:2000;
 }
-
 
 .loadingBox{
+    background:#fff;
+    padding:30px 45px;
+    border-radius:14px;
+    text-align:center;
+    box-shadow:0 10px 40px rgba(0,0,0,.18);
+}
 
-  background:white;
-
-  padding:30px 45px;
-
-  border-radius:14px;
-
-  box-shadow:
-    0 10px 40px
-    rgba(0,0,0,.15);
-
-  text-align:center;
-
+.loadingIcon{
+    font-size:40px;
+    margin-bottom:10px;
 }
 
 
-.loadingBox > div:first-child{
-
-  font-size:40px;
-
-  margin-bottom:10px;
-
-}
-
-
-/* =====================================================
+/* =========================================================
    MOBILE
-   ===================================================== */
+   ========================================================= */
 
 @media(max-width:800px){
 
-  .header{
+    .header{
+        flex-direction:column;
+        align-items:stretch;
+    }
 
-    flex-direction:column;
+    .headerButtons{
+        justify-content:center;
+    }
 
-    align-items:stretch;
+    .cards{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
 
-  }
+    .filters{
+        align-items:stretch;
+    }
 
+    .field{
+        width:100%;
+    }
 
-  .headerButtons{
-
-    justify-content:center;
-
-  }
-
-
-  .cards{
-
-    grid-template-columns:
-      repeat(2,1fr);
-
-  }
-
-
-  .filters{
-
-    flex-direction:column;
-
-    align-items:stretch;
-
-  }
-
-
-  .field{
-
-    width:100%;
-
-  }
-
-
-  .searchBtn{
-
-    width:100%;
-
-  }
-
-}
-
-
-@media(max-width:450px){
-
-  .cards{
-
-    grid-template-columns:1fr;
-
-  }
-
-
-  .headerLeft h2{
-
-    font-size:16px;
-
-  }
+    .field select,
+    .field input,
+    .searchBtn{
+        width:100%;
+    }
 
 }
 
@@ -777,3150 +487,3134 @@ td{
 <body>
 
 
-<!-- =====================================================
-     LOGIN SCREEN
-     ===================================================== -->
+<!-- =======================================================
+     LOGIN
+     ======================================================= -->
 
-<div id="loginScreen">
+<section id="loginScreen">
 
-  <div class="loginBox">
-
-    <h2>
-      🔐 ADMIN LOGIN
-    </h2>
-
-    <p>
-      Dashboard Access
-    </p>
-
-
-    <input
-      id="email"
-      type="email"
-      placeholder="Enter Gmail"
-      autocomplete="email"
-    >
-
-
-    <button
-      id="sendOtpBtn"
-      class="primaryBtn"
-      onclick="sendOTP()"
-      style="width:100%;"
-    >
-      SEND OTP
-    </button>
-
-
-    <input
-      id="otp"
-      placeholder="Enter OTP"
-      inputmode="numeric"
-      autocomplete="one-time-code"
-      style="display:none;"
-    >
-
-
-    <button
-      id="verifyBtn"
-      class="primaryBtn"
-      onclick="verifyOTP()"
-      style="
-        display:none;
-        width:100%;
-        margin-top:5px;
-      "
-    >
-      VERIFY OTP
-    </button>
-
-
-    <p
-      id="loginStatus"
-      class="status"
-    ></p>
-
-  </div>
-
-</div>
-
-
-<!-- =====================================================
-     APPLICATION
-     ===================================================== -->
-
-<div id="app">
-
-
-  <!-- ===================================================
-       HEADER
-       =================================================== -->
-
-  <div class="header">
-
-
-    <div class="headerLeft">
-
-      <img
-        src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200"
-      >
-
-
-      <div>
+    <div class="loginBox">
 
         <h2>
-          ACEBEDO OPTICAL INVENTORY
+            🔐 ADMIN LOGIN
         </h2>
 
-        <small>
-          Central Inventory Management
-        </small>
-
-      </div>
-
-    </div>
-
-
-    <div class="headerButtons">
-
-      <button
-        id="refreshBtn"
-        onclick="refreshDashboard()"
-      >
-        🔄 Refresh
-      </button>
-
-
-      <button
-        id="updateStockBtn"
-        onclick="openUpdateStockModal()"
-      >
-        📤 Update Stocks
-      </button>
-
-
-      <button
-        id="clearBtn"
-        onclick="openClearModal()"
-      >
-        🗑 Clear Report
-      </button>
-
-
-      <button
-        id="exportBtn"
-        onclick="openExportModal()"
-      >
-        📥 Export
-      </button>
-
-
-      <button
-        id="logoutBtn"
-        onclick="logoutUser()"
-      >
-        Logout
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- ===================================================
-       MAIN
-       =================================================== -->
-
-  <div class="main">
-
-
-    <!-- =================================================
-         FILTERS
-         ================================================= -->
-
-    <div class="filters">
-
-
-      <div class="field">
-
-        <label>
-          Branch
-        </label>
-
-
-        <select
-          id="branchSelect"
-        >
-
-          <option value="">
-            -- Select Branch --
-          </option>
-
-          <option value="ALL">
-            🏢 ALL BRANCHES
-          </option>
-
-          <option value="GAI">
-            🏢 Gaisano Iloilo
-          </option>
-
-          <option value="CAS">
-            🏢 Casa Plaza
-          </option>
-
-          <option value="BAC">
-            🏢 Bacolod
-          </option>
-
-          <option value="BIN">
-            🏢 Binalbagan
-          </option>
-
-          <option value="BIS">
-            🏢 Bislig
-          </option>
-
-          <option value="CAD">
-            🏢 Cadiz
-          </option>
-
-          <option value="DGT">
-            🏢 Dumaguete
-          </option>
-
-          <option value="KAB">
-            🏢 Kabankalan
-          </option>
-
-          <option value="KAL">
-            🏢 Kalibo
-          </option>
-
-          <option value="PAS">
-            🏢 Passi
-          </option>
-
-          <option value="POT">
-            🏢 Pototan
-          </option>
-
-          <option value="SAN">
-            🏢 San Carlos
-          </option>
-
-          <option value="TAB">
-            🏢 Tabunok
-          </option>
-
-          <option value="TAN">
-            🏢 Tandag
-          </option>
-
-          <option value="TIS">
-            🏢 Tisa
-          </option>
-
-          <option value="TOL">
-            🏢 Toledo
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Select Report
-        </label>
-
-
-        <select
-          id="sheetSelect"
-        >
-
-          <option value="stocks">
-            📦 Stocks
-          </option>
-
-          <option value="SCANRESULTS">
-            💰 Sold Out
-          </option>
-
-          <option value="AUDIT">
-            🔄 Re-Inventory
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div class="field">
-
-        <label>
-          Search
-        </label>
-
+        <p>
+            Dashboard Access
+        </p>
 
         <input
-          id="searchBox"
-          placeholder="Tag, SI, Description"
-          onkeydown="
-            if(event.key==='Enter'){
-              searchDashboard();
-            }
-          "
+            id="email"
+            type="email"
+            placeholder="Enter Gmail"
+            autocomplete="email"
         >
 
-      </div>
+        <button
+            id="sendOtpBtn"
+            class="primaryBtn"
+            onclick="sendOTP()"
+        >
+            SEND OTP
+        </button>
 
+        <input
+            id="otp"
+            placeholder="Enter OTP"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            style="display:none;"
+        >
 
-      <button
-        id="searchBtn"
-        class="searchBtn"
-        onclick="searchDashboard()"
-      >
-        🔍 Search
-      </button>
+        <button
+            id="verifyBtn"
+            class="primaryBtn"
+            onclick="verifyOTP()"
+            style="display:none;"
+        >
+            VERIFY OTP
+        </button>
+
+        <p
+            id="loginStatus"
+            class="status"
+        ></p>
 
     </div>
 
-
-    <!-- =================================================
-         CARDS
-         ================================================= -->
-
-    <div class="cards">
+</section>
 
 
-      <div class="card">
+<!-- =======================================================
+     APP
+     ======================================================= -->
 
-        <h3>
-          Available
-        </h3>
-
-        <h1 id="availableCount">
-          0
-        </h1>
-
-      </div>
+<section
+    id="appScreen"
+    class="hidden"
+>
 
 
-      <div class="card">
+    <!-- HEADER -->
 
-        <h3>
-          Sold Out
-        </h3>
+    <div class="header">
 
-        <h1 id="soldCount">
-          0
-        </h1>
+        <div class="headerLeft">
 
-      </div>
-
-
-      <div class="card">
-
-        <h3>
-          Audited
-        </h3>
-
-        <h1 id="auditCount">
-          0
-        </h1>
-
-      </div>
-
-
-      <div class="card">
-
-        <h3>
-          Showing
-        </h3>
-
-        <h1 id="showingCount">
-          0
-        </h1>
-
-      </div>
-
-    </div>
-
-
-    <!-- =================================================
-         TABLE
-         ================================================= -->
-
-    <div class="tableWrap">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>
-              Branch
-            </th>
-
-            <th>
-              Lenstype
-            </th>
-
-            <th>
-              Description
-            </th>
-
-            <th>
-              Tag
-            </th>
-
-            <th>
-              SI
-            </th>
-
-            <th>
-              Date
-            </th>
-
-            <th>
-              Actions
-            </th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody
-          id="tableBody"
-        >
-
-          <tr>
-
-            <td
-              colspan="7"
-              style="
-                text-align:center;
-                padding:40px;
-              "
+            <img
+                src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200"
+                alt="Acebedo Optical"
             >
-              Select a branch and click SEARCH.
-            </td>
 
-          </tr>
+            <div>
 
-        </tbody>
+                <h2>
+                    ACEBEDO OPTICAL INVENTORY
+                </h2>
 
-      </table>
+                <small>
+                    Central Inventory Management
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="headerButtons">
+
+            <button
+                id="refreshBtn"
+                onclick="refreshDashboard()"
+            >
+                🔄 Refresh
+            </button>
+
+            <button
+                id="updateStockBtn"
+                onclick="openUpdateStockModal()"
+            >
+                📤 Update Stocks
+            </button>
+
+            <button
+                id="clearBtn"
+                onclick="openClearModal()"
+            >
+                🗑 Clear Report
+            </button>
+
+            <button
+                id="exportBtn"
+                onclick="openExportModal()"
+            >
+                📥 Export
+            </button>
+
+            <button
+                id="logoutBtn"
+                onclick="logoutUser()"
+            >
+                Logout
+            </button>
+
+        </div>
 
     </div>
 
 
-    <!-- =================================================
-         PAGINATION
-         ================================================= -->
-
-    <div class="pagination">
-
-      <button
-        id="prevBtn"
-        onclick="previousPage()"
-      >
-        ◀ Previous
-      </button>
+    <div class="main">
 
 
-      <span
-        id="pageInfo"
-      >
-        Page 0 / 0
-      </span>
+        <!-- FILTERS -->
+
+        <div class="filters">
+
+            <div class="field">
+
+                <label>
+                    Branch
+                </label>
+
+                <select id="branchSelect">
+
+                    <option value="">
+                        -- Select Branch --
+                    </option>
+
+                    <option value="ALL">
+                        🏢 ALL BRANCHES
+                    </option>
+
+                    <option value="GAI">
+                        🏢 Gaisano Iloilo
+                    </option>
+
+                    <option value="CAS">
+                        🏢 Casa Plaza
+                    </option>
+
+                    <option value="BAC">
+                        🏢 Bacolod
+                    </option>
+
+                    <option value="BIN">
+                        🏢 Binalbagan
+                    </option>
+
+                    <option value="BIS">
+                        🏢 Bislig
+                    </option>
+
+                    <option value="CAD">
+                        🏢 Cadiz
+                    </option>
+
+                    <option value="DGT">
+                        🏢 Dumaguete
+                    </option>
+
+                    <option value="KAB">
+                        🏢 Kabankalan
+                    </option>
+
+                    <option value="KAL">
+                        🏢 Kalibo
+                    </option>
+
+                    <option value="PAS">
+                        🏢 Passi
+                    </option>
+
+                    <option value="POT">
+                        🏢 Pototan
+                    </option>
+
+                    <option value="SAN">
+                        🏢 San Carlos
+                    </option>
+
+                    <option value="TAB">
+                        🏢 Tabunok
+                    </option>
+
+                    <option value="TAN">
+                        🏢 Tandag
+                    </option>
+
+                    <option value="TIS">
+                        🏢 Tisa
+                    </option>
+
+                    <option value="TOL">
+                        🏢 Toledo
+                    </option>
+
+                </select>
+
+            </div>
 
 
-      <button
-        id="nextBtn"
-        onclick="nextPage()"
-      >
-        Next ▶
-      </button>
+            <div class="field">
+
+                <label>
+                    Select Report
+                </label>
+
+                <select id="sheetSelect">
+
+                    <option value="stocks">
+                        📦 Stocks
+                    </option>
+
+                    <option value="SCANRESULTS">
+                        💰 Sold Out
+                    </option>
+
+                    <option value="AUDIT">
+                        🔄 Re-Inventory
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Search
+                </label>
+
+                <input
+                    id="searchBox"
+                    placeholder="Tag, SI, Description"
+                    onkeydown="searchKeyDown(event)"
+                >
+
+            </div>
+
+
+            <button
+                id="searchBtn"
+                class="searchBtn"
+                onclick="searchDashboard()"
+            >
+                🔍 Search
+            </button>
+
+        </div>
+
+
+        <!-- CARDS -->
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>
+                    Available
+                </h3>
+
+                <h1 id="availableCount">
+                    0
+                </h1>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Sold Out
+                </h3>
+
+                <h1 id="soldCount">
+                    0
+                </h1>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Audited
+                </h3>
+
+                <h1 id="auditCount">
+                    0
+                </h1>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Showing
+                </h3>
+
+                <h1 id="showingCount">
+                    0
+                </h1>
+
+            </div>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="tableWrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Branch
+                        </th>
+
+                        <th>
+                            Lenstype
+                        </th>
+
+                        <th>
+                            Description
+                        </th>
+
+                        <th>
+                            Tag
+                        </th>
+
+                        <th>
+                            SI
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="tableBody">
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            style="text-align:center;padding:40px;"
+                        >
+                            Click SEARCH to load data.
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- PAGINATION -->
+
+        <div class="pagination">
+
+            <button
+                id="prevBtn"
+                onclick="previousPage()"
+            >
+                ◀ Previous
+            </button>
+
+            <span id="pageInfo">
+                Page 0 / 0
+            </span>
+
+            <button
+                id="nextBtn"
+                onclick="nextPage()"
+            >
+                Next ▶
+            </button>
+
+        </div>
 
     </div>
 
-  </div>
-
-</div>
+</section>
 
 
-<!-- =====================================================
+<!-- =======================================================
      EDIT MODAL
-     ===================================================== -->
+     ======================================================= -->
 
 <div
-  id="editModal"
-  class="modalOverlay"
+    id="editModal"
+    class="modalOverlay hidden"
 >
 
-  <div class="modal">
+    <div class="modal">
 
-    <h3>
-      Edit Record
-    </h3>
+        <h3>
+            Edit Record
+        </h3>
 
+        <input
+            type="hidden"
+            id="editBranch"
+        >
 
-    <input
-      type="hidden"
-      id="editBranch"
-    >
+        <input
+            type="hidden"
+            id="editTag"
+        >
 
+        <label>
+            SI Number
+        </label>
 
-    <input
-      type="hidden"
-      id="editTag"
-    >
+        <input
+            id="editSI"
+        >
 
+        <div class="modalButtons">
 
-    <label>
-      SI Number
-    </label>
+            <button
+                onclick="closeEditModal()"
+            >
+                Cancel
+            </button>
 
+            <button
+                class="primaryBtn"
+                onclick="saveEdit()"
+            >
+                Save
+            </button>
 
-    <input
-      id="editSI"
-    >
-
-
-    <div class="modalButtons">
-
-      <button
-        onclick="closeEditModal()"
-      >
-        Cancel
-      </button>
-
-
-      <button
-        class="primaryBtn"
-        onclick="saveEdit()"
-      >
-        Save
-      </button>
+        </div>
 
     </div>
-
-  </div>
 
 </div>
 
 
-<!-- =====================================================
+<!-- =======================================================
      UPDATE STOCKS MODAL
-     ===================================================== -->
+     ======================================================= -->
 
 <div
-  id="updateStockModal"
-  class="modalOverlay"
+    id="updateStockModal"
+    class="modalOverlay hidden"
 >
 
-  <div class="modal">
+    <div class="modal">
 
-    <h3>
-      Update Stocks
-    </h3>
+        <h3>
+            Update Stocks
+        </h3>
 
+        <label>
+            Select Branch
+        </label>
 
-    <label>
-      Select Branch
-    </label>
+        <select id="updateBranch">
 
+            <option value="">
+                -- Select Branch --
+            </option>
 
-    <select
-      id="updateBranch"
-    >
+            <option value="GAI">
+                🏢 Gaisano Iloilo
+            </option>
 
-      <option value="">
-        -- Select Branch --
-      </option>
+            <option value="CAS">
+                🏢 Casa Plaza
+            </option>
 
-      <option value="GAI">
-        🏢 Gaisano Iloilo
-      </option>
+            <option value="BAC">
+                🏢 Bacolod
+            </option>
 
-      <option value="CAS">
-        🏢 Casa Plaza
-      </option>
+            <option value="BIN">
+                🏢 Binalbagan
+            </option>
 
-      <option value="BAC">
-        🏢 Bacolod
-      </option>
+            <option value="BIS">
+                🏢 Bislig
+            </option>
 
-      <option value="BIN">
-        🏢 Binalbagan
-      </option>
+            <option value="CAD">
+                🏢 Cadiz
+            </option>
 
-      <option value="BIS">
-        🏢 Bislig
-      </option>
+            <option value="DGT">
+                🏢 Dumaguete
+            </option>
 
-      <option value="CAD">
-        🏢 Cadiz
-      </option>
+            <option value="KAB">
+                🏢 Kabankalan
+            </option>
 
-      <option value="DGT">
-        🏢 Dumaguete
-      </option>
+            <option value="KAL">
+                🏢 Kalibo
+            </option>
 
-      <option value="KAB">
-        🏢 Kabankalan
-      </option>
+            <option value="PAS">
+                🏢 Passi
+            </option>
 
-      <option value="KAL">
-        🏢 Kalibo
-      </option>
+            <option value="POT">
+                🏢 Pototan
+            </option>
 
-      <option value="PAS">
-        🏢 Passi
-      </option>
+            <option value="SAN">
+                🏢 San Carlos
+            </option>
 
-      <option value="POT">
-        🏢 Pototan
-      </option>
+            <option value="TAB">
+                🏢 Tabunok
+            </option>
 
-      <option value="SAN">
-        🏢 San Carlos
-      </option>
+            <option value="TAN">
+                🏢 Tandag
+            </option>
 
-      <option value="TAB">
-        🏢 Tabunok
-      </option>
+            <option value="TIS">
+                🏢 Tisa
+            </option>
 
-      <option value="TAN">
-        🏢 Tandag
-      </option>
+            <option value="TOL">
+                🏢 Toledo
+            </option>
 
-      <option value="TIS">
-        🏢 Tisa
-      </option>
-
-      <option value="TOL">
-        🏢 Toledo
-      </option>
-
-    </select>
+        </select>
 
 
-    <label>
-      Select Excel File
-    </label>
+        <label>
+            Select Excel File
+        </label>
+
+        <input
+            type="file"
+            id="stockFile"
+            accept=".xlsx,.xls"
+        >
 
 
-    <input
-      type="file"
-      id="stockFile"
-      accept=".xlsx,.xls"
-    >
+        <div class="modalButtons">
 
+            <button
+                onclick="closeUpdateStockModal()"
+            >
+                Cancel
+            </button>
 
-    <div class="modalButtons">
+            <button
+                class="primaryBtn"
+                onclick="updateStocks()"
+            >
+                Update
+            </button>
 
-      <button
-        onclick="closeUpdateStockModal()"
-      >
-        Cancel
-      </button>
-
-
-      <button
-        id="updateConfirmBtn"
-        class="primaryBtn"
-        onclick="updateStocks()"
-      >
-        Update
-      </button>
+        </div>
 
     </div>
-
-  </div>
 
 </div>
 
 
-<!-- =====================================================
-     EXPORT MODAL
-     ===================================================== -->
-
-<div
-  id="exportModal"
-  class="modalOverlay"
->
-
-  <div class="modal">
-
-    <h3>
-      Select Branch to Export
-    </h3>
-
-
-    <label>
-      Branch
-    </label>
-
-
-    <select
-      id="exportBranch"
-    >
-
-      <option value="">
-        -- Select Branch --
-      </option>
-
-      <option value="GAI">
-        🏢 Gaisano Iloilo
-      </option>
-
-      <option value="CAS">
-        🏢 Casa Plaza
-      </option>
-
-      <option value="BAC">
-        🏢 Bacolod
-      </option>
-
-      <option value="BIN">
-        🏢 Binalbagan
-      </option>
-
-      <option value="BIS">
-        🏢 Bislig
-      </option>
-
-      <option value="CAD">
-        🏢 Cadiz
-      </option>
-
-      <option value="DGT">
-        🏢 Dumaguete
-      </option>
-
-      <option value="KAB">
-        🏢 Kabankalan
-      </option>
-
-      <option value="KAL">
-        🏢 Kalibo
-      </option>
-
-      <option value="PAS">
-        🏢 Passi
-      </option>
-
-      <option value="POT">
-        🏢 Pototan
-      </option>
-
-      <option value="SAN">
-        🏢 San Carlos
-      </option>
-
-      <option value="TAB">
-        🏢 Tabunok
-      </option>
-
-      <option value="TAN">
-        🏢 Tandag
-      </option>
-
-      <option value="TIS">
-        🏢 Tisa
-      </option>
-
-      <option value="TOL">
-        🏢 Toledo
-      </option>
-
-    </select>
-
-
-    <div class="modalButtons">
-
-      <button
-        onclick="closeExportModal()"
-      >
-        Cancel
-      </button>
-
-
-      <button
-        class="primaryBtn"
-        onclick="startExport()"
-      >
-        Export
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =====================================================
+<!-- =======================================================
      CLEAR MODAL
-     ===================================================== -->
+     ======================================================= -->
 
 <div
-  id="clearModal"
-  class="modalOverlay"
+    id="clearModal"
+    class="modalOverlay hidden"
 >
 
-  <div class="modal">
+    <div class="modal">
 
-    <h3>
-      Clear Report
-    </h3>
+        <h3>
+            Clear Report
+        </h3>
 
+        <label>
+            Select Branch
+        </label>
 
-    <label>
-      Select Branch
-    </label>
+        <select id="clearBranch">
 
+            <option value="">
+                -- Select Branch --
+            </option>
 
-    <select
-      id="clearBranch"
-    >
+            <option value="GAI">
+                🏢 Gaisano Iloilo
+            </option>
 
-      <option value="">
-        -- Select Branch --
-      </option>
+            <option value="CAS">
+                🏢 Casa Plaza
+            </option>
 
-      <option value="GAI">
-        🏢 Gaisano Iloilo
-      </option>
+            <option value="BAC">
+                🏢 Bacolod
+            </option>
 
-      <option value="CAS">
-        🏢 Casa Plaza
-      </option>
+            <option value="BIN">
+                🏢 Binalbagan
+            </option>
 
-      <option value="BAC">
-        🏢 Bacolod
-      </option>
+            <option value="BIS">
+                🏢 Bislig
+            </option>
 
-      <option value="BIN">
-        🏢 Binalbagan
-      </option>
+            <option value="CAD">
+                🏢 Cadiz
+            </option>
 
-      <option value="BIS">
-        🏢 Bislig
-      </option>
+            <option value="DGT">
+                🏢 Dumaguete
+            </option>
 
-      <option value="CAD">
-        🏢 Cadiz
-      </option>
+            <option value="KAB">
+                🏢 Kabankalan
+            </option>
 
-      <option value="DGT">
-        🏢 Dumaguete
-      </option>
+            <option value="KAL">
+                🏢 Kalibo
+            </option>
 
-      <option value="KAB">
-        🏢 Kabankalan
-      </option>
+            <option value="PAS">
+                🏢 Passi
+            </option>
 
-      <option value="KAL">
-        🏢 Kalibo
-      </option>
+            <option value="POT">
+                🏢 Pototan
+            </option>
 
-      <option value="PAS">
-        🏢 Passi
-      </option>
+            <option value="SAN">
+                🏢 San Carlos
+            </option>
 
-      <option value="POT">
-        🏢 Pototan
-      </option>
+            <option value="TAB">
+                🏢 Tabunok
+            </option>
 
-      <option value="SAN">
-        🏢 San Carlos
-      </option>
+            <option value="TAN">
+                🏢 Tandag
+            </option>
 
-      <option value="TAB">
-        🏢 Tabunok
-      </option>
+            <option value="TIS">
+                🏢 Tisa
+            </option>
 
-      <option value="TAN">
-        🏢 Tandag
-      </option>
+            <option value="TOL">
+                🏢 Toledo
+            </option>
 
-      <option value="TIS">
-        🏢 Tisa
-      </option>
-
-      <option value="TOL">
-        🏢 Toledo
-      </option>
-
-    </select>
+        </select>
 
 
-    <label>
-      Select Report
-    </label>
+        <label>
+            Select Report
+        </label>
+
+        <select id="clearSheet">
+
+            <option value="">
+                -- Select Report --
+            </option>
+
+            <option value="stocks">
+                📦 Stocks
+            </option>
+
+            <option value="SCANRESULTS">
+                💰 Sold Out
+            </option>
+
+            <option value="AUDIT">
+                🔄 Re-Inventory
+            </option>
+
+        </select>
 
 
-    <select
-      id="clearSheet"
-    >
+        <div class="modalButtons">
 
-      <option value="">
-        -- Select Report --
-      </option>
+            <button
+                onclick="closeClearModal()"
+            >
+                Cancel
+            </button>
 
-      <option value="stocks">
-        📦 Stocks
-      </option>
+            <button
+                class="dangerBtn"
+                onclick="clearReport()"
+            >
+                Clear
+            </button>
 
-      <option value="SCANRESULTS">
-        💰 Sold Out
-      </option>
-
-      <option value="AUDIT">
-        🔄 Re-Inventory
-      </option>
-
-    </select>
-
-
-    <div class="modalButtons">
-
-      <button
-        onclick="closeClearModal()"
-      >
-        Cancel
-      </button>
-
-
-      <button
-        class="dangerBtn"
-        onclick="clearReport()"
-      >
-        Clear
-      </button>
+        </div>
 
     </div>
-
-  </div>
 
 </div>
 
 
-<!-- =====================================================
-     CONFIRMATION DIALOG
-     ===================================================== -->
+<!-- =======================================================
+     EXPORT MODAL
+     ======================================================= -->
 
 <div
-  id="dialogModal"
-  class="modalOverlay"
+    id="exportModal"
+    class="modalOverlay hidden"
 >
 
-  <div class="modal">
+    <div class="modal">
 
-    <div
-      id="dialogIcon"
-      class="dialogIcon"
-    >
-      ⚠️
+        <h3>
+            Export Inventory
+        </h3>
+
+        <label>
+            Select Branch
+        </label>
+
+        <select id="exportBranch">
+
+            <option value="">
+                -- Select Branch --
+            </option>
+
+            <option value="GAI">
+                🏢 Gaisano Iloilo
+            </option>
+
+            <option value="CAS">
+                🏢 Casa Plaza
+            </option>
+
+            <option value="BAC">
+                🏢 Bacolod
+            </option>
+
+            <option value="BIN">
+                🏢 Binalbagan
+            </option>
+
+            <option value="BIS">
+                🏢 Bislig
+            </option>
+
+            <option value="CAD">
+                🏢 Cadiz
+            </option>
+
+            <option value="DGT">
+                🏢 Dumaguete
+            </option>
+
+            <option value="KAB">
+                🏢 Kabankalan
+            </option>
+
+            <option value="KAL">
+                🏢 Kalibo
+            </option>
+
+            <option value="PAS">
+                🏢 Passi
+            </option>
+
+            <option value="POT">
+                🏢 Pototan
+            </option>
+
+            <option value="SAN">
+                🏢 San Carlos
+            </option>
+
+            <option value="TAB">
+                🏢 Tabunok
+            </option>
+
+            <option value="TAN">
+                🏢 Tandag
+            </option>
+
+            <option value="TIS">
+                🏢 Tisa
+            </option>
+
+            <option value="TOL">
+                🏢 Toledo
+            </option>
+
+        </select>
+
+
+        <div class="modalButtons">
+
+            <button
+                onclick="closeExportModal()"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="primaryBtn"
+                onclick="startExport()"
+            >
+                Export
+            </button>
+
+        </div>
+
     </div>
-
-
-    <div
-      id="dialogTitle"
-      class="dialogTitle"
-    >
-      Confirm
-    </div>
-
-
-    <div
-      id="dialogMessage"
-      class="dialogMessage"
-    >
-      Message
-    </div>
-
-
-    <div class="dialogButtons">
-
-      <button
-        onclick="closeDialog()"
-      >
-        Cancel
-      </button>
-
-
-      <button
-        id="dialogOK"
-        class="primaryBtn"
-        onclick="dialogOKClick()"
-      >
-        OK
-      </button>
-
-    </div>
-
-  </div>
 
 </div>
 
 
-<!-- =====================================================
+<!-- =======================================================
+     CONFIRM DIALOG
+     ======================================================= -->
+
+<div
+    id="dialogModal"
+    class="modalOverlay hidden"
+>
+
+    <div class="modal">
+
+        <div
+            id="dialogIcon"
+            class="dialogIcon"
+        >
+            ⚠️
+        </div>
+
+        <div
+            id="dialogTitle"
+            class="dialogTitle"
+        >
+            Confirm
+        </div>
+
+        <div
+            id="dialogMessage"
+            class="dialogMessage"
+        >
+            Message
+        </div>
+
+        <div class="dialogButtons">
+
+            <button
+                class="dialogCancel"
+                onclick="closeDialog(false)"
+            >
+                Cancel
+            </button>
+
+            <button
+                id="dialogOK"
+                class="primaryBtn"
+                onclick="dialogOKClick()"
+            >
+                OK
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
      LOADING
-     ===================================================== -->
+     ======================================================= -->
 
 <div
-  id="loadingOverlay"
+    id="loadingOverlay"
+    class="hidden"
 >
 
-  <div class="loadingBox">
+    <div class="loadingBox">
 
-    <div>
-      ⏳
+        <div class="loadingIcon">
+            ⏳
+        </div>
+
+        <div id="loadingText">
+            Please wait...
+        </div>
+
     </div>
-
-    <div id="loadingText">
-      Please wait...
-    </div>
-
-  </div>
 
 </div>
+
+
+<!-- =======================================================
+     XLSX LIBRARY
+     ======================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+></script>
 
 
 <script>
 
-/* ==========================================================
-   GLOBAL STATE
-   ========================================================== */
+/* =========================================================
+   IMPORTANT
+   =========================================================
 
-let sessionId =
-  localStorage.getItem(
-    'acebedo_inventory_session'
-  );
+   CHANGE ONLY THIS VALUE.
 
+   Put your Apps Script Web App URL here.
+
+   Example:
+
+   const API_URL =
+       "https://script.google.com/macros/s/XXXXXXXX/exec";
+
+   DO NOT PUT SUPABASE URL OR KEY HERE.
+   ========================================================= */
+
+const API_URL =
+    "https://script.google.com/macros/s/AKfycbziCkvHC98Tm81NZT4BKAKtDAwIdndEHskwPMGHRytmJFFEmSdrwbPmKioJRGtk774uaw/exec";
+
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+let session =
+    localStorage.getItem(
+        "acebedo_inventory_session"
+    ) || "";
 
 let currentEmail =
-  localStorage.getItem(
-    'acebedo_inventory_email'
-  );
+    localStorage.getItem(
+        "acebedo_inventory_email"
+    ) || "";
 
-
-let allData = [];
+let currentData = [];
 
 let currentPage = 1;
 
-const PAGE_SIZE = 20;
+const rowsPerPage = 20;
 
 let dialogCallback = null;
 
 
-/* ==========================================================
-   INITIALIZE
-   ========================================================== */
+/* =========================================================
+   API CALL
+   ========================================================= */
 
-document.addEventListener(
-  'DOMContentLoaded',
-  function(){
+function apiCall(
+    action,
+    params = {}
+){
 
-    if (sessionId) {
+    return new Promise(
+        function(resolve,reject){
 
-      checkSession();
+            if (
+                !API_URL ||
+                API_URL ===
+                "YOUR_APPS_SCRIPT_WEB_APP_URL"
+            ){
 
-    }
-    else {
+                reject(
+                    new Error(
+                        "API_URL is not configured in index.html."
+                    )
+                );
 
-      showLogin();
+                return;
 
-    }
-
-  }
-);
+            }
 
 
-/* ==========================================================
+            const callback =
+                "cb_" +
+                Date.now() +
+                "_" +
+                Math.floor(
+                    Math.random() * 100000
+                );
+
+
+            const query =
+                new URLSearchParams();
+
+
+            query.set(
+                "action",
+                action
+            );
+
+            query.set(
+                "callback",
+                callback
+            );
+
+
+            Object.keys(params)
+                .forEach(
+                    function(key){
+
+                        const value =
+                            params[key];
+
+                        if (
+                            value !== undefined &&
+                            value !== null
+                        ){
+
+                            query.set(
+                                key,
+                                String(value)
+                            );
+
+                        }
+
+                    }
+                );
+
+
+            const script =
+                document.createElement(
+                    "script"
+                );
+
+
+            let finished = false;
+
+
+            function cleanup(){
+
+                if (
+                    script.parentNode
+                ){
+
+                    script.parentNode
+                        .removeChild(
+                            script
+                        );
+
+                }
+
+                try{
+
+                    delete window[
+                        callback
+                    ];
+
+                }
+                catch(e){}
+
+            }
+
+
+            const timeout =
+                setTimeout(
+                    function(){
+
+                        if(finished){
+                            return;
+                        }
+
+                        finished = true;
+
+                        cleanup();
+
+                        reject(
+                            new Error(
+                                "API request timed out."
+                            )
+                        );
+
+                    },
+                    60000
+                );
+
+
+            window[callback] =
+                function(data){
+
+                    if(finished){
+                        return;
+                    }
+
+                    finished = true;
+
+                    clearTimeout(
+                        timeout
+                    );
+
+                    cleanup();
+
+                    if(
+                        data &&
+                        data.ok === false
+                    ){
+
+                        reject(
+                            new Error(
+                                data.error ||
+                                data.message ||
+                                "API request failed."
+                            )
+                        );
+
+                        return;
+
+                    }
+
+                    resolve(
+                        data
+                    );
+
+                };
+
+
+            script.onerror =
+                function(){
+
+                    if(finished){
+                        return;
+                    }
+
+                    finished = true;
+
+                    clearTimeout(
+                        timeout
+                    );
+
+                    cleanup();
+
+                    reject(
+                        new Error(
+                            "Unable to connect to Apps Script."
+                        )
+                    );
+
+                };
+
+
+            script.src =
+                API_URL +
+                (
+                    API_URL.indexOf("?") >= 0
+                        ? "&"
+                        : "?"
+                ) +
+                query.toString();
+
+
+            document.body.appendChild(
+                script
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
    LOGIN
-   ========================================================== */
+   ========================================================= */
 
-function showLogin(){
+async function sendOTP(){
 
-  document
-    .getElementById(
-      'loginScreen'
-    )
-    .style.display =
-      'flex';
-
-
-  document
-    .getElementById(
-      'app'
-    )
-    .style.display =
-      'none';
-
-}
-
-
-/* ==========================================================
-   SHOW APP
-   ========================================================== */
-
-function showApp(){
-
-  document
-    .getElementById(
-      'loginScreen'
-    )
-    .style.display =
-      'none';
-
-
-  document
-    .getElementById(
-      'app'
-    )
-    .style.display =
-      'block';
-
-}
-
-
-/* ==========================================================
-   SEND OTP
-   ========================================================== */
-
-function sendOTP(){
-
-  const email =
-    document
-      .getElementById(
-        'email'
-      )
-      .value
-      .trim();
-
-
-  if (!email) {
-
-    setLoginStatus(
-      'Please enter your Gmail address.',
-      true
-    );
-
-    return;
-
-  }
-
-
-  setLoginStatus(
-    'Sending OTP...',
-    false
-  );
-
-
-  document
-    .getElementById(
-      'sendOtpBtn'
-    )
-    .disabled =
-      true;
-
-
-  google.script.run
-
-    .withSuccessHandler(
-      function(result){
-
+    const email =
         document
-          .getElementById(
-            'sendOtpBtn'
-          )
-          .disabled =
-            false;
+            .getElementById(
+                "email"
+            )
+            .value
+            .trim();
 
 
-        if (!result || !result.ok) {
+    if(!email){
 
-          setLoginStatus(
-            result
-              ? result.message
-              : 'Unable to send OTP.',
+        setLoginStatus(
+            "Please enter your Gmail address.",
             true
-          );
+        );
 
-          return;
+        return;
+
+    }
+
+
+    try{
+
+        setLoginStatus(
+            "Sending OTP...",
+            false
+        );
+
+
+        const result =
+            await apiCall(
+                "sendOTP",
+                {
+                    email:email
+                }
+            );
+
+
+        if(
+            !result ||
+            result.ok !== true
+        ){
+
+            throw new Error(
+                result &&
+                (
+                    result.error ||
+                    result.message
+                )
+                    ? (
+                        result.error ||
+                        result.message
+                    )
+                    : "Unable to send OTP."
+            );
 
         }
 
 
         document
-          .getElementById(
-            'otp'
-          )
-          .style.display =
-            'block';
+            .getElementById(
+                "otp"
+            )
+            .style.display =
+                "block";
 
 
         document
-          .getElementById(
-            'verifyBtn'
-          )
-          .style.display =
-            'block';
+            .getElementById(
+                "verifyBtn"
+            )
+            .style.display =
+                "block";
 
 
         setLoginStatus(
-          result.message,
-          false
+            "OTP sent. Check your email.",
+            false
         );
 
-
-        document
-          .getElementById(
-            'otp'
-          )
-          .focus();
-
-      }
-    )
-
-    .withFailureHandler(
-      function(error){
-
-        document
-          .getElementById(
-            'sendOtpBtn'
-          )
-          .disabled =
-            false;
-
+    }
+    catch(error){
 
         setLoginStatus(
-          error.message ||
-          String(error),
-          true
+            error.message,
+            true
         );
 
-      }
-    )
-
-    .sendOTP(
-      email
-    );
+    }
 
 }
 
 
-/* ==========================================================
+/* =========================================================
    VERIFY OTP
-   ========================================================== */
+   ========================================================= */
 
-function verifyOTP(){
+async function verifyOTP(){
 
-  const email =
-    document
-      .getElementById(
-        'email'
-      )
-      .value
-      .trim();
-
-
-  const otp =
-    document
-      .getElementById(
-        'otp'
-      )
-      .value
-      .trim();
-
-
-  if (!email || !otp) {
-
-    setLoginStatus(
-      'Enter your email and OTP.',
-      true
-    );
-
-    return;
-
-  }
-
-
-  setLoginStatus(
-    'Verifying...',
-    false
-  );
-
-
-  document
-    .getElementById(
-      'verifyBtn'
-    )
-    .disabled =
-      true;
-
-
-  google.script.run
-
-    .withSuccessHandler(
-      function(result){
-
+    const email =
         document
-          .getElementById(
-            'verifyBtn'
-          )
-          .disabled =
-            false;
+            .getElementById(
+                "email"
+            )
+            .value
+            .trim();
 
 
-        if (!result || !result.ok) {
+    const otp =
+        document
+            .getElementById(
+                "otp"
+            )
+            .value
+            .trim();
 
-          setLoginStatus(
-            result
-              ? result.message
-              : 'Login failed.',
+
+    if(!email || !otp){
+
+        setLoginStatus(
+            "Enter your email and OTP.",
             true
-          );
+        );
 
-          return;
+        return;
+
+    }
+
+
+    try{
+
+        setLoginStatus(
+            "Verifying OTP...",
+            false
+        );
+
+
+        const result =
+            await apiCall(
+                "verifyOTP",
+                {
+                    email:email,
+                    otp:otp
+                }
+            );
+
+
+        if(
+            !result ||
+            result.ok !== true
+        ){
+
+            throw new Error(
+                result.error ||
+                "Invalid OTP."
+            );
 
         }
 
 
-        sessionId =
-          result.session;
+        session =
+            result.session;
 
 
         currentEmail =
-          result.email;
+            result.email;
 
 
         localStorage.setItem(
-          'acebedo_inventory_session',
-          sessionId
+            "acebedo_inventory_session",
+            session
         );
 
 
         localStorage.setItem(
-          'acebedo_inventory_email',
-          currentEmail
+            "acebedo_inventory_email",
+            currentEmail
         );
 
 
         showApp();
 
-      }
-    )
-
-    .withFailureHandler(
-      function(error){
-
-        document
-          .getElementById(
-            'verifyBtn'
-          )
-          .disabled =
-            false;
-
 
         setLoginStatus(
-          error.message ||
-          String(error),
-          true
-        );
-
-      }
-    )
-
-    .verifyOTP(
-      email,
-      otp
-    );
-
-}
-
-
-/* ==========================================================
-   LOGIN STATUS
-   ========================================================== */
-
-function setLoginStatus(
-  message,
-  isError
-){
-
-  const element =
-    document
-      .getElementById(
-        'loginStatus'
-      );
-
-
-  element.textContent =
-    message;
-
-
-  element.className =
-    'status ' +
-    (
-      isError
-        ? 'error'
-        : 'success'
-    );
-
-}
-
-
-/* ==========================================================
-   CHECK SESSION
-   ========================================================== */
-
-function checkSession(){
-
-  google.script.run
-
-    .withSuccessHandler(
-      function(result){
-
-        if (
-          result &&
-          result.ok
-        ) {
-
-          currentEmail =
-            result.email;
-
-
-          localStorage.setItem(
-            'acebedo_inventory_email',
-            currentEmail
-          );
-
-
-          showApp();
-
-        }
-        else {
-
-          clearSession();
-
-        }
-
-      }
-    )
-
-    .withFailureHandler(
-      function(){
-
-        clearSession();
-
-      }
-    )
-
-    .checkSession(
-      sessionId
-    );
-
-}
-
-
-/* ==========================================================
-   LOGOUT
-   ========================================================== */
-
-function logoutUser(){
-
-  showConfirm(
-    'Logout',
-    'Are you sure you want to logout?',
-    '🚪',
-    function(){
-
-      google.script.run
-
-        .withSuccessHandler(
-          function(){
-
-            clearSession();
-
-          }
-        )
-
-        .withFailureHandler(
-          function(){
-
-            clearSession();
-
-          }
-        )
-
-        .logout(
-          sessionId
+            "",
+            false
         );
 
     }
-  );
+    catch(error){
+
+        setLoginStatus(
+            error.message,
+            true
+        );
+
+    }
 
 }
 
 
-/* ==========================================================
+/* =========================================================
+   SESSION CHECK
+   ========================================================= */
+
+async function checkExistingSession(){
+
+    if(!session){
+
+        showLogin();
+
+        return;
+
+    }
+
+
+    try{
+
+        const result =
+            await apiCall(
+                "checkSession",
+                {
+                    session:session
+                }
+            );
+
+
+        if(
+            result &&
+            result.ok
+        ){
+
+            currentEmail =
+                result.email ||
+                currentEmail;
+
+            showApp();
+
+        }
+        else{
+
+            clearSession();
+
+        }
+
+    }
+    catch(error){
+
+        clearSession();
+
+    }
+
+}
+
+
+/* =========================================================
+   SHOW LOGIN
+   ========================================================= */
+
+function showLogin(){
+
+    document
+        .getElementById(
+            "loginScreen"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "appScreen"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+}
+
+
+/* =========================================================
+   SHOW APP
+   ========================================================= */
+
+function showApp(){
+
+    document
+        .getElementById(
+            "loginScreen"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "appScreen"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+}
+
+
+/* =========================================================
    CLEAR SESSION
-   ========================================================== */
+   ========================================================= */
 
 function clearSession(){
 
-  sessionId = null;
+    session = "";
 
-  currentEmail = null;
+    currentEmail = "";
 
-  localStorage.removeItem(
-    'acebedo_inventory_session'
-  );
-
-  localStorage.removeItem(
-    'acebedo_inventory_email'
-  );
-
-
-  document
-    .getElementById(
-      'otp'
-    )
-    .style.display =
-      'none';
-
-
-  document
-    .getElementById(
-      'verifyBtn'
-    )
-    .style.display =
-      'none';
-
-
-  showLogin();
-
-}
-
-
-/* ==========================================================
-   SEARCH
-   ========================================================== */
-
-function searchDashboard(){
-
-  const branch =
-    document
-      .getElementById(
-        'branchSelect'
-      )
-      .value;
-
-
-  const report =
-    document
-      .getElementById(
-        'sheetSelect'
-      )
-      .value;
-
-
-  const search =
-    document
-      .getElementById(
-        'searchBox'
-      )
-      .value
-      .trim();
-
-
-  if (!branch) {
-
-    showConfirm(
-      'Branch Required',
-      'Please select a branch first.',
-      '⚠️',
-      null,
-      false
+    localStorage.removeItem(
+        "acebedo_inventory_session"
     );
 
-    return;
+    localStorage.removeItem(
+        "acebedo_inventory_email"
+    );
 
-  }
-
-
-  loadDashboard(
-    branch,
-    report,
-    search
-  );
+    showLogin();
 
 }
 
 
-/* ==========================================================
-   REFRESH
-   ========================================================== */
+/* =========================================================
+   LOGOUT
+   ========================================================= */
 
-function refreshDashboard(){
+async function logoutUser(){
 
-  const branch =
-    document
-      .getElementById(
-        'branchSelect'
-      )
-      .value;
+    try{
 
+        if(session){
 
-  if (!branch) {
+            await apiCall(
+                "logout",
+                {
+                    session:session
+                }
+            );
 
-    return;
+        }
 
-  }
+    }
+    catch(error){}
 
-
-  const report =
-    document
-      .getElementById(
-        'sheetSelect'
-      )
-      .value;
-
-
-  const search =
-    document
-      .getElementById(
-        'searchBox'
-      )
-      .value
-      .trim();
-
-
-  loadDashboard(
-    branch,
-    report,
-    search
-  );
+    clearSession();
 
 }
 
 
-/* ==========================================================
-   LOAD DASHBOARD
-   ========================================================== */
+/* =========================================================
+   LOGIN STATUS
+   ========================================================= */
 
-function loadDashboard(
-  branch,
-  report,
-  search
+function setLoginStatus(
+    message,
+    error
 ){
 
-  showLoading(
-    'Loading Supabase data...'
-  );
+    const el =
+        document
+            .getElementById(
+                "loginStatus"
+            );
 
 
-  google.script.run
-
-    .withSuccessHandler(
-      function(result){
-
-        hideLoading();
+    el.textContent =
+        message || "";
 
 
-        if (
-          !result ||
-          !result.ok
-        ) {
+    el.style.color =
+        error
+            ? "#dc3545"
+            : "#198754";
 
-          showError(
-            result
-              ? result.message
-              : 'Unable to load dashboard.'
-          );
+}
 
-          return;
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+async function searchDashboard(){
+
+    const branch =
+        document
+            .getElementById(
+                "branchSelect"
+            )
+            .value;
+
+
+    const report =
+        document
+            .getElementById(
+                "sheetSelect"
+            )
+            .value;
+
+
+    const search =
+        document
+            .getElementById(
+                "searchBox"
+            )
+            .value
+            .trim();
+
+
+    if(!branch){
+
+        showDialog(
+            "⚠️",
+            "Select Branch",
+            "Please select a branch first.",
+            null
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        showLoading(
+            "Searching Supabase..."
+        );
+
+
+        const result =
+            await apiCall(
+                "dashboard",
+                {
+                    session:session,
+                    branch:branch,
+                    report:report,
+                    search:search
+                }
+            );
+
+
+        if(
+            !result ||
+            result.ok !== true
+        ){
+
+            throw new Error(
+                result.error ||
+                "Unable to load dashboard."
+            );
 
         }
 
 
-        allData =
-          result.data ||
-          [];
-
-
-        currentPage =
-          1;
-
-
-        document
-          .getElementById(
-            'availableCount'
-          )
-          .textContent =
-            formatNumber(
-              result.availableCount
-            );
+        currentData =
+            Array.isArray(
+                result.data
+            )
+                ? result.data
+                : [];
 
 
         document
-          .getElementById(
-            'soldCount'
-          )
-          .textContent =
-            formatNumber(
-              result.soldCount
-            );
+            .getElementById(
+                "availableCount"
+            )
+            .textContent =
+                formatNumber(
+                    result.availableCount || 0
+                );
 
 
         document
-          .getElementById(
-            'auditCount'
-          )
-          .textContent =
-            formatNumber(
-              result.auditCount
-            );
+            .getElementById(
+                "soldCount"
+            )
+            .textContent =
+                formatNumber(
+                    result.soldCount || 0
+                );
 
+
+        document
+            .getElementById(
+                "auditCount"
+            )
+            .textContent =
+                formatNumber(
+                    result.auditCount || 0
+                );
+
+
+        document
+            .getElementById(
+                "showingCount"
+            )
+            .textContent =
+                formatNumber(
+                    result.showingCount || 0
+                );
+
+
+        currentPage = 1;
 
         renderTable();
 
-      }
-    )
+    }
+    catch(error){
 
-    .withFailureHandler(
-      function(error){
+        handleAPIError(
+            error
+        );
+
+    }
+    finally{
 
         hideLoading();
 
-        handleServerError(
-          error
-        );
-
-      }
-    )
-
-    .getDashboard(
-      sessionId,
-      branch,
-      report,
-      search
-    );
+    }
 
 }
 
 
-/* ==========================================================
+/* =========================================================
+   REFRESH
+   ========================================================= */
+
+function refreshDashboard(){
+
+    searchDashboard();
+
+}
+
+
+/* =========================================================
+   ENTER KEY SEARCH
+   ========================================================= */
+
+function searchKeyDown(event){
+
+    if(
+        event.key === "Enter"
+    ){
+
+        searchDashboard();
+
+    }
+
+}
+
+
+/* =========================================================
    RENDER TABLE
-   ========================================================== */
+   ========================================================= */
 
 function renderTable(){
 
-  const tbody =
+    const tbody =
+        document
+            .getElementById(
+                "tableBody"
+            );
+
+
+    const total =
+        currentData.length;
+
+
+    const totalPages =
+        total === 0
+            ? 0
+            : Math.ceil(
+                total /
+                rowsPerPage
+            );
+
+
+    if(
+        currentPage >
+        totalPages &&
+        totalPages > 0
+    ){
+
+        currentPage =
+            totalPages;
+
+    }
+
+
+    const start =
+        (
+            currentPage - 1
+        ) *
+        rowsPerPage;
+
+
+    const end =
+        start +
+        rowsPerPage;
+
+
+    const rows =
+        currentData.slice(
+            start,
+            end
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    if(!rows.length){
+
+        const tr =
+            document.createElement(
+                "tr"
+            );
+
+
+        tr.innerHTML =
+            `
+            <td
+                colspan="7"
+                style="text-align:center;padding:40px;"
+            >
+                No records found.
+            </td>
+            `;
+
+
+        tbody.appendChild(
+            tr
+        );
+
+    }
+    else{
+
+        rows.forEach(
+            function(row){
+
+                const tr =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                tr.innerHTML = `
+
+                    <td>
+                        ${escapeHTML(
+                            row.branchName ||
+                            row.branch ||
+                            ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            row.lenstype || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            row.description || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            row.tag || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            row.si || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            row.date || ""
+                        )}
+                    </td>
+
+                    <td>
+                        <button
+                            class="actionBtn"
+                            onclick="openEditModal(
+                                '${escapeJS(row.branch)}',
+                                '${escapeJS(row.tag)}',
+                                '${escapeJS(row.si)}'
+                            )"
+                        >
+                            ✏️ Edit
+                        </button>
+                    </td>
+
+                `;
+
+
+                tbody.appendChild(
+                    tr
+                );
+
+            }
+        );
+
+    }
+
+
     document
-      .getElementById(
-        'tableBody'
-      );
-
-
-  const total =
-    allData.length;
-
-
-  const totalPages =
-    Math.ceil(
-      total /
-      PAGE_SIZE
-    );
-
-
-  if (
-    total === 0
-  ) {
-
-    tbody.innerHTML = `
-
-      <tr>
-
-        <td
-          colspan="7"
-          style="
-            text-align:center;
-            padding:40px;
-          "
-        >
-          No records found.
-        </td>
-
-      </tr>
-
-    `;
+        .getElementById(
+            "pageInfo"
+        )
+        .textContent =
+            totalPages
+                ? (
+                    "Page " +
+                    currentPage +
+                    " / " +
+                    totalPages
+                )
+                : "Page 0 / 0";
 
 
     document
-      .getElementById(
-        'showingCount'
-      )
-      .textContent =
-        '0';
+        .getElementById(
+            "prevBtn"
+        )
+        .disabled =
+            currentPage <= 1;
 
 
-    updatePagination(
-      0
-    );
-
-
-    return;
-
-  }
-
-
-  if (
-    currentPage >
-    totalPages
-  ) {
-
-    currentPage =
-      totalPages;
-
-  }
-
-
-  const start =
-    (
-      currentPage - 1
-    ) *
-    PAGE_SIZE;
-
-
-  const end =
-    Math.min(
-      start +
-      PAGE_SIZE,
-      total
-    );
-
-
-  const pageRows =
-    allData.slice(
-      start,
-      end
-    );
-
-
-  tbody.innerHTML =
-    pageRows
-      .map(
-        function(item){
-
-          return `
-
-            <tr>
-
-              <td>
-                ${escapeHtml(
-                  item.branchName ||
-                  item.branch ||
-                  ''
-                )}
-              </td>
-
-              <td>
-                ${escapeHtml(
-                  item.lenstype ||
-                  ''
-                )}
-              </td>
-
-              <td>
-                ${escapeHtml(
-                  item.description ||
-                  ''
-                )}
-              </td>
-
-              <td>
-                ${escapeHtml(
-                  item.tag ||
-                  ''
-                )}
-              </td>
-
-              <td>
-                ${escapeHtml(
-                  item.si ||
-                  ''
-                )}
-              </td>
-
-              <td>
-                ${escapeHtml(
-                  item.date ||
-                  ''
-                )}
-              </td>
-
-              <td>
-
-                <button
-                  class="primaryBtn"
-                  onclick="
-                    openEditModal(
-                      '${jsEscape(item.branch)}',
-                      '${jsEscape(item.tag)}',
-                      '${jsEscape(item.si)}'
-                    )
-                  "
-                >
-                  ✏️ Edit
-                </button>
-
-              </td>
-
-            </tr>
-
-          `;
-
-        }
-      )
-      .join('');
-
-
-  document
-    .getElementById(
-      'showingCount'
-    )
-    .textContent =
-      formatNumber(
-        total
-      );
-
-
-  updatePagination(
-    totalPages
-  );
+    document
+        .getElementById(
+            "nextBtn"
+        )
+        .disabled =
+            currentPage >=
+            totalPages;
 
 }
 
 
-/* ==========================================================
+/* =========================================================
    PAGINATION
-   ========================================================== */
-
-function updatePagination(
-  totalPages
-){
-
-  document
-    .getElementById(
-      'pageInfo'
-    )
-    .textContent =
-      totalPages
-        ? 'Page ' +
-          currentPage +
-          ' / ' +
-          totalPages
-        : 'Page 0 / 0';
-
-
-  document
-    .getElementById(
-      'prevBtn'
-    )
-    .disabled =
-      currentPage <= 1;
-
-
-  document
-    .getElementById(
-      'nextBtn'
-    )
-    .disabled =
-      currentPage >=
-      totalPages ||
-      totalPages === 0;
-
-}
-
+   ========================================================= */
 
 function previousPage(){
 
-  if (
-    currentPage > 1
-  ) {
+    if(currentPage > 1){
 
-    currentPage--;
+        currentPage--;
 
-    renderTable();
+        renderTable();
 
-  }
+    }
 
 }
 
 
 function nextPage(){
 
-  const totalPages =
-    Math.ceil(
-      allData.length /
-      PAGE_SIZE
-    );
+    const totalPages =
+        Math.ceil(
+            currentData.length /
+            rowsPerPage
+        );
 
 
-  if (
-    currentPage <
-    totalPages
-  ) {
+    if(
+        currentPage <
+        totalPages
+    ){
 
-    currentPage++;
+        currentPage++;
 
-    renderTable();
+        renderTable();
 
-  }
+    }
 
 }
 
 
-/* ==========================================================
+/* =========================================================
    EDIT MODAL
-   ========================================================== */
+   ========================================================= */
 
 function openEditModal(
-  branch,
-  tag,
-  si
+    branch,
+    tag,
+    si
 ){
 
-  document
-    .getElementById(
-      'editBranch'
-    )
-    .value =
-      branch;
+    document
+        .getElementById(
+            "editBranch"
+        )
+        .value =
+            branch;
 
 
-  document
-    .getElementById(
-      'editTag'
-    )
-    .value =
-      tag;
+    document
+        .getElementById(
+            "editTag"
+        )
+        .value =
+            tag;
 
 
-  document
-    .getElementById(
-      'editSI'
-    )
-    .value =
-      si;
+    document
+        .getElementById(
+            "editSI"
+        )
+        .value =
+            si;
 
 
-  document
-    .getElementById(
-      'editModal'
-    )
-    .style.display =
-      'flex';
+    document
+        .getElementById(
+            "editModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
 
 }
 
 
 function closeEditModal(){
 
-  document
-    .getElementById(
-      'editModal'
-    )
-    .style.display =
-      'none';
+    document
+        .getElementById(
+            "editModal"
+        )
+        .classList.add(
+            "hidden"
+        );
 
 }
 
 
-/* ==========================================================
+/* =========================================================
    SAVE EDIT
-   ========================================================== */
+   ========================================================= */
 
-function saveEdit(){
+async function saveEdit(){
 
-  const branch =
-    document
-      .getElementById(
-        'editBranch'
-      )
-      .value;
-
-
-  const tag =
-    document
-      .getElementById(
-        'editTag'
-      )
-      .value;
+    const branch =
+        document
+            .getElementById(
+                "editBranch"
+            )
+            .value;
 
 
-  const newSI =
-    document
-      .getElementById(
-        'editSI'
-      )
-      .value
-      .trim();
+    const tag =
+        document
+            .getElementById(
+                "editTag"
+            )
+            .value;
 
 
-  if (!newSI) {
-
-    alert(
-      'SI Number is required.'
-    );
-
-    return;
-
-  }
+    const si =
+        document
+            .getElementById(
+                "editSI"
+            )
+            .value
+            .trim();
 
 
-  closeEditModal();
+    if(!si){
+
+        showDialog(
+            "⚠️",
+            "Missing SI",
+            "Please enter the SI Number.",
+            null
+        );
+
+        return;
+
+    }
 
 
-  showLoading(
-    'Updating SI in Supabase...'
-  );
+    try{
+
+        closeEditModal();
+
+        showLoading(
+            "Updating SI in Supabase..."
+        );
 
 
-  google.script.run
+        await apiCall(
+            "updateSI",
+            {
+                session:session,
+                branch:branch,
+                tag:tag,
+                si:si
+            }
+        );
 
-    .withSuccessHandler(
-      function(result){
 
         hideLoading();
 
 
-        if (
-          !result ||
-          !result.ok
-        ) {
+        showDialog(
+            "✅",
+            "Updated",
+            "SI Number updated successfully.",
+            function(){
 
-          showError(
-            result
-              ? result.message
-              : 'Update failed.'
-          );
+                searchDashboard();
 
-          return;
-
-        }
-
-
-        showConfirm(
-          'Updated',
-          'SI Number updated successfully.',
-          '✅',
-          function(){
-
-            refreshDashboard();
-
-          },
-          false
+            }
         );
 
-      }
-    )
-
-    .withFailureHandler(
-      function(error){
+    }
+    catch(error){
 
         hideLoading();
 
-        handleServerError(
-          error
+        handleAPIError(
+            error
         );
 
-      }
-    )
-
-    .updateSI(
-      sessionId,
-      branch,
-      tag,
-      newSI
-    );
+    }
 
 }
 
 
-/* ==========================================================
-   UPDATE STOCKS MODAL
-   ========================================================== */
+/* =========================================================
+   UPDATE STOCK MODAL
+   ========================================================= */
 
 function openUpdateStockModal(){
 
-  document
-    .getElementById(
-      'updateStockModal'
-    )
-    .style.display =
-      'flex';
+    document
+        .getElementById(
+            "updateStockModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
 
 }
 
 
 function closeUpdateStockModal(){
 
-  document
-    .getElementById(
-      'updateStockModal'
-    )
-    .style.display =
-      'none';
+    document
+        .getElementById(
+            "updateStockModal"
+        )
+        .classList.add(
+            "hidden"
+        );
 
 }
 
 
-/* ==========================================================
+/* =========================================================
    UPDATE STOCKS
-   ========================================================== */
+   ========================================================= */
 
-function updateStocks(){
+async function updateStocks(){
 
-  const branch =
-    document
-      .getElementById(
-        'updateBranch'
-      )
-      .value;
-
-
-  const file =
-    document
-      .getElementById(
-        'stockFile'
-      )
-      .files[0];
+    const branch =
+        document
+            .getElementById(
+                "updateBranch"
+            )
+            .value;
 
 
-  if (!branch) {
-
-    alert(
-      'Please select a branch.'
-    );
-
-    return;
-
-  }
+    const file =
+        document
+            .getElementById(
+                "stockFile"
+            )
+            .files[0];
 
 
-  if (!file) {
+    if(!branch){
 
-    alert(
-      'Please select an Excel file.'
-    );
+        showDialog(
+            "⚠️",
+            "Select Branch",
+            "Please select a branch.",
+            null
+        );
 
-    return;
+        return;
 
-  }
-
-
-  showLoading(
-    'Reading Excel file...'
-  );
+    }
 
 
-  const reader =
-    new FileReader();
+    if(!file){
+
+        showDialog(
+            "⚠️",
+            "Select File",
+            "Please select an Excel file.",
+            null
+        );
+
+        return;
+
+    }
 
 
-  reader.onload =
-    function(event){
+    try{
 
-      try {
-
-        const data =
-          new Uint8Array(
-            event.target.result
-          );
-
-
-        const workbook =
-          XLSX.read(
-            data,
-            {
-              type:
-                'array',
-
-              cellDates:
-                true
-            }
-          );
-
-
-        const firstSheet =
-          workbook.Sheets[
-            workbook.SheetNames[0]
-          ];
-
-
-        let rows =
-          XLSX.utils.sheet_to_json(
-            firstSheet,
-            {
-              header:1,
-
-              defval:'',
-
-              raw:true
-            }
-          );
-
-
-        /*
-         * Remove completely empty rows.
-         */
-
-        rows =
-          rows.filter(
-            function(row){
-
-              return row.some(
-                function(value){
-
-                  return (
-                    value !== '' &&
-                    value !== null &&
-                    value !== undefined
-                  );
-
-                }
-              );
-
-            }
-          );
-
-
-        /*
-         * Remove header row if it is present.
-         */
-
-        if (
-          rows.length &&
-          String(
-            rows[0][0] ||
-            ''
-          )
-          .trim()
-          .toUpperCase() ===
-          'SDATE'
-        ) {
-
-          rows.shift();
-
-        }
-
-
-        if (!rows.length) {
-
-          hideLoading();
-
-          alert(
-            'The Excel file contains no data.'
-          );
-
-          return;
-
-        }
-
-
-        /*
-         * Normalize each row to 27 columns.
-         */
-
-        rows =
-          rows.map(
-            function(row){
-
-              const result =
-                new Array(27)
-                  .fill('');
-
-
-              for (
-                let i = 0;
-                i < 27;
-                i++
-              ) {
-
-                if (
-                  row[i] !==
-                  undefined &&
-                  row[i] !==
-                  null
-                ) {
-
-                  result[i] =
-                    row[i];
-
-                }
-
-              }
-
-
-              return result;
-
-            }
-          );
-
+        closeUpdateStockModal();
 
         showLoading(
-          'Uploading ' +
-          formatNumber(
-            rows.length
-          ) +
-          ' records to Supabase...'
+            "Reading Excel file..."
         );
 
 
-        google.script.run
-
-          .withSuccessHandler(
-            function(result){
-
-              hideLoading();
-
-
-              if (
-                !result ||
-                !result.ok
-              ) {
-
-                showError(
-                  result
-                    ? result.message
-                    : 'Update failed.'
-                );
-
-                return;
-
-              }
-
-
-              closeUpdateStockModal();
-
-
-              document
-                .getElementById(
-                  'stockFile'
-                )
-                .value =
-                  '';
-
-
-              showConfirm(
-                'Update Complete',
-                result.message,
-                '✅',
-                function(){
-
-                  const selectedBranch =
-                    document
-                      .getElementById(
-                        'branchSelect'
-                      )
-                      .value;
-
-
-                  if (
-                    selectedBranch ===
-                    branch
-                  ) {
-
-                    refreshDashboard();
-
-                  }
-
-                },
-                false
-              );
-
-            }
-          )
-
-          .withFailureHandler(
-            function(error){
-
-              hideLoading();
-
-              handleServerError(
-                error
-              );
-
-            }
-          )
-
-          .updateStocks(
-            sessionId,
-            branch,
-            rows
-          );
-
-      }
-      catch(error){
-
-        hideLoading();
-
-        alert(
-          'Unable to read Excel file:\n\n' +
-          error.message
-        );
-
-      }
-
-    };
-
-
-  reader.onerror =
-    function(){
-
-      hideLoading();
-
-      alert(
-        'Unable to read the Excel file.'
-      );
-
-    };
-
-
-  reader.readAsArrayBuffer(
-    file
-  );
-
-}
-
-
-/* ==========================================================
-   EXPORT
-   ========================================================== */
-
-function openExportModal(){
-
-  document
-    .getElementById(
-      'exportModal'
-    )
-    .style.display =
-      'flex';
-
-}
-
-
-function closeExportModal(){
-
-  document
-    .getElementById(
-      'exportModal'
-    )
-    .style.display =
-      'none';
-
-}
-
-
-function startExport(){
-
-  const branch =
-    document
-      .getElementById(
-        'exportBranch'
-      )
-      .value;
-
-
-  if (!branch) {
-
-    alert(
-      'Please select a branch.'
-    );
-
-    return;
-
-  }
-
-
-  closeExportModal();
-
-
-  showLoading(
-    'Preparing Supabase export...'
-  );
-
-
-  google.script.run
-
-    .withSuccessHandler(
-      function(result){
-
-        hideLoading();
-
-
-        if (
-          !result ||
-          !result.ok
-        ) {
-
-          showError(
-            result
-              ? result.message
-              : 'Export failed.'
-          );
-
-          return;
+        const rows =
+            await readExcelFile(
+                file
+            );
+
+
+        if(
+            !rows ||
+            rows.length < 2
+        ){
+
+            throw new Error(
+                "The Excel file does not contain stock data."
+            );
 
         }
 
 
         /*
-         * Open temporary XLSX spreadsheet.
+         * Remove header.
          */
 
-        window.open(
-          result.url,
-          '_blank'
-        );
+        const dataRows =
+            rows.slice(1);
 
 
-        showConfirm(
-          'Export Ready',
-          'The export has been created.\n\nIt contains data loaded directly from Supabase.',
-          '📥',
-          null,
-          false
-        );
+        /*
+         * Chunk upload.
+         *
+         * We intentionally use small
+         * chunks because the browser
+         * communicates with Apps Script
+         * using JSONP.
+         */
 
-      }
-    )
+        const chunkSize = 20;
 
-    .withFailureHandler(
-      function(error){
+        let uploaded = 0;
+
+
+        for(
+            let i = 0;
+            i < dataRows.length;
+            i += chunkSize
+        ){
+
+            const chunk =
+                dataRows.slice(
+                    i,
+                    i + chunkSize
+                );
+
+
+            const json =
+                JSON.stringify(
+                    chunk
+                );
+
+
+            const encoded =
+                uint8ToBase64(
+                    new TextEncoder()
+                        .encode(
+                            json
+                        )
+                );
+
+
+            showLoading(
+                "Uploading " +
+                Math.min(
+                    i + chunk.length,
+                    dataRows.length
+                ) +
+                " / " +
+                dataRows.length +
+                "..."
+            );
+
+
+            await apiCall(
+                "uploadChunk",
+                {
+                    session:session,
+                    branch:branch,
+                    chunk:encoded
+                }
+            );
+
+
+            uploaded +=
+                chunk.length;
+
+        }
+
 
         hideLoading();
 
-        handleServerError(
-          error
+
+        document
+            .getElementById(
+                "stockFile"
+            )
+            .value = "";
+
+
+        showDialog(
+            "✅",
+            "Update Complete",
+            "Successfully uploaded " +
+            uploaded +
+            " stock records to " +
+            branch +
+            ".",
+            function(){
+
+                searchDashboard();
+
+            }
         );
 
-      }
-    )
+    }
+    catch(error){
 
-    .exportReport(
-      sessionId,
-      branch
+        hideLoading();
+
+        handleAPIError(
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   READ EXCEL
+   ========================================================= */
+
+function readExcelFile(file){
+
+    return new Promise(
+        function(resolve,reject){
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(event){
+
+                    try{
+
+                        const workbook =
+                            XLSX.read(
+                                event.target.result,
+                                {
+                                    type:"array",
+                                    cellDates:true
+                                }
+                            );
+
+
+                        const sheetName =
+                            workbook
+                                .SheetNames[0];
+
+
+                        const sheet =
+                            workbook
+                                .Sheets[
+                                    sheetName
+                                ];
+
+
+                        const rows =
+                            XLSX.utils
+                                .sheet_to_json(
+                                    sheet,
+                                    {
+                                        header:1,
+                                        defval:""
+                                    }
+                                );
+
+
+                        resolve(
+                            rows
+                        );
+
+                    }
+                    catch(error){
+
+                        reject(
+                            new Error(
+                                "Unable to read Excel file: " +
+                                error.message
+                            )
+                        );
+
+                    }
+
+                };
+
+
+            reader.onerror =
+                function(){
+
+                    reject(
+                        new Error(
+                            "Unable to read the selected file."
+                        )
+                    );
+
+                };
+
+
+            reader.readAsArrayBuffer(
+                file
+            );
+
+        }
     );
 
 }
 
 
-/* ==========================================================
+/* =========================================================
+   BASE64
+   ========================================================= */
+
+function uint8ToBase64(
+    bytes
+){
+
+    let binary = "";
+
+    const chunkSize = 0x8000;
+
+    for(
+        let i = 0;
+        i < bytes.length;
+        i += chunkSize
+    ){
+
+        binary += String.fromCharCode.apply(
+            null,
+            bytes.subarray(
+                i,
+                Math.min(
+                    i + chunkSize,
+                    bytes.length
+                )
+            )
+        );
+
+    }
+
+    return btoa(
+        binary
+    );
+
+}
+
+
+/* =========================================================
    CLEAR MODAL
-   ========================================================== */
+   ========================================================= */
 
 function openClearModal(){
 
-  document
-    .getElementById(
-      'clearModal'
-    )
-    .style.display =
-      'flex';
+    document
+        .getElementById(
+            "clearModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
 
 }
 
 
 function closeClearModal(){
 
-  document
-    .getElementById(
-      'clearModal'
-    )
-    .style.display =
-      'none';
+    document
+        .getElementById(
+            "clearModal"
+        )
+        .classList.add(
+            "hidden"
+        );
 
 }
 
 
-/* ==========================================================
+/* =========================================================
    CLEAR REPORT
-   ========================================================== */
+   ========================================================= */
 
-function clearReport(){
+async function clearReport(){
 
-  const branch =
-    document
-      .getElementById(
-        'clearBranch'
-      )
-      .value;
-
-
-  const report =
-    document
-      .getElementById(
-        'clearSheet'
-      )
-      .value;
+    const branch =
+        document
+            .getElementById(
+                "clearBranch"
+            )
+            .value;
 
 
-  if (!branch) {
-
-    alert(
-      'Please select a branch.'
-    );
-
-    return;
-
-  }
+    const report =
+        document
+            .getElementById(
+                "clearSheet"
+            )
+            .value;
 
 
-  if (!report) {
+    if(!branch){
 
-    alert(
-      'Please select a report.'
-    );
+        showDialog(
+            "⚠️",
+            "Select Branch",
+            "Please select a branch.",
+            null
+        );
 
-    return;
+        return;
 
-  }
-
-
-  const reportName =
-    report === 'stocks'
-      ? 'Stocks'
-      : report === 'SCANRESULTS'
-        ? 'Sold Out'
-        : 'Re-Inventory';
+    }
 
 
-  showConfirm(
-    'Clear Report',
-    'WARNING!\n\nYou are about to clear:\n\n' +
-    branch +
-    ' - ' +
-    reportName +
-    '\n\nThis action cannot be undone.',
-    '⚠️',
-    function(){
+    if(!report){
 
-      closeClearModal();
+        showDialog(
+            "⚠️",
+            "Select Report",
+            "Please select a report.",
+            null
+        );
 
+        return;
 
-      showLoading(
-        'Clearing Supabase data...'
-      );
+    }
 
 
-      google.script.run
-
-        .withSuccessHandler(
-          function(result){
-
-            hideLoading();
+    closeClearModal();
 
 
-            if (
-              !result ||
-              !result.ok
-            ) {
+    showDialog(
+        "⚠️",
+        "Clear Report",
+        "This will permanently delete all records in:\n\n" +
+        branch +
+        " / " +
+        report +
+        "\n\nContinue?",
+        async function(){
 
-              showError(
-                result
-                  ? result.message
-                  : 'Clear failed.'
-              );
+            try{
 
-              return;
+                showLoading(
+                    "Clearing Supabase..."
+                );
+
+
+                await apiCall(
+                    "clearReport",
+                    {
+                        session:session,
+                        branch:branch,
+                        report:report
+                    }
+                );
+
+
+                hideLoading();
+
+
+                showDialog(
+                    "✅",
+                    "Cleared",
+                    "Report cleared successfully.",
+                    function(){
+
+                        searchDashboard();
+
+                    }
+                );
+
+            }
+            catch(error){
+
+                hideLoading();
+
+                handleAPIError(
+                    error
+                );
 
             }
 
+        }
+    );
 
-            showConfirm(
-              'Report Cleared',
-              result.message,
-              '✅',
-              function(){
-
-                const currentBranch =
-                  document
-                    .getElementById(
-                      'branchSelect'
-                    )
-                    .value;
+}
 
 
-                const currentReport =
-                  document
-                    .getElementById(
-                      'sheetSelect'
-                    )
-                    .value;
+/* =========================================================
+   EXPORT MODAL
+   ========================================================= */
+
+function openExportModal(){
+
+    document
+        .getElementById(
+            "exportModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+}
 
 
-                if (
-                  currentBranch ===
-                    branch &&
-                  currentReport ===
-                    report
-                ) {
+function closeExportModal(){
 
-                  refreshDashboard();
+    document
+        .getElementById(
+            "exportModal"
+        )
+        .classList.add(
+            "hidden"
+        );
 
+}
+
+
+/* =========================================================
+   EXPORT
+   ========================================================= */
+
+async function startExport(){
+
+    const branch =
+        document
+            .getElementById(
+                "exportBranch"
+            )
+            .value;
+
+
+    if(!branch){
+
+        showDialog(
+            "⚠️",
+            "Select Branch",
+            "Please select a branch.",
+            null
+        );
+
+        return;
+
+    }
+
+
+    closeExportModal();
+
+
+    try{
+
+        showLoading(
+            "Preparing export..."
+        );
+
+
+        const result =
+            await apiCall(
+                "export",
+                {
+                    session:session,
+                    branch:branch
                 }
-
-              },
-              false
             );
 
-          }
-        )
 
-        .withFailureHandler(
-          function(error){
+        if(
+            !result ||
+            !Array.isArray(
+                result.files
+            )
+        ){
 
-            hideLoading();
-
-            handleServerError(
-              error
+            throw new Error(
+                "No export files were returned."
             );
 
-          }
-        )
+        }
 
-        .clearReport(
-          sessionId,
-          branch,
-          report
+
+        result.files.forEach(
+            function(file){
+
+                downloadTextFile(
+                    file.name,
+                    file.content
+                );
+
+            }
+        );
+
+
+        hideLoading();
+
+
+        showDialog(
+            "✅",
+            "Export Complete",
+            "The STOCKS, SOLD, and AUDIT CSV files have been downloaded.",
+            null
         );
 
     }
-  );
+    catch(error){
+
+        hideLoading();
+
+        handleAPIError(
+            error
+        );
+
+    }
 
 }
 
 
-/* ==========================================================
-   CONFIRMATION DIALOG
-   ========================================================== */
+/* =========================================================
+   DOWNLOAD FILE
+   ========================================================= */
 
-function showConfirm(
-  title,
-  message,
-  icon,
-  callback,
-  showCancel = true
+function downloadTextFile(
+    filename,
+    content
 ){
 
-  document
-    .getElementById(
-      'dialogIcon'
-    )
-    .textContent =
-      icon ||
-      '⚠️';
+    const blob =
+        new Blob(
+            [
+                "\uFEFF" +
+                content
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
 
 
-  document
-    .getElementById(
-      'dialogTitle'
-    )
-    .textContent =
-      title ||
-      'Confirm';
+    const url =
+        URL.createObjectURL(
+            blob
+        );
 
 
-  document
-    .getElementById(
-      'dialogMessage'
-    )
-    .textContent =
-      message ||
-      '';
+    const a =
+        document.createElement(
+            "a"
+        );
 
 
-  dialogCallback =
-    callback;
+    a.href = url;
+
+    a.download =
+        filename;
 
 
-  const modal =
-    document
-      .getElementById(
-        'dialogModal'
-      );
-
-
-  const cancelButton =
-    modal.querySelector(
-      '.dialogButtons button:first-child'
+    document.body.appendChild(
+        a
     );
 
 
-  cancelButton.style.display =
-    showCancel
-      ? 'inline-block'
-      : 'none';
+    a.click();
 
 
-  modal.style.display =
-    'flex';
+    a.remove();
+
+
+    setTimeout(
+        function(){
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        },
+        1000
+    );
 
 }
 
 
-function closeDialog(){
+/* =========================================================
+   DIALOG
+   ========================================================= */
 
-  document
-    .getElementById(
-      'dialogModal'
-    )
-    .style.display =
-      'none';
+function showDialog(
+    icon,
+    title,
+    message,
+    callback
+){
+
+    document
+        .getElementById(
+            "dialogIcon"
+        )
+        .textContent =
+            icon;
 
 
-  dialogCallback =
-    null;
+    document
+        .getElementById(
+            "dialogTitle"
+        )
+        .textContent =
+            title;
+
+
+    document
+        .getElementById(
+            "dialogMessage"
+        )
+        .textContent =
+            message;
+
+
+    dialogCallback =
+        callback;
+
+
+    document
+        .getElementById(
+            "dialogModal"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+}
+
+
+function closeDialog(
+    runCallback
+){
+
+    document
+        .getElementById(
+            "dialogModal"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    const callback =
+        dialogCallback;
+
+
+    dialogCallback =
+        null;
+
+
+    if(
+        runCallback === true &&
+        typeof callback === "function"
+    ){
+
+        callback();
+
+    }
 
 }
 
 
 function dialogOKClick(){
 
-  const callback =
-    dialogCallback;
-
-
-  closeDialog();
-
-
-  if (
-    typeof callback ===
-    'function'
-  ) {
-
-    callback();
-
-  }
+    closeDialog(
+        true
+    );
 
 }
 
 
-/* ==========================================================
+/* =========================================================
    LOADING
-   ========================================================== */
+   ========================================================= */
 
 function showLoading(
-  text
+    text
 ){
 
-  document
-    .getElementById(
-      'loadingText'
-    )
-    .textContent =
-      text ||
-      'Please wait...';
+    document
+        .getElementById(
+            "loadingText"
+        )
+        .textContent =
+            text ||
+            "Please wait...";
 
 
-  document
-    .getElementById(
-      'loadingOverlay'
-    )
-    .style.display =
-      'flex';
+    document
+        .getElementById(
+            "loadingOverlay"
+        )
+        .classList.remove(
+            "hidden"
+        );
 
 }
 
 
 function hideLoading(){
 
-  document
-    .getElementById(
-      'loadingOverlay'
-    )
-    .style.display =
-      'none';
+    document
+        .getElementById(
+            "loadingOverlay"
+        )
+        .classList.add(
+            "hidden"
+        );
 
 }
 
 
-/* ==========================================================
+/* =========================================================
    ERROR HANDLING
-   ========================================================== */
+   ========================================================= */
 
-function handleServerError(
-  error
+function handleAPIError(
+    error
 ){
 
-  const message =
-    error &&
-    error.message
-      ? error.message
-      : String(error);
+    const message =
+        error &&
+        error.message
+            ? error.message
+            : String(error);
 
 
-  if (
-    message.indexOf(
-      'SESSION_EXPIRED'
-    ) !== -1
-  ) {
+    if(
+        message.indexOf(
+            "SESSION_EXPIRED"
+        ) !== -1
+    ){
 
-    clearSession();
+        clearSession();
 
-    alert(
-      'Your session has expired. Please login again.'
-    );
+        showDialog(
+            "🔐",
+            "Session Expired",
+            "Your login session has expired. Please login again.",
+            null
+        );
 
-    return;
-
-  }
-
-
-  showError(
-    message
-  );
-
-}
-
-
-function showError(
-  message
-){
-
-  showConfirm(
-    'Error',
-    message,
-    '❌',
-    null,
-    false
-  );
-
-}
-
-
-/* ==========================================================
-   HTML ESCAPING
-   ========================================================== */
-
-function escapeHtml(
-  value
-){
-
-  return String(
-    value === undefined ||
-    value === null
-      ? ''
-      : value
-  )
-  .replace(
-    /&/g,
-    '&amp;'
-  )
-  .replace(
-    /</g,
-    '&lt;'
-  )
-  .replace(
-    />/g,
-    '&gt;'
-  )
-  .replace(
-    /"/g,
-    '&quot;'
-  )
-  .replace(
-    /'/g,
-    '&#039;'
-  );
-
-}
-
-
-/* ==========================================================
-   JAVASCRIPT STRING ESCAPING
-   ========================================================== */
-
-function jsEscape(
-  value
-){
-
-  return String(
-    value === undefined ||
-    value === null
-      ? ''
-      : value
-  )
-  .replace(
-    /\\/g,
-    '\\\\'
-  )
-  .replace(
-    /'/g,
-    "\\'"
-  )
-  .replace(
-    /\r/g,
-    '\\r'
-  )
-  .replace(
-    /\n/g,
-    '\\n'
-  );
-
-}
-
-
-/* ==========================================================
-   NUMBER FORMAT
-   ========================================================== */
-
-function formatNumber(
-  value
-){
-
-  const number =
-    Number(value) || 0;
-
-
-  return number.toLocaleString();
-
-}
-
-
-/* ==========================================================
-   CLOSE MODALS WHEN CLICKING OUTSIDE
-   ========================================================== */
-
-document.addEventListener(
-  'click',
-  function(event){
-
-    if (
-      event.target.classList.contains(
-        'modalOverlay'
-      )
-    ) {
-
-      event.target.style.display =
-        'none';
+        return;
 
     }
 
-  }
+
+    showDialog(
+        "❌",
+        "Error",
+        message,
+        null
+    );
+
+}
+
+
+/* =========================================================
+   HTML ESCAPE
+   ========================================================= */
+
+function escapeHTML(
+    value
+){
+
+    return String(
+        value === undefined ||
+        value === null
+            ? ""
+            : value
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   JAVASCRIPT STRING ESCAPE
+   ========================================================= */
+
+function escapeJS(
+    value
+){
+
+    return String(
+        value === undefined ||
+        value === null
+            ? ""
+            : value
+    )
+    .replace(
+        /\\/g,
+        "\\\\"
+    )
+    .replace(
+        /'/g,
+        "\\'"
+    )
+    .replace(
+        /\r/g,
+        "\\r"
+    )
+    .replace(
+        /\n/g,
+        "\\n"
+    );
+
+}
+
+
+/* =========================================================
+   NUMBER FORMAT
+   ========================================================= */
+
+function formatNumber(
+    value
+){
+
+    const number =
+        Number(value) || 0;
+
+
+    return number.toLocaleString();
+
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        checkExistingSession();
+
+    }
 );
 
 </script>

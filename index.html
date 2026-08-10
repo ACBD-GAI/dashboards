@@ -1302,7 +1302,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycby0CYhx4rsPBiTjCI6gHkGSEDrRMywaAiGQ3Gk3HdhaiLCWnpi0kbwbsAnUBZKQH9RZgA/exec';
+  'https://script.google.com/macros/s/AKfycby5Yj5ypu7p0RvrOq9gGlU9SWBc9hhFV1x-bD_rJ-Q-lYuvJ3OsAd222jJ3MZI0Manusg/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -4376,13 +4376,13 @@ function showExportComplete(
    * The server returns exactly ONE XLSX.
    * Do not show CSV files or an export-folder link.
    */
-  const xlsxFile =
+  let xlsxFile =
     files.find(
       function(file) {
 
         return (
           file &&
-          file.url &&
+          (file.url || file.id) &&
           String(
             file.name || ''
           )
@@ -4394,6 +4394,25 @@ function showExportComplete(
 
       }
     );
+
+  /*
+   * Strong fallback: Apps Script may return the file ID even when
+   * the files array/URL is stripped or delayed. Build the download
+   * URL directly from the returned XLSX file ID.
+   */
+  if (!xlsxFile && result.xlsxFileId) {
+
+    xlsxFile = {
+      id:
+        result.xlsxFileId,
+      name:
+        result.xlsxFileName ||
+        ('ACEBEDO_' +
+         (result.branch || 'EXPORT') +
+         '_EXPORT.xlsx')
+    };
+
+  }
 
   if (xlsxFile) {
 

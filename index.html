@@ -220,30 +220,46 @@ th {
 .modalBackdrop {
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.45);
+  background:rgba(15,23,42,.48);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
   display:none;
   align-items:center;
   justify-content:center;
   z-index:1000;
+  padding:18px;
 }
 
 .modal {
   width:min(95%,500px);
-  background:#fff;
-  border-radius:14px;
-  padding:22px;
-  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  background:linear-gradient(180deg,#fff 0%,#f9fbff 100%);
+  border:1px solid rgba(22,119,255,.10);
+  border-radius:20px;
+  padding:24px;
+  box-shadow:0 25px 80px rgba(15,23,42,.28);
+  animation:modalIn .2s ease-out;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:translateY(10px) scale(.97); }
+  to { opacity:1; transform:translateY(0) scale(1); }
 }
 
 .modal h3 {
-  margin-top:0;
+  margin:0 0 18px;
+  font-size:20px;
+  color:#172033;
 }
 
 .modalButtons {
   display:flex;
   justify-content:flex-end;
-  gap:8px;
-  margin-top:20px;
+  gap:9px;
+  margin-top:22px;
+}
+.modalButtons button {
+  min-width:92px;
+  border-radius:10px;
+  font-weight:600;
 }
 
 .fileName {
@@ -258,30 +274,48 @@ th {
 
 #jobQueue {
   position:fixed;
-  right:18px;
-  bottom:18px;
-  width:min(390px,calc(100vw - 36px));
-  background:#fff;
-  border:1px solid #d9d9d9;
-  border-radius:13px;
-  box-shadow:0 10px 35px rgba(0,0,0,.18);
+  right:22px;
+  bottom:22px;
+  width:min(420px,calc(100vw - 30px));
+  background:rgba(255,255,255,.97);
+  border:1px solid rgba(22,119,255,.14);
+  border-radius:20px;
+  box-shadow:0 18px 55px rgba(15,23,42,.22);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
   z-index:5000;
   display:none;
   overflow:hidden;
+  animation:queueIn .25s ease-out;
+}
+@keyframes queueIn {
+  from { opacity:0; transform:translateY(16px) scale(.98); }
+  to { opacity:1; transform:translateY(0) scale(1); }
 }
 
 .queueHeader {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:11px 13px;
-  background:#f7f8fa;
-  border-bottom:1px solid #e5e5e5;
+  padding:14px 16px;
+  background:linear-gradient(135deg,#1677ff,#5b8cff);
+  color:#fff;
+}
+.queueHeader::before {
+  content:'';
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 5px rgba(255,255,255,.16);
+  margin-right:10px;
 }
 
 .queueTitle {
-  font-weight:bold;
+  font-weight:700;
   font-size:14px;
+  letter-spacing:.1px;
+  flex:1;
 }
 
 .queueX {
@@ -289,12 +323,18 @@ th {
   height:30px;
   padding:0;
   border-radius:50%;
+  border:1px solid rgba(255,255,255,.35);
+  background:rgba(255,255,255,.14);
+  color:#fff;
   font-size:18px;
   line-height:1;
 }
+.queueX:hover {
+  background:rgba(255,255,255,.25);
+}
 
 .queueBody {
-  padding:14px;
+  padding:16px;
 }
 
 .queueStatus {
@@ -312,17 +352,32 @@ th {
 
 .queueProgressOuter {
   width:100%;
-  height:8px;
+  height:9px;
   border-radius:20px;
-  background:#e9ecef;
+  background:#edf1f7;
   overflow:hidden;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.06);
 }
 
 .queueProgressInner {
   width:0%;
   height:100%;
-  background:#1677ff;
+  background:linear-gradient(90deg,#1677ff,#5b8cff);
+  border-radius:20px;
   transition:width .25s ease;
+  position:relative;
+  overflow:hidden;
+}
+.queueProgressInner::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+  animation:progressShine 1.4s linear infinite;
+}
+@keyframes progressShine {
+  from { transform:translateX(-100%); }
+  to { transform:translateX(100%); }
 }
 
 .queueProgressText {
@@ -781,6 +836,23 @@ th {
 </div>
 
 
+
+<div id="confirmModal" class="modalBackdrop">
+  <div class="modal" style="max-width:420px;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <div style="width:42px;height:42px;border-radius:13px;background:#fff1f2;color:#dc3545;display:flex;align-items:center;justify-content:center;font-size:20px;">!</div>
+      <div style="flex:1;">
+        <h3 id="confirmTitle">Please confirm</h3>
+        <div id="confirmMessage" style="color:#667085;line-height:1.5;font-size:14px;"></div>
+      </div>
+    </div>
+    <div class="modalButtons">
+      <button onclick="resolveConfirm(false)">Cancel</button>
+      <button class="dangerBtn" onclick="resolveConfirm(true)">Continue</button>
+    </div>
+  </div>
+</div>
+
 <!-- =========================================================
      EDIT MODAL
 ========================================================= -->
@@ -1110,7 +1182,7 @@ th {
       id="queueTitle"
       class="queueTitle"
     >
-      Background Job
+      Activity Center
     </div>
 
     <button
@@ -1184,6 +1256,50 @@ th {
 </div>
 
 
+<div id="toastStack" class="toastStack"></div>
+
+<style>
+.toastStack {
+  position:fixed;
+  top:22px;
+  right:22px;
+  z-index:7000;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:min(380px,calc(100vw - 30px));
+}
+.toast {
+  background:rgba(255,255,255,.97);
+  border:1px solid #e8edf5;
+  border-radius:16px;
+  box-shadow:0 14px 45px rgba(15,23,42,.18);
+  padding:14px 16px;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  animation:toastIn .22s ease-out;
+}
+.toastIcon {
+  width:34px;
+  height:34px;
+  border-radius:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+  background:#eef5ff;
+  font-size:17px;
+}
+.toastTitle { font-weight:700; font-size:13px; margin-bottom:3px; }
+.toastMessage { color:#667085; font-size:12px; line-height:1.45; }
+.toastClose { margin-left:auto; border:0; background:transparent; padding:2px 5px; color:#98a2b3; }
+@keyframes toastIn {
+  from { opacity:0; transform:translateY(-8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+</style>
+
 <script>
 
 /* ============================================================
@@ -1194,7 +1310,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycbwOlPCHeBn3Jl8_XBuikqxNo_SwGwhDvOGGZQchDRKP9BLJt-MNZNdgiuMHFyRvn7YuMw/exec';
+  'https://script.google.com/macros/s/AKfycbxTcC_tnRWWNoESojTZpoxl7lxWr-00DOCvvGNTiP_kvKlCZxLFSUwG6UHGuZR6LeSCjA/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -1361,8 +1477,8 @@ function api(
 
           if (
             data &&
-            data.ok === false &&
-            data.error
+            ((data.ok === false) ||
+             (String(data.status || '').toUpperCase() === 'ERROR'))
           ) {
 
             reject(
@@ -1538,6 +1654,38 @@ function postChunk(
 }
 
 
+
+function showToast(title, message, type='info', timeout=3500) {
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const icons = {success:'✓', error:'!', warning:'!', info:'i'};
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML =
+    '<div class="toastIcon">' + (icons[type] || 'i') + '</div>' +
+    '<div style="flex:1">' +
+      '<div class="toastTitle">' + escapeHtml(title) + '</div>' +
+      '<div class="toastMessage">' + escapeHtml(message) + '</div>' +
+    '</div>' +
+    '<button class="toastClose" aria-label="Close">×</button>';
+  toast.querySelector('.toastClose').onclick = () => toast.remove();
+  stack.appendChild(toast);
+  if (timeout > 0) setTimeout(() => toast.remove(), timeout);
+}
+
+function apiSucceeded(result) {
+  return !!result && (
+    result.ok === true ||
+    String(result.status || '').toUpperCase() === 'OK' ||
+    String(result.status || '').toUpperCase() === 'QUEUED' ||
+    String(result.status || '').toUpperCase() === 'VALID'
+  );
+}
+
+function apiErrorMessage(result, fallback) {
+  return (result && (result.error || result.message || result.result)) || fallback || 'Request failed.';
+}
+
 /* ============================================================
    LOGIN
 ============================================================ */
@@ -1710,15 +1858,12 @@ async function checkExistingSession() {
       await api(
         'checkSession',
         {
-          session:
+          sessionId:
             session
         }
       );
 
-    if (
-      result &&
-      result.ok
-    ) {
+    if (result && (result.ok || String(result.status || '').toUpperCase() === 'VALID')) {
 
       currentEmail =
         result.email ||
@@ -1817,7 +1962,7 @@ async function logoutUser() {
       await api(
         'logout',
         {
-          session:
+          sessionId:
             session
         }
       );
@@ -1865,9 +2010,7 @@ async function searchDashboard() {
 
   if (!branch) {
 
-    alert(
-      'Please select a branch.'
-    );
+    showToast('Branch required', 'Please select a branch.', 'warning');
 
     return;
 
@@ -1886,16 +2029,16 @@ async function searchDashboard() {
 
     const result =
       await api(
-        'dashboard',
+        'summary',
         {
 
-          session:
+          sessionId:
             session,
 
           branch:
             branch,
 
-          report:
+          sheet:
             report,
 
           search:
@@ -1936,7 +2079,7 @@ async function searchDashboard() {
         'showingCount'
       )
       .textContent =
-      result.showingCount || 0;
+      (result.total != null ? result.total : (result.data || []).length);
 
     renderTable();
 
@@ -2294,10 +2437,10 @@ async function saveEdit() {
 
     const result =
       await api(
-        'editSold',
+        'updateSI',
         {
 
-          session:
+          sessionId:
             session,
 
           branch:
@@ -2346,13 +2489,7 @@ async function deleteSoldRecord(
   tag
 ) {
 
-  if (
-    !confirm(
-      'Delete sold record with tag ' +
-      tag +
-      '?'
-    )
-  ) {
+  if (!(await niceConfirm('Delete sold record', 'Delete sold record with tag ' + tag + '?'))) {
 
     return;
 
@@ -2362,10 +2499,10 @@ async function deleteSoldRecord(
 
     const result =
       await api(
-        'deleteSold',
+        'deleteRecord',
         {
 
-          session:
+          sessionId:
             session,
 
           branch:
@@ -2399,6 +2536,25 @@ async function deleteSoldRecord(
 
 }
 
+
+
+let confirmResolver = null;
+function niceConfirm(title, message) {
+  return new Promise(resolve => {
+    confirmResolver = resolve;
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmModal').style.display = 'flex';
+  });
+}
+function resolveConfirm(value) {
+  document.getElementById('confirmModal').style.display = 'none';
+  if (confirmResolver) {
+    const fn = confirmResolver;
+    confirmResolver = null;
+    fn(!!value);
+  }
+}
 
 /* ============================================================
    MODALS
@@ -2511,258 +2667,129 @@ function showSelectedFile() {
 ============================================================ */
 
 async function updateStocks() {
-
   if (importRunning) {
-
-    alert(
-      'An import is already running.'
-    );
-
+    showToast('Import already running', 'Please wait for the current background import to finish.', 'warning');
     return;
-
   }
 
-  const branch =
-    document
-      .getElementById(
-        'updateBranch'
-      )
-      .value;
-
-  const file =
-    document
-      .getElementById(
-        'stockFile'
-      )
-      .files[0];
+  const branch = document.getElementById('updateBranch').value;
+  const file = document.getElementById('stockFile').files[0];
 
   if (!branch) {
-
-    alert(
-      'Please select a branch.'
-    );
-
+    showToast('Branch required', 'Please select a branch.', 'warning');
     return;
-
   }
-
   if (!file) {
-
-    alert(
-      'Please select an Excel or CSV file.'
-    );
-
+    alert('Please select an Excel or CSV file.');
     return;
-
   }
 
-  importRunning =
-    true;
-
+  importRunning = true;
   closeUpdateStockModal();
-
-  showQueue(
-    'IMPORT',
-    'Preparing import...',
-    branch
-  );
+  showToast('Import queued', 'The dashboard stays available while the inventory is processed.', 'info', 4500);
+  showQueue('IMPORT', 'Uploading file to background queue...', branch);
 
   try {
+    const base64 = await fileToBase64(file);
 
-    const rows =
-      await readImportFile(
-        file
-      );
+    const result = await postBackgroundJob({
+      action: 'uploadStock',
+      email: currentEmail,
+      sessionId: session,
+      branch: branch,
+      fileName: file.name,
+      file: base64
+    });
 
-    if (
-      !rows.length
-    ) {
-
-      throw new Error(
-        'The selected file contains no data.'
-      );
-
+    if (!result || result.status !== 'QUEUED' || !result.jobId) {
+      throw new Error((result && (result.message || result.error)) || 'Import job was not queued.');
     }
-
-    const dataRows =
-      normalizeImportRows(
-        rows
-      );
-
-    const totalRows =
-      dataRows.length;
-
-    const chunks =
-      [];
-
-    for (
-      let i = 0;
-      i < totalRows;
-      i +=
-        IMPORT_CHUNK_SIZE
-    ) {
-
-      chunks.push(
-        dataRows.slice(
-          i,
-          i +
-          IMPORT_CHUNK_SIZE
-        )
-      );
-
-    }
-
-    const totalChunks =
-      chunks.length;
-
-    const jobId =
-      crypto.randomUUID
-        ? crypto.randomUUID()
-        :
-        (
-          Date.now() +
-          '_' +
-          Math.random()
-            .toString(36)
-            .substring(2)
-        );
 
     currentJob = {
-
-      type:
-        'IMPORT',
-
-      jobId:
-        jobId,
-
-      branch:
-        branch,
-
-      totalRows:
-        totalRows,
-
-      totalChunks:
-        totalChunks,
-
-      processedRows:
-        0,
-
-      processedChunks:
-        0,
-
-      cancelled:
-        false
-
+      type: 'IMPORT',
+      jobId: result.jobId,
+      branch: branch,
+      cancelled: false
     };
 
-    updateQueue(
-      'IMPORT',
-      'Preparing import...',
-      branch,
-      0,
-      '0 / ' +
-      totalRows +
-      ' rows'
-    );
-
-    const prepared =
-      await api(
-        'prepareImport',
-        {
-
-          session:
-            session,
-
-          branch:
-            branch,
-
-          jobId:
-            jobId,
-
-          totalRows:
-            totalRows,
-
-          totalChunks:
-            totalChunks
-
-        }
-      );
-
-    if (
-      !prepared.ok
-    ) {
-
-      throw new Error(
-        prepared.error
-      );
-
-    }
-
-    await uploadChunksConcurrent(
-      chunks,
-      branch,
-      prepared.jobId ||
-      jobId,
-      totalRows
-    );
-
-    if (
-      currentJob &&
-      currentJob.cancelled
-    ) {
-
-      return;
-
-    }
-
-    updateQueue(
-      'IMPORT',
-      'Import complete',
-      branch,
-      100,
-      totalRows +
-      ' / ' +
-      totalRows +
-      ' rows'
-    );
-
-    showQueueComplete(
-      'IMPORT',
-      'Import complete',
-      branch
-    );
-
-    await searchDashboard();
-
+    updateQueue('IMPORT', 'Import queued...', branch, 5, 'Waiting for background worker');
+    startQueuePolling();
+  } catch (err) {
+    importRunning = false;
+    showQueueError('IMPORT', err.message || String(err));
   }
-
-  catch (err) {
-
-    if (
-      currentJob &&
-      currentJob.cancelled
-    ) {
-
-      return;
-
-    }
-
-    showQueueError(
-      'IMPORT',
-      err.message
-    );
-
-  }
-
-  finally {
-
-    importRunning =
-      false;
-
-  }
-
 }
 
+function fileToBase64(file) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = function() {
+      const value = String(reader.result || '');
+      const comma = value.indexOf(',');
+      resolve(comma >= 0 ? value.substring(comma + 1) : value);
+    };
+    reader.onerror = function() {
+      reject(new Error('Unable to read the selected file.'));
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function backgroundGet(action, params) {
+  return new Promise(function(resolve, reject) {
+    const url = new URL(GAS_URL);
+    url.searchParams.set('action', action);
+    Object.keys(params || {}).forEach(function(key) {
+      url.searchParams.set(key, params[key] == null ? '' : params[key]);
+    });
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url.toString(), true);
+    xhr.timeout = 60000;
+    xhr.onload = function() {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(new Error('Server HTTP ' + xhr.status));
+        return;
+      }
+      try {
+        resolve(JSON.parse(xhr.responseText || '{}'));
+      } catch (err) {
+        reject(new Error('Invalid Apps Script response.'));
+      }
+    };
+    xhr.onerror = function() { reject(new Error('Connection failed.')); };
+    xhr.ontimeout = function() { reject(new Error('Request timed out.')); };
+    xhr.send();
+  });
+}
+
+function postBackgroundJob(params) {
+  return new Promise(function(resolve, reject) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', GAS_URL, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    xhr.timeout = 120000;
+
+    xhr.onload = function() {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(new Error('Server HTTP ' + xhr.status));
+        return;
+      }
+      try {
+        resolve(JSON.parse(xhr.responseText || '{}'));
+      } catch (err) {
+        reject(new Error('Invalid Apps Script response.'));
+      }
+    };
+    xhr.onerror = function() { reject(new Error('Upload connection failed.')); };
+    xhr.ontimeout = function() { reject(new Error('Upload request timed out.')); };
+
+    const body = Object.keys(params).map(function(key) {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key] == null ? '' : params[key]);
+    }).join('&');
+    xhr.send(body);
+  });
+}
 
 /* ============================================================
    READ IMPORT FILE
@@ -3132,7 +3159,7 @@ async function uploadChunksConcurrent(
                   action:
                     'uploadChunk',
 
-                  session:
+                  sessionId:
                     session,
 
                   branch:
@@ -3314,7 +3341,7 @@ async function cancelCurrentJob() {
         'cancelImport',
         {
 
-          session:
+          sessionId:
             session,
 
           jobId:
@@ -3334,7 +3361,7 @@ async function cancelCurrentJob() {
         'cancelExport',
         {
 
-          session:
+          sessionId:
             session,
 
           jobId:
@@ -3382,111 +3409,47 @@ async function cancelCurrentJob() {
 ============================================================ */
 
 async function startExport() {
-
   if (exportRunning) {
-
-    alert(
-      'An export is already running.'
-    );
-
+    showToast('Export already running', 'Please wait for the current background export to finish.', 'warning');
     return;
-
   }
 
-  const branch =
-    document
-      .getElementById(
-        'exportBranch'
-      )
-      .value;
-
+  const branch = document.getElementById('exportBranch').value;
   if (!branch) {
-
-    alert(
-      'Please select a branch.'
-    );
-
+    showToast('Branch required', 'Please select a branch.', 'warning');
     return;
-
   }
 
   closeExportModal();
-
-  exportRunning =
-    true;
-
-  showQueue(
-    'EXPORT',
-    'Queueing export...',
-    branch
-  );
+  exportRunning = true;
+  showToast('Export queued', 'You can continue using the dashboard while the export runs.', 'info', 4500);
+  showQueue('EXPORT', 'Queueing export...', branch);
 
   try {
+    const result = await backgroundGet('export', {
+      email: currentEmail,
+      sessionId: session,
+      branch: branch
+    });
 
-    const result =
-      await api(
-        'startExport',
-        {
-
-          session:
-            session,
-
-          branch:
-            branch
-
-        }
-      );
-
-    if (!result.ok) {
-
-      throw new Error(
-        result.error
-      );
-
+    if (!result || result.status !== 'QUEUED' || !result.jobId) {
+      throw new Error((result && (result.message || result.error)) || 'Export job was not queued.');
     }
 
     currentJob = {
-
-      type:
-        'EXPORT',
-
-      jobId:
-        result.jobId,
-
-      branch:
-        branch,
-
-      cancelled:
-        false
-
+      type: 'EXPORT',
+      jobId: result.jobId,
+      branch: branch,
+      cancelled: false
     };
 
-    updateQueue(
-      'EXPORT',
-      'Export queued...',
-      branch,
-      0,
-      'Waiting for background worker'
-    );
-
+    updateQueue('EXPORT', 'Export queued...', branch, 5, 'Waiting for background worker');
     startQueuePolling();
-
+  } catch (err) {
+    exportRunning = false;
+    showQueueError('EXPORT', err.message || String(err));
   }
-
-  catch (err) {
-
-    exportRunning =
-      false;
-
-    showQueueError(
-      'EXPORT',
-      err.message
-    );
-
-  }
-
 }
-
 
 /* ============================================================
    QUEUE POLLING
@@ -3526,265 +3489,72 @@ function stopQueuePolling() {
 
 
 async function pollCurrentJob() {
-
   if (!currentJob) {
-
     stopQueuePolling();
-
     return;
-
   }
 
-  const job =
-    currentJob;
+  const job = currentJob;
 
   try {
+    const result = await backgroundGet('getJobStatus', {
+      email: currentEmail,
+      sessionId: session,
+      jobId: job.jobId
+    });
 
-    if (
-      job.type ===
-      'IMPORT'
-    ) {
+    if (!result || result.status !== 'OK') {
+      throw new Error((result && (result.message || result.error)) || 'Unable to read job status.');
+    }
 
-      const result =
-        await api(
-          'importStatus',
-          {
+    const status = String(result.jobStatus || '').toUpperCase();
 
-            session:
-              session,
+    if (status === 'PENDING') {
+      updateQueue(job.type, job.type === 'IMPORT' ? 'Import queued...' : 'Export queued...', job.branch, 10, 'Waiting for background worker');
+      return;
+    }
 
-            jobId:
-              job.jobId
+    if (status === 'RUNNING') {
+      updateQueue(job.type, job.type === 'IMPORT' ? 'Import running in background...' : 'Export running in background...', job.branch, 50, 'You can continue searching and using the dashboard.');
+      return;
+    }
 
-          }
-        );
+    if (status === 'DONE') {
+      stopQueuePolling();
 
-      if (!result.ok) {
-
-        throw new Error(
-          result.error
-        );
-
-      }
-
-      const total =
-        Number(
-          result.totalRows || 0
-        );
-
-      const processed =
-        Number(
-          result.processedRows || 0
-        );
-
-      const percent =
-        total
-          ? Math.min(
-              100,
-              Math.round(
-                processed /
-                total *
-                100
-              )
-            )
-          : 0;
-
-      updateQueue(
-        'IMPORT',
-        importStatusText(
-          result.status
-        ),
-        result.branch ||
-        job.branch,
-        percent,
-        processed +
-        ' / ' +
-        total +
-        ' rows'
-      );
-
-      if (
-        result.status ===
-        'completed'
-      ) {
-
-        importRunning =
-          false;
-
-        stopQueuePolling();
-
-        showQueueComplete(
-          'IMPORT',
-          'Import complete',
-          result.branch ||
-          job.branch
-        );
-
-        currentJob =
-          null;
-
+      if (job.type === 'IMPORT') {
+        importRunning = false;
+        showQueueComplete('IMPORT', 'Import complete', job.branch);
+        showToast('Import complete', 'The ' + job.branch + ' inventory is now updated.', 'success', 5000);
+        currentJob = null;
         await searchDashboard();
-
+      } else {
+        exportRunning = false;
+        showToast('Export complete', 'Your ' + job.branch + ' inventory export is ready.', 'success', 5000);
+        showExportComplete({
+          branch: job.branch,
+          files: result.fileId ? [{name: job.branch + '_Inventory.xlsx', url: 'https://drive.google.com/uc?export=download&id=' + result.fileId}] : []
+        });
+        currentJob = null;
       }
-
-      else if (
-        result.status ===
-        'error'
-      ) {
-
-        importRunning =
-          false;
-
-        stopQueuePolling();
-
-        showQueueError(
-          'IMPORT',
-          result.error ||
-          'Import failed.'
-        );
-
-        currentJob =
-          null;
-
-      }
-
       return;
-
     }
 
-
-    if (
-      job.type ===
-      'EXPORT'
-    ) {
-
-      const result =
-        await api(
-          'exportStatus',
-          {
-
-            session:
-              session,
-
-            jobId:
-              job.jobId
-
-          }
-        );
-
-      if (!result.ok) {
-
-        throw new Error(
-          result.error
-        );
-
-      }
-
-      const stocks =
-        Number(
-          result.stocksRows || 0
-        );
-
-      const sold =
-        Number(
-          result.soldRows || 0
-        );
-
-      const audit =
-        Number(
-          result.auditRows || 0
-        );
-
-      const stage =
-        result.stage || '';
-
-      const percent =
-        exportPercent(
-          stage
-        );
-
-      updateQueue(
-        'EXPORT',
-        exportStatusText(
-          stage
-        ),
-        result.branch ||
-        job.branch,
-        percent,
-        'Stocks: ' +
-        stocks.toLocaleString() +
-        ' • Sold: ' +
-        sold.toLocaleString() +
-        ' • Audit: ' +
-        audit.toLocaleString()
-      );
-
-      if (
-        result.status ===
-        'completed'
-      ) {
-
-        exportRunning =
-          false;
-
-        stopQueuePolling();
-
-        showExportComplete(
-          result
-        );
-
-        currentJob =
-          null;
-
-      }
-
-      else if (
-        result.status ===
-        'error'
-      ) {
-
-        exportRunning =
-          false;
-
-        stopQueuePolling();
-
-        showQueueError(
-          'EXPORT',
-          result.error ||
-          'Export failed.'
-        );
-
-        currentJob =
-          null;
-
-      }
-
+    if (status === 'FAILED' || status === 'ERROR') {
+      stopQueuePolling();
+      const message = result.result || 'Background job failed.';
+      if (job.type === 'IMPORT') importRunning = false;
+      if (job.type === 'EXPORT') exportRunning = false;
+      showQueueError(job.type, message);
+      currentJob = null;
       return;
-
     }
 
+    updateQueue(job.type, 'Checking background job...', job.branch, 25, 'Current status: ' + status);
+  } catch (err) {
+    updateQueue(job.type, 'Connection checking...', job.branch, 0, err.message || String(err));
   }
-
-  catch (err) {
-
-    /*
-     * Do not immediately kill the queue on a temporary
-     * polling/network error.
-     *
-     * The worker continues in Apps Script.
-     */
-    updateQueue(
-      job.type,
-      'Connection checking...',
-      job.branch,
-      0,
-      err.message
-    );
-
-  }
-
 }
-
 
 /* ============================================================
    EXPORT PROGRESS
@@ -3920,8 +3690,8 @@ function showQueue(
     )
     .textContent =
     type === 'IMPORT'
-      ? '📤 Import Queue'
-      : '📥 Export Queue';
+      ? '📤 Importing Stocks'
+      : '📥 Exporting Inventory';
 
   updateQueue(
     type,
@@ -3970,8 +3740,8 @@ function updateQueue(
     )
     .textContent =
     type === 'IMPORT'
-      ? '📤 Import Queue'
-      : '📥 Export Queue';
+      ? '📤 Importing Stocks'
+      : '📥 Exporting Inventory';
 
   document
     .getElementById(
@@ -4070,8 +3840,8 @@ function showQueueError(
     )
     .textContent =
     type === 'IMPORT'
-      ? '📤 Import Queue'
-      : '📥 Export Queue';
+      ? '📤 Importing Stocks'
+      : '📥 Exporting Inventory';
 
   document
     .getElementById(
@@ -4137,7 +3907,7 @@ function showExportComplete(
       'queueTitle'
     )
     .textContent =
-    '📥 Export Queue';
+    '📥 Exporting Inventory';
 
   document
     .getElementById(
@@ -4301,9 +4071,7 @@ async function clearReportAction() {
 
   if (!branch) {
 
-    alert(
-      'Please select a branch.'
-    );
+    showToast('Branch required', 'Please select a branch.', 'warning');
 
     return;
 
@@ -4319,15 +4087,7 @@ async function clearReportAction() {
 
   }
 
-  if (
-    !confirm(
-      'Are you sure you want to clear ' +
-      report +
-      ' for ' +
-      branch +
-      '?'
-    )
-  ) {
+  if (!(await niceConfirm('Clear report', 'Are you sure you want to clear ' + report + ' for ' + branch + '?'))) {
 
     return;
 
@@ -4337,16 +4097,16 @@ async function clearReportAction() {
 
     const result =
       await api(
-        'clearReport',
+        'clearSheet',
         {
 
-          session:
+          sessionId:
             session,
 
           branch:
             branch,
 
-          report:
+          sheet:
             report
 
         }
@@ -4364,9 +4124,7 @@ async function clearReportAction() {
 
     await searchDashboard();
 
-    alert(
-      result.message
-    );
+    showToast('Report cleared', result.message || 'The report was cleared successfully.', 'success');
 
   }
 

@@ -493,6 +493,14 @@ th {
   margin-bottom:2px;
 }
 
+
+.queueFileName {
+  margin-top:8px;
+  font-size:12px;
+  color:#64748b;
+  word-break:break-all;
+}
+
 </style>
 
 </head>
@@ -1294,7 +1302,7 @@ th {
  * CHANGE THIS TO YOUR DEPLOYED APPS SCRIPT WEB APP URL.
  */
 const GAS_URL =
-  'https://script.google.com/macros/s/AKfycbwdve2Qo9ZVdnRGINpwmBchRWcDJ7fuOdOXEkFQ2GuXQemlWyD-N6D7jAZJtgmhe03pAA/exec';
+  'https://script.google.com/macros/s/AKfycbwOlPCHeBn3Jl8_XBuikqxNo_SwGwhDvOGGZQchDRKP9BLJt-MNZNdgiuMHFyRvn7YuMw/exec';
 
 
 const IMPORT_CHUNK_SIZE =
@@ -4394,8 +4402,16 @@ function showExportComplete(
         'a'
       );
 
+    /*
+     * Prefer the server-provided URL. If the browser receives only
+     * the Drive file ID, build a direct Drive download URL locally.
+     */
     a.href =
-      xlsxFile.url;
+      xlsxFile.url ||
+      (xlsxFile.id
+        ? 'https://drive.google.com/uc?export=download&id=' +
+          encodeURIComponent(xlsxFile.id)
+        : '#');
 
     a.target =
       '_blank';
@@ -4411,6 +4427,40 @@ function showExportComplete(
 
     links.appendChild(
       a
+    );
+
+    const fileName =
+      document.createElement(
+        'div'
+      );
+
+    fileName.className =
+      'queueFileName';
+
+    fileName.textContent =
+      xlsxFile.name ||
+      'ACEBEDO_EXPORT.xlsx';
+
+    links.appendChild(
+      fileName
+    );
+
+  }
+  else {
+
+    const warning =
+      document.createElement(
+        'div'
+      );
+
+    warning.className =
+      'queueFileName';
+
+    warning.textContent =
+      'Export finished, but no XLSX download link was returned.';
+
+    links.appendChild(
+      warning
     );
 
   }

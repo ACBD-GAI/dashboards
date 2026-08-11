@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -25,7 +24,9 @@
   --radius:18px;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 html,body{
   margin:0;
@@ -35,14 +36,14 @@ html,body{
 
 body{
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,
-    BlinkMacSystemFont,"Segoe UI",sans-serif;
+  BlinkMacSystemFont,"Segoe UI",sans-serif;
   background:linear-gradient(135deg,#f8fbff,#f3f6fb 55%,#eef3fa);
   color:var(--text);
 }
 
 /* =========================================================
    LOGIN
-   ========================================================= */
+========================================================= */
 
 #loginScreen{
   min-height:100vh;
@@ -89,7 +90,9 @@ body{
   line-height:1.55;
 }
 
-.field{margin-bottom:15px}
+.field{
+  margin-bottom:15px;
+}
 
 .field label{
   display:block;
@@ -142,7 +145,7 @@ body{
 
 /* =========================================================
    DASHBOARD
-   ========================================================= */
+========================================================= */
 
 #dashboard{
   display:none;
@@ -157,7 +160,7 @@ body{
 
 /* =========================================================
    TOPBAR
-   ========================================================= */
+========================================================= */
 
 .topbar{
   display:flex;
@@ -227,7 +230,7 @@ body{
 
 /* =========================================================
    CONTROLS
-   ========================================================= */
+========================================================= */
 
 .controls{
   background:rgba(255,255,255,.92);
@@ -237,7 +240,7 @@ body{
   padding:15px;
   display:grid;
   grid-template-columns:170px 180px minmax(250px,1fr)
-    auto auto auto auto;
+  auto auto auto auto;
   gap:10px;
   margin-bottom:18px;
 }
@@ -308,7 +311,7 @@ body{
 
 /* =========================================================
    LOADING
-   ========================================================= */
+========================================================= */
 
 .loadingLine{
   height:2px;
@@ -321,13 +324,18 @@ body{
 }
 
 @keyframes loading{
-  from{background-position:200% 0}
-  to{background-position:-200% 0}
+  from{
+    background-position:200% 0;
+  }
+
+  to{
+    background-position:-200% 0;
+  }
 }
 
 /* =========================================================
    CARDS
-   ========================================================= */
+========================================================= */
 
 .cards{
   display:grid;
@@ -381,7 +389,7 @@ body{
 
 /* =========================================================
    TABLE
-   ========================================================= */
+========================================================= */
 
 .tableCard{
   background:#fff;
@@ -399,7 +407,9 @@ body{
   border-bottom:1px solid var(--line);
 }
 
-.tableTitle{font-weight:800}
+.tableTitle{
+  font-weight:800;
+}
 
 .tableSub{
   color:var(--muted);
@@ -453,7 +463,9 @@ tbody tr:hover{
   font-size:11px;
 }
 
-.tag{background:#f1f5f9}
+.tag{
+  background:#f1f5f9;
+}
 
 .branchTag{
   background:#eef2ff;
@@ -498,7 +510,7 @@ tbody tr:hover{
 
 /* =========================================================
    EMPTY
-   ========================================================= */
+========================================================= */
 
 .empty{
   text-align:center;
@@ -523,7 +535,7 @@ tbody tr:hover{
 
 /* =========================================================
    PAGINATION
-   ========================================================= */
+========================================================= */
 
 .pagination{
   display:flex;
@@ -553,7 +565,9 @@ tbody tr:hover{
   font-weight:700;
 }
 
-.pageBtn:hover{background:#f8fafc}
+.pageBtn:hover{
+  background:#f8fafc;
+}
 
 .pageBtn.active{
   background:#2563eb;
@@ -568,7 +582,7 @@ tbody tr:hover{
 
 /* =========================================================
    QUEUE
-   ========================================================= */
+========================================================= */
 
 #queuePanel{
   position:fixed;
@@ -643,7 +657,7 @@ tbody tr:hover{
 
 /* =========================================================
    CLEAR MODAL
-   ========================================================= */
+========================================================= */
 
 .modalBackdrop{
   position:fixed;
@@ -686,7 +700,7 @@ tbody tr:hover{
 
 /* =========================================================
    STATUS
-   ========================================================= */
+========================================================= */
 
 #globalStatus{
   position:fixed;
@@ -737,7 +751,9 @@ tbody tr:hover{
 }
 
 @media(max-width:700px){
-  .app{padding:12px}
+  .app{
+    padding:12px;
+  }
 
   .controls{
     grid-template-columns:1fr;
@@ -760,91 +776,88 @@ tbody tr:hover{
   }
 }
 </style>
-
 </head>
 
 <body>
 
 <!-- =========================================================
      LOGIN
-     ========================================================= -->
+========================================================= -->
 
 <section id="loginScreen">
 
   <div class="loginCard">
 
+    <div class="logo">◉</div>
 
-<div class="logo">◉</div>
+    <h1 class="loginTitle">
+      Acebedo Optical
+    </h1>
 
-<h1 class="loginTitle">
-  Acebedo Optical
-</h1>
+    <p class="loginSub">
+      Central Inventory Dashboard
+    </p>
 
-<p class="loginSub">
-  Central Inventory Dashboard
-</p>
+    <div id="emailStep">
 
-<div id="emailStep">
+      <div class="field">
+        <label>EMAIL ADDRESS</label>
 
-  <div class="field">
-    <label>EMAIL ADDRESS</label>
+        <input
+          id="email"
+          class="input"
+          type="email"
+          placeholder="Enter your authorized Gmail"
+          autocomplete="email"
+          onkeydown="if(event.key==='Enter')sendOTP()"
+        >
+      </div>
 
-    <input
-      id="email"
-      class="input"
-      type="email"
-      placeholder="Enter your authorized Gmail"
-      autocomplete="email"
-      onkeydown="if(event.key==='Enter')sendOTP()"
-    >
-  </div>
+      <button
+        id="sendOtpBtn"
+        class="primaryBtn"
+        onclick="sendOTP()"
+      >
+        Send verification code
+      </button>
 
-  <button
-    id="sendOtpBtn"
-    class="primaryBtn"
-    onclick="sendOTP()"
-  >
-    Send verification code
-  </button>
+    </div>
 
-</div>
+    <div id="otpStep" class="hidden">
 
-<div id="otpStep" class="hidden">
+      <div class="field">
+        <label>VERIFICATION CODE</label>
 
-  <div class="field">
-    <label>VERIFICATION CODE</label>
+        <input
+          id="otp"
+          class="input"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="Enter 6-digit code"
+          onkeydown="if(event.key==='Enter')verifyOTP()"
+        >
+      </div>
 
-    <input
-      id="otp"
-      class="input"
-      type="text"
-      inputmode="numeric"
-      maxlength="6"
-      placeholder="Enter 6-digit code"
-      onkeydown="if(event.key==='Enter')verifyOTP()"
-    >
-  </div>
+      <button
+        id="verifyBtn"
+        class="primaryBtn"
+        onclick="verifyOTP()"
+      >
+        Verify & enter dashboard
+      </button>
 
-  <button
-    id="verifyBtn"
-    class="primaryBtn"
-    onclick="verifyOTP()"
-  >
-    Verify & enter dashboard
-  </button>
+      <button
+        class="controlBtn"
+        style="width:100%;height:44px;margin-top:10px"
+        onclick="backToEmail()"
+      >
+        Change email
+      </button>
 
-  <button
-    class="controlBtn"
-    style="width:100%;height:44px;margin-top:10px"
-    onclick="backToEmail()"
-  >
-    Change email
-  </button>
+    </div>
 
-</div>
-
-<div id="loginStatus" class="loginStatus"></div>
-
+    <div id="loginStatus" class="loginStatus"></div>
 
   </div>
 
@@ -852,327 +865,312 @@ tbody tr:hover{
 
 <!-- =========================================================
      DASHBOARD
-     ========================================================= -->
+========================================================= -->
 
 <section id="dashboard">
 
   <div class="app">
 
+    <header class="topbar">
 
-<header class="topbar">
+      <div class="brand">
 
-  <div class="brand">
+        <div class="brandLogo">◉</div>
 
-    <div class="brandLogo">◉</div>
+        <div>
+          <div class="brandTitle">
+            Central Inventory
+          </div>
 
-    <div>
-      <div class="brandTitle">
-        Central Inventory
+          <div class="brandSub">
+            Acebedo Optical • Direct Supabase Inventory
+          </div>
+        </div>
+
       </div>
 
-      <div class="brandSub">
-        Acebedo Optical • Direct Supabase Inventory
-      </div>
-    </div>
+      <div class="userArea">
 
-  </div>
+        <div id="userEmail" class="userEmail"></div>
 
-  <div class="userArea">
+        <button
+          class="iconBtn"
+          title="Refresh"
+          onclick="refreshDashboard()"
+        >
+          ↻
+        </button>
 
-    <div id="userEmail" class="userEmail"></div>
+        <button
+          class="iconBtn"
+          title="Logout"
+          onclick="logout()"
+        >
+          ⇥
+        </button>
 
-    <button
-      class="iconBtn"
-      title="Refresh"
-      onclick="refreshDashboard()"
-    >
-      ↻
-    </button>
-
-    <button
-      class="iconBtn"
-      title="Logout"
-      onclick="logout()"
-    >
-      ⇥
-    </button>
-
-  </div>
-
-</header>
-
-
-<div class="controls">
-
-  <select
-    id="branch"
-    class="select"
-    onchange="branchChanged()"
-  >
-    <option value="ALL">ALL BRANCHES</option>
-    <option value="GAI">GAI</option>
-    <option value="CAS">CAS</option>
-    <option value="BAC">BAC</option>
-    <option value="BIN">BIN</option>
-    <option value="BIS">BIS</option>
-    <option value="CAD">CAD</option>
-    <option value="DGT">DGT</option>
-    <option value="KAB">KAB</option>
-    <option value="KAL">KAL</option>
-    <option value="PAS">PAS</option>
-    <option value="POT">POT</option>
-    <option value="SAN">SAN</option>
-    <option value="TAB">TAB</option>
-    <option value="TAN">TAN</option>
-    <option value="TIS">TIS</option>
-    <option value="TOL">TOL</option>
-  </select>
-
-
-  <select
-    id="sheet"
-    class="select"
-    onchange="reportChanged()"
-  >
-    <option value="stocks">AVAILABLE STOCKS</option>
-    <option value="sold">SOLD OUT</option>
-    <option value="audit">AUDIT</option>
-  </select>
-
-
-  <div class="searchWrap">
-
-    <span class="searchIcon">⌕</span>
-
-    <input
-      id="search"
-      class="searchInput"
-      placeholder="Search tag, description, lens type, SI No., QR..."
-      onkeydown="searchKey(event)"
-    >
-
-  </div>
-
-
-  <button
-    class="controlBtn"
-    onclick="clearReport()"
-  >
-    Clear
-  </button>
-
-
-  <button
-    class="controlBtn primary"
-    onclick="runSearch()"
-  >
-    Search
-  </button>
-
-
-  <button
-    class="controlBtn"
-    onclick="document.getElementById('importFile').click()"
-  >
-    ↑ Import
-  </button>
-
-
-  <button
-    class="controlBtn"
-    onclick="startExport()"
-  >
-    ↓ Export
-  </button>
-
-
-  <input
-    id="importFile"
-    type="file"
-    accept=".xlsx,.xls,.csv"
-    class="hidden"
-    onchange="handleImportFile(event)"
-  >
-
-</div>
-
-
-<div id="loadingLine" class="loadingLine hidden"></div>
-
-
-<div class="cards">
-
-  <div class="statCard">
-    <div class="statTop">
-      <span class="statLabel">AVAILABLE</span>
-      <span class="statIcon">✓</span>
-    </div>
-
-    <div id="availableTotal" class="statNumber">—</div>
-
-    <div class="statHint">
-      Stock not sold
-    </div>
-  </div>
-
-
-  <div class="statCard">
-    <div class="statTop">
-      <span class="statLabel">SOLD OUT</span>
-      <span class="statIcon">$</span>
-    </div>
-
-    <div id="soldTotal" class="statNumber">—</div>
-
-    <div class="statHint">
-      Recorded sales
-    </div>
-  </div>
-
-
-  <div class="statCard">
-    <div class="statTop">
-      <span class="statLabel">AUDITED</span>
-      <span class="statIcon">✓</span>
-    </div>
-
-    <div id="auditTotal" class="statNumber">—</div>
-
-    <div class="statHint">
-      Audit records
-    </div>
-  </div>
-
-
-  <div class="statCard">
-    <div class="statTop">
-      <span class="statLabel">SHOWING</span>
-      <span class="statIcon">≡</span>
-    </div>
-
-    <div id="showingTotal" class="statNumber">—</div>
-
-    <div class="statHint">
-      Current results
-    </div>
-  </div>
-
-</div>
-
-
-<section class="tableCard">
-
-  <div class="tableHeader">
-
-    <div>
-
-      <div id="tableTitle" class="tableTitle">
-        Available Stocks
       </div>
 
-      <div id="tableSub" class="tableSub">
-        Select a branch and search inventory.
+    </header>
+
+    <div class="controls">
+
+      <select
+        id="branch"
+        class="select"
+        onchange="branchChanged()"
+      >
+        <option value="ALL">ALL BRANCHES</option>
+        <option value="GAI">GAI</option>
+        <option value="CAS">CAS</option>
+        <option value="BAC">BAC</option>
+        <option value="BIN">BIN</option>
+        <option value="BIS">BIS</option>
+        <option value="CAD">CAD</option>
+        <option value="DGT">DGT</option>
+        <option value="KAB">KAB</option>
+        <option value="KAL">KAL</option>
+        <option value="PAS">PAS</option>
+        <option value="POT">POT</option>
+        <option value="SAN">SAN</option>
+        <option value="TAB">TAB</option>
+        <option value="TAN">TAN</option>
+        <option value="TIS">TIS</option>
+        <option value="TOL">TOL</option>
+      </select>
+
+      <select
+        id="sheet"
+        class="select"
+        onchange="reportChanged()"
+      >
+        <option value="stocks">AVAILABLE STOCKS</option>
+        <option value="sold">SOLD OUT</option>
+        <option value="audit">AUDIT</option>
+      </select>
+
+      <div class="searchWrap">
+
+        <span class="searchIcon">⌕</span>
+
+        <input
+          id="search"
+          class="searchInput"
+          placeholder="Search tag, description, lens type, SI No., QR..."
+          onkeydown="searchKey(event)"
+        >
+
       </div>
-
-    </div>
-
-    <div class="tableActions">
 
       <button
         class="controlBtn"
         onclick="clearReport()"
       >
-        Clear Report
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <div class="tableScroll">
-
-    <table>
-
-      <thead>
-        <tr>
-          <th>BRANCH</th>
-          <th>LENS TYPE</th>
-          <th>DESCRIPTION</th>
-          <th>TAG</th>
-          <th>SI NO.</th>
-          <th>DATE</th>
-          <th>ACTIONS</th>
-        </tr>
-      </thead>
-
-      <tbody id="tableBody"></tbody>
-
-    </table>
-
-  </div>
-
-
-  <div id="emptyState" class="empty">
-
-    <div class="emptyIcon">⌕</div>
-
-    <div class="emptyTitle">
-      Ready to search
-    </div>
-
-    <div class="emptyText">
-      Search your inventory to display records.
-    </div>
-
-  </div>
-
-
-  <div class="pagination">
-
-    <div id="pageInfo" class="pageInfo">
-      —
-    </div>
-
-    <div class="pageButtons">
-
-      <button
-        id="prevBtn"
-        class="pageBtn"
-        onclick="previousPage()"
-      >
-        ‹
+        Clear
       </button>
 
       <button
-        id="pageCurrent"
-        class="pageBtn active"
+        class="controlBtn primary"
+        onclick="runSearch()"
       >
-        1
+        Search
       </button>
 
       <button
-        id="nextBtn"
-        class="pageBtn"
-        onclick="nextPage()"
+        class="controlBtn"
+        onclick="document.getElementById('importFile').click()"
       >
-        ›
+        ↑ Import
       </button>
 
+      <button
+        class="controlBtn"
+        onclick="startExport()"
+      >
+        ↓ Export
+      </button>
+
+      <input
+        id="importFile"
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        class="hidden"
+        onchange="handleImportFile(event)"
+      >
+
     </div>
+
+    <div id="loadingLine" class="loadingLine hidden"></div>
+
+    <div class="cards">
+
+      <div class="statCard">
+
+        <div class="statTop">
+          <span class="statLabel">AVAILABLE</span>
+          <span class="statIcon">✓</span>
+        </div>
+
+        <div id="availableTotal" class="statNumber">—</div>
+
+        <div class="statHint">
+          Stock not sold
+        </div>
+
+      </div>
+
+      <div class="statCard">
+
+        <div class="statTop">
+          <span class="statLabel">SOLD OUT</span>
+          <span class="statIcon">$</span>
+        </div>
+
+        <div id="soldTotal" class="statNumber">—</div>
+
+        <div class="statHint">
+          Recorded sales
+        </div>
+
+      </div>
+
+      <div class="statCard">
+
+        <div class="statTop">
+          <span class="statLabel">AUDITED</span>
+          <span class="statIcon">✓</span>
+        </div>
+
+        <div id="auditTotal" class="statNumber">—</div>
+
+        <div class="statHint">
+          Audit records
+        </div>
+
+      </div>
+
+      <div class="statCard">
+
+        <div class="statTop">
+          <span class="statLabel">SHOWING</span>
+          <span class="statIcon">≡</span>
+        </div>
+
+        <div id="showingTotal" class="statNumber">—</div>
+
+        <div class="statHint">
+          Current results
+        </div>
+
+      </div>
+
+    </div>
+
+    <section class="tableCard">
+
+      <div class="tableHeader">
+
+        <div>
+
+          <div id="tableTitle" class="tableTitle">
+            Available Stocks
+          </div>
+
+          <div id="tableSub" class="tableSub">
+            Select a branch and search inventory.
+          </div>
+
+        </div>
+
+        <div class="tableActions">
+
+          <button
+            class="controlBtn"
+            onclick="clearReport()"
+          >
+            Clear Report
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="tableScroll">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>BRANCH</th>
+              <th>LENS TYPE</th>
+              <th>DESCRIPTION</th>
+              <th>TAG</th>
+              <th>SI NO.</th>
+              <th>DATE</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+
+          <tbody id="tableBody"></tbody>
+
+        </table>
+
+      </div>
+
+      <div id="emptyState" class="empty">
+
+        <div class="emptyIcon">⌕</div>
+
+        <div class="emptyTitle">
+          Ready to search
+        </div>
+
+        <div class="emptyText">
+          Search your inventory to display records.
+        </div>
+
+      </div>
+
+      <div class="pagination">
+
+        <div id="pageInfo" class="pageInfo">
+          —
+        </div>
+
+        <div class="pageButtons">
+
+          <button
+            id="prevBtn"
+            class="pageBtn"
+            onclick="previousPage()"
+          >
+            ‹
+          </button>
+
+          <button
+            id="pageCurrent"
+            class="pageBtn active"
+          >
+            1
+          </button>
+
+          <button
+            id="nextBtn"
+            class="pageBtn"
+            onclick="nextPage()"
+          >
+            ›
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
 
   </div>
 
 </section>
-
-
-  </div>
-
-</section>
-
-<!-- =========================================================
-     QUEUE
-     ========================================================= -->
 
 <div id="queuePanel"></div>
 
@@ -1182,7 +1180,7 @@ tbody tr:hover{
 
 /* =========================================================
    CONFIGURATION
-   ========================================================= */
+========================================================= */
 
 const SUPABASE_URL =
   "https://hvurhnarllvfinpdkfkp.supabase.co";
@@ -1193,7 +1191,6 @@ const SUPABASE_KEY =
 const LOGIN_API_URL =
   "https://script.google.com/macros/s/AKfycbxySytHT2kT6OsHeXf1jA7_uriXtqI6-m3Ub9TNnO4ls_otXFYqHQG4FQa2T0Y0S8J93A/exec";
 
-
 const SESSION_KEY =
   "acebedoInventorySession";
 
@@ -1203,15 +1200,27 @@ const USER_KEY =
 const ADMIN_KEY =
   "acebedoInventoryAdmin";
 
-
 const ROWS_PER_PAGE = 50;
 
+/*
+ * Supabase pagination size.
+ */
 const SUPABASE_PAGE_SIZE = 1000;
 
+/*
+ * Import insert batch.
+ */
 const IMPORT_CHUNK_SIZE = 500;
 
+/*
+ * Existing-row update concurrency.
+ */
 const IMPORT_CONCURRENCY = 8;
 
+/*
+ * Maximum rows used by general report searches.
+ */
+const MAX_FETCH_ROWS = 100000;
 
 const BRANCHES = [
   "GAI",
@@ -1231,7 +1240,6 @@ const BRANCHES = [
   "TIS",
   "TOL"
 ];
-
 
 const DB_COLUMNS = [
   "SDATE",
@@ -1263,10 +1271,9 @@ const DB_COLUMNS = [
   "STATUS"
 ];
 
-
 /* =========================================================
    STATE
-   ========================================================= */
+========================================================= */
 
 let sessionId =
   localStorage.getItem(SESSION_KEY);
@@ -1289,10 +1296,9 @@ let currentSearch = "";
 
 let isLoading = false;
 
-
 /* =========================================================
    LOGIN API
-   ========================================================= */
+========================================================= */
 
 function loginApiGet(action, params = {}){
 
@@ -1415,10 +1421,9 @@ function loginApiGet(action, params = {}){
 
 }
 
-
 /* =========================================================
    SEND OTP
-   ========================================================= */
+========================================================= */
 
 async function sendOTP(){
 
@@ -1495,10 +1500,9 @@ async function sendOTP(){
 
 }
 
-
 /* =========================================================
    VERIFY OTP
-   ========================================================= */
+========================================================= */
 
 async function verifyOTP(){
 
@@ -1594,10 +1598,9 @@ async function verifyOTP(){
 
 }
 
-
 /* =========================================================
    BACK TO EMAIL
-   ========================================================= */
+========================================================= */
 
 function backToEmail(){
 
@@ -1617,10 +1620,9 @@ function backToEmail(){
 
 }
 
-
 /* =========================================================
    SESSION
-   ========================================================= */
+========================================================= */
 
 async function checkExistingSession(){
 
@@ -1675,10 +1677,9 @@ async function checkExistingSession(){
   return false;
 }
 
-
 /* =========================================================
    LOGOUT
-   ========================================================= */
+========================================================= */
 
 async function logout(){
 
@@ -1721,10 +1722,9 @@ async function logout(){
 
 }
 
-
 /* =========================================================
    CLEAR SESSION
-   ========================================================= */
+========================================================= */
 
 function clearLoginSession(){
 
@@ -1738,10 +1738,9 @@ function clearLoginSession(){
 
 }
 
-
 /* =========================================================
    SHOW DASHBOARD
-   ========================================================= */
+========================================================= */
 
 function showDashboard(){
 
@@ -1761,10 +1760,9 @@ function showDashboard(){
 
 }
 
-
 /* =========================================================
    SUPABASE REQUEST
-   ========================================================= */
+========================================================= */
 
 async function supabaseRequest(
   path,
@@ -1796,7 +1794,10 @@ async function supabaseRequest(
   }
 
   if(options.headers){
-    Object.assign(headers,options.headers);
+    Object.assign(
+      headers,
+      options.headers
+    );
   }
 
   const response =
@@ -1865,10 +1866,9 @@ async function supabaseRequest(
 
 }
 
-
 /* =========================================================
    TABLE NAME
-   ========================================================= */
+========================================================= */
 
 function tableName(branch,report){
 
@@ -1889,10 +1889,9 @@ function tableName(branch,report){
 
 }
 
-
 /* =========================================================
    REPORT LABEL
-   ========================================================= */
+========================================================= */
 
 function reportLabel(){
 
@@ -1913,10 +1912,9 @@ function reportLabel(){
 
 }
 
-
 /* =========================================================
    TITLE
-   ========================================================= */
+========================================================= */
 
 function updateReportTitle(){
 
@@ -1941,10 +1939,9 @@ function updateReportTitle(){
 
 }
 
-
 /* =========================================================
-   SEARCH
-   ========================================================= */
+   SEARCH CLEAN
+========================================================= */
 
 function cleanSearch(value){
 
@@ -1954,13 +1951,55 @@ function cleanSearch(value){
 
 }
 
+/* =========================================================
+   SEARCH VALUE ESCAPE
+========================================================= */
+
+function escapePostgrestValue(value){
+
+  return String(value || "")
+    .replace(/\\/g,"\\\\")
+    .replace(/"/g,'\\"')
+    .replace(/\(/g,"\\(")
+    .replace(/\)/g,"\\)")
+    .replace(/,/g,"\\,")
+    .replace(/\*/g,"\\*");
+
+}
+
+/* =========================================================
+   BUILD SEARCH PARAMS
+
+   IMPORTANT:
+
+   NTAGN       = PARTIAL
+   DESCRIPTION = PARTIAL
+   LENSTYPE    = PARTIAL
+   QR          = PARTIAL
+   BR          = PARTIAL
+
+   SI NO.      = EXACT
+
+   Therefore:
+
+   Search 12345
+
+   matches:
+   SI = 12345
+
+   but DOES NOT match:
+   SI = 123456
+========================================================= */
 
 function buildSearchParams(search=""){
 
   const params =
     new URLSearchParams();
 
-  params.set("select","*");
+  params.set(
+    "select",
+    "*"
+  );
 
   const clean =
     cleanSearch(search);
@@ -1968,13 +2007,16 @@ function buildSearchParams(search=""){
   if(clean){
 
     const safe =
-      clean
-        .replace(/[%]/g,"")
-        .replace(/[(),]/g," ")
-        .replace(/\*/g," ");
+      escapePostgrestValue(clean);
 
     const pattern =
       "*" + safe + "*";
+
+    /*
+     * SI NO. deliberately uses eq.
+     */
+    const exactSI =
+      safe;
 
     params.set(
       "or",
@@ -1982,9 +2024,9 @@ function buildSearchParams(search=""){
       "NTAGN.ilike." + pattern +
       ",DESCRIPTION.ilike." + pattern +
       ",LENSTYPE.ilike." + pattern +
-      ',"SI NO.".ilike.' + pattern +
       ",QR.ilike." + pattern +
       ",BR.ilike." + pattern +
+      ',"SI NO.".eq.' + exactSI +
       ")"
     );
 
@@ -1999,15 +2041,14 @@ function buildSearchParams(search=""){
 
 }
 
-
 /* =========================================================
    FETCH ALL ROWS
-   ========================================================= */
+========================================================= */
 
 async function fetchAllRows(
   table,
   search="",
-  maxRows=100000
+  maxRows=MAX_FETCH_ROWS
 ){
 
   const all = [];
@@ -2048,14 +2089,22 @@ async function fetchAllRows(
       break;
     }
 
-    offset += SUPABASE_PAGE_SIZE;
+    offset +=
+      SUPABASE_PAGE_SIZE;
+
+    if(all.length >= maxRows){
+      break;
+    }
 
   }
 
-  return all;
+  return all.slice(0,maxRows);
 
 }
 
+/* =========================================================
+   FETCH BRANCH DATA
+========================================================= */
 
 async function fetchBranchData(
   branch,
@@ -2066,22 +2115,22 @@ async function fetchBranchData(
   return fetchAllRows(
     tableName(branch,report),
     search,
-    100000
+    MAX_FETCH_ROWS
   );
 
 }
 
-
 /* =========================================================
    GET SOLD TAGS
-   ========================================================= */
+========================================================= */
 
 async function getSoldTags(branch){
 
   const table =
     tableName(branch,"sold");
 
-  const tags = new Set();
+  const tags =
+    new Set();
 
   let offset = 0;
 
@@ -2090,7 +2139,11 @@ async function getSoldTags(branch){
     const params =
       new URLSearchParams();
 
-    params.set("select","NTAGN");
+    params.set(
+      "select",
+      "NTAGN"
+    );
+
     params.set(
       "limit",
       String(SUPABASE_PAGE_SIZE)
@@ -2103,7 +2156,9 @@ async function getSoldTags(branch){
 
     const rows =
       await supabaseRequest(
-        table + "?" + params.toString()
+        table +
+        "?" +
+        params.toString()
       );
 
     const batch =
@@ -2131,7 +2186,8 @@ async function getSoldTags(branch){
       break;
     }
 
-    offset += SUPABASE_PAGE_SIZE;
+    offset +=
+      SUPABASE_PAGE_SIZE;
 
   }
 
@@ -2139,10 +2195,9 @@ async function getSoldTags(branch){
 
 }
 
-
 /* =========================================================
    MAP ROW
-   ========================================================= */
+========================================================= */
 
 function mapRow(row,branch){
 
@@ -2176,10 +2231,18 @@ function mapRow(row,branch){
 
 }
 
-
 /* =========================================================
-   BRANCH / REPORT
-   ========================================================= */
+   BRANCH CHANGE
+
+   IMPORTANT:
+
+   DO NOT call clearReport() here.
+
+   clearReport() opens the popup.
+
+   Changing branch should silently clear
+   the currently displayed report.
+========================================================= */
 
 function branchChanged(){
 
@@ -2187,10 +2250,17 @@ function branchChanged(){
 
   updateReportTitle();
 
-  clearReport();
+  silentlyClearReport();
 
 }
 
+/* =========================================================
+   REPORT CHANGE
+
+   IMPORTANT:
+
+   DO NOT call clearReport() here.
+========================================================= */
 
 function reportChanged(){
 
@@ -2198,14 +2268,13 @@ function reportChanged(){
 
   updateReportTitle();
 
-  clearReport();
+  silentlyClearReport();
 
 }
 
-
 /* =========================================================
-   RESET
-   ========================================================= */
+   RESET DASHBOARD
+========================================================= */
 
 function resetDashboardDisplay(){
 
@@ -2229,7 +2298,11 @@ function resetDashboardDisplay(){
 
   empty.innerHTML = `
     <div class="emptyIcon">⌕</div>
-    <div class="emptyTitle">Ready to search</div>
+
+    <div class="emptyTitle">
+      Ready to search
+    </div>
+
     <div class="emptyText">
       Search your inventory to display records.
     </div>
@@ -2237,7 +2310,8 @@ function resetDashboardDisplay(){
 
   document
     .getElementById("pageInfo")
-    .textContent = "Ready to search";
+    .textContent =
+      "Ready to search";
 
   document
     .getElementById("availableTotal")
@@ -2261,14 +2335,83 @@ function resetDashboardDisplay(){
 
 }
 
-
 /* =========================================================
-   CLEAR REPORT
-   ========================================================= */
+   SILENT CLEAR
 
-function clearReport(){
+   Used by:
+   - branch change
+   - report change
+   - reset
+
+   It NEVER opens a popup.
+========================================================= */
+
+function silentlyClearReport(){
 
   searchGeneration++;
+
+  currentRows = [];
+  totalRows = 0;
+  currentPage = 1;
+  currentSearch = "";
+
+  document
+    .getElementById("search")
+    .value = "";
+
+  document
+    .getElementById("tableBody")
+    .innerHTML = "";
+
+  const empty =
+    document.getElementById("emptyState");
+
+  empty.style.display = "block";
+
+  empty.innerHTML = `
+    <div class="emptyIcon">⌕</div>
+
+    <div class="emptyTitle">
+      Ready to search
+    </div>
+
+    <div class="emptyText">
+      Press Search to load records.
+    </div>
+  `;
+
+  document
+    .getElementById("availableTotal")
+    .textContent = "—";
+
+  document
+    .getElementById("soldTotal")
+    .textContent = "—";
+
+  document
+    .getElementById("auditTotal")
+    .textContent = "—";
+
+  document
+    .getElementById("showingTotal")
+    .textContent = "—";
+
+  document
+    .getElementById("pageInfo")
+    .textContent =
+      "Ready to search";
+
+  updatePagination();
+
+}
+
+/* =========================================================
+   CLEAR REPORT BUTTON
+
+   ONLY THIS FUNCTION OPENS THE POPUP.
+========================================================= */
+
+function clearReport(){
 
   const currentBranch =
     document
@@ -2296,7 +2439,8 @@ function clearReport(){
 
       <div class="modalSub">
         Choose the branch and report you want
-        to clear.
+        to clear from the screen.
+        Database records will NOT be deleted.
       </div>
 
       <div class="field">
@@ -2308,7 +2452,9 @@ function clearReport(){
           class="select"
         >
 
-          <option value="ALL">ALL BRANCHES</option>
+          <option value="ALL">
+            ALL BRANCHES
+          </option>
 
           ${BRANCHES.map(
             b =>
@@ -2365,28 +2511,41 @@ function clearReport(){
       </div>
 
     </div>
-
   `;
 
   document.body.appendChild(modal);
 
-  modal.querySelector("#clearBranch").value =
+  modal.querySelector(
+    "#clearBranch"
+  ).value =
     currentBranch;
 
-  modal.querySelector("#clearReportType").value =
+  modal.querySelector(
+    "#clearReportType"
+  ).value =
     currentReport;
 
-  modal.querySelector("[data-cancel]").onclick =
-    ()=>modal.remove();
+  modal.querySelector(
+    "[data-cancel]"
+  ).onclick =
+    ()=>{
+      modal.remove();
+    };
 
-  modal.querySelector("[data-clear]").onclick =
+  modal.querySelector(
+    "[data-clear]"
+  ).onclick =
     ()=>{
 
       const branch =
-        modal.querySelector("#clearBranch").value;
+        modal.querySelector(
+          "#clearBranch"
+        ).value;
 
       const report =
-        modal.querySelector("#clearReportType").value;
+        modal.querySelector(
+          "#clearReportType"
+        ).value;
 
       document
         .getElementById("branch")
@@ -2398,97 +2557,21 @@ function clearReport(){
 
       modal.remove();
 
-      performClearReport();
+      updateReportTitle();
+
+      silentlyClearReport();
+
+      showStatus(
+        "Report cleared."
+      );
 
     };
 
 }
 
-
-function performClearReport(){
-
-  searchGeneration++;
-
-  currentRows = [];
-  totalRows = 0;
-  currentPage = 1;
-  currentSearch = "";
-
-  document
-    .getElementById("search")
-    .value = "";
-
-  document
-    .getElementById("tableBody")
-    .innerHTML = "";
-
-  document
-    .getElementById("emptyState")
-    .style.display = "block";
-
-  document
-    .getElementById("emptyState")
-    .innerHTML = `
-
-      <div class="emptyIcon">
-        ⌕
-      </div>
-
-      <div class="emptyTitle">
-        Report cleared
-      </div>
-
-      <div class="emptyText">
-        ${escapeHtml(
-          reportLabel()
-        )}
-        •
-        ${
-          document
-            .getElementById("branch")
-            .value === "ALL"
-              ? "ALL BRANCHES"
-              : document
-                  .getElementById("branch")
-                  .value
-        }
-        <br>
-        Press Search to load records.
-      </div>
-
-    `;
-
-  document
-    .getElementById("availableTotal")
-    .textContent = "—";
-
-  document
-    .getElementById("soldTotal")
-    .textContent = "—";
-
-  document
-    .getElementById("auditTotal")
-    .textContent = "—";
-
-  document
-    .getElementById("showingTotal")
-    .textContent = "—";
-
-  document
-    .getElementById("pageInfo")
-    .textContent =
-      "Report cleared";
-
-  updateReportTitle();
-
-  updatePagination();
-
-}
-
-
 /* =========================================================
-   SEARCH
-   ========================================================= */
+   RUN SEARCH
+========================================================= */
 
 function runSearch(){
 
@@ -2498,6 +2581,9 @@ function runSearch(){
 
 }
 
+/* =========================================================
+   SEARCH KEY
+========================================================= */
 
 function searchKey(event){
 
@@ -2511,10 +2597,9 @@ function searchKey(event){
 
 }
 
-
 /* =========================================================
    REFRESH / SEARCH
-   ========================================================= */
+========================================================= */
 
 async function refreshDashboard(){
 
@@ -2570,6 +2655,7 @@ async function refreshDashboard(){
                   sold
                 ] =
                   await Promise.all([
+
                     fetchBranchData(
                       b,
                       "stocks",
@@ -2577,6 +2663,7 @@ async function refreshDashboard(){
                     ),
 
                     getSoldTags(b)
+
                   ]);
 
                 const available =
@@ -2617,7 +2704,10 @@ async function refreshDashboard(){
           )
         );
 
-      if(generation !== searchGeneration){
+      if(
+        generation !==
+        searchGeneration
+      ){
         return;
       }
 
@@ -2693,18 +2783,26 @@ async function refreshDashboard(){
 
     }
 
-    if(generation !== searchGeneration){
+    if(
+      generation !==
+      searchGeneration
+    ){
       return;
     }
 
     currentRows = combined;
 
-    totalRows = combined.length;
+    totalRows =
+      combined.length;
 
     currentPage = 1;
 
     renderCurrentPage();
 
+    /*
+     * Calculate statistics separately,
+     * but don't block the report from appearing.
+     */
     updateStatsDirect(
       branch,
       generation
@@ -2724,24 +2822,33 @@ async function refreshDashboard(){
       error
     );
 
-    if(generation === searchGeneration){
+    if(
+      generation ===
+      searchGeneration
+    ){
+
       renderError(error);
+
     }
 
   }finally{
 
-    if(generation === searchGeneration){
+    if(
+      generation ===
+      searchGeneration
+    ){
+
       setLoading(false);
+
     }
 
   }
 
 }
 
-
 /* =========================================================
    STATISTICS
-   ========================================================= */
+========================================================= */
 
 async function updateStatsDirect(
   branch,
@@ -2761,6 +2868,29 @@ async function updateStatsDirect(
     branches.map(
       async b=>{
 
+        /*
+         * For statistics only, request the
+         * required columns instead of SELECT *.
+         */
+
+        const stockPromise =
+          fetchAllRowsForStats(
+            tableName(b,"stocks"),
+            "NTAGN"
+          );
+
+        const soldPromise =
+          fetchAllRowsForStats(
+            tableName(b,"sold"),
+            "NTAGN"
+          );
+
+        const auditPromise =
+          fetchAllRowsForStats(
+            tableName(b,"audit"),
+            "NTAGN"
+          );
+
         const [
           stocks,
           soldRows,
@@ -2768,23 +2898,9 @@ async function updateStatsDirect(
         ] =
           await Promise.all([
 
-            fetchBranchData(
-              b,
-              "stocks",
-              ""
-            ),
-
-            fetchBranchData(
-              b,
-              "sold",
-              ""
-            ),
-
-            fetchBranchData(
-              b,
-              "audit",
-              ""
-            )
+            stockPromise,
+            soldPromise,
+            auditPromise
 
           ]);
 
@@ -2822,15 +2938,20 @@ async function updateStatsDirect(
 
         });
 
-        sold += soldRows.length;
+        sold +=
+          soldRows.length;
 
-        audit += auditRows.length;
+        audit +=
+          auditRows.length;
 
       }
     )
   );
 
-  if(generation !== searchGeneration){
+  if(
+    generation !==
+    searchGeneration
+  ){
     return;
   }
 
@@ -2856,10 +2977,72 @@ async function updateStatsDirect(
 
 }
 
+/* =========================================================
+   STATISTICS FETCH
+========================================================= */
+
+async function fetchAllRowsForStats(
+  table,
+  selectColumns
+){
+
+  const all = [];
+
+  let offset = 0;
+
+  while(true){
+
+    const params =
+      new URLSearchParams();
+
+    params.set(
+      "select",
+      selectColumns
+    );
+
+    params.set(
+      "limit",
+      String(SUPABASE_PAGE_SIZE)
+    );
+
+    params.set(
+      "offset",
+      String(offset)
+    );
+
+    const rows =
+      await supabaseRequest(
+        table +
+        "?" +
+        params.toString()
+      );
+
+    const batch =
+      Array.isArray(rows)
+        ? rows
+        : [];
+
+    all.push(...batch);
+
+    if(
+      batch.length <
+      SUPABASE_PAGE_SIZE
+    ){
+      break;
+    }
+
+    offset +=
+      SUPABASE_PAGE_SIZE;
+
+  }
+
+  return all;
+
+}
 
 /* =========================================================
    RENDER
-   ========================================================= */
+========================================================= */
 
 function renderCurrentPage(){
 
@@ -2877,14 +3060,17 @@ function renderCurrentPage(){
 
 }
 
-
 function renderTable(rows){
 
   const body =
-    document.getElementById("tableBody");
+    document.getElementById(
+      "tableBody"
+    );
 
   const empty =
-    document.getElementById("emptyState");
+    document.getElementById(
+      "emptyState"
+    );
 
   body.innerHTML = "";
 
@@ -2930,13 +3116,7 @@ function renderTable(rows){
       .value;
 
   /*
-   * IMPORTANT:
-   *
    * ACTIONS ONLY EXIST FOR SOLD OUT.
-   *
-   * AVAILABLE = no action
-   * AUDIT     = no action
-   * SOLD      = edit SI + delete
    */
 
   const canEdit =
@@ -3057,7 +3237,9 @@ function renderTable(rows){
       "Showing " +
       formatNumber(start + 1) +
       "–" +
-      formatNumber(start + rows.length) +
+      formatNumber(
+        start + rows.length
+      ) +
       " of " +
       formatNumber(totalRows);
 
@@ -3070,10 +3252,9 @@ function renderTable(rows){
 
 }
 
-
 /* =========================================================
    PAGINATION
-   ========================================================= */
+========================================================= */
 
 function updatePagination(){
 
@@ -3103,7 +3284,6 @@ function updatePagination(){
 
 }
 
-
 function previousPage(){
 
   if(currentPage <= 1){
@@ -3115,7 +3295,6 @@ function previousPage(){
   renderCurrentPage();
 
 }
-
 
 function nextPage(){
 
@@ -3138,10 +3317,13 @@ function nextPage(){
 
 }
 
-
 /* =========================================================
    SAVE SI — SOLD ONLY
-   ========================================================= */
+
+   FIX:
+   Do NOT encodeURIComponent() before
+   passing to URLSearchParams.
+========================================================= */
 
 async function saveSoldSI(input){
 
@@ -3161,6 +3343,7 @@ async function saveSoldSI(input){
     );
 
     return;
+
   }
 
   const row =
@@ -3185,16 +3368,26 @@ async function saveSoldSI(input){
     const params =
       new URLSearchParams();
 
+    /*
+     * IMPORTANT:
+     *
+     * Old:
+     * eq. + encodeURIComponent(branch)
+     *
+     * New:
+     * eq.branch
+     *
+     * URLSearchParams handles encoding.
+     */
+
     params.set(
       "BR",
-      "eq." +
-      encodeURIComponent(branch)
+      "eq." + branch
     );
 
     params.set(
       "NTAGN",
-      "eq." +
-      encodeURIComponent(tag)
+      "eq." + tag
     );
 
     await supabaseRequest(
@@ -3238,10 +3431,9 @@ async function saveSoldSI(input){
 
 }
 
-
 /* =========================================================
    DELETE SOLD ONLY
-   ========================================================= */
+========================================================= */
 
 async function deleteSoldRow(
   branch,
@@ -3255,6 +3447,7 @@ async function deleteSoldRow(
     );
 
     return;
+
   }
 
   const confirmed =
@@ -3281,16 +3474,20 @@ async function deleteSoldRow(
     const params =
       new URLSearchParams();
 
+    /*
+     * FIXED FILTER.
+     *
+     * No double encoding.
+     */
+
     params.set(
       "BR",
-      "eq." +
-      encodeURIComponent(branch)
+      "eq." + branch
     );
 
     params.set(
       "NTAGN",
-      "eq." +
-      encodeURIComponent(tag)
+      "eq." + tag
     );
 
     await supabaseRequest(
@@ -3307,6 +3504,9 @@ async function deleteSoldRow(
       "Sold record deleted."
     );
 
+    /*
+     * Refresh SOLD report.
+     */
     await refreshDashboard();
 
   }catch(error){
@@ -3324,10 +3524,9 @@ async function deleteSoldRow(
 
 }
 
-
 /* =========================================================
    CONFIRM
-   ========================================================= */
+========================================================= */
 
 function inlineConfirm(text){
 
@@ -3411,10 +3610,9 @@ function inlineConfirm(text){
 
 }
 
-
 /* =========================================================
    IMPORT FILE
-   ========================================================= */
+========================================================= */
 
 async function handleImportFile(event){
 
@@ -3439,6 +3637,7 @@ async function handleImportFile(event){
     );
 
     return;
+
   }
 
   createQueueCard(
@@ -3460,7 +3659,9 @@ async function handleImportFile(event){
         }
       );
 
-    if(!workbook.SheetNames.length){
+    if(
+      !workbook.SheetNames.length
+    ){
 
       throw new Error(
         "The workbook contains no sheets."
@@ -3511,10 +3712,9 @@ async function handleImportFile(event){
 
 }
 
-
 /* =========================================================
    NORMALIZE IMPORT ROW
-   ========================================================= */
+========================================================= */
 
 function normalizeImportRow(input){
 
@@ -3571,7 +3771,6 @@ function normalizeImportRow(input){
 
 }
 
-
 function normalizeHeader(value){
 
   return String(value || "")
@@ -3580,7 +3779,6 @@ function normalizeHeader(value){
     .toUpperCase();
 
 }
-
 
 function normalizeCellValue(value){
 
@@ -3598,7 +3796,6 @@ function normalizeCellValue(value){
   return String(value).trim();
 
 }
-
 
 function formatDateValue(date){
 
@@ -3626,10 +3823,134 @@ function formatDateValue(date){
 
 }
 
+/* =========================================================
+   GET EXISTING TAGS FOR IMPORT ONLY
+
+   THIS IS THE BIG IMPORT SPEED FIX.
+
+   OLD CODE:
+   Downloaded the ENTIRE stocks table.
+
+   NEW CODE:
+   Only asks Supabase about the NTAGN values
+   actually present in the uploaded file.
+========================================================= */
+
+async function getExistingImportTags(
+  table,
+  tags
+){
+
+  const existing =
+    new Set();
+
+  const tagArray =
+    Array.from(tags);
+
+  /*
+   * Supabase URL length can become large.
+   * Keep batches relatively small.
+   */
+  const TAG_QUERY_BATCH = 200;
+
+  for(
+    let i=0;
+    i<tagArray.length;
+    i+=TAG_QUERY_BATCH
+  ){
+
+    const batch =
+      tagArray.slice(
+        i,
+        i + TAG_QUERY_BATCH
+      );
+
+    if(!batch.length){
+      continue;
+    }
+
+    /*
+     * Build:
+     *
+     * NTAGN=in.(TAG1,TAG2,TAG3)
+     *
+     * Values are escaped for PostgREST.
+     */
+
+    const escaped =
+      batch.map(
+        value =>
+          String(value)
+            .replace(/\\/g,"\\\\")
+            .replace(/"/g,'\\"')
+            .replace(/,/g,"\\,")
+            .replace(/\(/g,"\\(")
+            .replace(/\)/g,"\\)")
+      );
+
+    const params =
+      new URLSearchParams();
+
+    params.set(
+      "select",
+      "NTAGN"
+    );
+
+    params.set(
+      "NTAGN",
+      "in.(" +
+      escaped.join(",") +
+      ")"
+    );
+
+    const rows =
+      await supabaseRequest(
+        table +
+        "?" +
+        params.toString()
+      );
+
+    if(Array.isArray(rows)){
+
+      rows.forEach(row=>{
+
+        const tag =
+          String(
+            row?.NTAGN ?? ""
+          ).trim();
+
+        if(tag){
+          existing.add(tag);
+        }
+
+      });
+
+    }
+
+    updateQueue(
+      "IMPORT",
+      Math.min(
+        i + TAG_QUERY_BATCH,
+        tagArray.length
+      ),
+      Math.max(
+        1,
+        tagArray.length
+      ),
+      "Checking uploaded tags..."
+    );
+
+    await yieldToBrowser();
+
+  }
+
+  return existing;
+
+}
 
 /* =========================================================
    FAST IMPORT
-   ========================================================= */
+========================================================= */
 
 async function importDirect(
   branch,
@@ -3643,6 +3964,9 @@ async function importDirect(
       "stocks"
     );
 
+  /*
+   * Normalize uploaded rows.
+   */
   let mappedRows =
     rows
       .map(normalizeImportRow)
@@ -3664,18 +3988,19 @@ async function importDirect(
   /*
    * Force branch.
    */
-
   mappedRows.forEach(row=>{
-    row["BR"] = branch;
+
+    row["BR"] =
+      branch;
+
   });
 
   /*
    * Remove duplicate NTAGN values
-   * from the uploaded file.
+   * from uploaded file.
    *
    * Last occurrence wins.
    */
-
   const unique =
     new Map();
 
@@ -3687,48 +4012,52 @@ async function importDirect(
       ).trim();
 
     if(tag){
-      unique.set(tag,row);
+      unique.set(
+        tag,
+        row
+      );
     }
 
   });
 
   mappedRows =
-    Array.from(unique.values());
+    Array.from(
+      unique.values()
+    );
+
+  /*
+   * Create tag list.
+   */
+  const uploadedTags =
+    mappedRows.map(
+      row =>
+        String(
+          row["NTAGN"] || ""
+        ).trim()
+    );
 
   updateQueue(
     "IMPORT",
     0,
-    mappedRows.length,
-    "Checking existing inventory..."
+    Math.max(
+      1,
+      mappedRows.length
+    ),
+    "Checking existing uploaded tags..."
   );
 
   /*
-   * ONE database read instead of
-   * SELECT for every uploaded row.
+   * BIG SPEED IMPROVEMENT:
+   *
+   * Do NOT fetch the entire stock table.
+   *
+   * Only retrieve existing uploaded NTAGN.
    */
-
-  const existingRows =
-    await fetchAllRows(
-      table,
-      "",
-      100000
-    );
-
   const existingTags =
-    new Set();
-
-  existingRows.forEach(row=>{
-
-    const tag =
-      String(
-        row?.NTAGN ?? ""
-      ).trim();
-
-    if(tag){
-      existingTags.add(tag);
-    }
-
-  });
+    await getExistingImportTags(
+      table,
+      new Set(uploadedTags)
+    );
 
   const newRows = [];
 
@@ -3742,9 +4071,17 @@ async function importDirect(
       ).trim();
 
     if(existingTags.has(tag)){
-      existingRowsToUpdate.push(row);
+
+      existingRowsToUpdate.push(
+        row
+      );
+
     }else{
-      newRows.push(row);
+
+      newRows.push(
+        row
+      );
+
     }
 
   });
@@ -3754,10 +4091,7 @@ async function importDirect(
 
   /*
    * BULK INSERT NEW RECORDS.
-   *
-   * No row-by-row POST.
    */
-
   for(
     let i=0;
     i<newRows.length;
@@ -3781,7 +4115,8 @@ async function importDirect(
       }
     );
 
-    inserted += chunk.length;
+    inserted +=
+      chunk.length;
 
     updateQueue(
       "IMPORT",
@@ -3801,14 +4136,14 @@ async function importDirect(
   }
 
   /*
-   * EXISTING ROWS:
+   * Existing records:
    *
-   * We cannot safely PATCH different values
-   * to different NTAGN rows in one normal
-   * PostgREST PATCH request.
+   * Different rows can contain different
+   * values, therefore ordinary PATCH
+   * cannot update all rows with different
+   * values in one request.
    *
-   * Therefore we run controlled concurrent
-   * PATCH requests instead of serial requests.
+   * We use controlled concurrency.
    */
 
   let updateIndex = 0;
@@ -3824,7 +4159,9 @@ async function importDirect(
         index >=
         existingRowsToUpdate.length
       ){
+
         return;
+
       }
 
       const row =
@@ -3854,19 +4191,23 @@ async function importDirect(
 
       });
 
+      /*
+       * FIXED FILTER:
+       *
+       * Do NOT encodeURIComponent()
+       * before URLSearchParams.
+       */
       const params =
         new URLSearchParams();
 
       params.set(
         "BR",
-        "eq." +
-        encodeURIComponent(branch)
+        "eq." + branch
       );
 
       params.set(
         "NTAGN",
-        "eq." +
-        encodeURIComponent(tag)
+        "eq." + tag
       );
 
       await supabaseRequest(
@@ -3875,7 +4216,9 @@ async function importDirect(
         params.toString(),
         {
           method:"PATCH",
+
           body:body,
+
           prefer:"return=minimal"
         }
       );
@@ -3920,7 +4263,9 @@ async function importDirect(
 
   }
 
-  await Promise.all(workers);
+  await Promise.all(
+    workers
+  );
 
   updateQueue(
     "IMPORT",
@@ -3941,32 +4286,37 @@ async function importDirect(
     " updated."
   );
 
-  setTimeout(()=>{
-
-    refreshDashboard();
-
-  },300);
+  /*
+   * Refresh only AFTER import finishes.
+   */
+  setTimeout(
+    ()=>{
+      refreshDashboard();
+    },
+    300
+  );
 
 }
 
-
 /* =========================================================
    BROWSER YIELD
-   ========================================================= */
+========================================================= */
 
 function yieldToBrowser(){
 
   return new Promise(
     resolve =>
-      setTimeout(resolve,0)
+      setTimeout(
+        resolve,
+        0
+      )
   );
 
 }
 
-
 /* =========================================================
    EXPORT
-   ========================================================= */
+========================================================= */
 
 async function startExport(){
 
@@ -4116,10 +4466,6 @@ async function startExport(){
       formatFileDate() +
       ".xlsx";
 
-    /*
-     * Browser download only.
-     */
-
     XLSX.writeFile(
       wb,
       filename
@@ -4153,10 +4499,9 @@ async function startExport(){
 
 }
 
-
 /* =========================================================
    SAFE SHEET NAME
-   ========================================================= */
+========================================================= */
 
 function safeSheetName(name){
 
@@ -4165,14 +4510,16 @@ function safeSheetName(name){
       /[\\\/\?\*\[\]\:]/g,
       "_"
     )
-    .substring(0,31);
+    .substring(
+      0,
+      31
+    );
 
 }
 
-
 /* =========================================================
    FILE DATE
-   ========================================================= */
+========================================================= */
 
 function formatFileDate(){
 
@@ -4181,7 +4528,8 @@ function formatFileDate(){
 
   const pad =
     n =>
-      String(n).padStart(2,"0");
+      String(n)
+        .padStart(2,"0");
 
   return (
     d.getFullYear() +
@@ -4195,10 +4543,9 @@ function formatFileDate(){
 
 }
 
-
 /* =========================================================
    QUEUE CREATE
-   ========================================================= */
+========================================================= */
 
 function createQueueCard(
   id,
@@ -4281,10 +4628,9 @@ function createQueueCard(
 
 }
 
-
 /* =========================================================
    QUEUE UPDATE
-   ========================================================= */
+========================================================= */
 
 function updateQueue(
   id,
@@ -4354,10 +4700,9 @@ function updateQueue(
 
 }
 
-
 /* =========================================================
    QUEUE ERROR
-   ========================================================= */
+========================================================= */
 
 function updateQueueError(
   id,
@@ -4410,10 +4755,9 @@ function updateQueueError(
 
 }
 
-
 /* =========================================================
    STATUS
-   ========================================================= */
+========================================================= */
 
 function showStatus(message){
 
@@ -4434,17 +4778,18 @@ function showStatus(message){
   window.__statusTimer =
     setTimeout(
       ()=>{
-        el.classList.remove("show");
+        el.classList.remove(
+          "show"
+        );
       },
       4000
     );
 
 }
 
-
 /* =========================================================
    LOGIN STATUS
-   ========================================================= */
+========================================================= */
 
 function setLoginStatus(message){
 
@@ -4455,10 +4800,9 @@ function setLoginStatus(message){
 
 }
 
-
 /* =========================================================
    LOADING
-   ========================================================= */
+========================================================= */
 
 function setLoading(value){
 
@@ -4473,10 +4817,9 @@ function setLoading(value){
 
 }
 
-
 /* =========================================================
    ERROR
-   ========================================================= */
+========================================================= */
 
 function renderError(error){
 
@@ -4492,7 +4835,8 @@ function renderError(error){
 
   body.innerHTML = "";
 
-  empty.style.display = "block";
+  empty.style.display =
+    "block";
 
   empty.innerHTML = `
 
@@ -4530,10 +4874,9 @@ function renderError(error){
 
 }
 
-
 /* =========================================================
    NUMBER
-   ========================================================= */
+========================================================= */
 
 function formatNumber(value){
 
@@ -4543,10 +4886,9 @@ function formatNumber(value){
 
 }
 
-
 /* =========================================================
-   ESCAPE
-   ========================================================= */
+   ESCAPE HTML
+========================================================= */
 
 function escapeHtml(value){
 
@@ -4564,17 +4906,15 @@ function escapeHtml(value){
 
 }
 
-
 function escapeHtmlAttribute(value){
 
   return escapeHtml(value);
 
 }
 
-
 /* =========================================================
    STARTUP
-   ========================================================= */
+========================================================= */
 
 (async function(){
 
@@ -4589,16 +4929,17 @@ function escapeHtmlAttribute(value){
 
     document
       .getElementById("loginScreen")
-      .style.display = "flex";
+      .style.display =
+        "flex";
 
     document
       .getElementById("dashboard")
-      .style.display = "none";
+      .style.display =
+        "none";
 
   }
 
 })();
-
 </script>
 
 </body>

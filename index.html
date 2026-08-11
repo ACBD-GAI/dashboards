@@ -3097,8 +3097,21 @@ async function checkExistingSession(){
       error
     );
 
-    // Keep the existing session if the
-    // server/API temporarily cannot be reached.
+    // loginApiGet rejects when the server returns
+    // { ok:false, error:"SESSION_EXPIRED" }.
+    // That MUST log this browser out immediately.
+    if(
+      error &&
+      error.message === "SESSION_EXPIRED"
+    ){
+
+      clearLoginSession();
+      return false;
+
+    }
+
+    // For temporary network/API failures, keep the
+    // existing session instead of logging the user out.
     return true;
   }
 

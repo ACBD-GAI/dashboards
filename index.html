@@ -2292,7 +2292,7 @@ body{
 
       <button
         class="controlBtn"
-        onclick="clearReport()"
+        onclick="clearSearchField()"
       >
         Clear
       </button>
@@ -2807,9 +2807,13 @@ function loginApiGet(action, params = {}){
 
         cleanup();
 
+        forceLogout(
+          "Unable to connect to login server. You have been logged out."
+        );
+
         reject(
           new Error(
-            "Unable to connect to login server."
+            "FORCE_LOGOUT"
           )
         );
 
@@ -3185,6 +3189,41 @@ function stopSessionMonitor(){
 
   }
 
+}
+
+/* =========================================================
+   FORCE LOGOUT
+   Used when the login server cannot be reached.
+   Does NOT depend on the server logout request.
+========================================================= */
+
+function forceLogout(message = ""){
+  stopSessionMonitor();
+  clearLoginSession();
+
+  document
+    .getElementById("dashboard")
+    .style.display = "none";
+
+  document
+    .getElementById("loginScreen")
+    .style.display = "flex";
+
+  document
+    .getElementById("emailStep")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("otpStep")
+    .classList.add("hidden");
+
+  document
+    .getElementById("otp")
+    .value = "";
+
+  setLoginStatus(
+    message || "You have been logged out. Please log in again."
+  );
 }
 
 /* =========================================================
@@ -4008,6 +4047,24 @@ function silentlyClearReport(){
 
   updatePagination();
 
+}
+
+/* =========================================================
+   CLEAR SEARCH FIELD ONLY
+========================================================= */
+
+function clearSearchField(){
+  const search =
+    document.getElementById("search");
+
+  if(!search){
+    return;
+  }
+
+  search.value = "";
+  currentSearch = "";
+  currentPage = 1;
+  search.focus();
 }
 
 /* =========================================================

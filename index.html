@@ -13,11 +13,12 @@
 <style>
 :root{
   --bg:#f4f7fb;
-  --card:#fff;
+  --card:#ffffff;
   --text:#182230;
   --muted:#718096;
   --line:#e6ebf2;
   --primary:#2563eb;
+  --primary-dark:#1d4ed8;
   --success:#16a34a;
   --danger:#dc2626;
   --warning:#d97706;
@@ -34,12 +35,16 @@ html,body{
 }
 
 body{
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:linear-gradient(135deg,#f8fbff 0%,#f3f6fb 55%,#eef3fa 100%);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,
+    BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:linear-gradient(
+    135deg,
+    #f8fbff 0%,
+    #f3f6fb 55%,
+    #eef3fa 100%
+  );
   color:var(--text);
 }
-
-.hidden{display:none!important}
 
 /* LOGIN */
 
@@ -88,7 +93,9 @@ body{
   line-height:1.55;
 }
 
-.field{margin-bottom:15px}
+.field{
+  margin-bottom:15px;
+}
 
 .field label{
   display:block;
@@ -106,6 +113,7 @@ body{
   border-radius:13px;
   outline:none;
   font-size:15px;
+  transition:.18s;
 }
 
 .input:focus{
@@ -125,11 +133,18 @@ body{
   font-size:14px;
   background:linear-gradient(135deg,var(--primary),#4f46e5);
   box-shadow:0 12px 25px rgba(37,99,235,.23);
+  transition:.18s;
+}
+
+.primaryBtn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 15px 30px rgba(37,99,235,.28);
 }
 
 .primaryBtn:disabled{
   opacity:.55;
   cursor:not-allowed;
+  transform:none;
 }
 
 .loginStatus{
@@ -152,6 +167,8 @@ body{
   padding:22px;
 }
 
+/* TOP BAR */
+
 .topbar{
   display:flex;
   align-items:center;
@@ -173,7 +190,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  color:#fff;
+  color:white;
   background:linear-gradient(135deg,#2563eb,#7c3aed);
   font-size:21px;
   box-shadow:0 9px 20px rgba(37,99,235,.2);
@@ -182,6 +199,7 @@ body{
 .brandTitle{
   font-size:19px;
   font-weight:850;
+  letter-spacing:-.4px;
 }
 
 .brandSub{
@@ -212,7 +230,15 @@ body{
   background:#fff;
   cursor:pointer;
   color:#475569;
+  transition:.15s;
 }
+
+.iconBtn:hover{
+  border-color:#cbd5e1;
+  background:#f8fafc;
+}
+
+/* CONTROL BAR */
 
 .controls{
   background:rgba(255,255,255,.9);
@@ -226,7 +252,8 @@ body{
   margin-bottom:18px;
 }
 
-.select,.searchInput{
+.select,
+.searchInput{
   width:100%;
   border:1px solid var(--line);
   border-radius:12px;
@@ -236,7 +263,9 @@ body{
   color:var(--text);
 }
 
-.searchWrap{position:relative}
+.searchWrap{
+  position:relative;
+}
 
 .searchIcon{
   position:absolute;
@@ -246,7 +275,9 @@ body{
   color:#94a3b8;
 }
 
-.searchInput{padding-left:38px}
+.searchInput{
+  padding-left:38px;
+}
 
 .controlBtn{
   border:1px solid var(--line);
@@ -257,6 +288,7 @@ body{
   cursor:pointer;
   font-weight:700;
   white-space:nowrap;
+  transition:.15s;
 }
 
 .controlBtn:hover{
@@ -269,6 +301,8 @@ body{
   border-color:transparent;
   background:linear-gradient(135deg,#2563eb,#4f46e5);
 }
+
+/* CARDS */
 
 .cards{
   display:grid;
@@ -311,6 +345,7 @@ body{
   margin-top:9px;
   font-size:28px;
   font-weight:850;
+  letter-spacing:-1px;
 }
 
 .statHint{
@@ -318,6 +353,8 @@ body{
   font-size:11px;
   margin-top:4px;
 }
+
+/* TABLE */
 
 .tableCard{
   background:#fff;
@@ -335,7 +372,9 @@ body{
   border-bottom:1px solid var(--line);
 }
 
-.tableTitle{font-weight:800}
+.tableTitle{
+  font-weight:800;
+}
 
 .tableSub{
   color:var(--muted);
@@ -343,7 +382,9 @@ body{
   margin-top:3px;
 }
 
-.tableScroll{overflow:auto}
+.tableScroll{
+  overflow:auto;
+}
 
 table{
   width:100%;
@@ -368,19 +409,38 @@ tbody td{
   white-space:nowrap;
 }
 
-tbody tr:hover{background:#f8fbff}
+tbody tr:hover{
+  background:#f8fbff;
+}
 
-.tag,.branchTag,.typeTag{
+.tag{
   display:inline-flex;
   padding:5px 8px;
   border-radius:8px;
+  background:#f1f5f9;
   font-weight:750;
   font-size:11px;
 }
 
-.tag{background:#f1f5f9}
-.branchTag{background:#eef2ff;color:#4338ca}
-.typeTag{background:#ecfeff;color:#0e7490}
+.branchTag{
+  display:inline-flex;
+  padding:5px 8px;
+  border-radius:8px;
+  background:#eef2ff;
+  color:#4338ca;
+  font-weight:750;
+  font-size:11px;
+}
+
+.typeTag{
+  display:inline-flex;
+  padding:5px 8px;
+  border-radius:8px;
+  background:#ecfeff;
+  color:#0e7490;
+  font-weight:750;
+  font-size:11px;
+}
 
 .actionBtn{
   border:1px solid var(--line);
@@ -392,7 +452,13 @@ tbody tr:hover{background:#f8fbff}
   font-weight:700;
 }
 
-.actionBtn.danger{color:#dc2626}
+.actionBtn:hover{
+  background:#f8fafc;
+}
+
+.actionBtn.danger{
+  color:#dc2626;
+}
 
 .siInput{
   width:100px;
@@ -401,6 +467,13 @@ tbody tr:hover{background:#f8fbff}
   border-radius:8px;
   outline:none;
 }
+
+.siInput:focus{
+  border-color:#60a5fa;
+  box-shadow:0 0 0 3px rgba(59,130,246,.1);
+}
+
+/* PAGINATION */
 
 .pagination{
   display:flex;
@@ -429,11 +502,17 @@ tbody tr:hover{background:#f8fbff}
   font-weight:700;
 }
 
+.pageBtn:hover{
+  background:#f8fafc;
+}
+
 .pageBtn.active{
   background:#2563eb;
   color:#fff;
   border-color:#2563eb;
 }
+
+/* EMPTY */
 
 .empty{
   text-align:center;
@@ -456,11 +535,13 @@ tbody tr:hover{background:#f8fbff}
   margin-top:4px;
 }
 
+/* QUEUE */
+
 #queuePanel{
   position:fixed;
   right:20px;
   bottom:20px;
-  width:min(390px,calc(100vw - 40px));
+  width:min(380px,calc(100vw - 40px));
   z-index:9999;
   display:flex;
   flex-direction:column;
@@ -470,7 +551,7 @@ tbody tr:hover{background:#f8fbff}
 
 .queueCard{
   pointer-events:auto;
-  background:rgba(255,255,255,.97);
+  background:rgba(255,255,255,.96);
   border:1px solid rgba(226,232,240,.95);
   border-radius:17px;
   padding:14px 15px;
@@ -482,6 +563,7 @@ tbody tr:hover{background:#f8fbff}
   display:flex;
   align-items:center;
   justify-content:space-between;
+  gap:10px;
 }
 
 .queueTitle{
@@ -513,7 +595,7 @@ tbody tr:hover{background:#f8fbff}
 
 .progressBar{
   height:100%;
-  width:0;
+  width:0%;
   border-radius:999px;
   background:linear-gradient(90deg,#2563eb,#7c3aed);
   transition:width .25s ease;
@@ -533,26 +615,62 @@ tbody tr:hover{background:#f8fbff}
   text-decoration:none;
 }
 
-#globalStatus{
+/* ADMIN */
+
+.adminPanel{
   position:fixed;
-  left:50%;
-  bottom:20px;
-  transform:translate(-50%,20px);
-  opacity:0;
-  pointer-events:none;
-  background:#172033;
-  color:#fff;
-  padding:10px 15px;
-  border-radius:11px;
-  font-size:12px;
-  box-shadow:0 12px 30px rgba(15,23,42,.2);
-  transition:.22s;
-  z-index:10000;
+  inset:0;
+  background:rgba(15,23,42,.38);
+  z-index:20000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
 }
 
-#globalStatus.show{
-  transform:translate(-50%,0);
-  opacity:1;
+.adminCard{
+  width:min(900px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:22px;
+  box-shadow:0 30px 80px rgba(15,23,42,.25);
+}
+
+.adminHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 20px;
+  border-bottom:1px solid var(--line);
+}
+
+.adminBody{
+  padding:20px;
+}
+
+.adminForm{
+  display:grid;
+  grid-template-columns:1fr 140px 140px auto;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.adminTable{
+  width:100%;
+  min-width:500px;
+}
+
+.adminTable th,
+.adminTable td{
+  padding:10px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  font-size:12px;
+}
+
+.hidden{
+  display:none !important;
 }
 
 .loadingLine{
@@ -568,30 +686,52 @@ tbody tr:hover{background:#f8fbff}
   to{background-position:-200% 0}
 }
 
-@media(max-width:1200px){
-  .controls{
-    grid-template-columns:1fr 1fr 1fr;
-  }
+#globalStatus{
+  position:fixed;
+  left:50%;
+  bottom:20px;
+  transform:translate(-50%,20px);
+  opacity:0;
+  pointer-events:none;
+  background:#172033;
+  color:#fff;
+  padding:10px 15px;
+  border-radius:11px;
+  font-size:12px;
+  box-shadow:0 12px 30px rgba(15,23,42,.2);
+  transition:.22s;
+  z-index:30000;
 }
 
-@media(max-width:900px){
-  .cards{
-    grid-template-columns:repeat(2,1fr);
-  }
+#globalStatus.show{
+  transform:translate(-50%,0);
+  opacity:1;
+}
+
+@media(max-width:1250px){
   .controls{
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr 1fr 1fr 1fr;
   }
   .searchWrap{
     grid-column:1/-1;
   }
 }
 
+@media(max-width:1100px){
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
 @media(max-width:700px){
   .app{padding:12px}
+  .topbar{align-items:flex-start}
   .userEmail{display:none}
   .controls{grid-template-columns:1fr}
   .searchWrap{grid-column:auto}
   .cards{grid-template-columns:1fr 1fr}
+  .statNumber{font-size:23px}
+  .adminForm{grid-template-columns:1fr}
 }
 </style>
 
@@ -599,87 +739,87 @@ tbody tr:hover{background:#f8fbff}
 
 <body>
 
-<!-- =========================================================
-     LOGIN
-========================================================= -->
+<!-- LOGIN -->
 
 <section id="loginScreen">
 
-<div class="loginCard">
+  <div class="loginCard">
 
+```
 <div class="logo">◉</div>
 
-<h1 class="loginTitle">Acebedo Optical</h1>
+<h1 class="loginTitle">
+  Acebedo Optical
+</h1>
 
 <p class="loginSub">
-Central Inventory Dashboard
+  Central Inventory Dashboard
 </p>
 
 <div id="emailStep">
 
-<div class="field">
+  <div class="field">
+    <label>EMAIL ADDRESS</label>
 
-<label>EMAIL ADDRESS</label>
+    <input
+      id="email"
+      class="input"
+      type="email"
+      placeholder="Enter your authorized Gmail"
+      autocomplete="email"
+    >
+  </div>
 
-<input
-id="email"
-class="input"
-type="email"
-placeholder="Enter your authorized Gmail"
-autocomplete="email"
-
->
-
-</div>
-
-<button
-id="sendOtpBtn"
-class="primaryBtn"
-onclick="sendOTP()"
-
->
-
-Send verification code </button>
+  <button
+    id="sendOtpBtn"
+    class="primaryBtn"
+    onclick="sendOTP()"
+  >
+    Send verification code
+  </button>
 
 </div>
 
 <div id="otpStep" class="hidden">
 
-<div class="field">
+  <div class="field">
+    <label>VERIFICATION CODE</label>
 
-<label>VERIFICATION CODE</label>
+    <input
+      id="otp"
+      class="input"
+      type="text"
+      inputmode="numeric"
+      maxlength="6"
+      placeholder="Enter 6-digit code"
+    >
+  </div>
 
-<input
-id="otp"
-class="input"
-type="text"
-inputmode="numeric"
-maxlength="6"
-placeholder="Enter 6-digit code"
+  <button
+    id="verifyBtn"
+    class="primaryBtn"
+    onclick="verifyOTP()"
+  >
+    Verify & enter dashboard
+  </button>
 
->
-
-</div>
-
-<button
-id="verifyBtn"
-class="primaryBtn"
-onclick="verifyOTP()"
-
->
-
-Verify & enter dashboard </button>
+  <button
+    class="controlBtn"
+    style="width:100%;margin-top:10px;padding:12px"
+    onclick="backToEmail()"
+  >
+    Change email
+  </button>
 
 </div>
 
 <div id="loginStatus" class="loginStatus"></div>
+```
 
-</div>
+  </div>
 </section>
 
-<!-- =========================================================
-     DASHBOARD
-========================================================= -->
+<!-- DASHBOARD -->
 
 <section id="dashboard">
 
@@ -687,43 +827,56 @@ Verify & enter dashboard </button>
 
 <header class="topbar">
 
-<div class="brand">
+  <div class="brand">
 
+```
 <div class="brandLogo">◉</div>
 
 <div>
-<div class="brandTitle">Central Inventory</div>
+  <div class="brandTitle">
+    Central Inventory
+  </div>
 
-<div class="brandSub">
-Acebedo Optical • Direct Supabase Inventory
+  <div class="brandSub">
+    Acebedo Optical • Direct Supabase
+  </div>
 </div>
-</div>
+```
 
-</div>
+  </div>
 
-<div class="userArea">
+  <div class="userArea">
 
+```
 <div id="userEmail" class="userEmail"></div>
 
 <button
-class="iconBtn"
-title="Refresh"
-onclick="refreshDashboard()"
-
+  id="adminUsersBtn"
+  class="iconBtn hidden"
+  title="Allowed Users"
+  onclick="openAdminUsers()"
 >
-
-↻ </button>
+  ⚙
+</button>
 
 <button
-class="iconBtn"
-title="Logout"
-onclick="logout()"
-
+  class="iconBtn"
+  title="Refresh"
+  onclick="refreshDashboard()"
 >
+  ↻
+</button>
 
-⇥ </button>
+<button
+  class="iconBtn"
+  title="Logout"
+  onclick="logout()"
+>
+  ⇥
+</button>
+```
 
-</div>
+  </div>
 
 </header>
 
@@ -826,44 +979,63 @@ onchange="handleImportFile(event)"
 
 </div>
 
-<div id="loadingLine" class="loadingLine hidden"></div>
+<div
+  id="loadingLine"
+  class="loadingLine hidden"
+></div>
 
 <div class="cards">
 
 <div class="statCard">
+
 <div class="statTop">
 <span class="statLabel">AVAILABLE</span>
 <span class="statIcon">✓</span>
 </div>
+
 <div id="availableTotal" class="statNumber">—</div>
+
 <div class="statHint">Stock not sold</div>
+
 </div>
 
 <div class="statCard">
+
 <div class="statTop">
 <span class="statLabel">SOLD OUT</span>
 <span class="statIcon">$</span>
 </div>
+
 <div id="soldTotal" class="statNumber">—</div>
+
 <div class="statHint">Recorded sales</div>
+
 </div>
 
 <div class="statCard">
+
 <div class="statTop">
 <span class="statLabel">AUDITED</span>
 <span class="statIcon">✓</span>
 </div>
+
 <div id="auditTotal" class="statNumber">—</div>
+
 <div class="statHint">Audit records</div>
+
 </div>
 
 <div class="statCard">
+
 <div class="statTop">
 <span class="statLabel">SHOWING</span>
 <span class="statIcon">≡</span>
 </div>
+
 <div id="showingTotal" class="statNumber">—</div>
+
 <div class="statHint">Current results</div>
+
 </div>
 
 </div>
@@ -893,7 +1065,6 @@ Select a branch and search inventory.
 <thead>
 
 <tr>
-
 <th>BRANCH</th>
 <th>LENS TYPE</th>
 <th>DESCRIPTION</th>
@@ -901,7 +1072,6 @@ Select a branch and search inventory.
 <th>SI NO.</th>
 <th>DATE</th>
 <th>ACTIONS</th>
-
 </tr>
 
 </thead>
@@ -916,7 +1086,9 @@ Select a branch and search inventory.
 
 <div class="emptyIcon">⌕</div>
 
-<div class="emptyTitle">Ready to search</div>
+<div class="emptyTitle">
+Ready to search
+</div>
 
 <div class="emptyText">
 Search your inventory to display records.
@@ -965,40 +1137,130 @@ onclick="nextPage()"
 </div>
 </section>
 
+<!-- QUEUE -->
+
 <div id="queuePanel"></div>
+
 <div id="globalStatus"></div>
+
+<!-- ADMIN USERS -->
+
+<div id="adminPanel" class="adminPanel">
+
+<div class="adminCard">
+
+<div class="adminHeader">
+
+<div>
+<strong>Allowed Users</strong>
+<div class="tableSub">
+app_allowed_users
+</div>
+</div>
+
+<button
+class="iconBtn"
+onclick="closeAdminUsers()"
+
+>
+
+× </button>
+
+</div>
+
+<div class="adminBody">
+
+<div class="adminForm">
+
+<input
+id="newUserEmail"
+class="input"
+type="email"
+placeholder="[user@gmail.com](mailto:user@gmail.com)"
+
+>
+
+<select
+id="newUserAdmin"
+class="select"
+
+>
+
+<option value="false">User</option>
+<option value="true">Admin</option>
+</select>
+
+<select
+id="newUserActive"
+class="select"
+
+>
+
+<option value="true">Active</option>
+<option value="false">Inactive</option>
+</select>
+
+<button
+class="controlBtn primary"
+onclick="addAllowedUser()"
+
+>
+
+Add </button>
+
+</div>
+
+<div class="tableScroll">
+
+<table class="adminTable">
+
+<thead>
+<tr>
+<th>EMAIL</th>
+<th>ADMIN</th>
+<th>ACTIVE</th>
+<th>ACTION</th>
+</tr>
+</thead>
+
+<tbody id="allowedUsersBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+</div>
+</div>
 
 <script>
 
 /* =========================================================
    SUPABASE CONFIG
-========================================================= */
+   ========================================================= */
 
 const SUPABASE_URL =
   "https://hvurhnarllvfinpdkfkp.supabase.co";
 
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
+
+
 /*
- IMPORTANT:
- Put your SUPABASE PUBLISHABLE KEY here.
-
- Acceptable:
- sb_publishable_...
-
- Or your legacy:
- anon JWT key
-
- NEVER put:
- service_role
- sb_secret
+ * IMPORTANT
+ *
+ * This is the PUBLIC anon/publishable key.
+ *
+ * NEVER put your service_role key in this HTML.
  */
 
-const SUPABASE_KEY =
-  "sb_publishable_TZ543sP2HWSoHG7EBAUJ8g_l038fmnp";
+const { createClient } =
+  supabase;
 
-const supabaseClient =
-  window.supabase.createClient(
+const db =
+  createClient(
     SUPABASE_URL,
-    SUPABASE_KEY,
+    SUPABASE_ANON_KEY,
     {
       auth:{
         persistSession:true,
@@ -1010,20 +1272,61 @@ const supabaseClient =
 
 
 /* =========================================================
-   BRANCH CONFIG
-========================================================= */
+   BRANCH TABLE MAP
+   ========================================================= */
 
 const BRANCHES = [
-  "GAI","CAS","BAC","BIN",
-  "BIS","CAD","DGT","KAB",
-  "KAL","PAS","POT","SAN",
-  "TAB","TAN","TIS","TOL"
+  "GAI",
+  "CAS",
+  "BAC",
+  "BIN",
+  "BIS",
+  "CAD",
+  "DGT",
+  "KAB",
+  "KAL",
+  "PAS",
+  "POT",
+  "SAN",
+  "TAB",
+  "TAN",
+  "TIS",
+  "TOL"
 ];
+
+
+function tableName(
+  branch,
+  sheet
+){
+
+  const b =
+    String(branch)
+      .trim()
+      .toLowerCase();
+
+  if(sheet === "stocks"){
+    return b + "_stocks";
+  }
+
+  if(sheet === "sold"){
+    return b + "_scanresults";
+  }
+
+  if(sheet === "audit"){
+    return b + "_audit";
+  }
+
+  throw new Error(
+    "Invalid table."
+  );
+
+}
 
 
 /* =========================================================
    STATE
-========================================================= */
+   ========================================================= */
 
 let currentPage = 1;
 
@@ -1031,91 +1334,43 @@ const rowsPerPage = 50;
 
 let lastRows = [];
 
-let currentSession = null;
+let totalResults = 0;
 
-let currentUser = null;
+let currentEmail = "";
+
+let currentIsAdmin = false;
 
 let currentAllowedUser = null;
 
 
 /* =========================================================
-   TABLE HELPERS
-========================================================= */
+   COLUMN HELPERS
+   ========================================================= */
 
-function tableName(branch,type){
+const COL = {
 
-  const b =
-    String(branch).toLowerCase();
+  branch:"BR",
 
-  if(type === "stocks")
-    return b + "_stocks";
+  tag:"NTAGN",
 
-  if(type === "sold")
-    return b + "_scanresults";
+  type:"LENSTYPE",
 
-  if(type === "audit")
-    return b + "_audit";
+  description:"DESCRIPTION",
 
-  throw new Error(
-    "Invalid table type."
-  );
+  si:"SI NO.",
 
-}
+  date:"DATE AND TIME",
 
+  qr:"QR",
 
-/* =========================================================
-   AUTHORIZATION
-========================================================= */
+  status:"STATUS"
 
-/*
- Check app_allowed_users BEFORE sending OTP.
-
- IMPORTANT:
- This requires an RLS policy allowing an unauthenticated
- lookup of only the requested email.
-
- The SQL policy is supplied after this HTML.
-*/
-
-async function isAllowedEmail(email){
-
-  const normalized =
-    String(email)
-      .trim()
-      .toLowerCase();
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("app_allowed_users")
-      .select("email,is_admin,active")
-      .eq("email",normalized)
-      .eq("active",true)
-      .maybeSingle();
-
-  if(error){
-
-    console.error(
-      "Allowed user check:",
-      error
-    );
-
-    throw new Error(
-      "Unable to check allowed users: " +
-      error.message
-    );
-
-  }
-
-  return data || null;
-}
+};
 
 
 /* =========================================================
-   SEND OTP
-========================================================= */
+   AUTH
+   ========================================================= */
 
 async function sendOTP(){
 
@@ -1125,6 +1380,7 @@ async function sendOTP(){
       .value
       .trim()
       .toLowerCase();
+
 
   if(!email){
 
@@ -1142,50 +1398,86 @@ async function sendOTP(){
       "sendOtpBtn"
     );
 
+
   button.disabled = true;
-  button.textContent = "Checking...";
+
+  button.textContent =
+    "Checking access...";
 
 
   try{
 
-    const allowed =
-      await isAllowedEmail(
-        email
-      );
+    /*
+     * FIRST:
+     * Check app_allowed_users.
+     *
+     * OTP is NOT sent unless:
+     *
+     * active = true
+     */
 
-    if(!allowed){
-
-      throw new Error(
-        "This email is not an active allowed user."
-      );
-
-    }
-
-    currentAllowedUser =
-      allowed;
-
-
-    button.textContent =
-      "Sending OTP...";
-
-
-    const {
-      error
-    } =
-      await supabaseClient.auth.signInWithOtp({
-
-        email:email,
-
-        options:{
-          shouldCreateUser:true
-        }
-
-      });
+    const { data:user, error } =
+      await db
+        .from("app_allowed_users")
+        .select(
+          "email,is_admin,active"
+        )
+        .eq(
+          "email",
+          email
+        )
+        .eq(
+          "active",
+          true
+        )
+        .maybeSingle();
 
 
     if(error){
 
-      throw error;
+      throw new Error(
+        "Unable to check allowed users: " +
+        error.message
+      );
+
+    }
+
+
+    if(!user){
+
+      throw new Error(
+        "This email is not authorized."
+      );
+
+    }
+
+
+    currentAllowedUser =
+      user;
+
+
+    button.textContent =
+      "Sending code...";
+
+
+    /*
+     * Supabase Auth OTP
+     */
+
+    const { error:otpError } =
+      await db.auth.signInWithOtp({
+        email:email,
+        options:{
+          shouldCreateUser:true
+        }
+      });
+
+
+    if(otpError){
+
+      throw new Error(
+        otpError.message
+      );
 
     }
 
@@ -1209,7 +1501,8 @@ async function sendOTP(){
 
     setLoginStatus(
       "Verification code sent to " +
-      email
+      email +
+      ". Check your email."
     );
 
 
@@ -1236,7 +1529,7 @@ async function sendOTP(){
 
 /* =========================================================
    VERIFY OTP
-========================================================= */
+   ========================================================= */
 
 async function verifyOTP(){
 
@@ -1247,11 +1540,23 @@ async function verifyOTP(){
       .trim()
       .toLowerCase();
 
+
   const token =
     document
       .getElementById("otp")
       .value
       .trim();
+
+
+  if(!email){
+
+    setLoginStatus(
+      "Enter your email."
+    );
+
+    return;
+
+  }
 
 
   if(!/^\d{6}$/.test(token)){
@@ -1270,58 +1575,75 @@ async function verifyOTP(){
       "verifyBtn"
     );
 
+
   button.disabled = true;
-  button.textContent = "Verifying...";
+
+  button.textContent =
+    "Verifying...";
 
 
   try{
 
-    /*
-     Verify the Supabase Auth OTP.
-    */
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.verifyOtp({
-
+    const { data,error } =
+      await db.auth.verifyOtp({
         email:email,
-
         token:token,
-
         type:"email"
-
       });
 
 
     if(error){
 
-      throw error;
+      throw new Error(
+        error.message
+      );
 
     }
 
 
-    currentSession =
-      data.session;
+    if(!data.session){
 
-    currentUser =
-      data.user;
+      throw new Error(
+        "Supabase did not create a session."
+      );
+
+    }
 
 
     /*
-     Check allowed-users AGAIN after authentication.
+     * SECURITY CHECK AGAIN AFTER LOGIN.
      */
 
-    const allowed =
-      await isAllowedEmail(
-        email
+    const { data:user, error:userError } =
+      await db
+        .from("app_allowed_users")
+        .select(
+          "email,is_admin,active"
+        )
+        .eq(
+          "email",
+          email
+        )
+        .eq(
+          "active",
+          true
+        )
+        .maybeSingle();
+
+
+    if(userError){
+
+      throw new Error(
+        "Unable to verify user access: " +
+        userError.message
       );
 
+    }
 
-    if(!allowed){
 
-      await supabaseClient.auth.signOut();
+    if(!user){
+
+      await db.auth.signOut();
 
       throw new Error(
         "Your account is not authorized."
@@ -1330,8 +1652,14 @@ async function verifyOTP(){
     }
 
 
+    currentEmail =
+      user.email;
+
+    currentIsAdmin =
+      !!user.is_admin;
+
     currentAllowedUser =
-      allowed;
+      user;
 
 
     showDashboard();
@@ -1358,61 +1686,105 @@ async function verifyOTP(){
 }
 
 
+function backToEmail(){
+
+  document
+    .getElementById("otpStep")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("emailStep")
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById("otp")
+    .value = "";
+
+  setLoginStatus("");
+
+}
+
+
 /* =========================================================
    EXISTING SESSION
-========================================================= */
+   ========================================================= */
 
 async function checkExistingSession(){
 
   try{
 
     const {
-      data
+      data:{
+        session
+      }
     } =
-      await supabaseClient.auth.getSession();
+      await db.auth.getSession();
 
 
-    if(
-      !data ||
-      !data.session
-    ){
+    if(!session){
 
       return false;
 
     }
-
-
-    currentSession =
-      data.session;
-
-    currentUser =
-      data.session.user;
 
 
     const email =
-      String(
-        currentUser.email || ""
-      )
-      .toLowerCase();
+      session.user.email
+        .trim()
+        .toLowerCase();
 
 
-    const allowed =
-      await isAllowedEmail(
-        email
-      );
+    /*
+     * Check app_allowed_users every time.
+     */
+
+    const { data:user,error } =
+      await db
+        .from("app_allowed_users")
+        .select(
+          "email,is_admin,active"
+        )
+        .eq(
+          "email",
+          email
+        )
+        .eq(
+          "active",
+          true
+        )
+        .maybeSingle();
 
 
-    if(!allowed){
+    if(error){
 
-      await supabaseClient.auth.signOut();
+      console.error(error);
+
+      await db.auth.signOut();
 
       return false;
 
     }
 
 
+    if(!user){
+
+      await db.auth.signOut();
+
+      return false;
+
+    }
+
+
+    currentEmail =
+      user.email;
+
+    currentIsAdmin =
+      !!user.is_admin;
+
     currentAllowedUser =
-      allowed;
+      user;
 
 
     return true;
@@ -1430,75 +1802,44 @@ async function checkExistingSession(){
 
 
 /* =========================================================
-   AUTH STATE
-========================================================= */
-
-supabaseClient.auth.onAuthStateChange(
-  function(event,session){
-
-    currentSession =
-      session;
-
-    currentUser =
-      session
-        ? session.user
-        : null;
-
-  }
-);
-
-
-/* =========================================================
    LOGOUT
-========================================================= */
+   ========================================================= */
 
 async function logout(){
 
-  try{
+  await db.auth.signOut();
 
-    await supabaseClient.auth.signOut();
+  currentEmail = "";
 
-  }catch(error){
+  currentIsAdmin = false;
 
-    console.error(error);
-
-  }
-
-
-  currentSession = null;
-  currentUser = null;
   currentAllowedUser = null;
-  lastRows = [];
-
 
   document
     .getElementById("dashboard")
-    .style.display =
-    "none";
-
+    .style.display = "none";
 
   document
     .getElementById("loginScreen")
-    .style.display =
-    "flex";
-
+    .style.display = "flex";
 
   document
     .getElementById("emailStep")
     .classList
     .remove("hidden");
 
-
   document
     .getElementById("otpStep")
     .classList
     .add("hidden");
 
+  document
+    .getElementById("email")
+    .value = "";
 
   document
     .getElementById("otp")
     .value = "";
-
 
   setLoginStatus("");
 
@@ -1507,26 +1848,34 @@ async function logout(){
 
 /* =========================================================
    SHOW DASHBOARD
-========================================================= */
+   ========================================================= */
 
 function showDashboard(){
 
   document
     .getElementById("loginScreen")
-    .style.display =
-    "none";
-
+    .style.display = "none";
 
   document
     .getElementById("dashboard")
-    .style.display =
-    "block";
-
+    .style.display = "block";
 
   document
     .getElementById("userEmail")
     .textContent =
-    currentUser?.email || "";
+      currentEmail;
+
+
+  const adminButton =
+    document.getElementById(
+      "adminUsersBtn"
+    );
+
+
+  adminButton.classList.toggle(
+    "hidden",
+    !currentIsAdmin
+  );
 
 
   refreshDashboard();
@@ -1536,25 +1885,59 @@ function showDashboard(){
 
 /* =========================================================
    LOGIN STATUS
-========================================================= */
+   ========================================================= */
 
 function setLoginStatus(message){
 
   document
     .getElementById("loginStatus")
     .textContent =
-    message || "";
+      message || "";
+
+}
+
+
+/* =========================================================
+   BRANCH / SHEET
+   ========================================================= */
+
+function branchChanged(){
+
+  currentPage = 1;
+
+  clearDisplayedRows();
+
+  refreshDashboard();
+
+}
+
+
+function sheetChanged(){
+
+  currentPage = 1;
+
+  clearDisplayedRows();
+
+  refreshDashboard();
 
 }
 
 
 /* =========================================================
    DASHBOARD
-========================================================= */
+   ========================================================= */
 
 async function refreshDashboard(){
 
-  if(!currentSession){
+  const {
+    data:{
+      session
+    }
+  } =
+    await db.auth.getSession();
+
+
+  if(!session){
 
     return;
 
@@ -1566,52 +1949,9 @@ async function refreshDashboard(){
 
   try{
 
-    const branch =
-      document
-        .getElementById("branch")
-        .value;
+    await loadStats();
 
-
-    const sheet =
-      document
-        .getElementById("sheet")
-        .value;
-
-
-    const search =
-      document
-        .getElementById("search")
-        .value
-        .trim();
-
-
-    const result =
-      await loadDashboard(
-        branch,
-        sheet,
-        search
-      );
-
-
-    lastRows =
-      result.rows || [];
-
-
-    updateStats(
-      result.stats
-    );
-
-
-    renderTable(
-      lastRows
-    );
-
-
-    updateTableHeader(
-      branch,
-      sheet,
-      search
-    );
+    await loadRows();
 
 
   }catch(error){
@@ -1619,8 +1959,10 @@ async function refreshDashboard(){
     console.error(error);
 
     showStatus(
-      error.message
+      error.message ||
+      "Unable to load dashboard."
     );
+
 
   }finally{
 
@@ -1632,14 +1974,27 @@ async function refreshDashboard(){
 
 
 /* =========================================================
-   LOAD DASHBOARD
-========================================================= */
+   STATS
+   ========================================================= */
 
-async function loadDashboard(
-  branch,
-  sheet,
-  search
-){
+async function loadStats(){
+
+  const branch =
+    document
+      .getElementById("branch")
+      .value;
+
+
+  const result = {
+
+    available:0,
+
+    sold:0,
+
+    audit:0
+
+  };
+
 
   const branches =
     branch === "ALL"
@@ -1647,155 +2002,123 @@ async function loadDashboard(
       : [branch];
 
 
-  const results =
-    await Promise.all(
-      branches.map(
-        b =>
-          loadBranchData(
-            b,
-            sheet,
-            search
-          )
-      )
-    );
-
-
-  let rows = [];
-
-  let availableTotal = 0;
-
-  let soldTotal = 0;
-
-  let auditTotal = 0;
-
-
-  results.forEach(
-    result => {
-
-      rows =
-        rows.concat(
-          result.rows
-        );
-
-      availableTotal +=
-        result.availableTotal;
-
-      soldTotal +=
-        result.soldTotal;
-
-      auditTotal +=
-        result.auditTotal;
-
-    }
-  );
-
-
   /*
-   Sort by branch then tag.
-  */
-
-  rows.sort(
-    function(a,b){
-
-      const aa =
-        (a.branch + " " + a.tag)
-          .toLowerCase();
-
-      const bb =
-        (b.branch + " " + b.tag)
-          .toLowerCase();
-
-      return aa.localeCompare(bb);
-
-    }
-  );
+   * Count each branch separately.
+   *
+   * AVAILABLE:
+   * stocks - sold tags
+   *
+   * SOLD:
+   * scanresults
+   *
+   * AUDIT:
+   * audit
+   */
 
 
-  return {
+  for(
+    const b of branches
+  ){
 
-    rows:rows,
-
-    stats:{
-      availableTotal,
-      soldTotal,
-      auditTotal,
-      showing:rows.length
-    }
-
-  };
-
-}
+    const stockTable =
+      tableName(
+        b,
+        "stocks"
+      );
 
 
-/* =========================================================
-   LOAD ONE BRANCH
-========================================================= */
+    const soldTable =
+      tableName(
+        b,
+        "sold"
+      );
 
-async function loadBranchData(
-  branch,
-  sheet,
-  search
-){
 
-  /*
-   Get sold tags first.
-  */
+    const auditTable =
+      tableName(
+        b,
+        "audit"
+      );
 
-  const {
-    data:soldRows,
-    error:soldError
-  } =
-    await supabaseClient
-      .from(
-        tableName(
-          branch,
-          "sold"
+
+    const [
+      stockCount,
+      soldCount,
+      auditCount
+    ] =
+      await Promise.all([
+
+        countRows(
+          stockTable
+        ),
+
+        countRows(
+          soldTable
+        ),
+
+        countRows(
+          auditTable
         )
-      )
-      .select(
-        '"NTAGN","DESCRIPTION","LENSTYPE","SI NO.","DATE AND TIME","QR"'
-      )
-      .limit(100000);
+
+      ]);
 
 
-  if(soldError){
+    result.available +=
+      Math.max(
+        0,
+        stockCount -
+        soldCount
+      );
 
-    throw new Error(
-      branch +
-      " sold query: " +
-      soldError.message
-    );
+
+    result.sold +=
+      soldCount;
+
+
+    result.audit +=
+      auditCount;
 
   }
 
 
-  const soldTags =
-    new Set(
-      (soldRows || [])
-        .map(
-          r =>
-            normalizeTag(
-              r["NTAGN"]
-            )
-        )
-        .filter(Boolean)
-    );
+  document
+    .getElementById("availableTotal")
+    .textContent =
+      formatNumber(
+        result.available
+      );
 
 
-  /*
-   Audit count.
-  */
+  document
+    .getElementById("soldTotal")
+    .textContent =
+      formatNumber(
+        result.sold
+      );
 
-  const auditCountResult =
-    await supabaseClient
-      .from(
-        tableName(
-          branch,
-          "audit"
-        )
-      )
+
+  document
+    .getElementById("auditTotal")
+    .textContent =
+      formatNumber(
+        result.audit
+      );
+
+}
+
+
+async function countRows(
+  table
+){
+
+  const {
+    count,
+    error
+  } =
+    await db
+      .from(table)
       .select(
-        "NTAGN",
+        "*",
         {
           count:"exact",
           head:true
@@ -1803,192 +2126,181 @@ async function loadBranchData(
       );
 
 
-  if(auditCountResult.error){
+  if(error){
 
     throw new Error(
-      branch +
-      " audit count: " +
-      auditCountResult.error.message
+      table +
+      ": " +
+      error.message
     );
 
   }
 
 
-  const auditTotal =
-    auditCountResult.count || 0;
+  return Number(count || 0);
+
+}
 
 
-  /*
-   SOLD OUT view.
-  */
+/* =========================================================
+   LOAD TABLE
+   ========================================================= */
 
-  if(sheet === "sold"){
+async function loadRows(){
 
-    let filtered =
-      soldRows || [];
-
-
-    if(search){
-
-      filtered =
-        filterClientRows(
-          filtered,
-          search
-        );
-
-    }
+  const branch =
+    document
+      .getElementById("branch")
+      .value;
 
 
-    return {
-
-      rows:
-        filtered.map(
-          rowToDashboardRow(
-            branch,
-            "sold"
-          )
-        ),
-
-      availableTotal:
-        0,
-
-      soldTotal:
-        soldRows.length,
-
-      auditTotal
-
-    };
-
-  }
+  const sheet =
+    document
+      .getElementById("sheet")
+      .value;
 
 
-  /*
-   AUDIT view.
-  */
-
-  if(sheet === "audit"){
-
-    let auditRows = [];
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from(
-          tableName(
-            branch,
-            "audit"
-          )
-        )
-        .select("*")
-        .limit(100000);
+  const search =
+    document
+      .getElementById("search")
+      .value
+      .trim();
 
 
-    if(error){
+  const offset =
+    (currentPage - 1) *
+    rowsPerPage;
 
-      throw new Error(
-        branch +
-        " audit: " +
-        error.message
+
+  const limit =
+    rowsPerPage;
+
+
+  let result;
+
+
+  if(branch === "ALL"){
+
+    result =
+      await loadAllBranches(
+        sheet,
+        search,
+        offset,
+        limit
       );
 
-    }
+  }else{
 
-
-    auditRows =
-      data || [];
-
-
-    if(search){
-
-      auditRows =
-        filterClientRows(
-          auditRows,
-          search
-        );
-
-    }
-
-
-    return {
-
-      rows:
-        auditRows.map(
-          rowToDashboardRow(
-            branch,
-            "audit"
-          )
-        ),
-
-      availableTotal:0,
-
-      soldTotal:
-        soldRows.length,
-
-      auditTotal
-
-    };
+    result =
+      await loadOneBranch(
+        branch,
+        sheet,
+        search,
+        offset,
+        limit
+      );
 
   }
 
 
-  /*
-   AVAILABLE STOCKS.
+  lastRows =
+    result.rows;
 
-   We fetch stock rows and remove anything
-   whose NTAGN appears in scanresults.
-  */
+  totalResults =
+    result.total;
+
+
+  renderTable(
+    lastRows
+  );
+
+
+  updateStatsShowing(
+    totalResults
+  );
+
+}
+
+
+/* =========================================================
+   LOAD ONE BRANCH
+   ========================================================= */
+
+async function loadOneBranch(
+  branch,
+  sheet,
+  search,
+  offset,
+  limit
+){
+
+  if(sheet === "stocks"){
+
+    return loadAvailableBranch(
+      branch,
+      search,
+      offset,
+      limit
+    );
+
+  }
+
+
+  const table =
+    tableName(
+      branch,
+      sheet
+    );
+
+
+  let query =
+    db
+      .from(table)
+      .select(
+        "*",
+        {
+          count:"exact"
+        }
+      );
+
+
+  query =
+    applySearch(
+      query,
+      search
+    );
+
+
+  query =
+    query
+      .order(
+        "NTAGN",
+        {
+          ascending:true,
+          nullsFirst:false
+        }
+      )
+      .range(
+        offset,
+        offset + limit - 1
+      );
+
 
   const {
-    data:stockRows,
-    error:stockError
+    data,
+    count,
+    error
   } =
-    await supabaseClient
-      .from(
-        tableName(
-          branch,
-          "stocks"
-        )
-      )
-      .select("*")
-      .limit(100000);
+    await query;
 
 
-  if(stockError){
+  if(error){
 
     throw new Error(
-      branch +
-      " stocks: " +
-      stockError.message
+      table +
+      ": " +
+      error.message
     );
-
-  }
-
-
-  let available =
-    (stockRows || [])
-      .filter(
-        row =>
-          !soldTags.has(
-            normalizeTag(
-              row["NTAGN"]
-            )
-          )
-      );
-
-
-  const availableTotal =
-    available.length;
-
-
-  if(search){
-
-    available =
-      filterClientRows(
-        available,
-        search
-      );
 
   }
 
@@ -1996,19 +2308,269 @@ async function loadBranchData(
   return {
 
     rows:
-      available.map(
-        rowToDashboardRow(
-          branch,
-          "stocks"
-        )
+      normalizeRows(
+        data || [],
+        branch
       ),
 
-    availableTotal,
+    total:
+      Number(count || 0)
 
-    soldTotal:
-      soldRows.length,
+  };
 
-    auditTotal
+}
+
+
+/* =========================================================
+   AVAILABLE STOCKS
+   ========================================================= */
+
+async function loadAvailableBranch(
+  branch,
+  search,
+  offset,
+  limit
+){
+
+  const stockTable =
+    tableName(
+      branch,
+      "stocks"
+    );
+
+
+  const soldTable =
+    tableName(
+      branch,
+      "sold"
+    );
+
+
+  /*
+   * Get sold tags first.
+   *
+   * Then filter stocks in memory.
+   *
+   * This preserves the original
+   * dashboard behavior:
+   *
+   * AVAILABLE = STOCKS minus SOLD.
+   */
+
+
+  const {
+    data:soldRows,
+    error:soldError
+  } =
+    await db
+      .from(soldTable)
+      .select("NTAGN");
+
+
+  if(soldError){
+
+    throw new Error(
+      soldTable +
+      ": " +
+      soldError.message
+    );
+
+  }
+
+
+  const soldSet =
+    new Set(
+      (soldRows || [])
+        .map(
+          r =>
+            String(
+              r["NTAGN"] || ""
+            )
+            .trim()
+        )
+        .filter(Boolean)
+    );
+
+
+  /*
+   * For searches we fetch matching stock rows.
+   *
+   * For normal browsing we fetch a reasonable
+   * server-side page and remove sold rows.
+   */
+
+
+  let query =
+    db
+      .from(stockTable)
+      .select(
+        "*",
+        {
+          count:"exact"
+        }
+      );
+
+
+  query =
+    applySearch(
+      query,
+      search
+    );
+
+
+  query =
+    query
+      .order(
+        "NTAGN",
+        {
+          ascending:true,
+          nullsFirst:false
+        }
+      )
+      .range(
+        0,
+        Math.max(
+          9999,
+          offset + limit * 10
+        )
+      );
+
+
+  const {
+    data,
+    error
+  } =
+    await query;
+
+
+  if(error){
+
+    throw new Error(
+      stockTable +
+      ": " +
+      error.message
+    );
+
+  }
+
+
+  const available =
+    (data || [])
+      .filter(
+        row =>
+          !soldSet.has(
+            String(
+              row["NTAGN"] || ""
+            ).trim()
+          )
+      );
+
+
+  return {
+
+    rows:
+      normalizeRows(
+        available.slice(
+          offset,
+          offset + limit
+        ),
+        branch
+      ),
+
+    total:
+      available.length
+
+  };
+
+}
+
+
+/* =========================================================
+   ALL BRANCHES
+   ========================================================= */
+
+async function loadAllBranches(
+  sheet,
+  search,
+  offset,
+  limit
+){
+
+  /*
+   * Each branch is queried independently.
+   *
+   * This avoids a huge combined database
+   * query and keeps the dashboard responsive.
+   */
+
+
+  const results =
+    await Promise.all(
+      BRANCHES.map(
+        async branch => {
+
+          if(sheet === "stocks"){
+
+            return loadAvailableBranch(
+              branch,
+              search,
+              0,
+              10000
+            );
+
+          }
+
+          return loadOneBranch(
+            branch,
+            sheet,
+            search,
+            0,
+            10000
+          );
+
+        }
+      )
+    );
+
+
+  let allRows = [];
+
+  let total = 0;
+
+
+  results.forEach(
+    result => {
+
+      allRows =
+        allRows.concat(
+          result.rows
+        );
+
+      total +=
+        result.total;
+
+    }
+  );
+
+
+  allRows.sort(
+    (a,b) =>
+      String(a.tag)
+        .localeCompare(
+          String(b.tag)
+        )
+  );
+
+
+  return {
+
+    rows:
+      allRows.slice(
+        offset,
+        offset + limit
+      ),
+
+    total
 
   };
 
@@ -2017,162 +2579,145 @@ async function loadBranchData(
 
 /* =========================================================
    SEARCH
-========================================================= */
+   ========================================================= */
 
-function filterClientRows(
-  rows,
+function applySearch(
+  query,
   search
 ){
 
-  const q =
-    String(search)
-      .trim()
-      .toLowerCase();
+  if(!search){
 
-
-  if(!q){
-
-    return rows;
+    return query;
 
   }
 
 
-  return rows.filter(
-    function(row){
+  const s =
+    search
+      .replace(
+        /,/g,
+        ""
+      )
+      .trim();
 
-      return [
 
-        row["NTAGN"],
-        row["DESCRIPTION"],
-        row["LENSTYPE"],
-        row["SI NO."],
-        row["QR"],
-        row["CATEGORY"],
-        row["LENSCODE"],
-        row["SUPPLIER"],
-        row["BR"]
+  /*
+   * Supabase/PostgREST OR search.
+   *
+   * Searches the same important fields
+   * shown by the old dashboard.
+   */
 
-      ]
-      .some(
-        value =>
-          String(
-            value ?? ""
-          )
-          .toLowerCase()
-          .includes(q)
-      );
+  const pattern =
+    "%" +
+    s.replace(
+      /[%_]/g,
+      ""
+    ) +
+    "%";
 
-    }
+
+  return query.or(
+    [
+      `"NTAGN".ilike.${pattern}`,
+      `"DESCRIPTION".ilike.${pattern}`,
+      `"LENSTYPE".ilike.${pattern}`,
+      `"SI NO.".ilike.${pattern}`,
+      `"QR".ilike.${pattern}`,
+      `"LENSCODE".ilike.${pattern}`,
+      `"SUPPLIER".ilike.${pattern}`,
+      `"BR".ilike.${pattern}`
+    ].join(",")
+  );
+
+}
+
+
+function runSearch(){
+
+  currentPage = 1;
+
+  refreshDashboard();
+
+}
+
+
+function searchKey(event){
+
+  if(event.key === "Enter"){
+
+    runSearch();
+
+  }
+
+}
+
+
+function clearSearch(){
+
+  document
+    .getElementById("search")
+    .value = "";
+
+  currentPage = 1;
+
+  refreshDashboard();
+
+}
+
+
+/* =========================================================
+   NORMALIZE ROWS
+   ========================================================= */
+
+function normalizeRows(
+  rows,
+  branch
+){
+
+  return rows.map(
+    row => ({
+
+      raw:row,
+
+      branch:
+        row["BR"] ||
+        branch,
+
+      lenstype:
+        row["LENSTYPE"] ||
+        "",
+
+      description:
+        row["DESCRIPTION"] ||
+        "",
+
+      tag:
+        row["NTAGN"] ||
+        "",
+
+      si:
+        row["SI NO."] ||
+        "",
+
+      date:
+        row["DATE AND TIME"] ||
+        "",
+
+      qr:
+        row["QR"] ||
+        ""
+
+    })
   );
 
 }
 
 
 /* =========================================================
-   ROW MAPPER
-========================================================= */
-
-function rowToDashboardRow(
-  branch,
-  source
-){
-
-  return function(row){
-
-    return {
-
-      branch,
-
-      source,
-
-      lenstype:
-        row["LENSTYPE"] || "",
-
-      description:
-        row["DESCRIPTION"] || "",
-
-      tag:
-        row["NTAGN"] || "",
-
-      si:
-        row["SI NO."] || "",
-
-      date:
-        row["DATE AND TIME"] ||
-        row["DELIVERYDATE"] ||
-        row["SDATE"] ||
-        "",
-
-      qr:
-        row["QR"] || "",
-
-      raw:row
-
-    };
-
-  };
-
-}
-
-
-/* =========================================================
-   NORMALIZE TAG
-========================================================= */
-
-function normalizeTag(value){
-
-  return String(
-    value ?? ""
-  )
-  .trim()
-  .toUpperCase();
-
-}
-
-
-/* =========================================================
-   STATS
-========================================================= */
-
-function updateStats(data){
-
-  document
-    .getElementById("availableTotal")
-    .textContent =
-    formatNumber(
-      data.availableTotal
-    );
-
-
-  document
-    .getElementById("soldTotal")
-    .textContent =
-    formatNumber(
-      data.soldTotal
-    );
-
-
-  document
-    .getElementById("auditTotal")
-    .textContent =
-    formatNumber(
-      data.auditTotal
-    );
-
-
-  document
-    .getElementById("showingTotal")
-    .textContent =
-    formatNumber(
-      data.showing
-    );
-
-}
-
-
-/* =========================================================
    TABLE
-========================================================= */
+   ========================================================= */
 
 function renderTable(rows){
 
@@ -2180,6 +2725,7 @@ function renderTable(rows){
     document.getElementById(
       "tableBody"
     );
+
 
   const empty =
     document.getElementById(
@@ -2200,7 +2746,10 @@ function renderTable(rows){
       .textContent =
       "No records found";
 
-    updatePaginationButtons();
+    document
+      .getElementById("showingTotal")
+      .textContent =
+      "0";
 
     return;
 
@@ -2211,19 +2760,13 @@ function renderTable(rows){
     "none";
 
 
-  const start =
-    (currentPage - 1) *
-    rowsPerPage;
+  const sheet =
+    document
+      .getElementById("sheet")
+      .value;
 
 
-  const pageRows =
-    rows.slice(
-      start,
-      start + rowsPerPage
-    );
-
-
-  pageRows.forEach(
+  rows.forEach(
     function(row){
 
       const tr =
@@ -2231,71 +2774,103 @@ function renderTable(rows){
 
 
       const branch =
-        escapeHtml(row.branch);
+        escapeHtml(
+          row.branch
+        );
+
 
       const type =
-        escapeHtml(row.lenstype);
+        escapeHtml(
+          row.lenstype
+        );
+
 
       const description =
-        escapeHtml(row.description);
+        escapeHtml(
+          row.description
+        );
+
 
       const tag =
-        escapeHtml(row.tag);
+        escapeHtml(
+          row.tag
+        );
+
 
       const si =
-        escapeHtml(row.si);
+        escapeHtml(
+          row.si
+        );
+
 
       const date =
-        escapeHtml(row.date);
+        escapeHtml(
+          row.date
+        );
+
+
+      const canEditSI =
+        sheet === "stocks";
 
 
       tr.innerHTML = `
 
 <td>
-<span class="branchTag">
-${branch}
-</span>
+  <span class="branchTag">
+    ${branch || "—"}
+  </span>
 </td>
 
 <td>
-<span class="typeTag">
-${type || "—"}
-</span>
+  <span class="typeTag">
+    ${type || "—"}
+  </span>
 </td>
 
 <td>
-${description || "—"}
+  ${description || "—"}
 </td>
 
 <td>
-<span class="tag">
-${tag || "—"}
-</span>
+  <span class="tag">
+    ${tag || "—"}
+  </span>
 </td>
 
 <td>
-<input
-class="siInput"
-value="${si}"
-data-tag="${escapeHtml(row.tag)}"
-data-branch="${escapeHtml(row.branch)}"
-onchange="saveSI(this)"
->
+
+${
+  canEditSI
+
+  ?
+
+  `<input
+    class="siInput"
+    value="${si}"
+    data-tag="${escapeHtml(row.tag)}"
+    data-branch="${escapeHtml(row.branch)}"
+    onchange="saveSI(this)"
+  >`
+
+  :
+
+  `<span>${si || "—"}</span>`
+}
+
 </td>
 
 <td>
-${date || "—"}
+  ${date || "—"}
 </td>
 
 <td>
 
 <button
-class="actionBtn danger"
-onclick="deleteRow(
-'${jsEscape(row.branch)}',
-'${jsEscape(row.tag)}',
-'${jsEscape(row.source)}'
-)"
+  class="actionBtn danger"
+  onclick="deleteRow(
+    '${jsEscape(row.branch)}',
+    '${jsEscape(row.tag)}'
+  )"
 >
 Delete
 </button>
@@ -2311,122 +2886,92 @@ Delete
   );
 
 
-  const totalPages =
-    Math.max(
-      1,
-      Math.ceil(
-        rows.length /
-        rowsPerPage
-      )
-    );
-
-
   document
     .getElementById("pageInfo")
     .textContent =
-    "Showing " +
-    (start + 1) +
-    "–" +
-    Math.min(
-      start + rowsPerPage,
-      rows.length
-    ) +
-    " of " +
-    rows.length;
+      "Showing " +
+      ((currentPage - 1) *
+      rowsPerPage + 1) +
+      "–" +
+      Math.min(
+        currentPage * rowsPerPage,
+        totalResults
+      ) +
+      " of " +
+      totalResults;
 
 
   document
     .getElementById("pageCurrent")
     .textContent =
-    currentPage;
+      currentPage;
 
 
   document
     .getElementById("prevBtn")
     .disabled =
-    currentPage <= 1;
+      currentPage <= 1;
 
 
   document
     .getElementById("nextBtn")
     .disabled =
-    currentPage >= totalPages;
+      currentPage *
+      rowsPerPage >=
+      totalResults;
+
+}
+
+
+function updateStatsShowing(
+  total
+){
+
+  document
+    .getElementById("showingTotal")
+    .textContent =
+      formatNumber(total);
 
 }
 
 
 /* =========================================================
-   PAGINATION
-========================================================= */
-
-function previousPage(){
-
-  if(currentPage <= 1)
-    return;
-
-  currentPage--;
-
-  renderTable(lastRows);
-
-}
-
-
-function nextPage(){
-
-  const totalPages =
-    Math.max(
-      1,
-      Math.ceil(
-        lastRows.length /
-        rowsPerPage
-      )
-    );
-
-
-  if(currentPage >= totalPages)
-    return;
-
-
-  currentPage++;
-
-  renderTable(lastRows);
-
-}
-
-
-function updatePaginationButtons(){
-
-  document
-    .getElementById("prevBtn")
-    .disabled = true;
-
-  document
-    .getElementById("nextBtn")
-    .disabled = true;
-
-}
-
-
-/* =========================================================
-   SI UPDATE
-========================================================= */
+   SAVE SI
+   PRIMARY KEY = BR + NTAGN
+   ========================================================= */
 
 async function saveSI(input){
 
   const branch =
-    input.dataset.branch;
+    input.dataset.branch
+      .trim()
+      .toUpperCase();
+
 
   const tag =
-    input.dataset.tag;
+    input.dataset.tag
+      .trim();
+
 
   const si =
     input.value.trim();
 
 
-  if(!branch || !tag){
+  if(!branch){
 
     showStatus(
-      "Missing branch or tag."
+      "Branch is required."
+    );
+
+    return;
+
+  }
+
+
+  if(!tag){
+
+    showStatus(
+      "Tag is required."
     );
 
     return;
@@ -2436,42 +2981,58 @@ async function saveSI(input){
 
   try{
 
-    const table =
-      tableName(
-        branch,
-        "stocks"
-      );
-
-
     /*
-     Update ONLY SI NO.
-    */
+     * EXACT PRIMARY KEY:
+     *
+     * BR + NTAGN
+     */
 
     const {
+      data,
       error
     } =
-      await supabaseClient
-        .from(table)
+      await db
+        .from(
+          tableName(
+            branch,
+            "stocks"
+          )
+        )
         .update({
+
           "SI NO.":si
+
         })
+        .eq(
+          "BR",
+          branch
+        )
         .eq(
           "NTAGN",
           tag
+        )
+        .select(
+          "BR,NTAGN,SI NO."
         );
 
 
     if(error){
 
-      throw error;
+      throw new Error(
+        error.message
+      );
 
     }
 
 
-    /*
-     Also update the matching sold/audit record
-     only when that is the currently displayed source.
-     */
+    if(!data || !data.length){
+
+      throw new Error(
+        "No stock was updated. Check BR + NTAGN and your RLS policy."
+      );
+
+    }
+
 
     showStatus(
       "SI No. saved."
@@ -2483,7 +3044,7 @@ async function saveSI(input){
     console.error(error);
 
     showStatus(
-      "SI No. update failed: " +
+      "SI update failed: " +
       error.message
     );
 
@@ -2494,41 +3055,56 @@ async function saveSI(input){
 
 /* =========================================================
    DELETE
-========================================================= */
+   PRIMARY KEY = BR + NTAGN
+   ========================================================= */
 
 async function deleteRow(
   branch,
-  tag,
-  source
+  tag
 ){
 
   const confirmed =
     await inlineConfirm(
       "Delete " +
       tag +
+      " from " +
+      branch +
       "?"
     );
 
 
-  if(!confirmed)
+  if(!confirmed){
+
     return;
+
+  }
 
 
   try{
 
+    const sheet =
+      document
+        .getElementById("sheet")
+        .value;
+
+
     const table =
       tableName(
         branch,
-        source
+        sheet
       );
 
 
     const {
       error
     } =
-      await supabaseClient
+      await db
         .from(table)
         .delete()
+        .eq(
+          "BR",
+          branch
+        )
         .eq(
           "NTAGN",
           tag
@@ -2537,7 +3113,9 @@ async function deleteRow(
 
     if(error){
 
-      throw error;
+      throw new Error(
+        error.message
+      );
 
     }
 
@@ -2552,8 +3130,6 @@ async function deleteRow(
 
   }catch(error){
 
-    console.error(error);
-
     showStatus(
       "Delete failed: " +
       error.message
@@ -2566,7 +3142,7 @@ async function deleteRow(
 
 /* =========================================================
    INLINE CONFIRM
-========================================================= */
+   ========================================================= */
 
 function inlineConfirm(text){
 
@@ -2575,6 +3151,7 @@ function inlineConfirm(text){
 
       const panel =
         document.createElement("div");
+
 
       panel.className =
         "queueCard";
@@ -2589,26 +3166,29 @@ ${escapeHtml(text)}
 </div>
 
 <button
-class="queueClose"
-data-no
+  class="queueClose"
+  data-no
 >
 ×
 </button>
 
 </div>
 
-<div class="queueText">
+<div
+  class="queueText"
+  style="margin-top:10px"
+>
 
 <button
-class="controlBtn"
-data-no
+  class="controlBtn"
+  data-no
 >
 Cancel
 </button>
 
 <button
-class="controlBtn primary"
-data-yes
+  class="controlBtn primary"
+  data-yes
 >
 Delete
 </button>
@@ -2631,13 +3211,13 @@ Delete
           btn => {
 
             btn.onclick =
-            function(){
+              function(){
 
-              panel.remove();
+                panel.remove();
 
-              resolve(false);
+                resolve(false);
 
-            };
+              };
 
           }
         );
@@ -2646,13 +3226,13 @@ Delete
       panel
         .querySelector("[data-yes]")
         .onclick =
-        function(){
+          function(){
 
-          panel.remove();
+            panel.remove();
 
-          resolve(true);
+            resolve(true);
 
-        };
+          };
 
     }
   );
@@ -2661,19 +3241,63 @@ Delete
 
 
 /* =========================================================
+   PAGINATION
+   ========================================================= */
+
+function previousPage(){
+
+  if(currentPage <= 1){
+
+    return;
+
+  }
+
+
+  currentPage--;
+
+  refreshDashboard();
+
+}
+
+
+function nextPage(){
+
+  if(
+    currentPage *
+    rowsPerPage >=
+    totalResults
+  ){
+
+    return;
+
+  }
+
+
+  currentPage++;
+
+  refreshDashboard();
+
+}
+
+
+/* =========================================================
    IMPORT
-========================================================= */
+   ========================================================= */
 
 async function handleImportFile(event){
 
   const file =
     event.target.files[0];
 
+
   event.target.value = "";
 
 
-  if(!file)
+  if(!file){
+
     return;
+
+  }
 
 
   const branch =
@@ -2716,22 +3340,17 @@ async function handleImportFile(event){
       );
 
 
-    const sheetName =
-      workbook.SheetNames[0];
-
-
-    const worksheet =
+    const firstSheet =
       workbook.Sheets[
-        sheetName
+        workbook.SheetNames[0]
       ];
 
 
     const rows =
       XLSX.utils.sheet_to_json(
-        worksheet,
+        firstSheet,
         {
-          defval:"",
-          raw:false
+          defval:""
         }
       );
 
@@ -2771,7 +3390,7 @@ async function handleImportFile(event){
 
 /* =========================================================
    DIRECT SUPABASE IMPORT
-========================================================= */
+   ========================================================= */
 
 async function importRowsDirect(
   branch,
@@ -2786,21 +3405,24 @@ async function importRowsDirect(
     );
 
 
+  createQueueCard(
+    "IMPORT",
+    "Importing " +
+    fileName
+  );
+
+
   /*
-   Normalize the uploaded headers.
+   * Existing stock upload format is expected
+   * to have the same column headers as your
+   * Supabase stock table.
+   *
+   * Unknown Excel columns are ignored.
+   */
 
-   This accepts:
-   SDATE
-   SUPPLIER
-   DR
-   ...
-   SI NO.
-   DATE AND TIME
-   USER EMAIL
-   STATUS
-  */
 
-  const validColumns = [
+  const allowedColumns = [
+
     "SDATE",
     "SUPPLIER",
     "DR",
@@ -2828,30 +3450,48 @@ async function importRowsDirect(
     "DATE AND TIME",
     "USER EMAIL",
     "STATUS"
+
   ];
 
 
-  const normalized =
+  const cleanRows =
     rows.map(
-      function(row){
+      original => {
 
-        const result = {};
+        const row = {};
 
 
-        validColumns.forEach(
-          function(column){
+        allowedColumns.forEach(
+          column => {
 
             if(
               Object.prototype.hasOwnProperty.call(
-                row,
+                original,
                 column
               )
             ){
 
-              result[column] =
-                normalizeImportValue(
-                  row[column]
-                );
+              let value =
+                original[column];
+
+
+              if(
+                value instanceof Date
+              ){
+
+                value =
+                  formatDateTime(
+                    value
+                  );
+
+              }
+
+
+              row[column] =
+                value === null ||
+                value === undefined
+                  ? ""
+                  : String(value);
 
             }
 
@@ -2860,39 +3500,24 @@ async function importRowsDirect(
 
 
         /*
-         If USER EMAIL is blank, use
-         the authenticated user's email.
-        */
+         * BR is always controlled
+         * by selected branch.
+         */
 
-        if(
-          !result["USER EMAIL"] &&
-          currentUser?.email
-        ){
-
-          result["USER EMAIL"] =
-            currentUser.email;
-
-        }
+        row["BR"] =
+          branch;
 
 
-        return result;
+        return row;
 
       }
     )
     .filter(
       row =>
-        row["NTAGN"] ||
-        row["DESCRIPTION"]
+        String(
+          row["NTAGN"] || ""
+        ).trim() !== ""
     );
-
-
-  if(!normalized.length){
-
-    throw new Error(
-      "No valid inventory rows found."
-    );
-
-  }
 
 
   const chunkSize = 500;
@@ -2900,21 +3525,22 @@ async function importRowsDirect(
   let processed = 0;
 
 
-  createQueueCard(
-    "IMPORT_JOB",
-    "Importing " +
-    fileName
-  );
-
+  /*
+   * UPSERT uses:
+   *
+   * BR + NTAGN
+   *
+   * because that is your primary key.
+   */
 
   for(
-    let i=0;
-    i<normalized.length;
-    i+=chunkSize
+    let i = 0;
+    i < cleanRows.length;
+    i += chunkSize
   ){
 
     const chunk =
-      normalized.slice(
+      cleanRows.slice(
         i,
         i + chunkSize
       );
@@ -2923,15 +3549,23 @@ async function importRowsDirect(
     const {
       error
     } =
-      await supabaseClient
+      await db
         .from(table)
-        .insert(chunk);
+        .upsert(
+          chunk,
+          {
+            onConflict:
+              "BR,NTAGN"
+          }
+        );
 
 
     if(error){
 
       throw new Error(
-        "Import chunk failed: " +
+        "Import failed at row " +
+        (i + 1) +
+        ": " +
         error.message
       );
 
@@ -2943,18 +3577,17 @@ async function importRowsDirect(
 
 
     updateQueue(
-      "IMPORT_JOB",
+      "IMPORT",
       processed,
-      normalized.length,
+      cleanRows.length,
       "Importing " +
       fileName
     );
 
 
     /*
-     Yield to the browser so the dashboard
-     remains responsive.
-    */
+     * Let browser render between chunks.
+     */
 
     await yieldToBrowser();
 
@@ -2962,57 +3595,33 @@ async function importRowsDirect(
 
 
   updateQueue(
-    "IMPORT_JOB",
-    normalized.length,
-    normalized.length,
+    "IMPORT",
+    cleanRows.length,
+    cleanRows.length,
     "Import complete."
   );
 
 
   showStatus(
-    "Import completed."
+    "Import completed: " +
+    formatNumber(
+      cleanRows.length
+    ) +
+    " rows."
   );
 
 
   setTimeout(
     refreshDashboard,
-    500
+    700
   );
-
-}
-
-
-/* =========================================================
-   IMPORT VALUE
-========================================================= */
-
-function normalizeImportValue(value){
-
-  if(
-    value === null ||
-    value === undefined
-  ){
-
-    return "";
-
-  }
-
-
-  if(value instanceof Date){
-
-    return value.toISOString();
-
-  }
-
-
-  return String(value);
 
 }
 
 
 /* =========================================================
    EXPORT
-========================================================= */
+   ========================================================= */
 
 async function startExport(){
 
@@ -3030,8 +3639,226 @@ async function startExport(){
     );
 
 
-    await exportDirect(
-      branch
+    /*
+     * Export directly from Supabase.
+     *
+     * No Apps Script.
+     * No Google Drive.
+     * No export job ID.
+     * No missing download URL.
+     */
+
+
+    const branches =
+      branch === "ALL"
+        ? BRANCHES
+        : [branch];
+
+
+    const workbook =
+      XLSX.utils.book_new();
+
+
+    let totalStocks = 0;
+
+    let totalSold = 0;
+
+    let totalAudit = 0;
+
+
+    for(
+      let i = 0;
+      i < branches.length;
+      i++
+    ){
+
+      const b =
+        branches[i];
+
+
+      updateQueue(
+        "EXPORT",
+        i,
+        branches.length,
+        "Reading " +
+        b
+      );
+
+
+      const [
+        stocks,
+        sold,
+        audit
+      ] =
+        await Promise.all([
+
+          fetchAllRows(
+            tableName(
+              b,
+              "stocks"
+            )
+          ),
+
+          fetchAllRows(
+            tableName(
+              b,
+              "sold"
+            )
+          ),
+
+          fetchAllRows(
+            tableName(
+              b,
+              "audit"
+            )
+          )
+
+        ]);
+
+
+      /*
+       * AVAILABLE sheet:
+       * remove sold NTAGN from stocks.
+       */
+
+      const soldSet =
+        new Set(
+          sold
+            .map(
+              r =>
+                String(
+                  r["NTAGN"] || ""
+                ).trim()
+            )
+            .filter(Boolean)
+        );
+
+
+      const available =
+        stocks.filter(
+          r =>
+            !soldSet.has(
+              String(
+                r["NTAGN"] || ""
+              ).trim()
+            )
+        );
+
+
+      totalStocks +=
+        available.length;
+
+      totalSold +=
+        sold.length;
+
+      totalAudit +=
+        audit.length;
+
+
+      if(available.length){
+
+        XLSX.utils.book_append_sheet(
+          workbook,
+          XLSX.utils.json_to_sheet(
+            available
+          ),
+          safeSheetName(
+            b + "_STOCKS"
+          )
+        );
+
+      }
+
+
+      if(sold.length){
+
+        XLSX.utils.book_append_sheet(
+          workbook,
+          XLSX.utils.json_to_sheet(
+            sold
+          ),
+          safeSheetName(
+            b + "_SOLD"
+          )
+        );
+
+      }
+
+
+      if(audit.length){
+
+        XLSX.utils.book_append_sheet(
+          workbook,
+          XLSX.utils.json_to_sheet(
+            audit
+          ),
+          safeSheetName(
+            b + "_AUDIT"
+          )
+        );
+
+      }
+
+
+      await yieldToBrowser();
+
+    }
+
+
+    /*
+     * Guarantee at least one worksheet.
+     */
+
+    if(!workbook.SheetNames.length){
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        XLSX.utils.aoa_to_sheet([
+          [
+            "No records found"
+          ]
+        ]),
+        "EXPORT"
+      );
+
+    }
+
+
+    updateQueue(
+      "EXPORT",
+      100,
+      100,
+      "Creating XLSX..."
+    );
+
+
+    const fileName =
+      "Acebedo_Inventory_" +
+      (branch === "ALL"
+        ? "ALL"
+        : branch) +
+      "_" +
+      dateFileStamp() +
+      ".xlsx";
+
+
+    XLSX.writeFile(
+      workbook,
+      fileName
+    );
+
+
+    updateQueue(
+      "EXPORT",
+      100,
+      100,
+      "Downloaded " +
+      fileName
+    );
+
+
+    showStatus(
+      "XLSX export completed."
     );
 
 
@@ -3050,67 +3877,68 @@ async function startExport(){
 
 
 /* =========================================================
-   DIRECT XLSX EXPORT
-========================================================= */
+   FETCH ALL ROWS
+   ========================================================= */
 
-async function exportDirect(branch){
+async function fetchAllRows(
+  table
+){
 
-  const branches =
-    branch === "ALL"
-      ? BRANCHES
-      : [branch];
+  const pageSize = 1000;
 
+  let offset = 0;
 
-  let availableRows = [];
-
-  let soldRows = [];
-
-  let auditRows = [];
+  let result = [];
 
 
-  const totalBranches =
-    branches.length;
+  while(true){
+
+    const {
+      data,
+      error
+    } =
+      await db
+        .from(table)
+        .select("*")
+        .range(
+          offset,
+          offset + pageSize - 1
+        );
 
 
-  for(
-    let i=0;
-    i<branches.length;
-    i++
-  ){
+    if(error){
 
-    const b =
-      branches[i];
+      throw new Error(
+        table +
+        ": " +
+        error.message
+      );
 
-
-    updateQueue(
-      "EXPORT",
-      i,
-      totalBranches,
-      "Reading " +
-      b
-    );
+    }
 
 
-    const data =
-      await getExportBranch(
-        b
+    const rows =
+      data || [];
+
+
+    result =
+      result.concat(
+        rows
       );
 
 
-    availableRows =
-      availableRows.concat(
-        data.available
-      );
+    if(
+      rows.length <
+      pageSize
+    ){
 
-    soldRows =
-      soldRows.concat(
-        data.sold
-      );
+      break;
 
-    auditRows =
-      auditRows.concat(
-        data.audit
-      );
+    }
+
+
+    offset +=
+      pageSize;
 
 
     await yieldToBrowser();
@@ -3118,294 +3946,362 @@ async function exportDirect(branch){
   }
 
 
-  /*
-   Add branch information to exported rows.
-  */
-
-  const available =
-    availableRows.map(
-      r =>
-        Object.assign(
-          {BRANCH:r.__branch},
-          r
-        )
-    );
-
-
-  const sold =
-    soldRows.map(
-      r =>
-        Object.assign(
-          {BRANCH:r.__branch},
-          r
-        )
-    );
-
-
-  const audit =
-    auditRows.map(
-      r =>
-        Object.assign(
-          {BRANCH:r.__branch},
-          r
-        )
-    );
-
-
-  [available,sold,audit]
-    .forEach(
-      arr =>
-        arr.forEach(
-          row =>
-            delete row.__branch
-        )
-    );
-
-
-  updateQueue(
-    "EXPORT",
-    95,
-    100,
-    "Building XLSX..."
-  );
-
-
-  const workbook =
-    XLSX.utils.book_new();
-
-
-  const wsAvailable =
-    XLSX.utils.json_to_sheet(
-      available
-    );
-
-
-  const wsSold =
-    XLSX.utils.json_to_sheet(
-      sold
-    );
-
-
-  const wsAudit =
-    XLSX.utils.json_to_sheet(
-      audit
-    );
-
-
-  XLSX.utils.book_append_sheet(
-    workbook,
-    wsAvailable,
-    "AVAILABLE"
-  );
-
-
-  XLSX.utils.book_append_sheet(
-    workbook,
-    wsSold,
-    "SOLD"
-  );
-
-
-  XLSX.utils.book_append_sheet(
-    workbook,
-    wsAudit,
-    "AUDIT"
-  );
-
-
-  const filename =
-    "Acebedo_Inventory_" +
-    branch +
-    "_" +
-    new Date()
-      .toISOString()
-      .slice(0,10) +
-    ".xlsx";
-
-
-  const xlsxData =
-    XLSX.write(
-      workbook,
-      {
-        bookType:"xlsx",
-        type:"array"
-      }
-    );
-
-
-  const blob =
-    new Blob(
-      [xlsxData],
-      {
-        type:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      }
-    );
-
-
-  const url =
-    URL.createObjectURL(blob);
-
-
-  const a =
-    document.createElement("a");
-
-  a.href = url;
-
-  a.download = filename;
-
-  document.body.appendChild(a);
-
-  a.click();
-
-  a.remove();
-
-
-  setTimeout(
-    function(){
-      URL.revokeObjectURL(url);
-    },
-    10000
-  );
-
-
-  updateQueue(
-    "EXPORT",
-    100,
-    100,
-    "XLSX ready: " +
-    filename
-  );
-
-
-  showStatus(
-    "XLSX export completed."
-  );
+  return result;
 
 }
 
 
 /* =========================================================
-   EXPORT BRANCH
-========================================================= */
+   ADMIN / ALLOWED USERS
+   ========================================================= */
 
-async function getExportBranch(branch){
+function openAdminUsers(){
 
-  const stockResult =
-    await supabaseClient
-      .from(
-        tableName(
-          branch,
-          "stocks"
-        )
-      )
-      .select("*")
-      .limit(100000);
+  if(!currentIsAdmin){
 
-
-  if(stockResult.error)
-    throw stockResult.error;
-
-
-  const soldResult =
-    await supabaseClient
-      .from(
-        tableName(
-          branch,
-          "scanresults"
-        )
-      )
-      .select("*")
-      .limit(100000);
-
-
-  if(soldResult.error)
-    throw soldResult.error;
-
-
-  const auditResult =
-    await supabaseClient
-      .from(
-        tableName(
-          branch,
-          "audit"
-        )
-      )
-      .select("*")
-      .limit(100000);
-
-
-  if(auditResult.error)
-    throw auditResult.error;
-
-
-  const sold =
-    soldResult.data || [];
-
-
-  const soldTags =
-    new Set(
-      sold
-        .map(
-          r =>
-            normalizeTag(
-              r["NTAGN"]
-            )
-        )
-        .filter(Boolean)
+    showStatus(
+      "Administrator access required."
     );
 
+    return;
 
-  const available =
-    (stockResult.data || [])
-      .filter(
-        r =>
-          !soldTags.has(
-            normalizeTag(
-              r["NTAGN"]
-            )
-          )
+  }
+
+
+  document
+    .getElementById("adminPanel")
+    .style.display =
+      "flex";
+
+
+  loadAllowedUsers();
+
+}
+
+
+function closeAdminUsers(){
+
+  document
+    .getElementById("adminPanel")
+    .style.display =
+      "none";
+
+}
+
+
+async function loadAllowedUsers(){
+
+  if(!currentIsAdmin){
+
+    return;
+
+  }
+
+
+  const body =
+    document
+      .getElementById(
+        "allowedUsersBody"
       );
 
 
-  return {
+  body.innerHTML =
+    "<tr><td colspan='4'>Loading...</td></tr>";
 
-    available:
-      available.map(
-        r =>
-          Object.assign(
-            {__branch:branch},
-            r
-          )
-      ),
 
-    sold:
-      sold.map(
-        r =>
-          Object.assign(
-            {__branch:branch},
-            r
-          )
-      ),
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("app_allowed_users")
+      .select(
+        "email,is_admin,active"
+      )
+      .order(
+        "email",
+        {
+          ascending:true
+        }
+      );
 
-    audit:
-      (auditResult.data || [])
-        .map(
-          r =>
-            Object.assign(
-              {__branch:branch},
-              r
-            )
-        )
 
-  };
+  if(error){
+
+    body.innerHTML =
+      `<tr>
+        <td colspan="4">
+          ${escapeHtml(
+            error.message
+          )}
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  body.innerHTML = "";
+
+
+  (data || []).forEach(
+    user => {
+
+      const tr =
+        document.createElement("tr");
+
+
+      tr.innerHTML = `
+
+<td>
+${escapeHtml(user.email)}
+</td>
+
+<td>
+${user.is_admin ? "YES" : "NO"}
+</td>
+
+<td>
+${user.active ? "ACTIVE" : "INACTIVE"}
+</td>
+
+<td>
+
+<button
+  class="actionBtn"
+  onclick="toggleAllowedUser(
+    '${jsEscape(user.email)}',
+    ${!user.active}
+  )"
+>
+${user.active ? "Deactivate" : "Activate"}
+</button>
+
+<button
+  class="actionBtn danger"
+  onclick="deleteAllowedUser(
+    '${jsEscape(user.email)}'
+  )"
+>
+Delete
+</button>
+
+</td>
+
+`;
+
+
+      body.appendChild(tr);
+
+    }
+  );
+
+}
+
+
+async function addAllowedUser(){
+
+  if(!currentIsAdmin){
+
+    return;
+
+  }
+
+
+  const email =
+    document
+      .getElementById(
+        "newUserEmail"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const isAdmin =
+    document
+      .getElementById(
+        "newUserAdmin"
+      )
+      .value === "true";
+
+
+  const active =
+    document
+      .getElementById(
+        "newUserActive"
+      )
+      .value === "true";
+
+
+  if(!email){
+
+    showStatus(
+      "Enter an email."
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const {
+      error
+    } =
+      await db
+        .from("app_allowed_users")
+        .upsert(
+          {
+            email:email,
+            is_admin:isAdmin,
+            active:active
+          },
+          {
+            onConflict:"email"
+          }
+        );
+
+
+    if(error){
+
+      throw new Error(
+        error.message
+      );
+
+    }
+
+
+    document
+      .getElementById(
+        "newUserEmail"
+      )
+      .value = "";
+
+
+    showStatus(
+      "Allowed user saved."
+    );
+
+
+    loadAllowedUsers();
+
+
+  }catch(error){
+
+    showStatus(
+      "Unable to add user: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+async function toggleAllowedUser(
+  email,
+  active
+){
+
+  try{
+
+    const {
+      error
+    } =
+      await db
+        .from("app_allowed_users")
+        .update({
+          active:active
+        })
+        .eq(
+          "email",
+          email
+        );
+
+
+    if(error){
+
+      throw new Error(
+        error.message
+      );
+
+    }
+
+
+    loadAllowedUsers();
+
+  }catch(error){
+
+    showStatus(
+      error.message
+    );
+
+  }
+
+}
+
+
+async function deleteAllowedUser(
+  email
+){
+
+  const confirmed =
+    await inlineConfirm(
+      "Delete allowed user " +
+      email +
+      "?"
+    );
+
+
+  if(!confirmed){
+
+    return;
+
+  }
+
+
+  try{
+
+    const {
+      error
+    } =
+      await db
+        .from("app_allowed_users")
+        .delete()
+        .eq(
+          "email",
+          email
+        );
+
+
+    if(error){
+
+      throw new Error(
+        error.message
+      );
+
+    }
+
+
+    loadAllowedUsers();
+
+  }catch(error){
+
+    showStatus(
+      error.message
+    );
+
+  }
 
 }
 
 
 /* =========================================================
    QUEUE
-========================================================= */
+   ========================================================= */
 
 function createQueueCard(
   id,
@@ -3418,8 +4314,16 @@ function createQueueCard(
     );
 
 
-  if(card)
+  if(card){
+
+    card.querySelector(
+      "[data-status]"
+    ).textContent =
+      text;
+
     return;
+
+  }
 
 
   card =
@@ -3434,19 +4338,23 @@ function createQueueCard(
     "queue_" + id;
 
 
+  const title =
+    id.startsWith("IMPORT")
+      ? "↑ Import"
+      : "↓ Export";
+
+
   card.innerHTML = `
 
 <div class="queueHead">
 
 <div class="queueTitle">
-${id.startsWith("IMPORT")
-  ? "↑ Import"
-  : "↓ Export"}
+${title}
 </div>
 
 <button
-class="queueClose"
-onclick="this.closest('.queueCard').remove()"
+  class="queueClose"
+  onclick="this.closest('.queueCard').remove()"
 >
 ×
 </button>
@@ -3460,15 +4368,17 @@ ${escapeHtml(text)}
 <div class="progress">
 
 <div
-class="progressBar"
-data-progress
+  class="progressBar"
+  data-progress
 ></div>
 
 </div>
 
 <div class="queueBottom">
 
-<span data-percent>0%</span>
+<span data-percent>
+0%
+</span>
 
 <span data-status>
 Working...
@@ -3528,21 +4438,28 @@ function updateQueue(
 
 
   card
-    .querySelector("[data-progress]")
+    .querySelector(
+      "[data-progress]"
+    )
     .style.width =
-    percent + "%";
+      percent + "%";
 
 
   card
-    .querySelector("[data-percent]")
+    .querySelector(
+      "[data-percent]"
+    )
     .textContent =
-    percent + "%";
+      percent + "%";
 
 
   card
-    .querySelector("[data-status]")
+    .querySelector(
+      "[data-status]"
+    )
     .textContent =
-    text || "Working...";
+      text ||
+      "Working...";
 
 }
 
@@ -3573,140 +4490,41 @@ function updateQueueError(
   }
 
 
-  card
-    .querySelector("[data-progress]")
-    .style.width =
+  const bar =
+    card.querySelector(
+      "[data-progress]"
+    );
+
+
+  bar.style.width =
     "100%";
 
 
-  card
-    .querySelector("[data-progress]")
-    .style.background =
+  bar.style.background =
     "#dc2626";
 
 
-  card
-    .querySelector("[data-percent]")
-    .textContent =
+  card.querySelector(
+    "[data-percent]"
+  ).textContent =
     "ERROR";
 
 
-  card
-    .querySelector("[data-status]")
-    .textContent =
+  card.querySelector(
+    "[data-status]"
+  ).textContent =
     message;
 
 }
 
 
 /* =========================================================
-   SEARCH
-========================================================= */
-
-function runSearch(){
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-function searchKey(event){
-
-  if(event.key === "Enter"){
-
-    runSearch();
-
-  }
-
-}
-
-
-function clearSearch(){
-
-  document
-    .getElementById("search")
-    .value = "";
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-function branchChanged(){
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-function sheetChanged(){
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-function updateTableHeader(
-  branch,
-  sheet,
-  search
-){
-
-  const title =
-    document.getElementById(
-      "tableTitle"
-    );
-
-  const sub =
-    document.getElementById(
-      "tableSub"
-    );
-
-
-  let sheetName =
-    "Available Stocks";
-
-
-  if(sheet === "sold")
-    sheetName = "Sold Out";
-
-
-  if(sheet === "audit")
-    sheetName = "Audit";
-
-
-  title.textContent =
-    sheetName;
-
-
-  sub.textContent =
-    (branch === "ALL"
-      ? "All branches"
-      : branch) +
-    (search
-      ? " • Search: " + search
-      : "");
-
-}
-
-
-/* =========================================================
    STATUS
-========================================================= */
+   ========================================================= */
 
-function showStatus(message){
+function showStatus(
+  message
+){
 
   const el =
     document.getElementById(
@@ -3718,7 +4536,9 @@ function showStatus(message){
     message;
 
 
-  el.classList.add("show");
+  el.classList.add(
+    "show"
+  );
 
 
   clearTimeout(
@@ -3743,9 +4563,11 @@ function showStatus(message){
 
 /* =========================================================
    LOADING
-========================================================= */
+   ========================================================= */
 
-function setLoading(value){
+function setLoading(
+  value
+){
 
   document
     .getElementById(
@@ -3761,8 +4583,179 @@ function setLoading(value){
 
 
 /* =========================================================
-   BROWSER YIELD
-========================================================= */
+   HELPERS
+   ========================================================= */
+
+function clearDisplayedRows(){
+
+  lastRows = [];
+
+  totalResults = 0;
+
+  document
+    .getElementById(
+      "tableBody"
+    )
+    .innerHTML = "";
+
+  document
+    .getElementById(
+      "showingTotal"
+    )
+    .textContent = "0";
+
+}
+
+
+function formatNumber(
+  value
+){
+
+  return Number(
+    value || 0
+  ).toLocaleString();
+
+}
+
+
+function escapeHtml(
+  value
+){
+
+  return String(
+    value === undefined ||
+    value === null
+      ? ""
+      : value
+  )
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
+}
+
+
+function jsEscape(
+  value
+){
+
+  return String(
+    value || ""
+  )
+  .replace(
+    /\\/g,
+    "\\\\"
+  )
+  .replace(
+    /'/g,
+    "\\'"
+  )
+  .replace(
+    /\r/g,
+    "\\r"
+  )
+  .replace(
+    /\n/g,
+    "\\n"
+  );
+
+}
+
+
+function formatDateTime(
+  date
+){
+
+  if(!(date instanceof Date)){
+
+    return String(
+      date || ""
+    );
+
+  }
+
+
+  const pad =
+    n =>
+      String(n)
+        .padStart(2,"0");
+
+
+  return (
+    date.getFullYear() +
+    "-" +
+    pad(date.getMonth()+1) +
+    "-" +
+    pad(date.getDate()) +
+    " " +
+    pad(date.getHours()) +
+    ":" +
+    pad(date.getMinutes()) +
+    ":" +
+    pad(date.getSeconds())
+  );
+
+}
+
+
+function dateFileStamp(){
+
+  const d =
+    new Date();
+
+
+  const pad =
+    n =>
+      String(n)
+        .padStart(2,"0");
+
+
+  return (
+    d.getFullYear() +
+    pad(d.getMonth()+1) +
+    pad(d.getDate()) +
+    "_" +
+    pad(d.getHours()) +
+    pad(d.getMinutes()) +
+    pad(d.getSeconds())
+  );
+
+}
+
+
+function safeSheetName(
+  name
+){
+
+  return String(name)
+    .replace(
+      /[\\\/\?\*\[\]\:]/g,
+      "_"
+    )
+    .substring(
+      0,
+      31
+    );
+
+}
+
 
 function yieldToBrowser(){
 
@@ -3778,66 +4771,56 @@ function yieldToBrowser(){
 
 
 /* =========================================================
-   HELPERS
-========================================================= */
+   SUPABASE AUTH STATE
+   ========================================================= */
 
-function formatNumber(value){
+db.auth.onAuthStateChange(
+  async (
+    event,
+    session
+  ) => {
 
-  return Number(
-    value || 0
-  ).toLocaleString();
+    console.log(
+      "Supabase auth:",
+      event
+    );
 
-}
+    if(
+      event ===
+      "SIGNED_OUT"
+    ){
 
+      return;
 
-function escapeHtml(value){
+    }
 
-  return String(
-    value === undefined ||
-    value === null
-      ? ""
-      : value
-  )
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/"/g,"&quot;")
-  .replace(/'/g,"&#039;");
-
-}
-
-
-function jsEscape(value){
-
-  return String(
-    value || ""
-  )
-  .replace(/\\/g,"\\\\")
-  .replace(/'/g,"\\'")
-  .replace(/\n/g,"\\n")
-  .replace(/\r/g,"\\r");
-
-}
+  }
+);
 
 
 /* =========================================================
    STARTUP
-========================================================= */
+   ========================================================= */
 
 (async function(){
 
   /*
-   Make sure the Supabase client exists.
-  */
+   * Basic configuration check.
+   */
 
   if(
-    SUPABASE_KEY ===
-    "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
+    SUPABASE_URL ===
+    "YOUR_SUPABASE_PROJECT_URL" ||
+    SUPABASE_ANON_KEY ===
+    "YOUR_SUPABASE_ANON_OR_PUBLISHABLE_KEY"
   ){
 
-    setLoginStatus(
-      "Paste your Supabase publishable key into the HTML first."
-    );
+    document
+      .getElementById(
+        "loginStatus"
+      )
+      .textContent =
+      "Configure SUPABASE_URL and SUPABASE_ANON_KEY in the HTML.";
 
     return;
 
@@ -3855,14 +4838,15 @@ function jsEscape(value){
   }else{
 
     document
-      .getElementById("loginScreen")
+      .getElementById(
+        "loginScreen"
+      )
       .style.display =
       "flex";
 
   }
 
 })();
-
 </script>
 
 </body>

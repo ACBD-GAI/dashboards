@@ -1998,84 +1998,6 @@ button:disabled{
   }
 
 }
-
-/* =========================================================
-   ACEBEDO OPTICAL — SKY BLUE BACKGROUND + DRIVE LOGO
-   OVERRIDES ONLY — NO JS / FUNCTION CHANGES
-========================================================= */
-
-body{
-  background:#87CEEB !important;
-}
-
-#loginScreen{
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,.24), transparent 32%),
-    radial-gradient(circle at 80% 80%, rgba(37,99,235,.12), transparent 34%),
-    linear-gradient(135deg,#87CEEB 0%,#BFEFFF 100%) !important;
-}
-
-.logo,
-.brandLogo{
-  overflow:hidden;
-  background:#ffffff !important;
-  padding:0 !important;
-  border:1px solid rgba(255,255,255,.9);
-}
-
-.logo img,
-.brandLogo img{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:contain;
-  border-radius:inherit;
-}
-
-.brandTitle{
-  color:#111827 !important;
-}
-
-.brandSub{
-  color:#1f2937 !important;
-}
-
-.userEmail,
-.iconBtn{
-  color:#111827 !important;
-  background:rgba(255,255,255,.72) !important;
-  border-color:rgba(255,255,255,.85) !important;
-}
-
-.iconBtn:hover{
-  background:#ffffff !important;
-  border-color:#ffffff !important;
-}
-
-
-.brandLogo{
-  width:47px;
-  height:47px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:14px;
-  overflow:hidden;
-  background:#ffffff;
-  box-shadow:
-    0 9px 24px rgba(37,99,235,.18);
-}
-
-.brandLogo img{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:contain;
-  border-radius:inherit;
-}
-
-   
-
 </style>
 
 
@@ -2095,7 +2017,7 @@ body{
 
   <div class="loginCard">
 
-    <img src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w100">
+    <div class="logo">◉</div>
 
     <h1 class="loginTitle">
       Acebedo Optical
@@ -2186,9 +2108,7 @@ body{
 
       <div class="brand">
 
-        <div class="brandLogo">
- <img src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200">
-</div>
+        <div class="brandLogo">◉</div>
 
         <div>
 
@@ -2583,7 +2503,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbxySytHT2kT6OsHeXf1jA7_uriXtqI6-m3Ub9TNnO4ls_otXFYqHQG4FQa2T0Y0S8J93A/exec";
+  "https://script.google.com/macros/s/AKfycbxrZ2mVjPmCKQS6Ba8Yw30Caqjvpn95CPg8j5xyK-F_naA_uOqBSXQ0_JaYtq0_vPNNIQ/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -2996,6 +2916,7 @@ async function verifyOTP(){
     );
 
     showDashboard();
+    startSessionMonitor();
 
   }catch(error){
 
@@ -3101,11 +3022,69 @@ async function checkExistingSession(){
   }
 
 }
+
+/* =========================================================
+   FORCE LOGOUT WHEN SAME EMAIL LOGS IN ELSEWHERE
+========================================================= */
+
+let sessionMonitor = null;
+
+function startSessionMonitor(){
+
+  if(sessionMonitor){
+    clearInterval(sessionMonitor);
+  }
+
+  sessionMonitor =
+    setInterval(async function(){
+
+      if(!sessionId){
+        return;
+      }
+
+      const valid =
+        await checkExistingSession();
+
+      if(!valid && !sessionId){
+
+        document
+          .getElementById("dashboard")
+          .style.display = "none";
+
+        document
+          .getElementById("loginScreen")
+          .style.display = "flex";
+
+        document
+          .getElementById("emailStep")
+          .classList.remove("hidden");
+
+        document
+          .getElementById("otpStep")
+          .classList.add("hidden");
+
+        document
+          .getElementById("otp")
+          .value = "";
+
+        setLoginStatus(
+          "Your account was logged in on another device. You have been logged out here."
+        );
+      }
+
+    }, 15000);
+
+}
 /* =========================================================
    LOGOUT
 ========================================================= */
 
 async function logout(){
+
+  if(sessionMonitor){
+    clearInterval(sessionMonitor);
+    sessionMonitor = null;
+  }
 
   try{
 
@@ -5747,103 +5726,19 @@ async function handleImportFile(
         }
       );
 
-   if(!rows.length){
+    if(!rows.length){
 
-  throw new Error(
-    "No rows found in the file."
-  );
-
-}
-
-/* =========================================================
-   CHECK UPLOADED FILE BRANCH BEFORE IMPORT
-   DO NOT IMPORT IF BR DOES NOT MATCH SELECTED BRANCH
-========================================================= */
-
-const selectedBranch =
-  String(branch || "")
-    .trim()
-    .toUpperCase();
-
-const fileBranchSet =
-  new Set();
-
-let missingBranchRows = 0;
-
-rows.forEach(
-  inputRow=>{
-
-    const normalized =
-      normalizeImportRow(inputRow);
-
-    const fileBranch =
-      String(
-        normalized["BR"] || ""
-      )
-        .trim()
-        .toUpperCase();
-
-    if(fileBranch){
-      fileBranchSet.add(
-        fileBranch
+      throw new Error(
+        "No rows found in the file."
       );
-    }else{
-      missingBranchRows++;
+
     }
 
-  }
-);
-
-/* BR column missing or empty */
-if(
-  fileBranchSet.size === 0
-){
-
-  throw new Error(
-    "Import failed: BR column is missing or empty."
-  );
-
-}
-
-/* Check every BR value against selected branch */
-const wrongBranches =
-  [...fileBranchSet].filter(
-    fileBranch =>
-      fileBranch !== selectedBranch
-  );
-
-/* Wrong branch OR mixed branches */
-if(
-  wrongBranches.length > 0 ||
-  missingBranchRows > 0 ||
-  fileBranchSet.size > 1
-){
-
-  const detectedBranches =
-    [...fileBranchSet].join(", ");
-
-  throw new Error(
-    "BRANCH DOES NOT MATCH\n\n" +
-    "Selected branch: " +
-    selectedBranch +
-    "\n" +
-    "File branch: " +
-    detectedBranches +
-    "\n\n" +
-    "Nothing was imported."
-  );
-
-}
-
-/* =========================================================
-   BRANCH VERIFIED — CONTINUE EXISTING IMPORT
-========================================================= */
-
-await importDirect(
-  branch,
-  rows,
-  file.name
-);
+    await importDirect(
+      branch,
+      rows,
+      file.name
+    );
 
   }catch(error){
 
@@ -7205,6 +7100,7 @@ function escapeHtmlAttribute(
     if(loggedIn){
 
       showDashboard();
+      startSessionMonitor();
 
     }else{
 

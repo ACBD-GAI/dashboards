@@ -1,12 +1,14 @@
-
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>Acebedo Optical Inventory</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -25,22 +27,35 @@
   --radius:18px;
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
-html,body{
+html,
+body{
   margin:0;
   padding:0;
   min-height:100%;
 }
 
 body{
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
-  "Segoe UI",sans-serif;
-  background:linear-gradient(135deg,#f8fbff 0%,#f3f6fb 55%,#eef3fa 100%);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background:
+    linear-gradient(
+      135deg,
+      #f8fbff 0%,
+      #f3f6fb 55%,
+      #eef3fa 100%
+    );
   color:var(--text);
 }
-
-.hidden{display:none!important}
 
 /* LOGIN */
 
@@ -89,7 +104,9 @@ body{
   line-height:1.55;
 }
 
-.field{margin-bottom:15px}
+.field{
+  margin-bottom:15px;
+}
 
 .field label{
   display:block;
@@ -146,6 +163,15 @@ body{
   margin-top:15px;
   font-size:13px;
   color:var(--muted);
+  line-height:1.5;
+}
+
+.loginStatus.error{
+  color:#dc2626;
+}
+
+.loginStatus.success{
+  color:#16a34a;
 }
 
 /* DASHBOARD */
@@ -160,6 +186,8 @@ body{
   margin:auto;
   padding:22px;
 }
+
+/* TOPBAR */
 
 .topbar{
   display:flex;
@@ -255,7 +283,15 @@ body{
   color:var(--text);
 }
 
-.searchWrap{position:relative}
+.select:focus,
+.searchInput:focus{
+  border-color:#93b4ff;
+  box-shadow:0 0 0 3px rgba(37,99,235,.08);
+}
+
+.searchWrap{
+  position:relative;
+}
 
 .searchIcon{
   position:absolute;
@@ -265,7 +301,9 @@ body{
   color:#94a3b8;
 }
 
-.searchInput{padding-left:38px}
+.searchInput{
+  padding-left:38px;
+}
 
 .controlBtn{
   border:1px solid var(--line);
@@ -360,7 +398,9 @@ body{
   border-bottom:1px solid var(--line);
 }
 
-.tableTitle{font-weight:800}
+.tableTitle{
+  font-weight:800;
+}
 
 .tableSub{
   color:var(--muted);
@@ -368,7 +408,9 @@ body{
   margin-top:3px;
 }
 
-.tableScroll{overflow:auto}
+.tableScroll{
+  overflow:auto;
+}
 
 table{
   width:100%;
@@ -393,28 +435,37 @@ tbody td{
   white-space:nowrap;
 }
 
-tbody tr:hover{background:#f8fbff}
+tbody tr:hover{
+  background:#f8fbff;
+}
 
-.tag,
-.branchTag,
-.typeTag{
+.tag{
   display:inline-flex;
   padding:5px 8px;
   border-radius:8px;
+  background:#f1f5f9;
   font-weight:750;
   font-size:11px;
 }
 
-.tag{background:#f1f5f9}
-
 .branchTag{
+  display:inline-flex;
+  padding:5px 8px;
+  border-radius:8px;
   background:#eef2ff;
   color:#4338ca;
+  font-weight:750;
+  font-size:11px;
 }
 
 .typeTag{
+  display:inline-flex;
+  padding:5px 8px;
+  border-radius:8px;
   background:#ecfeff;
   color:#0e7490;
+  font-weight:750;
+  font-size:11px;
 }
 
 .actionBtn{
@@ -427,12 +478,16 @@ tbody tr:hover{background:#f8fbff}
   font-weight:700;
 }
 
-.actionBtn:hover{background:#f8fafc}
+.actionBtn:hover{
+  background:#f8fafc;
+}
 
-.actionBtn.danger{color:#dc2626}
+.actionBtn.danger{
+  color:#dc2626;
+}
 
 .siInput{
-  width:110px;
+  width:100px;
   padding:7px 8px;
   border:1px solid #cbd5e1;
   border-radius:8px;
@@ -473,7 +528,9 @@ tbody tr:hover{background:#f8fbff}
   font-weight:700;
 }
 
-.pageBtn:hover{background:#f8fafc}
+.pageBtn:hover{
+  background:#f8fafc;
+}
 
 .pageBtn.active{
   background:#2563eb;
@@ -601,12 +658,15 @@ tbody tr:hover{background:#f8fbff}
   box-shadow:0 12px 30px rgba(15,23,42,.2);
   transition:.22s;
   z-index:10000;
+  max-width:90vw;
 }
 
 #globalStatus.show{
   transform:translate(-50%,0);
   opacity:1;
 }
+
+/* LOADING */
 
 .loadingLine{
   height:2px;
@@ -617,13 +677,21 @@ tbody tr:hover{background:#f8fbff}
 }
 
 @keyframes loading{
-  from{background-position:200% 0}
-  to{background-position:-200% 0}
+  from{
+    background-position:200% 0;
+  }
+  to{
+    background-position:-200% 0;
+  }
+}
+
+.hidden{
+  display:none !important;
 }
 
 @media(max-width:1250px){
   .controls{
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr 1fr 1fr;
   }
 
   .searchWrap{
@@ -638,11 +706,17 @@ tbody tr:hover{background:#f8fbff}
 }
 
 @media(max-width:700px){
-  .app{padding:12px}
+  .app{
+    padding:12px;
+  }
 
-  .topbar{align-items:flex-start}
+  .topbar{
+    align-items:flex-start;
+  }
 
-  .userEmail{display:none}
+  .userEmail{
+    display:none;
+  }
 
   .controls{
     grid-template-columns:1fr;
@@ -659,393 +733,530 @@ tbody tr:hover{background:#f8fbff}
   .statNumber{
     font-size:23px;
   }
+
+  .loginCard{
+    padding:30px;
+  }
 }
 </style>
+
 </head>
 
 <body>
 
+<!-- LOGIN -->
+
 <section id="loginScreen">
+
   <div class="loginCard">
 
-    <div class="logo">◉</div>
 
-    <h1 class="loginTitle">Acebedo Optical</h1>
+<div class="logo">◉</div>
 
-    <p class="loginSub">
-      Central Inventory Dashboard
-    </p>
+<h1 class="loginTitle">
+  Acebedo Optical
+</h1>
 
-    <div id="emailStep">
+<p class="loginSub">
+  Central Inventory Dashboard
+</p>
 
-      <div class="field">
-        <label>EMAIL ADDRESS</label>
+<div id="emailStep">
 
-        <input
-          id="email"
-          class="input"
-          type="email"
-          placeholder="Enter your authorized Gmail"
-          autocomplete="email"
-        >
-      </div>
+  <div class="field">
 
-      <button
-        id="sendOtpBtn"
-        class="primaryBtn"
-        onclick="sendOTP()"
-      >
-        Send verification code
-      </button>
+    <label>EMAIL ADDRESS</label>
 
-    </div>
-
-    <div id="otpStep" class="hidden">
-
-      <div class="field">
-        <label>VERIFICATION CODE</label>
-
-        <input
-          id="otp"
-          class="input"
-          type="text"
-          inputmode="numeric"
-          maxlength="6"
-          placeholder="Enter 6-digit code"
-          autocomplete="one-time-code"
-        >
-      </div>
-
-      <button
-        id="verifyBtn"
-        class="primaryBtn"
-        onclick="verifyOTP()"
-      >
-        Verify & enter dashboard
-      </button>
-
-      <button
-        class="controlBtn"
-        style="width:100%;height:44px;margin-top:10px"
-        onclick="backToEmail()"
-      >
-        Use another email
-      </button>
-
-    </div>
-
-    <div id="loginStatus" class="loginStatus"></div>
+    <input
+      id="email"
+      class="input"
+      type="email"
+      placeholder="Enter your authorized Gmail"
+      autocomplete="email"
+    >
 
   </div>
+
+  <button
+    id="sendOtpBtn"
+    class="primaryBtn"
+    onclick="sendOTP()"
+  >
+    Send verification code
+  </button>
+
+</div>
+
+<div
+  id="otpStep"
+  class="hidden"
+>
+
+  <div class="field">
+
+    <label>VERIFICATION CODE</label>
+
+    <input
+      id="otp"
+      class="input"
+      type="text"
+      inputmode="numeric"
+      maxlength="6"
+      autocomplete="one-time-code"
+      placeholder="Enter 6-digit code"
+    >
+
+  </div>
+
+  <button
+    id="verifyBtn"
+    class="primaryBtn"
+    onclick="verifyOTP()"
+  >
+    Verify & enter dashboard
+  </button>
+
+  <button
+    id="backEmailBtn"
+    class="controlBtn"
+    style="width:100%;height:45px;margin-top:10px"
+    onclick="backToEmail()"
+  >
+    Change email
+  </button>
+
+</div>
+
+<div
+  id="loginStatus"
+  class="loginStatus"
+></div>
+
+
+  </div>
+
 </section>
 
+<!-- DASHBOARD -->
 
 <section id="dashboard">
 
-<div class="app">
+  <div class="app">
+
 
 <header class="topbar">
 
   <div class="brand">
 
-    <div class="brandLogo">◉</div>
+    <div class="brandLogo">
+      ◉
+    </div>
 
     <div>
-      <div class="brandTitle">Central Inventory</div>
+
+      <div class="brandTitle">
+        Central Inventory
+      </div>
 
       <div class="brandSub">
         Acebedo Optical • Direct Supabase Inventory
       </div>
+
     </div>
 
   </div>
 
   <div class="userArea">
 
-    <div id="userEmail" class="userEmail"></div>
+    <div
+      id="userEmail"
+      class="userEmail"
+    ></div>
 
     <button
       class="iconBtn"
       title="Refresh"
       onclick="refreshDashboard()"
-    >↻</button>
+    >
+      ↻
+    </button>
 
     <button
       class="iconBtn"
       title="Logout"
       onclick="logout()"
-    >⇥</button>
+    >
+      ⇥
+    </button>
 
   </div>
 
 </header>
 
 
+<!-- CONTROLS -->
+
 <div class="controls">
 
-<select
-  id="branch"
-  class="select"
-  onchange="branchChanged()"
->
-  <option value="ALL">ALL BRANCHES</option>
-  <option value="GAI">GAI</option>
-  <option value="CAS">CAS</option>
-  <option value="BAC">BAC</option>
-  <option value="BIN">BIN</option>
-  <option value="BIS">BIS</option>
-  <option value="CAD">CAD</option>
-  <option value="DGT">DGT</option>
-  <option value="KAB">KAB</option>
-  <option value="KAL">KAL</option>
-  <option value="PAS">PAS</option>
-  <option value="POT">POT</option>
-  <option value="SAN">SAN</option>
-  <option value="TAB">TAB</option>
-  <option value="TAN">TAN</option>
-  <option value="TIS">TIS</option>
-  <option value="TOL">TOL</option>
-</select>
+  <select
+    id="branch"
+    class="select"
+    onchange="branchChanged()"
+  >
+
+    <option value="ALL">ALL BRANCHES</option>
+    <option value="GAI">GAI</option>
+    <option value="CAS">CAS</option>
+    <option value="BAC">BAC</option>
+    <option value="BIN">BIN</option>
+    <option value="BIS">BIS</option>
+    <option value="CAD">CAD</option>
+    <option value="DGT">DGT</option>
+    <option value="KAB">KAB</option>
+    <option value="KAL">KAL</option>
+    <option value="PAS">PAS</option>
+    <option value="POT">POT</option>
+    <option value="SAN">SAN</option>
+    <option value="TAB">TAB</option>
+    <option value="TAN">TAN</option>
+    <option value="TIS">TIS</option>
+    <option value="TOL">TOL</option>
+
+  </select>
 
 
-<select
-  id="sheet"
-  class="select"
-  onchange="sheetChanged()"
->
-  <option value="stocks">AVAILABLE STOCKS</option>
-  <option value="sold">SOLD OUT</option>
-  <option value="audit">AUDIT</option>
-</select>
+  <select
+    id="sheet"
+    class="select"
+    onchange="sheetChanged()"
+  >
+
+    <option value="stocks">
+      AVAILABLE STOCKS
+    </option>
+
+    <option value="sold">
+      SOLD OUT
+    </option>
+
+    <option value="audit">
+      AUDIT
+    </option>
+
+  </select>
 
 
-<div class="searchWrap">
+  <div class="searchWrap">
 
-<span class="searchIcon">⌕</span>
+    <span class="searchIcon">
+      ⌕
+    </span>
 
-<input
-  id="search"
-  class="searchInput"
-  placeholder="Search tag, description, lens type, SI No., QR..."
-  onkeydown="searchKey(event)"
->
+    <input
+      id="search"
+      class="searchInput"
+      placeholder="Search tag, description, lens type, SI No., QR..."
+      onkeydown="searchKey(event)"
+    >
+
+  </div>
+
+
+  <button
+    class="controlBtn"
+    onclick="clearSearch()"
+  >
+    Clear
+  </button>
+
+
+  <button
+    class="controlBtn primary"
+    onclick="runSearch()"
+  >
+    Search
+  </button>
+
+
+  <button
+    class="controlBtn"
+    onclick="document.getElementById('importFile').click()"
+  >
+    ↑ Import
+  </button>
+
+
+  <button
+    class="controlBtn"
+    onclick="startExport()"
+  >
+    ↓ Export
+  </button>
+
+
+  <input
+    id="importFile"
+    type="file"
+    accept=".xlsx,.xls,.csv"
+    class="hidden"
+    onchange="handleImportFile(event)"
+  >
 
 </div>
 
 
-<button
-  class="controlBtn"
-  onclick="clearSearch()"
->
-Clear
-</button>
+<div
+  id="loadingLine"
+  class="loadingLine hidden"
+></div>
 
 
-<button
-  class="controlBtn primary"
-  onclick="runSearch()"
->
-Search
-</button>
-
-
-<button
-  class="controlBtn"
-  onclick="document.getElementById('importFile').click()"
->
-↑ Import
-</button>
-
-
-<button
-  class="controlBtn"
-  onclick="startExport()"
->
-↓ Export
-</button>
-
-
-<input
-  id="importFile"
-  type="file"
-  accept=".xlsx,.xls,.csv"
-  class="hidden"
-  onchange="handleImportFile(event)"
->
-
-</div>
-
-
-<div id="loadingLine" class="loadingLine hidden"></div>
-
+<!-- STAT CARDS -->
 
 <div class="cards">
 
-<div class="statCard">
-  <div class="statTop">
-    <span class="statLabel">AVAILABLE</span>
-    <span class="statIcon">✓</span>
+  <div class="statCard">
+
+    <div class="statTop">
+
+      <span class="statLabel">
+        AVAILABLE
+      </span>
+
+      <span class="statIcon">
+        ✓
+      </span>
+
+    </div>
+
+    <div
+      id="availableTotal"
+      class="statNumber"
+    >
+      —
+    </div>
+
+    <div class="statHint">
+      Stock not sold
+    </div>
+
   </div>
 
-  <div id="availableTotal" class="statNumber">—</div>
 
-  <div class="statHint">Stock not sold</div>
-</div>
+  <div class="statCard">
 
+    <div class="statTop">
 
-<div class="statCard">
-  <div class="statTop">
-    <span class="statLabel">SOLD OUT</span>
-    <span class="statIcon">$</span>
+      <span class="statLabel">
+        SOLD OUT
+      </span>
+
+      <span class="statIcon">
+        $
+      </span>
+
+    </div>
+
+    <div
+      id="soldTotal"
+      class="statNumber"
+    >
+      —
+    </div>
+
+    <div class="statHint">
+      Recorded sales
+    </div>
+
   </div>
 
-  <div id="soldTotal" class="statNumber">—</div>
 
-  <div class="statHint">Recorded sales</div>
-</div>
+  <div class="statCard">
 
+    <div class="statTop">
 
-<div class="statCard">
-  <div class="statTop">
-    <span class="statLabel">AUDITED</span>
-    <span class="statIcon">✓</span>
+      <span class="statLabel">
+        AUDITED
+      </span>
+
+      <span class="statIcon">
+        ✓
+      </span>
+
+    </div>
+
+    <div
+      id="auditTotal"
+      class="statNumber"
+    >
+      —
+    </div>
+
+    <div class="statHint">
+      Audit records
+    </div>
+
   </div>
 
-  <div id="auditTotal" class="statNumber">—</div>
 
-  <div class="statHint">Audit records</div>
-</div>
+  <div class="statCard">
 
+    <div class="statTop">
 
-<div class="statCard">
-  <div class="statTop">
-    <span class="statLabel">SHOWING</span>
-    <span class="statIcon">≡</span>
+      <span class="statLabel">
+        SHOWING
+      </span>
+
+      <span class="statIcon">
+        ≡
+      </span>
+
+    </div>
+
+    <div
+      id="showingTotal"
+      class="statNumber"
+    >
+      —
+    </div>
+
+    <div class="statHint">
+      Current results
+    </div>
+
   </div>
 
-  <div id="showingTotal" class="statNumber">—</div>
-
-  <div class="statHint">Current results</div>
 </div>
 
-</div>
 
+<!-- TABLE -->
 
 <section class="tableCard">
 
-<div class="tableHeader">
+  <div class="tableHeader">
 
-<div>
+    <div>
 
-<div id="tableTitle" class="tableTitle">
-Inventory
-</div>
+      <div
+        id="tableTitle"
+        class="tableTitle"
+      >
+        Inventory
+      </div>
 
-<div id="tableSub" class="tableSub">
-Select a branch and search inventory.
-</div>
+      <div
+        id="tableSub"
+        class="tableSub"
+      >
+        Search your inventory.
+      </div>
 
-</div>
+    </div>
 
-</div>
-
-
-<div class="tableScroll">
-
-<table>
-
-<thead>
-
-<tr>
-<th>BRANCH</th>
-<th>LENS TYPE</th>
-<th>DESCRIPTION</th>
-<th>TAG</th>
-<th>SI NO.</th>
-<th>DATE</th>
-<th>ACTIONS</th>
-</tr>
-
-</thead>
-
-<tbody id="tableBody"></tbody>
-
-</table>
-
-</div>
+  </div>
 
 
-<div id="emptyState" class="empty">
+  <div class="tableScroll">
 
-<div class="emptyIcon">⌕</div>
+    <table>
 
-<div class="emptyTitle">
-Ready to search
-</div>
+      <thead>
 
-<div class="emptyText">
-Search your inventory to display records.
-</div>
+        <tr>
 
-</div>
+          <th>BRANCH</th>
+          <th>LENS TYPE</th>
+          <th>DESCRIPTION</th>
+          <th>TAG</th>
+          <th>SI NO.</th>
+          <th>DATE</th>
+          <th>ACTIONS</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="tableBody"></tbody>
+
+    </table>
+
+  </div>
 
 
-<div class="pagination">
+  <div
+    id="emptyState"
+    class="empty"
+  >
 
-<div id="pageInfo" class="pageInfo">—</div>
+    <div class="emptyIcon">
+      ⌕
+    </div>
 
-<div class="pageButtons">
+    <div class="emptyTitle">
+      Ready to search
+    </div>
 
-<button
-  id="prevBtn"
-  class="pageBtn"
-  onclick="previousPage()"
->‹</button>
+    <div class="emptyText">
+      Search your inventory to display records.
+    </div>
 
-<button
-  id="pageCurrent"
-  class="pageBtn active"
->1</button>
+  </div>
 
-<button
-  id="nextBtn"
-  class="pageBtn"
-  onclick="nextPage()"
->›</button>
 
-</div>
+  <div class="pagination">
 
-</div>
+    <div
+      id="pageInfo"
+      class="pageInfo"
+    >
+      —
+    </div>
+
+    <div class="pageButtons">
+
+      <button
+        id="prevBtn"
+        class="pageBtn"
+        onclick="previousPage()"
+      >
+        ‹
+      </button>
+
+      <button
+        id="pageCurrent"
+        class="pageBtn active"
+      >
+        1
+      </button>
+
+      <button
+        id="nextBtn"
+        class="pageBtn"
+        onclick="nextPage()"
+      >
+        ›
+      </button>
+
+    </div>
+
+  </div>
 
 </section>
 
-</div>
-</section>
 
+  </div>
+
+</section>
 
 <div id="queuePanel"></div>
 
 <div id="globalStatus"></div>
 
-
 <script>
+
 /* =========================================================
-   SUPABASE CONFIGURATION
-   =========================================================
-
-   PUT YOUR REAL VALUES HERE.
-
-   Supabase Dashboard:
-   Project Settings
-   → Data API
-   → Project URL
-
-   Project Settings
-   → API
-   → Publishable/anon key
-
-   NEVER PUT THE SERVICE ROLE KEY IN THIS FILE.
-========================================================= */
+   SUPABASE CONFIG
+   ========================================================= */
 
 const SUPABASE_URL =
   "https://hvurhnarllvfinpdkfkp.supabase.co";
@@ -1054,14 +1265,16 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 
-/* =========================================================
-   SUPABASE CLIENT
-========================================================= */
-
-const { createClient } = window.supabase;
+/*
+ * IMPORTANT:
+ *
+ * Use your Supabase ANON/PUBLISHABLE key here.
+ *
+ * NEVER use the service_role key in GitHub Pages.
+ */
 
 const supabaseClient =
-  createClient(
+  window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
     {
@@ -1075,8 +1288,8 @@ const supabaseClient =
 
 
 /* =========================================================
-   BRANCHES
-========================================================= */
+   CONFIG
+   ========================================================= */
 
 const BRANCHES = [
   "GAI",
@@ -1097,135 +1310,171 @@ const BRANCHES = [
   "TOL"
 ];
 
+const ROWS_PER_PAGE = 50;
+
+const IMPORT_CHUNK_SIZE = 500;
+
 
 /* =========================================================
    STATE
-========================================================= */
+   ========================================================= */
 
 let currentUser = null;
-let currentProfile = null;
 
 let currentPage = 1;
 
-const rowsPerPage = 50;
-
 let lastRows = [];
 
-let totalRows = 0;
+let hasNextPage = false;
 
-let currentRequest = 0;
+let searchInProgress = false;
 
+let importRunning = false;
 
-/* =========================================================
-   DATABASE COLUMN NAMES
-========================================================= */
-
-const C = {
-  SDATE:"SDATE",
-  SUPPLIER:"SUPPLIER",
-  DR:"DR",
-  COST:"COST",
-  ASG:"ASG",
-  CB:"CB",
-  FD:"FD",
-  UNITS:"UNITS",
-  POWER:"POWER",
-  LENSTYPE:"LENSTYPE",
-  PUNIT:"PUNIT",
-  BR:"BR",
-  NTAGN:"NTAGN",
-  CATEGORY:"CATEGORY",
-  DESCRIPTION:"DESCRIPTION",
-  LENSCODE:"LENSCODE",
-  SELLINGPRICE:"SELLINGPRICE",
-  DELIVERYDATE:"DELIVERYDATE",
-  ORNUMBER:"ORNUMBER",
-  ORDATE:"ORDATE",
-  REMARKS:"REMARKS",
-  TAGPRICE:"TAGPRICE",
-  QR:"QR",
-  SI:"SI NO.",
-  DATETIME:"DATE AND TIME",
-  USEREMAIL:"USER EMAIL",
-  STATUS:"STATUS"
-};
+let exportRunning = false;
 
 
 /* =========================================================
-   TABLE NAME
-========================================================= */
+   TABLE MAP
+   ========================================================= */
 
-function tableName(branch,type){
+function tableName(branch,sheet){
 
   const b =
     String(branch || "")
       .trim()
       .toLowerCase();
 
-  if(!BRANCHES.map(x => x.toLowerCase()).includes(b)){
-    throw new Error("Invalid branch.");
-  }
-
-  if(type === "stocks"){
+  if(sheet === "stocks"){
     return b + "_stocks";
   }
 
-  if(type === "sold"){
+  if(sheet === "sold"){
     return b + "_scanresults";
   }
 
-  if(type === "audit"){
+  if(sheet === "audit"){
     return b + "_audit";
   }
 
-  throw new Error("Invalid table type.");
+  throw new Error(
+    "Invalid inventory table."
+  );
+
 }
 
 
 /* =========================================================
-   AUTHORIZED USER CHECK
-========================================================= */
+   FIELD HELPERS
+   ========================================================= */
 
-async function getAllowedUser(email){
+function field(row,name){
 
-  const cleanEmail =
+  if(!row){
+    return "";
+  }
+
+  return (
+    row[name] ??
+    row[name.toUpperCase()] ??
+    ""
+  );
+
+}
+
+
+function normalizeRow(
+  row,
+  branch
+){
+
+  return {
+
+    branch:branch,
+
+    lenstype:String(
+      field(row,"LENSTYPE")
+    ),
+
+    description:String(
+      field(row,"DESCRIPTION")
+    ),
+
+    tag:String(
+      field(row,"NTAGN")
+    ),
+
+    si:String(
+      field(row,"SI NO.")
+    ),
+
+    date:String(
+      field(row,"DATE AND TIME")
+    ),
+
+    qr:String(
+      field(row,"QR")
+    )
+
+  };
+
+}
+
+
+/* =========================================================
+   AUTHORIZED USER
+   ========================================================= */
+
+async function getAllowedUser(
+  email
+){
+
+  const normalized =
     String(email || "")
       .trim()
       .toLowerCase();
 
-  if(!cleanEmail){
+
+  if(!normalized){
     return null;
   }
 
-  const { data,error } =
+
+  const result =
     await supabaseClient
       .from("app_allowed_users")
-      .select("email,is_admin,active")
-      .eq("email",cleanEmail)
+      .select(
+        "email,is_admin,active"
+      )
+      .eq(
+        "email",
+        normalized
+      )
+      .eq(
+        "active",
+        true
+      )
       .maybeSingle();
 
-  if(error){
+
+  if(result.error){
+
     throw new Error(
       "Unable to check allowed users: " +
-      error.message
+      result.error.message
     );
+
   }
 
-  if(!data){
-    return null;
-  }
 
-  if(data.active !== true){
-    return null;
-  }
+  return result.data || null;
 
-  return data;
 }
 
 
 /* =========================================================
-   SEND OTP
-========================================================= */
+   LOGIN
+   ========================================================= */
 
 async function sendOTP(){
 
@@ -1236,99 +1485,165 @@ async function sendOTP(){
       .trim()
       .toLowerCase();
 
+
   if(!email){
+
     setLoginStatus(
-      "Enter your authorized email address."
+      "Enter your authorized email address.",
+      true
     );
+
     return;
+
   }
 
+
+  if(
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      email
+    )
+  ){
+
+    setLoginStatus(
+      "Enter a valid email address.",
+      true
+    );
+
+    return;
+
+  }
+
+
   const button =
-    document.getElementById("sendOtpBtn");
+    document.getElementById(
+      "sendOtpBtn"
+    );
+
 
   button.disabled = true;
-  button.textContent = "Checking...";
+
+  button.textContent =
+    "Checking...";
+
 
   try{
 
-    /* FIRST: CHECK app_allowed_users */
+    /*
+     * Check app_allowed_users BEFORE
+     * requesting an Auth OTP.
+     */
 
     const allowed =
-      await getAllowedUser(email);
+      await getAllowedUser(
+        email
+      );
+
 
     if(!allowed){
 
       throw new Error(
-        "This email is not an active authorized user."
+        "This email is not authorized."
       );
 
     }
 
-    currentProfile = allowed;
 
-    button.textContent = "Sending code...";
+    button.textContent =
+      "Sending code...";
 
-    /*
-      IMPORTANT:
 
-      Supabase Auth sends the OTP email.
+    const result =
+      await supabaseClient.auth.signInWithOtp(
+        {
+          email:email,
 
-      shouldCreateUser:false prevents unauthorized
-      email addresses from being silently registered.
-    */
-
-    const { error } =
-      await supabaseClient.auth.signInWithOtp({
-        email:email,
-        options:{
-          shouldCreateUser:false
+          options:{
+            shouldCreateUser:false
+          }
         }
-      });
+      );
 
-    if(error){
-      throw error;
+
+    if(result.error){
+
+      throw result.error;
+
     }
 
+
     document
-      .getElementById("emailStep")
+      .getElementById(
+        "emailStep"
+      )
       .classList
       .add("hidden");
 
+
     document
-      .getElementById("otpStep")
+      .getElementById(
+        "otpStep"
+      )
       .classList
       .remove("hidden");
 
+
     document
-      .getElementById("otp")
+      .getElementById(
+        "otp"
+      )
       .focus();
 
+
     setLoginStatus(
-      "A 6-digit verification code was sent to " +
-      email + "."
+      "Verification code sent to " +
+      email +
+      ". Check your inbox and spam folder.",
+      false,
+      true
     );
+
 
   }catch(error){
 
-    console.error("SEND OTP ERROR:",error);
+    let message =
+      error?.message ||
+      "Unable to send verification code.";
+
+
+    if(
+      /rate limit/i.test(
+        message
+      )
+    ){
+
+      message =
+        "Supabase email rate limit exceeded. " +
+        "Stop requesting codes and wait for the rate limit to reset.";
+
+    }
+
 
     setLoginStatus(
-      error.message ||
-      "Unable to send verification code."
+      message,
+      true
     );
+
 
   }finally{
 
     button.disabled = false;
-    button.textContent = "Send verification code";
+
+    button.textContent =
+      "Send verification code";
 
   }
+
 }
 
 
 /* =========================================================
    VERIFY OTP
-========================================================= */
+   ========================================================= */
 
 async function verifyOTP(){
 
@@ -1339,210 +1654,168 @@ async function verifyOTP(){
       .trim()
       .toLowerCase();
 
-  const otp =
+
+  const token =
     document
       .getElementById("otp")
       .value
-      .trim()
-      .replace(/\D/g,"");
+      .trim();
 
-  if(otp.length !== 6){
+
+  if(!email){
 
     setLoginStatus(
-      "Enter the 6-digit verification code."
+      "Email address is missing.",
+      true
     );
 
     return;
+
   }
 
+
+  if(!/^\d{6}$/.test(token)){
+
+    setLoginStatus(
+      "Enter the 6-digit verification code.",
+      true
+    );
+
+    return;
+
+  }
+
+
   const button =
-    document.getElementById("verifyBtn");
+    document.getElementById(
+      "verifyBtn"
+    );
+
 
   button.disabled = true;
-  button.textContent = "Verifying...";
+
+  button.textContent =
+    "Verifying...";
+
 
   try{
 
     /*
-      Check authorization AGAIN before creating
-      the dashboard session.
-    */
+     * Verify the six digit email OTP.
+     */
 
-    const allowed =
-      await getAllowedUser(email);
+    const result =
+      await supabaseClient.auth.verifyOtp(
+        {
+          email:email,
 
-    if(!allowed){
+          token:token,
 
-      throw new Error(
-        "This email is not an active authorized user."
+          type:"email"
+        }
       );
 
-    }
 
-    currentProfile = allowed;
+    if(result.error){
 
-    const { data,error } =
-      await supabaseClient.auth.verifyOtp({
-        email:email,
-        token:otp,
-        type:"email"
-      });
-
-    if(error){
-      throw error;
-    }
-
-    if(!data || !data.session){
-
-      throw new Error(
-        "Supabase did not create a login session."
-      );
+      throw result.error;
 
     }
 
-    currentUser =
-      data.user;
 
-    showDashboard();
+    const session =
+      result.data?.session;
 
-  }catch(error){
-
-    console.error("VERIFY OTP ERROR:",error);
-
-    setLoginStatus(
-      error.message ||
-      "Invalid or expired verification code."
-    );
-
-  }finally{
-
-    button.disabled = false;
-    button.textContent = "Verify & enter dashboard";
-
-  }
-}
-
-
-/* =========================================================
-   BACK TO EMAIL
-========================================================= */
-
-function backToEmail(){
-
-  document
-    .getElementById("otpStep")
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById("emailStep")
-    .classList
-    .remove("hidden");
-
-  document
-    .getElementById("otp")
-    .value = "";
-
-  setLoginStatus("");
-
-}
-
-
-/* =========================================================
-   CURRENT SESSION
-========================================================= */
-
-async function checkExistingSession(){
-
-  try{
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.getSession();
-
-    if(error){
-      console.error(error);
-      return false;
-    }
-
-    if(!data.session){
-      return false;
-    }
 
     const user =
-      data.session.user;
+      result.data?.user;
+
+
+    if(!session || !user){
+
+      throw new Error(
+        "Login succeeded but no Supabase session was returned."
+      );
+
+    }
+
+
+    /*
+     * Check allowed users AGAIN after
+     * authentication.
+     */
 
     const allowed =
       await getAllowedUser(
         user.email
       );
 
+
     if(!allowed){
 
       await supabaseClient.auth.signOut();
 
-      return false;
+      throw new Error(
+        "Your account is not authorized."
+      );
+
     }
 
-    currentUser = user;
-    currentProfile = allowed;
 
-    return true;
+    currentUser = user;
+
+
+    showDashboard();
+
 
   }catch(error){
 
-    console.error(
-      "SESSION ERROR:",
-      error
+    setLoginStatus(
+      error?.message ||
+      "Invalid verification code.",
+      true
     );
 
-    return false;
+  }finally{
+
+    button.disabled = false;
+
+    button.textContent =
+      "Verify & enter dashboard";
+
   }
+
 }
 
 
 /* =========================================================
-   LOGOUT
-========================================================= */
+   BACK TO EMAIL
+   ========================================================= */
 
-async function logout(){
-
-  try{
-    await supabaseClient.auth.signOut();
-  }catch(error){
-    console.error(error);
-  }
-
-  currentUser = null;
-  currentProfile = null;
+function backToEmail(){
 
   document
-    .getElementById("dashboard")
-    .style.display = "none";
-
-  document
-    .getElementById("loginScreen")
-    .style.display = "flex";
-
-  document
-    .getElementById("otpStep")
+    .getElementById(
+      "otpStep"
+    )
     .classList
     .add("hidden");
 
+
   document
-    .getElementById("emailStep")
+    .getElementById(
+      "emailStep"
+    )
     .classList
     .remove("hidden");
 
-  document
-    .getElementById("email")
-    .value = "";
 
   document
-    .getElementById("otp")
+    .getElementById(
+      "otp"
+    )
     .value = "";
+
 
   setLoginStatus("");
 
@@ -1550,131 +1823,291 @@ async function logout(){
 
 
 /* =========================================================
+   AUTH SESSION
+   ========================================================= */
+
+async function checkExistingSession(){
+
+  try{
+
+    const result =
+      await supabaseClient.auth.getSession();
+
+
+    if(result.error){
+
+      return false;
+
+    }
+
+
+    const session =
+      result.data?.session;
+
+
+    if(!session){
+
+      return false;
+
+    }
+
+
+    const user =
+      session.user;
+
+
+    if(!user?.email){
+
+      await supabaseClient.auth.signOut();
+
+      return false;
+
+    }
+
+
+    /*
+     * Validate app_allowed_users.
+     */
+
+    const allowed =
+      await getAllowedUser(
+        user.email
+      );
+
+
+    if(!allowed){
+
+      await supabaseClient.auth.signOut();
+
+      return false;
+
+    }
+
+
+    currentUser =
+      user;
+
+
+    return true;
+
+  }catch(error){
+
+    console.error(
+      "Session check error:",
+      error
+    );
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================================================
+   AUTH STATE
+   ========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+  async function(
+    event,
+    session
+  ){
+
+    if(
+      event === "SIGNED_OUT"
+    ){
+
+      currentUser = null;
+
+      showLogin();
+
+      return;
+
+    }
+
+
+    if(
+      session?.user
+    ){
+
+      currentUser =
+        session.user;
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+async function logout(){
+
+  try{
+
+    await supabaseClient.auth.signOut();
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+  }
+
+
+  currentUser = null;
+
+  showLogin();
+
+}
+
+
+/* =========================================================
+   LOGIN SCREEN
+   ========================================================= */
+
+function showLogin(){
+
+  document
+    .getElementById(
+      "dashboard"
+    )
+    .style.display =
+      "none";
+
+
+  document
+    .getElementById(
+      "loginScreen"
+    )
+    .style.display =
+      "flex";
+
+
+  document
+    .getElementById(
+      "otpStep"
+    )
+    .classList
+    .add("hidden");
+
+
+  document
+    .getElementById(
+      "emailStep"
+    )
+    .classList
+    .remove("hidden");
+
+
+  document
+    .getElementById(
+      "otp"
+    )
+    .value = "";
+
+}
+
+
+/* =========================================================
    SHOW DASHBOARD
-========================================================= */
+   ========================================================= */
 
 function showDashboard(){
 
   document
-    .getElementById("loginScreen")
-    .style.display = "none";
+    .getElementById(
+      "loginScreen"
+    )
+    .style.display =
+      "none";
+
 
   document
-    .getElementById("dashboard")
-    .style.display = "block";
+    .getElementById(
+      "dashboard"
+    )
+    .style.display =
+      "block";
+
 
   document
-    .getElementById("userEmail")
+    .getElementById(
+      "userEmail"
+    )
     .textContent =
-      currentUser?.email || "";
+      currentUser?.email ||
+      "";
+
 
   currentPage = 1;
 
-  /*
-    Do not automatically fetch every stock record.
-    User searches when needed.
-  */
-
-  resetDashboard();
+  refreshDashboard();
 
 }
 
 
 /* =========================================================
-   RESET DASHBOARD
-========================================================= */
+   LOGIN STATUS
+   ========================================================= */
 
-function resetDashboard(){
+function setLoginStatus(
+  message,
+  isError,
+  isSuccess
+){
 
-  lastRows = [];
-  totalRows = 0;
-
-  document
-    .getElementById("availableTotal")
-    .textContent = "—";
-
-  document
-    .getElementById("soldTotal")
-    .textContent = "—";
-
-  document
-    .getElementById("auditTotal")
-    .textContent = "—";
-
-  document
-    .getElementById("showingTotal")
-    .textContent = "—";
-
-  document
-    .getElementById("tableBody")
-    .innerHTML = "";
-
-  document
-    .getElementById("emptyState")
-    .style.display = "block";
-
-  document
-    .getElementById("pageInfo")
-    .textContent =
-      "Search your inventory.";
-
-}
+  const el =
+    document.getElementById(
+      "loginStatus"
+    );
 
 
-/* =========================================================
-   BRANCH CHANGE
-========================================================= */
-
-function branchChanged(){
-
-  currentPage = 1;
-
-  resetDashboard();
-
-}
+  el.textContent =
+    message || "";
 
 
-/* =========================================================
-   SHEET CHANGE
-========================================================= */
-
-function sheetChanged(){
-
-  currentPage = 1;
-
-  resetDashboard();
-
-}
+  el.classList.toggle(
+    "error",
+    !!isError
+  );
 
 
-/* =========================================================
-   REFRESH
-========================================================= */
-
-function refreshDashboard(){
-
-  runSearch();
+  el.classList.toggle(
+    "success",
+    !!isSuccess
+  );
 
 }
 
 
 /* =========================================================
    SEARCH
-========================================================= */
+   ========================================================= */
 
 function runSearch(){
 
   currentPage = 1;
 
-  loadDashboard();
+  refreshDashboard();
 
 }
 
 
 function searchKey(event){
 
-  if(event.key === "Enter"){
+  if(
+    event.key === "Enter"
+  ){
+
+    event.preventDefault();
+
     runSearch();
+
   }
 
 }
@@ -1683,593 +2116,675 @@ function searchKey(event){
 function clearSearch(){
 
   document
-    .getElementById("search")
+    .getElementById(
+      "search"
+    )
     .value = "";
+
 
   currentPage = 1;
 
-  resetDashboard();
+  refreshDashboard();
+
+}
+
+
+function branchChanged(){
+
+  currentPage = 1;
+
+  refreshDashboard();
+
+}
+
+
+function sheetChanged(){
+
+  currentPage = 1;
+
+  refreshDashboard();
 
 }
 
 
 /* =========================================================
-   LOAD DASHBOARD
-========================================================= */
+   SEARCH CONDITIONS
+   ========================================================= */
 
-async function loadDashboard(){
+function buildSearchFilter(
+  search
+){
 
-  if(!currentUser){
-    return;
-  }
-
-  const requestId =
-    ++currentRequest;
-
-  const branch =
-    document
-      .getElementById("branch")
-      .value;
-
-  const sheet =
-    document
-      .getElementById("sheet")
-      .value;
-
-  const search =
-    document
-      .getElementById("search")
-      .value
+  const value =
+    String(search || "")
       .trim();
 
-  setLoading(true);
 
-  try{
+  if(!value){
 
-    if(branch === "ALL"){
+    return null;
 
-      await loadAllBranches(
-        sheet,
-        search,
-        requestId
+  }
+
+
+  const escaped =
+    value
+      .replace(
+        /,/g,
+        " "
+      )
+      .replace(
+        /%/g,
+        "\\%"
+      )
+      .replace(
+        /_/g,
+        "\\_"
       );
 
-    }else{
 
-      await loadOneBranch(
-        branch,
-        sheet,
-        search,
-        requestId
+  return [
+    `NTAGN.ilike.%${escaped}%`,
+    `DESCRIPTION.ilike.%${escaped}%`,
+    `LENSTYPE.ilike.%${escaped}%`,
+    `"SI NO.".ilike.%${escaped}%`,
+    `QR.ilike.%${escaped}%`,
+    `SUPPLIER.ilike.%${escaped}%`,
+    `LENSCODE.ilike.%${escaped}%`,
+    `BR.ilike.%${escaped}%`
+  ].join(",");
+
+}
+
+
+/* =========================================================
+   QUERY ONE BRANCH
+   ========================================================= */
+
+async function queryBranch(
+  branch,
+  sheet,
+  search,
+  from,
+  to
+){
+
+  const table =
+    tableName(
+      branch,
+      sheet
+    );
+
+
+  let query =
+    supabaseClient
+      .from(table)
+      .select(
+        "*",
+        {
+          count:"exact"
+        }
+      );
+
+
+  const filter =
+    buildSearchFilter(
+      search
+    );
+
+
+  if(filter){
+
+    query =
+      query.or(
+        filter
+      );
+
+  }
+
+
+  query =
+    query
+      .order(
+        "NTAGN",
+        {
+          ascending:true
+        }
+      )
+      .range(
+        from,
+        to
+      );
+
+
+  const result =
+    await query;
+
+
+  if(result.error){
+
+    throw new Error(
+      branch +
+      " " +
+      sheet +
+      ": " +
+      result.error.message
+    );
+
+  }
+
+
+  return {
+
+    branch:branch,
+
+    rows:result.data || [],
+
+    count:result.count || 0
+
+  };
+
+}
+
+
+/* =========================================================
+   QUERY ALL BRANCHES
+   ========================================================= */
+
+async function queryAllBranches(
+  sheet,
+  search,
+  page
+){
+
+  /*
+   * For ALL branches we query each branch
+   * in parallel.
+   *
+   * We request enough rows to create the
+   * requested page.
+   */
+
+  const neededEnd =
+    page *
+    ROWS_PER_PAGE;
+
+
+  const results =
+    await Promise.all(
+      BRANCHES.map(
+        function(branch){
+
+          return queryBranch(
+            branch,
+            sheet,
+            search,
+            0,
+            neededEnd - 1
+          );
+
+        }
+      )
+    );
+
+
+  let combined = [];
+
+
+  let total = 0;
+
+
+  results.forEach(
+    function(result){
+
+      total +=
+        result.count;
+
+
+      result.rows.forEach(
+        function(row){
+
+          combined.push(
+            normalizeRow(
+              row,
+              result.branch
+            )
+          );
+
+        }
       );
 
     }
+  );
+
+
+  /*
+   * Sort ALL branch results by tag.
+   */
+
+  combined.sort(
+    function(a,b){
+
+      return String(a.tag)
+        .localeCompare(
+          String(b.tag),
+          undefined,
+          {
+            numeric:true,
+            sensitivity:"base"
+          }
+        );
+
+    }
+  );
+
+
+  const start =
+    (page - 1) *
+    ROWS_PER_PAGE;
+
+
+  const rows =
+    combined.slice(
+      start,
+      start + ROWS_PER_PAGE
+    );
+
+
+  return {
+
+    rows:rows,
+
+    total:total,
+
+    hasNext:
+      combined.length >
+      start + ROWS_PER_PAGE
+
+  };
+
+}
+
+
+/* =========================================================
+   QUERY DASHBOARD
+   ========================================================= */
+
+async function refreshDashboard(){
+
+  if(
+    !currentUser ||
+    searchInProgress
+  ){
+
+    return;
+
+  }
+
+
+  searchInProgress = true;
+
+  setLoading(true);
+
+
+  const branch =
+    document
+      .getElementById(
+        "branch"
+      )
+      .value;
+
+
+  const sheet =
+    document
+      .getElementById(
+        "sheet"
+      )
+      .value;
+
+
+  const search =
+    document
+      .getElementById(
+        "search"
+      )
+      .value
+      .trim();
+
+
+  try{
+
+    const stats =
+      await getStats(
+        branch
+      );
+
+
+    let result;
+
+
+    if(branch === "ALL"){
+
+      result =
+        await queryAllBranches(
+          sheet,
+          search,
+          currentPage
+        );
+
+    }else{
+
+      const start =
+        (currentPage - 1) *
+        ROWS_PER_PAGE;
+
+
+      const end =
+        start +
+        ROWS_PER_PAGE -
+        1;
+
+
+      const resultOne =
+        await queryBranch(
+          branch,
+          sheet,
+          search,
+          start,
+          end
+        );
+
+
+      result = {
+
+        rows:
+          resultOne.rows.map(
+            function(row){
+
+              return normalizeRow(
+                row,
+                branch
+              );
+
+            }
+          ),
+
+        total:
+          resultOne.count,
+
+        hasNext:
+          resultOne.count >
+          currentPage *
+          ROWS_PER_PAGE
+
+      };
+
+    }
+
+
+    lastRows =
+      result.rows || [];
+
+
+    hasNextPage =
+      !!result.hasNext;
+
+
+    updateStats(
+      stats,
+      result
+    );
+
+
+    renderTable(
+      lastRows
+    );
+
 
   }catch(error){
 
     console.error(
-      "DASHBOARD ERROR:",
       error
     );
+
+
+    if(
+      /JWT|expired|invalid.*token|unauthorized/i
+        .test(
+          error.message || ""
+        )
+    ){
+
+      await logout();
+
+      return;
+
+    }
+
 
     showStatus(
       error.message ||
       "Unable to load inventory."
     );
 
+
   }finally{
 
-    if(requestId === currentRequest){
-      setLoading(false);
-    }
+    searchInProgress = false;
+
+    setLoading(false);
 
   }
-}
-
-
-/* =========================================================
-   LOAD ONE BRANCH
-========================================================= */
-
-async function loadOneBranch(
-  branch,
-  sheet,
-  search,
-  requestId
-){
-
-  const table =
-    tableName(branch,sheet);
-
-  const offset =
-    (currentPage - 1) *
-    rowsPerPage;
-
-  let query =
-    supabaseClient
-      .from(table)
-      .select("*",{count:"exact"})
-      .range(
-        offset,
-        offset + rowsPerPage - 1
-      )
-      .order(
-        C.NTAGN,
-        {ascending:true}
-      );
-
-  query =
-    applySearch(
-      query,
-      search
-    );
-
-  const {
-    data,
-    count,
-    error
-  } = await query;
-
-  if(error){
-    throw error;
-  }
-
-  if(requestId !== currentRequest){
-    return;
-  }
-
-  let rows =
-    data || [];
-
-  /*
-    AVAILABLE STOCKS:
-    Remove tags that already exist in scanresults.
-
-    This keeps the same logical behavior as the
-    previous dashboard.
-  */
-
-  if(sheet === "stocks"){
-
-    const soldTags =
-      await getSoldTags(branch);
-
-    rows =
-      rows.filter(
-        row =>
-          !soldTags.has(
-            normalizeTag(row[C.NTAGN])
-          )
-      );
-
-  }
-
-  totalRows =
-    sheet === "stocks"
-      ? await getAvailableCount(
-          branch,
-          search
-        )
-      : Number(count || 0);
-
-  const soldTotal =
-    await countSold(branch);
-
-  const auditTotal =
-    await countAudit(branch);
-
-  renderDashboardData(
-    rows,
-    {
-      availableTotal:
-        sheet === "stocks"
-          ? totalRows
-          : await getAvailableCount(branch,""),
-
-      soldTotal,
-      auditTotal,
-      showing:
-        rows.length
-    }
-  );
-
-}
-
-
-/* =========================================================
-   LOAD ALL BRANCHES
-========================================================= */
-
-async function loadAllBranches(
-  sheet,
-  search,
-  requestId
-){
-
-  /*
-    ALL BRANCHES is loaded branch-by-branch.
-
-    Each query is limited to 50 records.
-    This prevents downloading 100k+ rows.
-  */
-
-  const results = [];
-
-  let availableTotal = 0;
-  let soldTotal = 0;
-  let auditTotal = 0;
-
-  for(const branch of BRANCHES){
-
-    if(requestId !== currentRequest){
-      return;
-    }
-
-    const table =
-      tableName(branch,sheet);
-
-    const offset =
-      (currentPage - 1) *
-      rowsPerPage;
-
-    let query =
-      supabaseClient
-        .from(table)
-        .select("*",{count:"exact"})
-        .range(
-          offset,
-          offset + rowsPerPage - 1
-        )
-        .order(
-          C.NTAGN,
-          {ascending:true}
-        );
-
-    query =
-      applySearch(
-        query,
-        search
-      );
-
-    const {
-      data,
-      count,
-      error
-    } = await query;
-
-    if(error){
-      throw error;
-    }
-
-    let branchRows =
-      data || [];
-
-    if(sheet === "stocks"){
-
-      const soldTags =
-        await getSoldTags(branch);
-
-      branchRows =
-        branchRows.filter(
-          row =>
-            !soldTags.has(
-              normalizeTag(
-                row[C.NTAGN]
-              )
-            )
-        );
-
-    }
-
-    results.push(
-      ...branchRows.map(
-        row => ({
-          ...row,
-          __branch:branch
-        })
-      )
-    );
-
-    if(sheet === "stocks"){
-
-      availableTotal +=
-        await getAvailableCount(
-          branch,
-          search
-        );
-
-    }else{
-
-      availableTotal +=
-        await getAvailableCount(
-          branch,
-          ""
-        );
-
-    }
-
-    soldTotal +=
-      await countSold(branch);
-
-    auditTotal +=
-      await countAudit(branch);
-
-  }
-
-  if(requestId !== currentRequest){
-    return;
-  }
-
-  lastRows =
-    results;
-
-  totalRows =
-    availableTotal;
-
-  renderDashboardData(
-    results,
-    {
-      availableTotal,
-      soldTotal,
-      auditTotal,
-      showing:results.length
-    }
-  );
-
-}
-
-
-/* =========================================================
-   SEARCH FILTER
-========================================================= */
-
-function applySearch(query,search){
-
-  if(!search){
-    return query;
-  }
-
-  const s =
-    String(search)
-      .replace(/,/g,"")
-      .trim();
-
-  const escaped =
-    s.replace(/"/g,'""');
-
-  /*
-    Search across the important inventory columns.
-
-    Supabase/PostgREST OR syntax.
-  */
-
-  return query.or(
-    [
-      `${C.NTAGN}.ilike.*${escaped}*`,
-      `${C.DESCRIPTION}.ilike.*${escaped}*`,
-      `${C.LENSTYPE}.ilike.*${escaped}*`,
-      `${C.SI}.ilike.*${escaped}*`,
-      `${C.QR}.ilike.*${escaped}*`,
-      `${C.LENSCODE}.ilike.*${escaped}*`,
-      `${C.CATEGORY}.ilike.*${escaped}*`,
-      `${C.SUPPLIER}.ilike.*${escaped}*`
-    ].join(",")
-  );
-
-}
-
-
-/* =========================================================
-   SOLD TAGS
-========================================================= */
-
-async function getSoldTags(branch){
-
-  const table =
-    tableName(branch,"sold");
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from(table)
-      .select(C.NTAGN);
-
-  if(error){
-    throw error;
-  }
-
-  const set =
-    new Set();
-
-  for(const row of data || []){
-
-    const tag =
-      normalizeTag(
-        row[C.NTAGN]
-      );
-
-    if(tag){
-      set.add(tag);
-    }
-
-  }
-
-  return set;
-
-}
-
-
-/* =========================================================
-   COUNTS
-========================================================= */
-
-async function countSold(branch){
-
-  const table =
-    tableName(branch,"sold");
-
-  const {
-    count,
-    error
-  } =
-    await supabaseClient
-      .from(table)
-      .select("*",{
-        count:"exact",
-        head:true
-      });
-
-  if(error){
-    throw error;
-  }
-
-  return Number(count || 0);
-
-}
-
-
-async function countAudit(branch){
-
-  const table =
-    tableName(branch,"audit");
-
-  const {
-    count,
-    error
-  } =
-    await supabaseClient
-      .from(table)
-      .select("*",{
-        count:"exact",
-        head:true
-      });
-
-  if(error){
-    throw error;
-  }
-
-  return Number(count || 0);
-
-}
-
-
-/* =========================================================
-   AVAILABLE COUNT
-========================================================= */
-
-async function getAvailableCount(
-  branch,
-  search
-){
-
-  const stocksTable =
-    tableName(branch,"stocks");
-
-  /*
-    We count stock rows, then subtract sold tags.
-
-    For filtered searches, we obtain matching stock tags
-    and remove sold tags.
-  */
-
-  let query =
-    supabaseClient
-      .from(stocksTable)
-      .select(C.NTAGN);
-
-  query =
-    applySearch(
-      query,
-      search || ""
-    );
-
-  const {
-    data,
-    error
-  } = await query;
-
-  if(error){
-    throw error;
-  }
-
-  const soldTags =
-    await getSoldTags(branch);
-
-  let count = 0;
-
-  for(const row of data || []){
-
-    const tag =
-      normalizeTag(
-        row[C.NTAGN]
-      );
-
-    if(!tag || !soldTags.has(tag)){
-      count++;
-    }
-
-  }
-
-  return count;
-
-}
-
-
-/* =========================================================
-   RENDER DATA
-========================================================= */
-
-function renderDashboardData(
-  rows,
-  stats
-){
-
-  lastRows =
-    rows || [];
-
-  updateStats(stats);
-
-  renderTable(
-    lastRows
-  );
 
 }
 
 
 /* =========================================================
    STATS
-========================================================= */
+   ========================================================= */
 
-function updateStats(data){
+async function countTable(
+  table,
+  search
+){
 
-  document
-    .getElementById("availableTotal")
-    .textContent =
-      formatNumber(
-        data.availableTotal
+  let query =
+    supabaseClient
+      .from(table)
+      .select(
+        "NTAGN",
+        {
+          count:"exact",
+          head:true
+        }
       );
 
-  document
-    .getElementById("soldTotal")
-    .textContent =
-      formatNumber(
-        data.soldTotal
+
+  const filter =
+    buildSearchFilter(
+      search
+    );
+
+
+  if(filter){
+
+    query =
+      query.or(
+        filter
       );
 
-  document
-    .getElementById("auditTotal")
-    .textContent =
-      formatNumber(
-        data.auditTotal
-      );
+  }
+
+
+  const result =
+    await query;
+
+
+  if(result.error){
+
+    throw result.error;
+
+  }
+
+
+  return result.count || 0;
+
+}
+
+
+async function getStats(
+  branch
+){
+
+  const branches =
+    branch === "ALL"
+      ? BRANCHES
+      : [branch];
+
+
+  const results =
+    await Promise.all(
+      branches.map(
+        async function(b){
+
+          const [
+            stock,
+            sold,
+            audit
+          ] =
+            await Promise.all(
+              [
+                countTable(
+                  tableName(
+                    b,
+                    "stocks"
+                  )
+                ),
+
+                countTable(
+                  tableName(
+                    b,
+                    "sold"
+                  )
+                ),
+
+                countTable(
+                  tableName(
+                    b,
+                    "audit"
+                  )
+                )
+              ]
+            );
+
+
+          return {
+            stock,
+            sold,
+            audit
+          };
+
+        }
+      )
+    );
+
+
+  let stockTotal = 0;
+
+  let soldTotal = 0;
+
+  let auditTotal = 0;
+
+
+  results.forEach(
+    function(item){
+
+      stockTotal +=
+        item.stock;
+
+      soldTotal +=
+        item.sold;
+
+      auditTotal +=
+        item.audit;
+
+    }
+  );
+
+
+  /*
+   * Your inventory model is:
+   *
+   * AVAILABLE =
+   * STOCKS - SOLD
+   *
+   * because scanresults represents sold
+   * records.
+   */
+
+  const available =
+    Math.max(
+      0,
+      stockTotal -
+      soldTotal
+    );
+
+
+  return {
+
+    stockTotal,
+    soldTotal,
+    auditTotal,
+    availableTotal:
+      available
+
+  };
+
+}
+
+
+function updateStats(
+  stats,
+  result
+){
 
   document
-    .getElementById("showingTotal")
+    .getElementById(
+      "availableTotal"
+    )
     .textContent =
       formatNumber(
-        data.showing
+        stats.availableTotal
+      );
+
+
+  document
+    .getElementById(
+      "soldTotal"
+    )
+    .textContent =
+      formatNumber(
+        stats.soldTotal
+      );
+
+
+  document
+    .getElementById(
+      "auditTotal"
+    )
+    .textContent =
+      formatNumber(
+        stats.auditTotal
+      );
+
+
+  document
+    .getElementById(
+      "showingTotal"
+    )
+    .textContent =
+      formatNumber(
+        result.total
       );
 
 }
@@ -2277,101 +2792,139 @@ function updateStats(data){
 
 /* =========================================================
    TABLE
-========================================================= */
+   ========================================================= */
 
-function renderTable(rows){
+function renderTable(
+  rows
+){
 
   const body =
-    document.getElementById("tableBody");
+    document.getElementById(
+      "tableBody"
+    );
+
 
   const empty =
-    document.getElementById("emptyState");
+    document.getElementById(
+      "emptyState"
+    );
+
 
   body.innerHTML = "";
 
-  if(!rows || !rows.length){
 
-    empty.style.display = "block";
+  if(
+    !rows ||
+    !rows.length
+  ){
+
+    empty.style.display =
+      "block";
+
 
     document
-      .getElementById("pageInfo")
+      .getElementById(
+        "pageInfo"
+      )
       .textContent =
         "No records found";
 
-    updatePagination();
+
+    updatePagination(
+      0
+    );
+
 
     return;
+
   }
 
-  empty.style.display = "none";
+
+  empty.style.display =
+    "none";
+
 
   rows.forEach(
     function(row){
 
+      const tr =
+        document.createElement(
+          "tr"
+        );
+
+
       const branch =
-        row.__branch ||
-        row[C.BR] ||
-        document
-          .getElementById("branch")
-          .value;
+        escapeHtml(
+          row.branch
+        );
+
 
       const type =
-        row[C.LENSTYPE];
+        escapeHtml(
+          row.lenstype
+        );
+
 
       const description =
-        row[C.DESCRIPTION];
+        escapeHtml(
+          row.description
+        );
+
 
       const tag =
-        row[C.NTAGN];
+        escapeHtml(
+          row.tag
+        );
+
 
       const si =
-        row[C.SI];
+        escapeHtml(
+          row.si
+        );
+
 
       const date =
-        row[C.DATETIME] ||
-        row[C.SDATE];
+        escapeHtml(
+          row.date
+        );
 
-      const tr =
-        document.createElement("tr");
 
       tr.innerHTML = `
 
         <td>
           <span class="branchTag">
-            ${escapeHtml(branch)}
+            ${branch}
           </span>
         </td>
 
         <td>
           <span class="typeTag">
-            ${escapeHtml(type || "—")}
+            ${type || "—"}
           </span>
         </td>
 
         <td>
-          ${escapeHtml(description || "—")}
+          ${description || "—"}
         </td>
 
         <td>
           <span class="tag">
-            ${escapeHtml(tag || "—")}
+            ${tag || "—"}
           </span>
         </td>
 
         <td>
           <input
             class="siInput"
-            value="${escapeHtml(si || "")}"
-            data-branch="${escapeHtml(branch)}"
-            data-tag="${escapeHtml(tag || "")}"
-            data-br="${escapeHtml(row[C.BR] || branch)}"
-            data-ntagn="${escapeHtml(tag || "")}"
+            value="${si}"
+            data-tag="${tag}"
+            data-branch="${branch}"
             onchange="saveSI(this)"
           >
         </td>
 
         <td>
-          ${escapeHtml(date || "—")}
+          ${date || "—"}
         </td>
 
         <td>
@@ -2379,114 +2932,108 @@ function renderTable(rows){
           <button
             class="actionBtn danger"
             onclick="deleteRow(
-              '${jsEscape(branch)}',
-              '${jsEscape(row[C.BR] || branch)}',
-              '${jsEscape(tag)}'
+              '${jsEscape(row.branch)}',
+              '${jsEscape(row.tag)}'
             )"
           >
             Delete
           </button>
 
         </td>
+
       `;
 
-      body.appendChild(tr);
+
+      body.appendChild(
+        tr
+      );
 
     }
   );
 
+
   document
-    .getElementById("pageInfo")
+    .getElementById(
+      "pageInfo"
+    )
     .textContent =
       "Showing " +
       rows.length +
-      " records • Page " +
-      currentPage;
+      " records";
 
-  updatePagination();
+
+  updatePagination(
+    rows.length
+  );
 
 }
 
 
-/* =========================================================
-   PAGINATION
-========================================================= */
-
-function updatePagination(){
+function updatePagination(
+  count
+){
 
   document
-    .getElementById("pageCurrent")
+    .getElementById(
+      "pageCurrent"
+    )
     .textContent =
       currentPage;
 
+
   document
-    .getElementById("prevBtn")
+    .getElementById(
+      "prevBtn"
+    )
     .disabled =
       currentPage <= 1;
 
+
   document
-    .getElementById("nextBtn")
+    .getElementById(
+      "nextBtn"
+    )
     .disabled =
-      lastRows.length < rowsPerPage;
-
-}
-
-
-function previousPage(){
-
-  if(currentPage <= 1){
-    return;
-  }
-
-  currentPage--;
-
-  loadDashboard();
-
-}
-
-
-function nextPage(){
-
-  if(lastRows.length < rowsPerPage){
-    return;
-  }
-
-  currentPage++;
-
-  loadDashboard();
+      !hasNextPage ||
+      count < ROWS_PER_PAGE;
 
 }
 
 
 /* =========================================================
    SAVE SI
-   PRIMARY KEY = BR + NTAGN
-========================================================= */
+   ========================================================= */
 
-async function saveSI(input){
+async function saveSI(
+  input
+){
 
   const branch =
     input.dataset.branch;
 
-  const br =
-    input.dataset.br;
-
   const tag =
-    input.dataset.ntagn;
+    input.dataset.tag;
 
   const si =
     input.value.trim();
 
-  if(!branch || !br || !tag){
+
+  if(!branch || !tag){
 
     showStatus(
-      "Cannot update SI: BR or NTAGN is missing."
+      "Branch or tag is missing."
     );
 
     return;
+
   }
 
+
   try{
+
+    /*
+     * BR + NTAGN is the composite primary key.
+     */
 
     const table =
       tableName(
@@ -2494,57 +3041,41 @@ async function saveSI(input){
         "stocks"
       );
 
-    /*
-      IMPORTANT:
 
-      Your inventory key is:
-
-      BR + NTAGN
-
-      Therefore we update BOTH key columns
-      in the WHERE condition.
-
-      Only SI NO. is changed.
-    */
-
-    const {
-      data,
-      error
-    } =
+    const result =
       await supabaseClient
         .from(table)
-        .update({
-          [C.SI]:si
-        })
-        .eq(C.BR,br)
-        .eq(C.NTAGN,tag)
-        .select(C.NTAGN);
+        .update(
+          {
+            "SI NO.":si
+          }
+        )
+        .eq(
+          "BR",
+          branch
+        )
+        .eq(
+          "NTAGN",
+          tag
+        );
 
-    if(error){
-      throw error;
+
+    if(result.error){
+
+      throw result.error;
+
     }
 
-    if(!data || !data.length){
-
-      throw new Error(
-        "No matching stock found for BR + NTAGN."
-      );
-
-    }
 
     showStatus(
       "SI No. saved."
     );
 
+
   }catch(error){
 
-    console.error(
-      "SAVE SI ERROR:",
-      error
-    );
-
     showStatus(
-      "SI update failed: " +
+      "Unable to save SI No.: " +
       error.message
     );
 
@@ -2555,29 +3086,37 @@ async function saveSI(input){
 
 /* =========================================================
    DELETE
-========================================================= */
+   ========================================================= */
 
 async function deleteRow(
   branch,
-  br,
   tag
 ){
 
   const confirmed =
     await inlineConfirm(
-      "Delete " + tag + "?"
+      "Delete " +
+      tag +
+      "?"
     );
 
+
   if(!confirmed){
+
     return;
+
   }
 
-  try{
 
-    const sheet =
-      document
-        .getElementById("sheet")
-        .value;
+  const sheet =
+    document
+      .getElementById(
+        "sheet"
+      )
+      .value;
+
+
+  try{
 
     const table =
       tableName(
@@ -2585,31 +3124,37 @@ async function deleteRow(
         sheet
       );
 
-    const {
-      error
-    } =
+
+    const result =
       await supabaseClient
         .from(table)
         .delete()
-        .eq(C.BR,br)
-        .eq(C.NTAGN,tag);
+        .eq(
+          "BR",
+          branch
+        )
+        .eq(
+          "NTAGN",
+          tag
+        );
 
-    if(error){
-      throw error;
+
+    if(result.error){
+
+      throw result.error;
+
     }
+
 
     showStatus(
       "Record deleted."
     );
 
-    loadDashboard();
+
+    refreshDashboard();
+
 
   }catch(error){
-
-    console.error(
-      "DELETE ERROR:",
-      error
-    );
 
     showStatus(
       "Delete failed: " +
@@ -2623,18 +3168,24 @@ async function deleteRow(
 
 /* =========================================================
    INLINE CONFIRM
-========================================================= */
+   ========================================================= */
 
-function inlineConfirm(text){
+function inlineConfirm(
+  text
+){
 
   return new Promise(
     function(resolve){
 
       const panel =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
+
 
       panel.className =
         "queueCard";
+
 
       panel.innerHTML = `
 
@@ -2647,7 +3198,9 @@ function inlineConfirm(text){
           <button
             class="queueClose"
             data-no
-          >×</button>
+          >
+            ×
+          </button>
 
         </div>
 
@@ -2671,21 +3224,31 @@ function inlineConfirm(text){
           </button>
 
         </div>
+
       `;
 
+
       document
-        .getElementById("queuePanel")
-        .appendChild(panel);
+        .getElementById(
+          "queuePanel"
+        )
+        .appendChild(
+          panel
+        );
+
 
       panel
-        .querySelectorAll("[data-no]")
+        .querySelectorAll(
+          "[data-no]"
+        )
         .forEach(
-          btn => {
+          function(button){
 
-            btn.onclick =
+            button.onclick =
               function(){
 
                 panel.remove();
+
                 resolve(false);
 
               };
@@ -2693,12 +3256,16 @@ function inlineConfirm(text){
           }
         );
 
+
       panel
-        .querySelector("[data-yes]")
+        .querySelector(
+          "[data-yes]"
+        )
         .onclick =
           function(){
 
             panel.remove();
+
             resolve(true);
 
           };
@@ -2710,33 +3277,74 @@ function inlineConfirm(text){
 
 
 /* =========================================================
-   IMPORT
-========================================================= */
+   PAGINATION
+   ========================================================= */
 
-async function handleImportFile(event){
+function previousPage(){
+
+  if(
+    currentPage <= 1
+  ){
+
+    return;
+
+  }
+
+
+  currentPage--;
+
+  refreshDashboard();
+
+}
+
+
+function nextPage(){
+
+  if(
+    !hasNextPage
+  ){
+
+    return;
+
+  }
+
+
+  currentPage++;
+
+  refreshDashboard();
+
+}
+
+
+/* =========================================================
+   IMPORT
+   ========================================================= */
+
+async function handleImportFile(
+  event
+){
 
   const file =
     event.target.files[0];
 
+
   event.target.value = "";
 
+
   if(!file){
-    return;
-  }
-
-  if(!window.XLSX){
-
-    showStatus(
-      "XLSX library is not loaded."
-    );
 
     return;
+
   }
+
 
   const branch =
     document
-      .getElementById("branch")
+      .getElementById(
+        "branch"
+      )
       .value;
+
 
   if(branch === "ALL"){
 
@@ -2745,21 +3353,33 @@ async function handleImportFile(event){
     );
 
     return;
+
   }
 
-  const queueId =
-    "IMPORT_" +
-    Date.now();
 
-  createQueueCard(
-    queueId,
-    "Reading " + file.name
-  );
+  if(importRunning){
+
+    showStatus(
+      "An import is already running."
+    );
+
+    return;
+
+  }
+
 
   try{
 
+    createQueueCard(
+      "IMPORT",
+      "Reading " +
+      file.name
+    );
+
+
     const buffer =
       await file.arrayBuffer();
+
 
     const workbook =
       XLSX.read(
@@ -2770,54 +3390,60 @@ async function handleImportFile(event){
         }
       );
 
-    if(!workbook.SheetNames.length){
+
+    const sheetName =
+      workbook.SheetNames[0];
+
+
+    if(!sheetName){
+
       throw new Error(
-        "The file contains no worksheet."
+        "The workbook has no worksheet."
       );
+
     }
 
-    const firstSheet =
+
+    const worksheet =
       workbook.Sheets[
-        workbook.SheetNames[0]
+        sheetName
       ];
+
 
     const rows =
       XLSX.utils.sheet_to_json(
-        firstSheet,
+        worksheet,
         {
-          defval:"",
-          raw:false
+          defval:""
         }
       );
+
 
     if(!rows.length){
 
       updateQueue(
-        queueId,
+        "IMPORT",
         0,
-        0,
+        1,
         "No rows found."
       );
 
       return;
+
     }
 
-    await importRows(
-      branch,
+
+    await startImportJob(
       rows,
       file.name,
-      queueId
+      branch
     );
+
 
   }catch(error){
 
-    console.error(
-      "IMPORT ERROR:",
-      error
-    );
-
     updateQueueError(
-      queueId,
+      "IMPORT",
       error.message
     );
 
@@ -2827,122 +3453,80 @@ async function handleImportFile(event){
 
 
 /* =========================================================
-   IMPORT ROWS
-========================================================= */
+   IMPORT FIELD CONVERSION
+   ========================================================= */
 
-async function importRows(
-  branch,
-  rows,
-  fileName,
-  queueId
+const COLUMN_NAMES = [
+  "SDATE",
+  "SUPPLIER",
+  "DR",
+  "COST",
+  "ASG",
+  "CB",
+  "FD",
+  "UNITS",
+  "POWER",
+  "LENSTYPE",
+  "PUNIT",
+  "BR",
+  "NTAGN",
+  "CATEGORY",
+  "DESCRIPTION",
+  "LENSCODE",
+  "SELLINGPRICE",
+  "DELIVERYDATE",
+  "ORNUMBER",
+  "ORDATE",
+  "REMARKS",
+  "TAGPRICE",
+  "QR",
+  "SI NO.",
+  "DATE AND TIME",
+  "USER EMAIL",
+  "STATUS"
+];
+
+
+function getImportValue(
+  row,
+  column
 ){
 
-  const table =
-    tableName(
-      branch,
-      "stocks"
-    );
-
-  const normalized =
-    rows.map(
-      row =>
-        normalizeImportRow(
-          row,
-          branch
-        )
-    );
-
-  const chunkSize = 500;
-
-  let processed = 0;
-
-  for(
-    let i=0;
-    i<normalized.length;
-    i+=chunkSize
+  if(
+    row[column] !== undefined
   ){
 
-    const chunk =
-      normalized.slice(
-        i,
-        i + chunkSize
-      );
-
-    /*
-      UPSERT is used with:
-
-      BR + NTAGN
-
-      as the composite key.
-
-      Existing records are updated.
-      New records are inserted.
-    */
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from(table)
-        .upsert(
-          chunk,
-          {
-            onConflict:
-              `${C.BR},${C.NTAGN}`,
-            ignoreDuplicates:false
-          }
-        );
-
-    if(error){
-      throw error;
-    }
-
-    processed += chunk.length;
-
-    updateQueue(
-      queueId,
-      processed,
-      normalized.length,
-      "Importing " +
-      fileName
-    );
-
-    /*
-      Yield to the browser so the dashboard
-      remains responsive.
-    */
-
-    await new Promise(
-      resolve =>
-        setTimeout(resolve,0)
-    );
+    return row[column];
 
   }
 
-  updateQueue(
-    queueId,
-    normalized.length,
-    normalized.length,
-    "Import complete."
-  );
 
-  showStatus(
-    "Import completed: " +
-    formatNumber(normalized.length) +
-    " rows."
-  );
+  const lower =
+    column.toLowerCase();
 
-  setTimeout(
-    () => loadDashboard(),
-    700
-  );
+
+  for(
+    const key of Object.keys(row)
+  ){
+
+    if(
+      String(key)
+        .trim()
+        .toLowerCase() ===
+      lower
+    ){
+
+      return row[key];
+
+    }
+
+  }
+
+
+  return "";
 
 }
 
-
-/* =========================================================
-   NORMALIZE IMPORT ROW
-========================================================= */
 
 function normalizeImportRow(
   source,
@@ -2951,69 +3535,52 @@ function normalizeImportRow(
 
   const row = {};
 
-  /*
-    Accept the exact existing headers.
 
-    This also tolerates minor capitalization differences.
-  */
+  COLUMN_NAMES.forEach(
+    function(column){
 
-  const sourceMap = {};
+      let value =
+        getImportValue(
+          source,
+          column
+        );
 
-  Object.keys(source || {})
-    .forEach(
-      key => {
 
-        sourceMap[
-          normalizeHeader(key)
-        ] =
-          source[key];
+      if(
+        value instanceof Date
+      ){
+
+        value =
+          value.toISOString();
 
       }
-    );
 
-  const headers = Object.values(C);
 
-  headers.forEach(
-    column => {
+      if(
+        value === null ||
+        value === undefined
+      ){
 
-      const normalized =
-        normalizeHeader(column);
+        value = "";
+
+      }
+
 
       row[column] =
-        sourceMap[normalized] !== undefined
-          ? sourceMap[normalized]
-          : "";
+        String(value);
 
     }
   );
 
-  /*
-    Branch is always controlled by the
-    branch selected in the dashboard.
-  */
 
-  row[C.BR] =
+  /*
+   * Always use the selected branch
+   * as the BR value.
+   */
+
+  row.BR =
     branch;
 
-  row[C.NTAGN] =
-    String(
-      row[C.NTAGN] || ""
-    ).trim();
-
-  if(!row[C.NTAGN]){
-
-    throw new Error(
-      "Import contains a row with an empty NTAGN."
-    );
-
-  }
-
-  /*
-    USER EMAIL is assigned to the logged-in user.
-  */
-
-  row[C.USEREMAIL] =
-    currentUser?.email || "";
 
   return row;
 
@@ -3021,204 +3588,352 @@ function normalizeImportRow(
 
 
 /* =========================================================
+   IMPORT JOB
+   ========================================================= */
+
+async function startImportJob(
+  rows,
+  fileName,
+  branch
+){
+
+  if(importRunning){
+
+    throw new Error(
+      "An import is already running."
+    );
+
+  }
+
+
+  importRunning = true;
+
+
+  const total =
+    rows.length;
+
+
+  createQueueCard(
+    "IMPORT",
+    "Importing " +
+    fileName
+  );
+
+
+  let processed = 0;
+
+
+  try{
+
+    for(
+      let i = 0;
+      i < total;
+      i += IMPORT_CHUNK_SIZE
+    ){
+
+      const sourceChunk =
+        rows.slice(
+          i,
+          i +
+          IMPORT_CHUNK_SIZE
+        );
+
+
+      const chunk =
+        sourceChunk.map(
+          function(row){
+
+            return normalizeImportRow(
+              row,
+              branch
+            );
+
+          }
+        );
+
+
+      /*
+       * The primary key is:
+       *
+       * BR + NTAGN
+       *
+       */
+
+      const table =
+        tableName(
+          branch,
+          "stocks"
+        );
+
+
+      const result =
+        await supabaseClient
+          .from(table)
+          .upsert(
+            chunk,
+            {
+              onConflict:
+                "BR,NTAGN",
+              ignoreDuplicates:
+                false
+            }
+          );
+
+
+      if(result.error){
+
+        throw result.error;
+
+      }
+
+
+      processed +=
+        chunk.length;
+
+
+      updateQueue(
+        "IMPORT",
+        processed,
+        total,
+        "Imported " +
+        processed.toLocaleString() +
+        " / " +
+        total.toLocaleString()
+      );
+
+
+      /*
+       * Yield control to the browser.
+       * Dashboard remains responsive.
+       */
+
+      await sleep(10);
+
+    }
+
+
+    updateQueue(
+      "IMPORT",
+      total,
+      total,
+      "Import complete."
+    );
+
+
+    showStatus(
+      "Import completed."
+    );
+
+
+    setTimeout(
+      function(){
+
+        refreshDashboard();
+
+      },
+      500
+    );
+
+
+  }finally{
+
+    importRunning = false;
+
+  }
+
+}
+
+
+/* =========================================================
    EXPORT
-========================================================= */
+   ========================================================= */
 
 async function startExport(){
 
-  if(!currentUser){
+  if(exportRunning){
+
+    showStatus(
+      "An export is already running."
+    );
+
     return;
+
   }
+
+
+  exportRunning = true;
+
 
   const branch =
     document
-      .getElementById("branch")
+      .getElementById(
+        "branch"
+      )
       .value;
 
-  const queueId =
-    "EXPORT_" +
-    Date.now();
-
-  createQueueCard(
-    queueId,
-    "Preparing XLSX..."
-  );
 
   try{
+
+    createQueueCard(
+      "EXPORT",
+      "Preparing XLSX..."
+    );
+
 
     const branches =
       branch === "ALL"
         ? BRANCHES
         : [branch];
 
+
     const workbook =
       XLSX.utils.book_new();
 
-    let totalStocks = 0;
-    let totalSold = 0;
-    let totalAudit = 0;
 
-    /*
-      AVAILABLE STOCKS
-    */
+    let totalRows = 0;
 
-    const availableRows = [];
 
-    for(const b of branches){
+    for(
+      let i = 0;
+      i < branches.length;
+      i++
+    ){
 
-      const stocks =
-        await fetchAllRows(
-          tableName(b,"stocks"),
-          queueId,
-          "Loading stocks " + b
+      const b =
+        branches[i];
+
+
+      updateQueue(
+        "EXPORT",
+        i,
+        branches.length,
+        "Reading " +
+        b
+      );
+
+
+      const [
+        stocks,
+        sold,
+        audit
+      ] =
+        await Promise.all(
+          [
+            fetchAllRows(
+              tableName(
+                b,
+                "stocks"
+              )
+            ),
+
+            fetchAllRows(
+              tableName(
+                b,
+                "sold"
+              )
+            ),
+
+            fetchAllRows(
+              tableName(
+                b,
+                "audit"
+              )
+            )
+          ]
         );
+
+
+      /*
+       * AVAILABLE STOCKS
+       *
+       * Remove stock tags that exist
+       * in scanresults.
+       */
 
       const soldTags =
-        await getSoldTags(b);
+        new Set(
+          sold.map(
+            function(row){
 
-      for(const row of stocks){
+              return String(
+                field(
+                  row,
+                  "NTAGN"
+                )
+              );
 
-        const tag =
-          normalizeTag(
-            row[C.NTAGN]
-          );
-
-        if(!tag || !soldTags.has(tag)){
-
-          availableRows.push({
-            ...row,
-            BR:
-              row[C.BR] || b
-          });
-
-        }
-
-      }
-
-      totalStocks +=
-        availableRows.length;
-
-    }
-
-    updateQueue(
-      queueId,
-      25,
-      100,
-      "Preparing AVAILABLE sheet..."
-    );
-
-    addWorksheet(
-      workbook,
-      "STOCKS",
-      availableRows
-    );
-
-
-    /*
-      SOLD
-    */
-
-    const soldRows = [];
-
-    for(const b of branches){
-
-      const rows =
-        await fetchAllRows(
-          tableName(b,"sold"),
-          queueId,
-          "Loading sold " + b
+            }
+          )
         );
 
-      soldRows.push(
-        ...rows.map(
-          row => ({
-            ...row,
-            BR:
-              row[C.BR] || b
-          })
-        )
-      );
 
-    }
+      const available =
+        stocks.filter(
+          function(row){
 
-    totalSold =
-      soldRows.length;
+            return !soldTags.has(
+              String(
+                field(
+                  row,
+                  "NTAGN"
+                )
+              )
+            );
 
-    updateQueue(
-      queueId,
-      55,
-      100,
-      "Preparing SOLD sheet..."
-    );
-
-    addWorksheet(
-      workbook,
-      "SOLD",
-      soldRows
-    );
-
-
-    /*
-      AUDIT
-    */
-
-    const auditRows = [];
-
-    for(const b of branches){
-
-      const rows =
-        await fetchAllRows(
-          tableName(b,"audit"),
-          queueId,
-          "Loading audit " + b
+          }
         );
 
-      auditRows.push(
-        ...rows.map(
-          row => ({
-            ...row,
-            BR:
-              row[C.BR] || b
-          })
-        )
+
+      totalRows +=
+        available.length +
+        sold.length +
+        audit.length;
+
+
+      addSheetSafe(
+        workbook,
+        b + " STOCKS",
+        available
       );
+
+
+      addSheetSafe(
+        workbook,
+        b + " SOLD",
+        sold
+      );
+
+
+      addSheetSafe(
+        workbook,
+        b + " AUDIT",
+        audit
+      );
+
+
+      updateQueue(
+        "EXPORT",
+        i + 1,
+        branches.length,
+        "Processed " +
+        b
+      );
+
+
+      await sleep(10);
 
     }
 
-    totalAudit =
-      auditRows.length;
 
     updateQueue(
-      queueId,
-      80,
+      "EXPORT",
       100,
-      "Preparing AUDIT sheet..."
-    );
-
-    addWorksheet(
-      workbook,
-      "AUDIT",
-      auditRows
-    );
-
-
-    /*
-      EXPORT XLSX DIRECTLY IN THE BROWSER.
-
-      No Apps Script.
-      No Google Drive.
-      No job ID.
-      No missing download URL.
-    */
-
-    updateQueue(
-      queueId,
-      95,
       100,
       "Creating XLSX..."
     );
 
-    const xlsxBuffer =
+
+    const output =
       XLSX.write(
         workbook,
         {
@@ -3227,48 +3942,62 @@ async function startExport(){
         }
       );
 
+
     const blob =
       new Blob(
-        [xlsxBuffer],
+        [output],
         {
           type:
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         }
       );
 
+
     const url =
-      URL.createObjectURL(blob);
+      URL.createObjectURL(
+        blob
+      );
+
 
     const fileName =
       "Acebedo_Inventory_" +
-      (branch === "ALL"
-        ? "ALL"
-        : branch) +
-      "_" +
-      dateStamp() +
+      new Date()
+        .toISOString()
+        .slice(
+          0,
+          10
+        ) +
       ".xlsx";
 
+
     updateQueueDownload(
-      queueId,
+      "EXPORT",
       url,
-      fileName
+      fileName,
+      totalRows
     );
+
 
     showStatus(
       "XLSX export completed."
     );
 
+
   }catch(error){
 
     console.error(
-      "EXPORT ERROR:",
       error
     );
 
+
     updateQueueError(
-      queueId,
+      "EXPORT",
       error.message
     );
+
+  }finally{
+
+    exportRunning = false;
 
   }
 
@@ -3276,74 +4005,75 @@ async function startExport(){
 
 
 /* =========================================================
-   FETCH ALL ROWS FOR EXPORT
-========================================================= */
+   FETCH ALL ROWS
+   ========================================================= */
 
 async function fetchAllRows(
-  table,
-  queueId,
-  message
+  table
 ){
 
   const all = [];
 
-  const pageSize = 1000;
+  const pageSize =
+    1000;
 
-  let from = 0;
+  let offset = 0;
+
 
   while(true){
 
-    const to =
-      from + pageSize - 1;
-
-    const {
-      data,
-      error
-    } =
+    const result =
       await supabaseClient
         .from(table)
         .select("*")
-        .range(from,to)
         .order(
-          C.NTAGN,
-          {ascending:true}
+          "NTAGN",
+          {
+            ascending:true
+          }
+        )
+        .range(
+          offset,
+          offset +
+          pageSize -
+          1
         );
 
-    if(error){
-      throw error;
+
+    if(result.error){
+
+      throw result.error;
+
     }
 
+
     const rows =
-      data || [];
+      result.data || [];
+
 
     all.push(
       ...rows
     );
 
-    if(rows.length < pageSize){
+
+    if(
+      rows.length <
+      pageSize
+    ){
+
       break;
+
     }
 
-    from += pageSize;
 
-    updateQueue(
-      queueId,
-      Math.min(
-        90,
-        20 +
-        Math.floor(
-          all.length / 100
-        )
-      ),
-      100,
-      message
-    );
+    offset +=
+      pageSize;
 
-    await new Promise(
-      resolve =>
-        setTimeout(resolve,0)
-    );
+
+    await sleep(0);
+
   }
+
 
   return all;
 
@@ -3351,48 +4081,84 @@ async function fetchAllRows(
 
 
 /* =========================================================
-   ADD XLSX WORKSHEET
-========================================================= */
+   XLSX SHEET
+   ========================================================= */
 
-function addWorksheet(
+function rowToExportArray(
+  row
+){
+
+  return COLUMN_NAMES.map(
+    function(column){
+
+      return field(
+        row,
+        column
+      );
+
+    }
+  );
+
+}
+
+
+function addSheetSafe(
   workbook,
   name,
   rows
 ){
 
-  const headers =
-    Object.values(C);
+  /*
+   * Excel worksheet names have a 31
+   * character limit.
+   */
 
-  const output =
-    rows.map(
-      row => {
+  let safeName =
+    String(name)
+      .slice(
+        0,
+        31
+      );
 
-        const obj = {};
 
-        headers.forEach(
-          h => {
-            obj[h] =
-              row[h] ?? "";
-          }
-        );
+  if(
+    workbook.SheetNames.includes(
+      safeName
+    )
+  ){
 
-        return obj;
+    safeName =
+      safeName.slice(
+        0,
+        27
+      ) +
+      "_" +
+      Math.floor(
+        Math.random() *
+        999
+      );
 
-      }
-    );
+  }
+
+
+  const matrix = [
+    COLUMN_NAMES,
+    ...rows.map(
+      rowToExportArray
+    )
+  ];
+
 
   const worksheet =
-    XLSX.utils.json_to_sheet(
-      output,
-      {
-        header:headers
-      }
+    XLSX.utils.aoa_to_sheet(
+      matrix
     );
+
 
   XLSX.utils.book_append_sheet(
     workbook,
     worksheet,
-    name
+    safeName
   );
 
 }
@@ -3400,48 +4166,64 @@ function addWorksheet(
 
 /* =========================================================
    QUEUE
-========================================================= */
+   ========================================================= */
 
 function createQueueCard(
   id,
   text
 ){
 
-  if(
+  const existing =
     document.getElementById(
-      "queue_" + id
-    )
-  ){
+      "queue_" +
+      id
+    );
+
+
+  if(existing){
+
     return;
+
   }
 
+
   const card =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   card.className =
     "queueCard";
 
+
   card.id =
-    "queue_" + id;
+    "queue_" +
+    id;
+
+
+  const title =
+    id.startsWith(
+      "IMPORT"
+    )
+      ? "↑ Import"
+      : "↓ Export";
+
 
   card.innerHTML = `
 
     <div class="queueHead">
 
       <div class="queueTitle">
-        ${
-          id.startsWith("IMPORT")
-            ? "↑ Import"
-            : "↓ Export"
-        }
+        ${title}
       </div>
 
       <button
         class="queueClose"
-        onclick="
-          this.closest('.queueCard').remove()
-        "
-      >×</button>
+        onclick="this.closest('.queueCard').remove()"
+      >
+        ×
+      </button>
 
     </div>
 
@@ -3460,25 +4242,29 @@ function createQueueCard(
 
     <div class="queueBottom">
 
-      <span data-percent>0%</span>
+      <span data-percent>
+        0%
+      </span>
 
       <span data-status>
         Working...
       </span>
 
     </div>
+
   `;
 
+
   document
-    .getElementById("queuePanel")
-    .appendChild(card);
+    .getElementById(
+      "queuePanel"
+    )
+    .appendChild(
+      card
+    );
 
 }
 
-
-/* =========================================================
-   UPDATE QUEUE
-========================================================= */
 
 function updateQueue(
   id,
@@ -3489,8 +4275,10 @@ function updateQueue(
 
   let card =
     document.getElementById(
-      "queue_" + id
+      "queue_" +
+      id
     );
+
 
   if(!card){
 
@@ -3501,43 +4289,54 @@ function updateQueue(
 
     card =
       document.getElementById(
-        "queue_" + id
+        "queue_" +
+        id
       );
+
   }
+
 
   const percent =
     total > 0
       ? Math.min(
           100,
           Math.round(
-            current /
-            total *
+            Number(current) /
+            Number(total) *
             100
           )
         )
       : 0;
 
+
   card
-    .querySelector("[data-progress]")
+    .querySelector(
+      "[data-progress]"
+    )
     .style.width =
-      percent + "%";
+      percent +
+      "%";
+
 
   card
-    .querySelector("[data-percent]")
+    .querySelector(
+      "[data-percent]"
+    )
     .textContent =
-      percent + "%";
+      percent +
+      "%";
+
 
   card
-    .querySelector("[data-status]")
+    .querySelector(
+      "[data-status]"
+    )
     .textContent =
-      text || "Working...";
+      text ||
+      "Working...";
 
 }
 
-
-/* =========================================================
-   QUEUE ERROR
-========================================================= */
 
 function updateQueueError(
   id,
@@ -3546,8 +4345,10 @@ function updateQueueError(
 
   let card =
     document.getElementById(
-      "queue_" + id
+      "queue_" +
+      id
     );
+
 
   if(!card){
 
@@ -3558,114 +4359,127 @@ function updateQueueError(
 
     card =
       document.getElementById(
-        "queue_" + id
+        "queue_" +
+        id
       );
+
   }
+
 
   const bar =
     card.querySelector(
       "[data-progress]"
     );
 
+
   bar.style.width =
     "100%";
 
+
   bar.style.background =
     "#dc2626";
+
 
   card.querySelector(
     "[data-percent]"
   ).textContent =
     "ERROR";
 
+
   card.querySelector(
     "[data-status]"
   ).textContent =
-    message;
+    message ||
+    "Operation failed.";
 
 }
 
 
-/* =========================================================
-   DOWNLOAD
-========================================================= */
-
 function updateQueueDownload(
   id,
   url,
-  fileName
+  fileName,
+  totalRows
 ){
 
   const card =
     document.getElementById(
-      "queue_" + id
+      "queue_" +
+      id
     );
 
+
   if(!card){
+
     return;
+
   }
 
-  card
-    .querySelector("[data-progress]")
-    .style.width =
-      "100%";
 
-  card
-    .querySelector("[data-percent]")
-    .textContent =
-      "100%";
+  card.querySelector(
+    "[data-progress]"
+  ).style.width =
+    "100%";
 
-  card
-    .querySelector("[data-status]")
-    .innerHTML = "";
 
-  const link =
-    document.createElement("a");
+  card.querySelector(
+    "[data-percent]"
+  ).textContent =
+    "100%";
 
-  link.className =
-    "queueDownload";
 
-  link.href =
-    url;
+  card.querySelector(
+    "[data-status]"
+  ).innerHTML = `
 
-  link.download =
-    fileName;
+    <a
+      class="queueDownload"
+      href="${escapeHtml(url)}"
+      download="${escapeHtml(fileName)}"
+    >
+      Download ${escapeHtml(fileName)}
+    </a>
 
-  link.textContent =
-    "Download " + fileName;
-
-  card
-    .querySelector("[data-status]")
-    .appendChild(link);
+  `;
 
 }
 
 
 /* =========================================================
    STATUS
-========================================================= */
+   ========================================================= */
 
-function showStatus(message){
+function showStatus(
+  message
+){
 
   const el =
     document.getElementById(
       "globalStatus"
     );
 
+
   el.textContent =
     message;
 
-  el.classList.add("show");
+
+  el.classList.add(
+    "show"
+  );
+
 
   clearTimeout(
     window.__statusTimer
   );
 
+
   window.__statusTimer =
     setTimeout(
       function(){
 
-        el.classList.remove("show");
+        el.classList.remove(
+          "show"
+        );
 
       },
       3000
@@ -3675,27 +4489,17 @@ function showStatus(message){
 
 
 /* =========================================================
-   LOGIN STATUS
-========================================================= */
-
-function setLoginStatus(message){
-
-  document
-    .getElementById("loginStatus")
-    .textContent =
-      message || "";
-
-}
-
-
-/* =========================================================
    LOADING
-========================================================= */
+   ========================================================= */
 
-function setLoading(value){
+function setLoading(
+  value
+){
 
   document
-    .getElementById("loadingLine")
+    .getElementById(
+      "loadingLine"
+    )
     .classList
     .toggle(
       "hidden",
@@ -3707,32 +4511,11 @@ function setLoading(value){
 
 /* =========================================================
    HELPERS
-========================================================= */
+   ========================================================= */
 
-function normalizeTag(value){
-
-  return String(
-    value ?? ""
-  )
-  .trim()
-  .toUpperCase();
-
-}
-
-
-function normalizeHeader(value){
-
-  return String(
-    value ?? ""
-  )
-  .trim()
-  .toUpperCase()
-  .replace(/\s+/g," ");
-
-}
-
-
-function formatNumber(value){
+function formatNumber(
+  value
+){
 
   return Number(
     value || 0
@@ -3741,49 +4524,27 @@ function formatNumber(value){
 }
 
 
-function dateStamp(){
+function sleep(
+  ms
+){
 
-  const d =
-    new Date();
+  return new Promise(
+    function(resolve){
 
-  const y =
-    d.getFullYear();
+      setTimeout(
+        resolve,
+        ms
+      );
 
-  const m =
-    String(
-      d.getMonth()+1
-    ).padStart(2,"0");
-
-  const day =
-    String(
-      d.getDate()
-    ).padStart(2,"0");
-
-  const h =
-    String(
-      d.getHours()
-    ).padStart(2,"0");
-
-  const min =
-    String(
-      d.getMinutes()
-    ).padStart(2,"0");
-
-  const sec =
-    String(
-      d.getSeconds()
-    ).padStart(2,"0");
-
-  return (
-    y + m + day +
-    "_" +
-    h + min + sec
+    }
   );
 
 }
 
 
-function escapeHtml(value){
+function escapeHtml(
+  value
+){
 
   return String(
     value === undefined ||
@@ -3791,79 +4552,101 @@ function escapeHtml(value){
       ? ""
       : value
   )
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/"/g,"&quot;")
-  .replace(/'/g,"&#039;");
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
 
 }
 
 
-function jsEscape(value){
+function jsEscape(
+  value
+){
 
   return String(
-    value ?? ""
+    value || ""
   )
-  .replace(/\\/g,"\\\\")
-  .replace(/'/g,"\\'")
-  .replace(/\n/g,"\\n")
-  .replace(/\r/g,"\\r");
+  .replace(
+    /\\/g,
+    "\\\\"
+  )
+  .replace(
+    /'/g,
+    "\\'"
+  )
+  .replace(
+    /\n/g,
+    "\\n"
+  )
+  .replace(
+    /\r/g,
+    "\\r"
+  );
 
 }
-
-
-/* =========================================================
-   SUPABASE AUTH STATE
-========================================================= */
-
-supabaseClient.auth.onAuthStateChange(
-  async function(event,session){
-
-    console.log(
-      "Supabase auth:",
-      event
-    );
-
-    if(
-      event === "SIGNED_OUT"
-    ){
-
-      currentUser = null;
-      currentProfile = null;
-
-    }
-
-  }
-);
 
 
 /* =========================================================
    STARTUP
-========================================================= */
+   ========================================================= */
 
 (async function(){
 
-  /*
-    If the email template uses a confirmation URL,
-    Supabase can redirect back here.
+  try{
 
-    The SDK handles the session automatically.
-  */
+    if(
+      SUPABASE_ANON_KEY ===
+      "YOUR_SUPABASE_ANON_KEY"
+    ){
 
-  const loggedIn =
-    await checkExistingSession();
+      setLoginStatus(
+        "Add your Supabase anon/publishable key in the HTML first.",
+        true
+      );
 
-  if(loggedIn){
+      return;
 
-    showDashboard();
+    }
 
-  }else{
 
-    document
-      .getElementById("loginScreen")
-      .style.display =
-        "flex";
+    const loggedIn =
+      await checkExistingSession();
+
+
+    if(loggedIn){
+
+      showDashboard();
+
+    }else{
+
+      showLogin();
+
+    }
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+    showLogin();
 
   }
 
@@ -3872,4 +4655,3 @@ supabaseClient.auth.onAuthStateChange(
 
 </body>
 </html>
-

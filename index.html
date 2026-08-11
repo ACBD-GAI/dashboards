@@ -2986,7 +2986,7 @@ async function checkExistingSession(){
       await loginApiGet(
         "checkSession",
         {
-          sessionId:sessionId
+          sessionId: sessionId
         }
       );
 
@@ -3013,8 +3013,12 @@ async function checkExistingSession(){
       );
 
       return true;
-
     }
+
+    // Server explicitly says the session is invalid
+    clearLoginSession();
+
+    return false;
 
   }catch(error){
 
@@ -3023,14 +3027,12 @@ async function checkExistingSession(){
       error
     );
 
+    // Keep the existing session if the
+    // server/API temporarily cannot be reached.
+    return true;
   }
 
-  clearLoginSession();
-
-  return false;
-
 }
-
 /* =========================================================
    LOGOUT
 ========================================================= */

@@ -3,16 +3,18 @@
 <html lang="en">
 
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1"
+
+>
 
 <title>Acebedo Optical Inventory</title>
 
-<!-- Supabase -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- XLSX -->
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -24,12 +26,17 @@
   --text:#182230;
   --muted:#718096;
   --line:#e6ebf2;
+
   --primary:#2563eb;
   --primary-dark:#1d4ed8;
+
   --success:#16a34a;
   --danger:#dc2626;
   --warning:#d97706;
-  --shadow:0 12px 35px rgba(15,23,42,.08);
+
+  --shadow:
+    0 12px 35px rgba(15,23,42,.08);
+
   --radius:18px;
 }
 
@@ -45,6 +52,7 @@ body{
 }
 
 body{
+
   font-family:
     Inter,
     ui-sans-serif,
@@ -65,52 +73,86 @@ body{
   color:var(--text);
 }
 
+
 /* =========================================================
    LOGIN
    ========================================================= */
 
 #loginScreen{
+
   min-height:100vh;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   padding:24px;
 }
 
 .loginCard{
+
   width:min(430px,100%);
-  background:rgba(255,255,255,.94);
-  border:1px solid rgba(255,255,255,.8);
+
+  background:
+    rgba(255,255,255,.94);
+
+  border:
+    1px solid rgba(255,255,255,.8);
+
   border-radius:28px;
+
   padding:42px;
-  box-shadow:0 30px 80px rgba(30,64,175,.13);
+
+  box-shadow:
+    0 30px 80px rgba(30,64,175,.13);
+
   backdrop-filter:blur(16px);
 }
 
 .logo{
+
   width:66px;
   height:66px;
+
   border-radius:20px;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   font-size:29px;
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed
+    );
+
   color:#fff;
-  box-shadow:0 15px 30px rgba(37,99,235,.28);
+
+  box-shadow:
+    0 15px 30px rgba(37,99,235,.28);
+
   margin-bottom:22px;
 }
 
 .loginTitle{
+
   font-size:27px;
   font-weight:800;
+
   letter-spacing:-.7px;
+
   margin:0 0 7px;
 }
 
 .loginSub{
+
   color:var(--muted);
+
   margin:0 0 28px;
+
   line-height:1.55;
 }
 
@@ -119,174 +161,312 @@ body{
 }
 
 .field label{
+
   display:block;
+
   font-size:12px;
   font-weight:700;
+
   color:#64748b;
+
   margin-bottom:7px;
 }
 
 .input{
+
   width:100%;
-  border:1px solid var(--line);
+
+  border:
+    1px solid var(--line);
+
   background:#f8fafc;
+
   padding:14px 15px;
+
   border-radius:13px;
+
   outline:none;
+
   font-size:15px;
+
   transition:.18s;
 }
 
 .input:focus{
+
   background:#fff;
+
   border-color:#93b4ff;
-  box-shadow:0 0 0 4px rgba(37,99,235,.09);
+
+  box-shadow:
+    0 0 0 4px rgba(37,99,235,.09);
 }
 
 .primaryBtn{
+
   width:100%;
+
   border:0;
+
   padding:14px 18px;
+
   border-radius:13px;
+
   cursor:pointer;
+
   color:#fff;
+
   font-weight:750;
+
   font-size:14px;
-  background:linear-gradient(135deg,var(--primary),#4f46e5);
-  box-shadow:0 12px 25px rgba(37,99,235,.23);
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      #4f46e5
+    );
+
+  box-shadow:
+    0 12px 25px rgba(37,99,235,.23);
+
   transition:.18s;
 }
 
 .primaryBtn:hover{
+
   transform:translateY(-1px);
-  box-shadow:0 15px 30px rgba(37,99,235,.28);
+
+  box-shadow:
+    0 15px 30px rgba(37,99,235,.28);
 }
 
 .primaryBtn:disabled{
+
   opacity:.55;
+
   cursor:not-allowed;
+
   transform:none;
 }
 
 .loginStatus{
+
   min-height:20px;
+
   margin-top:15px;
+
   font-size:13px;
+
   color:var(--muted);
 }
+
 
 /* =========================================================
    DASHBOARD
    ========================================================= */
 
 #dashboard{
+
   display:none;
+
   min-height:100vh;
 }
 
 .app{
+
   max-width:1600px;
+
   margin:auto;
+
   padding:22px;
 }
+
 
 /* =========================================================
    TOP BAR
    ========================================================= */
 
 .topbar{
+
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   gap:20px;
+
   margin-bottom:22px;
 }
 
 .brand{
+
   display:flex;
+
   align-items:center;
+
   gap:13px;
 }
 
 .brandLogo{
+
   width:46px;
   height:46px;
+
   border-radius:14px;
+
   display:flex;
+
   align-items:center;
+
   justify-content:center;
+
   color:white;
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed
+    );
+
   font-size:21px;
-  box-shadow:0 9px 20px rgba(37,99,235,.2);
+
+  box-shadow:
+    0 9px 20px rgba(37,99,235,.2);
 }
 
 .brandTitle{
+
   font-size:19px;
   font-weight:850;
+
   letter-spacing:-.4px;
 }
 
 .brandSub{
+
   color:var(--muted);
+
   font-size:12px;
+
   margin-top:2px;
 }
 
 .userArea{
+
   display:flex;
+
   align-items:center;
+
   gap:10px;
 }
 
 .userEmail{
+
   color:#64748b;
+
   font-size:12px;
+
   max-width:220px;
+
   overflow:hidden;
+
   text-overflow:ellipsis;
 }
 
+.adminBadge{
+
+  display:none;
+
+  padding:5px 8px;
+
+  border-radius:8px;
+
+  background:#fef3c7;
+
+  color:#92400e;
+
+  font-size:10px;
+
+  font-weight:800;
+}
+
 .iconBtn{
+
   width:40px;
   height:40px;
+
   border:1px solid var(--line);
+
   border-radius:12px;
+
   background:#fff;
+
   cursor:pointer;
+
   color:#475569;
+
   transition:.15s;
 }
 
 .iconBtn:hover{
+
   border-color:#cbd5e1;
+
   background:#f8fafc;
 }
+
 
 /* =========================================================
    CONTROL BAR
    ========================================================= */
 
 .controls{
+
   background:rgba(255,255,255,.9);
+
   border:1px solid rgba(226,232,240,.9);
+
   border-radius:var(--radius);
+
   box-shadow:var(--shadow);
+
   padding:15px;
+
   display:grid;
-  grid-template-columns:170px 170px minmax(220px,1fr) auto auto auto auto;
+
+  grid-template-columns:
+    170px
+    170px
+    minmax(220px,1fr)
+    auto
+    auto
+    auto
+    auto;
+
   gap:10px;
+
   margin-bottom:18px;
 }
 
 .select,
 .searchInput{
+
   width:100%;
-  border:1px solid var(--line);
+
+  border:
+    1px solid var(--line);
+
   border-radius:12px;
+
   padding:12px 13px;
+
   background:#f8fafc;
+
   outline:none;
+
   color:var(--text);
 }
 
@@ -295,10 +475,14 @@ body{
 }
 
 .searchIcon{
+
   position:absolute;
+
   left:13px;
   top:50%;
+
   transform:translateY(-50%);
+
   color:#94a3b8;
 }
 
@@ -307,99 +491,161 @@ body{
 }
 
 .controlBtn{
-  border:1px solid var(--line);
+
+  border:
+    1px solid var(--line);
+
   background:#fff;
+
   color:#334155;
+
   border-radius:12px;
+
   padding:0 16px;
+
   cursor:pointer;
+
   font-weight:700;
+
   white-space:nowrap;
+
   transition:.15s;
 }
 
 .controlBtn:hover{
+
   background:#f8fafc;
+
   border-color:#cbd5e1;
 }
 
 .controlBtn.primary{
+
   color:#fff;
+
   border-color:transparent;
-  background:linear-gradient(135deg,#2563eb,#4f46e5);
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #4f46e5
+    );
 }
+
 
 /* =========================================================
    CARDS
    ========================================================= */
 
 .cards{
+
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+
+  grid-template-columns:
+    repeat(4,1fr);
+
   gap:14px;
+
   margin-bottom:18px;
 }
 
 .statCard{
+
   background:#fff;
+
   border:1px solid var(--line);
+
   border-radius:18px;
+
   padding:19px;
-  box-shadow:0 7px 25px rgba(15,23,42,.055);
+
+  box-shadow:
+    0 7px 25px rgba(15,23,42,.055);
 }
 
 .statTop{
+
   display:flex;
+
   justify-content:space-between;
+
   align-items:center;
 }
 
 .statLabel{
+
   color:var(--muted);
+
   font-size:12px;
+
   font-weight:700;
 }
 
 .statIcon{
+
   width:35px;
   height:35px;
+
   border-radius:11px;
+
   display:flex;
+
   align-items:center;
+
   justify-content:center;
+
   background:#eff6ff;
 }
 
 .statNumber{
+
   margin-top:9px;
+
   font-size:28px;
+
   font-weight:850;
+
   letter-spacing:-1px;
 }
 
 .statHint{
+
   color:#94a3b8;
+
   font-size:11px;
+
   margin-top:4px;
 }
+
 
 /* =========================================================
    TABLE
    ========================================================= */
 
 .tableCard{
+
   background:#fff;
+
   border:1px solid var(--line);
+
   border-radius:20px;
+
   box-shadow:var(--shadow);
+
   overflow:hidden;
 }
 
 .tableHeader{
+
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   padding:17px 19px;
+
   border-bottom:1px solid var(--line);
 }
 
@@ -408,8 +654,11 @@ body{
 }
 
 .tableSub{
+
   color:var(--muted);
+
   font-size:12px;
+
   margin-top:3px;
 }
 
@@ -418,25 +667,39 @@ body{
 }
 
 table{
+
   width:100%;
+
   border-collapse:collapse;
+
   min-width:900px;
 }
 
 thead th{
+
   text-align:left;
+
   padding:12px 15px;
+
   font-size:11px;
+
   color:#64748b;
+
   background:#f8fafc;
+
   border-bottom:1px solid var(--line);
+
   white-space:nowrap;
 }
 
 tbody td{
+
   padding:13px 15px;
+
   border-bottom:1px solid #eef2f7;
+
   font-size:13px;
+
   white-space:nowrap;
 }
 
@@ -445,41 +708,68 @@ tbody tr:hover{
 }
 
 .tag{
+
   display:inline-flex;
+
   padding:5px 8px;
+
   border-radius:8px;
+
   background:#f1f5f9;
+
   font-weight:750;
+
   font-size:11px;
 }
 
 .branchTag{
+
   display:inline-flex;
+
   padding:5px 8px;
+
   border-radius:8px;
+
   background:#eef2ff;
+
   color:#4338ca;
+
   font-weight:750;
+
   font-size:11px;
 }
 
 .typeTag{
+
   display:inline-flex;
+
   padding:5px 8px;
+
   border-radius:8px;
+
   background:#ecfeff;
+
   color:#0e7490;
+
   font-weight:750;
+
   font-size:11px;
 }
 
 .actionBtn{
+
   border:1px solid var(--line);
+
   background:#fff;
+
   border-radius:8px;
+
   padding:7px 9px;
+
   cursor:pointer;
+
   font-size:11px;
+
   font-weight:700;
 }
 
@@ -491,51 +781,77 @@ tbody tr:hover{
   color:#dc2626;
 }
 
+
 /* =========================================================
    SI
    ========================================================= */
 
 .siInput{
+
   width:100px;
+
   padding:7px 8px;
-  border:1px solid #cbd5e1;
+
+  border:
+    1px solid #cbd5e1;
+
   border-radius:8px;
+
   outline:none;
 }
 
 .siInput:focus{
+
   border-color:#60a5fa;
-  box-shadow:0 0 0 3px rgba(59,130,246,.1);
+
+  box-shadow:
+    0 0 0 3px rgba(59,130,246,.1);
 }
+
 
 /* =========================================================
    PAGINATION
    ========================================================= */
 
 .pagination{
+
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   padding:13px 17px;
 }
 
 .pageInfo{
+
   color:var(--muted);
+
   font-size:12px;
 }
 
 .pageButtons{
+
   display:flex;
+
   gap:7px;
 }
 
 .pageBtn{
+
   min-width:36px;
+
   height:36px;
+
   border:1px solid var(--line);
+
   background:#fff;
+
   border-radius:9px;
+
   cursor:pointer;
+
   font-weight:700;
 }
 
@@ -544,164 +860,275 @@ tbody tr:hover{
 }
 
 .pageBtn.active{
+
   background:#2563eb;
+
   color:#fff;
+
   border-color:#2563eb;
 }
+
 
 /* =========================================================
    EMPTY
    ========================================================= */
 
 .empty{
+
   text-align:center;
+
   padding:70px 20px;
+
   color:#94a3b8;
 }
 
 .emptyIcon{
+
   font-size:38px;
+
   margin-bottom:10px;
 }
 
 .emptyTitle{
+
   color:#475569;
+
   font-weight:800;
 }
 
 .emptyText{
+
   font-size:12px;
+
   margin-top:4px;
 }
+
 
 /* =========================================================
    QUEUE
    ========================================================= */
 
 #queuePanel{
+
   position:fixed;
+
   right:20px;
+
   bottom:20px;
+
   width:min(380px,calc(100vw - 40px));
+
   z-index:9999;
+
   display:flex;
+
   flex-direction:column;
+
   gap:10px;
+
   pointer-events:none;
 }
 
 .queueCard{
+
   pointer-events:auto;
-  background:rgba(255,255,255,.96);
-  border:1px solid rgba(226,232,240,.95);
+
+  background:
+    rgba(255,255,255,.96);
+
+  border:
+    1px solid rgba(226,232,240,.95);
+
   border-radius:17px;
+
   padding:14px 15px;
-  box-shadow:0 18px 55px rgba(15,23,42,.16);
+
+  box-shadow:
+    0 18px 55px rgba(15,23,42,.16);
+
   backdrop-filter:blur(15px);
 }
 
 .queueHead{
+
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   gap:10px;
 }
 
 .queueTitle{
+
   font-weight:800;
+
   font-size:13px;
 }
 
 .queueClose{
+
   border:0;
+
   background:transparent;
+
   color:#94a3b8;
+
   cursor:pointer;
+
   font-size:17px;
 }
 
 .queueText{
+
   color:#64748b;
+
   font-size:11px;
+
   margin-top:5px;
 }
 
 .progress{
+
   height:7px;
+
   background:#edf2f7;
+
   border-radius:999px;
+
   overflow:hidden;
+
   margin-top:11px;
 }
 
 .progressBar{
+
   height:100%;
+
   width:0%;
+
   border-radius:999px;
-  background:linear-gradient(90deg,#2563eb,#7c3aed);
-  transition:width .25s ease;
+
+  background:
+    linear-gradient(
+      90deg,
+      #2563eb,
+      #7c3aed
+    );
+
+  transition:
+    width .25s ease;
 }
 
 .queueBottom{
+
   display:flex;
+
   justify-content:space-between;
+
   margin-top:8px;
+
   color:#94a3b8;
+
   font-size:10px;
 }
 
 .queueDownload{
+
   color:#2563eb;
+
   font-weight:800;
+
   text-decoration:none;
 }
+
 
 /* =========================================================
    STATUS
    ========================================================= */
 
 #globalStatus{
+
   position:fixed;
+
   left:50%;
+
   bottom:20px;
-  transform:translate(-50%,20px);
+
+  transform:
+    translate(-50%,20px);
+
   opacity:0;
+
   pointer-events:none;
+
   background:#172033;
+
   color:#fff;
+
   padding:10px 15px;
+
   border-radius:11px;
+
   font-size:12px;
-  box-shadow:0 12px 30px rgba(15,23,42,.2);
+
+  box-shadow:
+    0 12px 30px rgba(15,23,42,.2);
+
   transition:.22s;
+
   z-index:10000;
 }
 
 #globalStatus.show{
-  transform:translate(-50%,0);
+
+  transform:
+    translate(-50%,0);
+
   opacity:1;
 }
+
 
 /* =========================================================
    LOADING
    ========================================================= */
 
 .loadingLine{
+
   height:2px;
+
   width:100%;
-  background:linear-gradient(90deg,transparent,#2563eb,transparent);
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      #2563eb,
+      transparent
+    );
+
   background-size:200% 100%;
-  animation:loading 1.2s infinite;
+
+  animation:
+    loading 1.2s infinite;
 }
 
 @keyframes loading{
-  from{background-position:200% 0;}
-  to{background-position:-200% 0;}
+
+  from{
+    background-position:200% 0;
+  }
+
+  to{
+    background-position:-200% 0;
+  }
 }
 
 .hidden{
   display:none !important;
 }
+
 
 /* =========================================================
    RESPONSIVE
@@ -710,7 +1137,8 @@ tbody tr:hover{
 @media(max-width:1250px){
 
   .controls{
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:
+      1fr 1fr 1fr;
   }
 
   .searchWrap{
@@ -720,8 +1148,18 @@ tbody tr:hover{
 
 @media(max-width:1100px){
 
+  .controls{
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .searchWrap{
+    grid-column:1 / -1;
+  }
+
   .cards{
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:
+      repeat(2,1fr);
   }
 }
 
@@ -737,6 +1175,10 @@ tbody tr:hover{
 
   .userEmail{
     display:none;
+  }
+
+  .adminBadge{
+    display:none !important;
   }
 
   .controls{
@@ -774,8 +1216,10 @@ tbody tr:hover{
 
   <div class="loginCard">
 
-
-<div class="logo">◉</div>
+```
+<div class="logo">
+  ◉
+</div>
 
 <h1 class="loginTitle">
   Acebedo Optical
@@ -785,11 +1229,14 @@ tbody tr:hover{
   Central Inventory Dashboard
 </p>
 
+
 <div id="emailStep">
 
   <div class="field">
 
-    <label>EMAIL ADDRESS</label>
+    <label>
+      EMAIL ADDRESS
+    </label>
 
     <input
       id="email"
@@ -801,6 +1248,7 @@ tbody tr:hover{
 
   </div>
 
+
   <button
     id="sendOtpBtn"
     class="primaryBtn"
@@ -811,11 +1259,17 @@ tbody tr:hover{
 
 </div>
 
-<div id="otpStep" class="hidden">
+
+<div
+  id="otpStep"
+  class="hidden"
+>
 
   <div class="field">
 
-    <label>VERIFICATION CODE</label>
+    <label>
+      VERIFICATION CODE
+    </label>
 
     <input
       id="otp"
@@ -828,6 +1282,7 @@ tbody tr:hover{
 
   </div>
 
+
   <button
     id="verifyBtn"
     class="primaryBtn"
@@ -838,8 +1293,12 @@ tbody tr:hover{
 
 </div>
 
-<div id="loginStatus" class="loginStatus"></div>
 
+<div
+  id="loginStatus"
+  class="loginStatus"
+></div>
+```
 
   </div>
 
@@ -853,12 +1312,16 @@ tbody tr:hover{
 
   <div class="app">
 
+```
+<!-- TOPBAR -->
 
 <header class="topbar">
 
   <div class="brand">
 
-    <div class="brandLogo">◉</div>
+    <div class="brandLogo">
+      ◉
+    </div>
 
     <div>
 
@@ -874,9 +1337,20 @@ tbody tr:hover{
 
   </div>
 
+
   <div class="userArea">
 
-    <div id="userEmail" class="userEmail"></div>
+    <div
+      id="userEmail"
+      class="userEmail"
+    ></div>
+
+    <span
+      id="adminBadge"
+      class="adminBadge"
+    >
+      ADMIN
+    </span>
 
     <button
       class="iconBtn"
@@ -899,9 +1373,11 @@ tbody tr:hover{
 </header>
 
 
+
 <!-- CONTROLS -->
 
 <div class="controls">
+
 
   <select
     id="branch"
@@ -909,7 +1385,9 @@ tbody tr:hover{
     onchange="branchChanged()"
   >
 
-    <option value="ALL">ALL BRANCHES</option>
+    <option value="ALL">
+      ALL BRANCHES
+    </option>
 
     <option value="GAI">GAI</option>
     <option value="CAS">CAS</option>
@@ -954,7 +1432,9 @@ tbody tr:hover{
 
   <div class="searchWrap">
 
-    <span class="searchIcon">⌕</span>
+    <span class="searchIcon">
+      ⌕
+    </span>
 
     <input
       id="search"
@@ -1009,12 +1489,18 @@ tbody tr:hover{
 </div>
 
 
-<div id="loadingLine" class="loadingLine hidden"></div>
+
+<div
+  id="loadingLine"
+  class="loadingLine hidden"
+></div>
+
 
 
 <!-- STAT CARDS -->
 
 <div class="cards">
+
 
   <div class="statCard">
 
@@ -1127,12 +1613,15 @@ tbody tr:hover{
 
   </div>
 
+
 </div>
+
 
 
 <!-- TABLE -->
 
 <section class="tableCard">
+
 
   <div class="tableHeader">
 
@@ -1165,19 +1654,41 @@ tbody tr:hover{
 
         <tr>
 
-          <th>BRANCH</th>
-          <th>LENS TYPE</th>
-          <th>DESCRIPTION</th>
-          <th>TAG</th>
-          <th>SI NO.</th>
-          <th>DATE</th>
-          <th>ACTIONS</th>
+          <th>
+            BRANCH
+          </th>
+
+          <th>
+            LENS TYPE
+          </th>
+
+          <th>
+            DESCRIPTION
+          </th>
+
+          <th>
+            TAG
+          </th>
+
+          <th>
+            SI NO.
+          </th>
+
+          <th>
+            DATE
+          </th>
+
+          <th>
+            ACTIONS
+          </th>
 
         </tr>
 
       </thead>
 
-      <tbody id="tableBody"></tbody>
+
+      <tbody id="tableBody">
+      </tbody>
 
     </table>
 
@@ -1213,6 +1724,7 @@ tbody tr:hover{
       —
     </div>
 
+
     <div class="pageButtons">
 
       <button
@@ -1243,15 +1755,11 @@ tbody tr:hover{
   </div>
 
 </section>
-
+```
 
   </div>
 
 </section>
-
-<!-- =======================================================
-     BACKGROUND QUEUE
-     ======================================================= -->
 
 <div id="queuePanel"></div>
 
@@ -1260,43 +1768,48 @@ tbody tr:hover{
 <script>
 
 /* =========================================================
-   SUPABASE CONFIGURATION
-   ========================================================= */
+   SUPABASE CONFIG
+   =========================================================
 
-/*
- * PUT YOUR SUPABASE PROJECT VALUES HERE.
- *
- * Use the PUBLIC / PUBLISHABLE / ANON KEY.
- *
- * NEVER put the SERVICE ROLE KEY in this HTML.
- */
+   PUT YOUR SUPABASE PROJECT URL HERE.
+
+   PUT YOUR SUPABASE PUBLISHABLE / ANON KEY HERE.
+
+   NEVER put the service-role key in this HTML.
+   ========================================================= */
 
 const SUPABASE_URL =
   "https://hvurhnarllvfinpdkfkp.supabase.co";
 
-const SUPABASE_KEY =
-  "sb_publishable_TZ543sP2HWSoHG7EBAUJ8g_l038fmnp";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
+
+/* =========================================================
+   SUPABASE CLIENT
+   ========================================================= */
 
 const {
   createClient
 } = window.supabase;
 
-
 const supabase =
   createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_ANON_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    }
   );
 
 
 /* =========================================================
-   CONFIG
+   BRANCH TABLE MAP
    ========================================================= */
-
-const SESSION_KEY =
-  "acebedoSupabaseInventory";
-
 
 const BRANCHES = [
   "GAI",
@@ -1318,42 +1831,15 @@ const BRANCHES = [
 ];
 
 
-const rowsPerPage = 50;
+function tableName(branch,type){
 
+  return (
+    String(branch).toLowerCase() +
+    "_" +
+    type
+  );
 
-/*
- * These are the exact database columns.
- */
-
-const DB_COLUMNS = [
-  "SDATE",
-  "SUPPLIER",
-  "DR",
-  "COST",
-  "ASG",
-  "CB",
-  "FD",
-  "UNITS",
-  "POWER",
-  "LENSTYPE",
-  "PUNIT",
-  "BR",
-  "NTAGN",
-  "CATEGORY",
-  "DESCRIPTION",
-  "LENSCODE",
-  "SELLINGPRICE",
-  "DELIVERYDATE",
-  "ORNUMBER",
-  "ORDATE",
-  "REMARKS",
-  "TAGPRICE",
-  "QR",
-  "SI NO.",
-  "DATE AND TIME",
-  "USER EMAIL",
-  "STATUS"
-];
+}
 
 
 /* =========================================================
@@ -1364,92 +1850,89 @@ let currentEmail = "";
 
 let currentUser = null;
 
+let currentIsAdmin = false;
+
 let currentPage = 1;
+
+const rowsPerPage = 50;
 
 let lastRows = [];
 
 let totalRows = 0;
 
-let importRunning = false;
-
-let exportRunning = false;
-
-let currentRequest = 0;
+let searchTimer = null;
 
 
 /* =========================================================
-   TABLE HELPERS
+   FIELD HELPERS
    ========================================================= */
 
-function tableName(
-  branch,
-  type
-){
+function valueOf(row,name){
 
-  const b =
-    String(branch || "")
-      .trim()
-      .toLowerCase();
-
-  if(
-    !BRANCHES
-      .map(x => x.toLowerCase())
-      .includes(b)
-  ){
-
-    throw new Error(
-      "Invalid branch: " + branch
-    );
-
+  if(!row){
+    return "";
   }
 
-
   return (
-    b +
-    "_" +
-    type
+    row[name] ??
+    row[name.toUpperCase()] ??
+    row[name.toLowerCase()] ??
+    ""
   );
 
 }
 
 
-function stockTable(branch){
-  return tableName(
-    branch,
-    "stocks"
+function rowTag(row){
+
+  return String(
+    valueOf(row,"NTAGN")
   );
+
 }
 
 
-function soldTable(branch){
-  return tableName(
-    branch,
-    "scanresults"
+function rowDescription(row){
+
+  return String(
+    valueOf(row,"DESCRIPTION")
   );
+
 }
 
 
-function auditTable(branch){
-  return tableName(
-    branch,
-    "audit"
+function rowLensType(row){
+
+  return String(
+    valueOf(row,"LENSTYPE")
   );
+
+}
+
+
+function rowSI(row){
+
+  return String(
+    valueOf(row,"SI NO.")
+  );
+
+}
+
+
+function rowDate(row){
+
+  return String(
+    valueOf(row,"DATE AND TIME")
+  );
+
 }
 
 
 /* =========================================================
-   AUTHORIZATION
+   ALLOWED USERS
    ========================================================= */
 
-/*
- * The Supabase Auth user is authenticated first.
- *
- * Then app_allowed_users is checked.
- */
-
-async function checkAllowedUser(
-  email
-){
+async function getAllowedUser(email){
 
   const normalized =
     String(email || "")
@@ -1457,26 +1940,39 @@ async function checkAllowedUser(
       .toLowerCase();
 
 
+  if(!normalized){
+
+    throw new Error(
+      "Enter your authorized email address."
+    );
+
+  }
+
+
   const {
     data,
     error
-  } =
-    await supabase
-      .from("app_allowed_users")
-      .select(
-        "email,is_admin,active"
-      )
-      .eq(
-        "email",
-        normalized
-      )
-      .maybeSingle();
+  } = await supabase
+    .from("app_allowed_users")
+    .select(
+      "email,is_admin,active"
+    )
+    .eq(
+      "email",
+      normalized
+    )
+    .maybeSingle();
 
 
   if(error){
 
+    console.error(
+      "Allowed-user lookup:",
+      error
+    );
+
     throw new Error(
-      "Unable to check authorized users: " +
+      "Unable to check allowed users. " +
       error.message
     );
 
@@ -1486,7 +1982,7 @@ async function checkAllowedUser(
   if(!data){
 
     throw new Error(
-      "This email is not authorized."
+      "This email is not on the allowed-users list."
     );
 
   }
@@ -1495,7 +1991,7 @@ async function checkAllowedUser(
   if(data.active !== true){
 
     throw new Error(
-      "This account is inactive."
+      "This account is currently inactive."
     );
 
   }
@@ -1507,7 +2003,7 @@ async function checkAllowedUser(
 
 
 /* =========================================================
-   LOGIN
+   SEND OTP
    ========================================================= */
 
 async function sendOTP(){
@@ -1546,33 +2042,55 @@ async function sendOTP(){
   try{
 
     /*
-     * Check app_allowed_users BEFORE
-     * sending the OTP.
+     * FIRST:
+     * Check app_allowed_users.
      */
 
-    await checkAllowedUser(
-      email
-    );
+    const allowed =
+      await getAllowedUser(
+        email
+      );
 
+
+    /*
+     * SECOND:
+     * Ask Supabase Auth to send
+     * the email OTP.
+     *
+     * shouldCreateUser:false means
+     * an unauthorized/new account is
+     * not silently created by this call.
+     */
 
     button.textContent =
-      "Sending...";
+      "Sending code...";
 
 
     const {
       error
     } =
       await supabase.auth.signInWithOtp({
+
         email:email,
+
         options:{
-          shouldCreateUser:true
+          shouldCreateUser:false
         }
+
       });
 
 
     if(error){
 
-      throw error;
+      /*
+       * Some Supabase configurations
+       * may not allow shouldCreateUser:false
+       * depending on Auth settings.
+       */
+
+      throw new Error(
+        error.message
+      );
 
     }
 
@@ -1596,11 +2114,17 @@ async function sendOTP(){
 
     setLoginStatus(
       "Verification code sent to " +
-      email
+      allowed.email
     );
 
 
   }catch(error){
+
+    console.error(
+      "OTP error:",
+      error
+    );
+
 
     setLoginStatus(
       error.message ||
@@ -1633,14 +2157,14 @@ async function verifyOTP(){
       .toLowerCase();
 
 
-  const otp =
+  const token =
     document
       .getElementById("otp")
       .value
       .trim();
 
 
-  if(otp.length !== 6){
+  if(token.length !== 6){
 
     setLoginStatus(
       "Enter the 6-digit verification code."
@@ -1665,20 +2189,37 @@ async function verifyOTP(){
 
   try{
 
+    /*
+     * Verify that the email is STILL
+     * allowed before creating the session.
+     */
+
+    const allowed =
+      await getAllowedUser(
+        email
+      );
+
+
     const {
       data,
       error
     } =
       await supabase.auth.verifyOtp({
+
         email:email,
-        token:otp,
+
+        token:token,
+
         type:"email"
+
       });
 
 
     if(error){
 
-      throw error;
+      throw new Error(
+        error.message
+      );
 
     }
 
@@ -1686,21 +2227,10 @@ async function verifyOTP(){
     if(!data.session){
 
       throw new Error(
-        "Supabase did not create a session."
+        "Authentication succeeded but no session was created."
       );
 
     }
-
-
-    /*
-     * Check authorization again
-     * after authentication.
-     */
-
-    const allowed =
-      await checkAllowedUser(
-        email
-      );
 
 
     currentUser =
@@ -1711,10 +2241,22 @@ async function verifyOTP(){
       allowed.email;
 
 
-    localStorage.setItem(
-      SESSION_KEY,
-      "1"
-    );
+    currentIsAdmin =
+      allowed.is_admin === true;
+
+
+    /*
+     * Final authorization check.
+     */
+
+    const allowedAgain =
+      await getAllowedUser(
+        currentEmail
+      );
+
+
+    currentIsAdmin =
+      allowedAgain.is_admin === true;
 
 
     showDashboard();
@@ -1722,9 +2264,15 @@ async function verifyOTP(){
 
   }catch(error){
 
+    console.error(
+      "Verify error:",
+      error
+    );
+
+
     setLoginStatus(
       error.message ||
-      "Verification failed."
+      "Invalid verification code."
     );
 
   }finally{
@@ -1748,16 +2296,29 @@ async function checkExistingSession(){
   try{
 
     const {
-      data
+      data,
+      error
     } =
       await supabase.auth.getSession();
 
 
-    if(
-      !data ||
-      !data.session ||
-      !data.session.user
-    ){
+    if(error){
+
+      console.error(
+        error
+      );
+
+      return false;
+
+    }
+
+
+    const session =
+      data.session;
+
+
+    if(!session ||
+       !session.user){
 
       return false;
 
@@ -1765,35 +2326,60 @@ async function checkExistingSession(){
 
 
     const email =
-      data.session.user.email
-        .trim()
-        .toLowerCase();
+      String(
+        session.user.email || ""
+      )
+      .trim()
+      .toLowerCase();
 
 
-    const allowed =
-      await checkAllowedUser(
-        email
-      );
+    if(!email){
+
+      return false;
+
+    }
 
 
-    currentUser =
-      data.session.user;
+    /*
+     * Do not trust an existing
+     * browser session blindly.
+     *
+     * Check app_allowed_users again.
+     */
+
+    try{
+
+      const allowed =
+        await getAllowedUser(
+          email
+        );
 
 
-    currentEmail =
-      allowed.email;
+      currentUser =
+        session.user;
+
+      currentEmail =
+        allowed.email;
+
+      currentIsAdmin =
+        allowed.is_admin === true;
 
 
-    return true;
+      return true;
+
+    }catch(error){
+
+      await supabase.auth.signOut();
+
+      return false;
+
+    }
 
   }catch(error){
 
     console.error(
-      "Session check:",
       error
     );
-
-    await supabase.auth.signOut();
 
     return false;
 
@@ -1821,18 +2407,16 @@ async function logout(){
   }
 
 
-  localStorage.removeItem(
-    SESSION_KEY
-  );
-
-
   currentUser = null;
 
   currentEmail = "";
 
-  currentPage = 1;
+  currentIsAdmin = false;
 
   lastRows = [];
+
+  totalRows = 0;
+
 
   document
     .getElementById("dashboard")
@@ -1859,16 +2443,14 @@ async function logout(){
 
 
   document
-    .getElementById("email")
-    .value = "";
-
-
-  document
     .getElementById("otp")
-    .value = "";
+    .value =
+      "";
 
 
-  setLoginStatus("");
+  setLoginStatus(
+    ""
+  );
 
 }
 
@@ -1897,7 +2479,89 @@ function showDashboard(){
       currentEmail;
 
 
-  refreshDashboard();
+  const adminBadge =
+    document.getElementById(
+      "adminBadge"
+    );
+
+
+  adminBadge.style.display =
+    currentIsAdmin
+      ? "inline-flex"
+      : "none";
+
+
+  currentPage = 1;
+
+  lastRows = [];
+
+  totalRows = 0;
+
+
+  /*
+   * Do NOT automatically load all
+   * inventory.
+   *
+   * User searches when needed.
+   */
+
+  resetDashboardDisplay();
+
+}
+
+
+/* =========================================================
+   RESET DISPLAY
+   ========================================================= */
+
+function resetDashboardDisplay(){
+
+  document
+    .getElementById("availableTotal")
+    .textContent =
+      "—";
+
+
+  document
+    .getElementById("soldTotal")
+    .textContent =
+      "—";
+
+
+  document
+    .getElementById("auditTotal")
+    .textContent =
+      "—";
+
+
+  document
+    .getElementById("showingTotal")
+    .textContent =
+      "—";
+
+
+  document
+    .getElementById("tableBody")
+    .innerHTML =
+      "";
+
+
+  document
+    .getElementById("emptyState")
+    .style.display =
+      "block";
+
+
+  document
+    .getElementById("pageInfo")
+    .textContent =
+      "Search your inventory";
+
+
+  document
+    .getElementById("pageCurrent")
+    .textContent =
+      "1";
 
 }
 
@@ -1906,9 +2570,7 @@ function showDashboard(){
    LOGIN STATUS
    ========================================================= */
 
-function setLoginStatus(
-  message
-){
+function setLoginStatus(message){
 
   document
     .getElementById("loginStatus")
@@ -1919,554 +2581,104 @@ function setLoginStatus(
 
 
 /* =========================================================
-   SUPABASE ERROR
+   BRANCH / SHEET CHANGES
    ========================================================= */
 
-function throwSupabaseError(
-  error,
-  action
-){
+function branchChanged(){
 
-  if(!error){
-    return;
-  }
+  currentPage = 1;
 
+  resetDashboardDisplay();
 
-  console.error(
-    action,
-    error
-  );
-
-
-  throw new Error(
-    action +
-    ": " +
-    (
-      error.message ||
-      "Supabase request failed."
-    )
-  );
-
-}
-
-
-/* =========================================================
-   GET CURRENT AUTH USER
-   ========================================================= */
-
-async function requireAuth(){
-
-  const {
-    data,
-    error
-  } =
-    await supabase.auth.getSession();
-
-
-  if(error){
-
-    throw error;
-
-  }
-
-
-  if(
-    !data ||
-    !data.session ||
-    !data.session.user
-  ){
-
-    throw new Error(
-      "SESSION_EXPIRED"
-    );
-
-  }
-
-
-  return data.session.user;
-
-}
-
-
-/* =========================================================
-   READ BRANCH STOCKS
-   ========================================================= */
-
-async function fetchStocks(
-  branch
-){
-
-  const table =
-    stockTable(branch);
-
-
-  const pageSize = 1000;
-
-  let from = 0;
-
-  const all = [];
-
-
-  while(true){
-
-    const {
-      data,
-      error
-    } =
-      await supabase
-        .from(table)
-        .select("*")
-        .range(
-          from,
-          from + pageSize - 1
-        );
-
-
-    throwSupabaseError(
-      error,
-      "Loading " + table
-    );
-
-
-    if(
-      data &&
-      data.length
-    ){
-
-      all.push(
-        ...data
-      );
-
-    }
-
-
-    if(
-      !data ||
-      data.length < pageSize
-    ){
-
-      break;
-
-    }
-
-
-    from += pageSize;
-
-  }
-
-
-  return all;
-
-}
-
-
-/* =========================================================
-   READ BRANCH SOLD
-   ========================================================= */
-
-async function fetchSold(
-  branch
-){
-
-  const table =
-    soldTable(branch);
-
-
-  const pageSize = 1000;
-
-  let from = 0;
-
-  const all = [];
-
-
-  while(true){
-
-    const {
-      data,
-      error
-    } =
-      await supabase
-        .from(table)
-        .select("*")
-        .range(
-          from,
-          from + pageSize - 1
-        );
-
-
-    throwSupabaseError(
-      error,
-      "Loading " + table
-    );
-
-
-    if(
-      data &&
-      data.length
-    ){
-
-      all.push(
-        ...data
-      );
-
-    }
-
-
-    if(
-      !data ||
-      data.length < pageSize
-    ){
-
-      break;
-
-    }
-
-
-    from += pageSize;
-
-  }
-
-
-  return all;
-
-}
-
-
-/* =========================================================
-   READ BRANCH AUDIT
-   ========================================================= */
-
-async function fetchAudit(
-  branch
-){
-
-  const table =
-    auditTable(branch);
-
-
-  const pageSize = 1000;
-
-  let from = 0;
-
-  const all = [];
-
-
-  while(true){
-
-    const {
-      data,
-      error
-    } =
-      await supabase
-        .from(table)
-        .select("*")
-        .range(
-          from,
-          from + pageSize - 1
-        );
-
-
-    throwSupabaseError(
-      error,
-      "Loading " + table
-    );
-
-
-    if(
-      data &&
-      data.length
-    ){
-
-      all.push(
-        ...data
-      );
-
-    }
-
-
-    if(
-      !data ||
-      data.length < pageSize
-    ){
-
-      break;
-
-    }
-
-
-    from += pageSize;
-
-  }
-
-
-  return all;
-
-}
-
-
-/* =========================================================
-   TAG
-   ========================================================= */
-
-function getTag(
-  row
-){
-
-  return String(
-    row["NTAGN"] ??
-    ""
-  ).trim();
-
-}
-
-
-/* =========================================================
-   SEARCH TEXT
-   ========================================================= */
-
-function matchesSearch(
-  row,
-  search
-){
-
-  if(!search){
-
-    return true;
-
-  }
-
-
-  const q =
-    search
-      .toLowerCase()
+  const search =
+    document
+      .getElementById("search")
+      .value
       .trim();
-
-
-  if(!q){
-
-    return true;
-
-  }
-
-
-  return [
-    row["SDATE"],
-    row["SUPPLIER"],
-    row["DR"],
-    row["COST"],
-    row["ASG"],
-    row["CB"],
-    row["FD"],
-    row["UNITS"],
-    row["POWER"],
-    row["LENSTYPE"],
-    row["PUNIT"],
-    row["BR"],
-    row["NTAGN"],
-    row["CATEGORY"],
-    row["DESCRIPTION"],
-    row["LENSCODE"],
-    row["SELLINGPRICE"],
-    row["DELIVERYDATE"],
-    row["ORNUMBER"],
-    row["ORDATE"],
-    row["REMARKS"],
-    row["TAGPRICE"],
-    row["QR"],
-    row["SI NO."],
-    row["DATE AND TIME"],
-    row["USER EMAIL"],
-    row["STATUS"]
-  ]
-  .some(function(value){
-
-    return String(
-      value ?? ""
-    )
-    .toLowerCase()
-    .includes(q);
-
-  });
-
-}
-
-
-/* =========================================================
-   NORMALIZE ROW
-   ========================================================= */
-
-function normalizeRow(
-  row,
-  branch
-){
-
-  return {
-
-    raw:row,
-
-    branch:branch,
-
-    lenstype:String(
-      row["LENSTYPE"] ??
-      ""
-    ),
-
-    description:String(
-      row["DESCRIPTION"] ??
-      ""
-    ),
-
-    tag:getTag(row),
-
-    si:String(
-      row["SI NO."] ??
-      ""
-    ),
-
-    date:String(
-      row["DATE AND TIME"] ??
-      ""
-    ),
-
-    qr:String(
-      row["QR"] ??
-      ""
-    )
-
-  };
-
-}
-
-
-/* =========================================================
-   LOAD ONE BRANCH
-   ========================================================= */
-
-async function loadBranchData(
-  branch,
-  sheet,
-  search
-){
-
-  const stocks =
-    await fetchStocks(
-      branch
-    );
-
-
-  const sold =
-    await fetchSold(
-      branch
-    );
-
-
-  const audit =
-    await fetchAudit(
-      branch
-    );
-
-
-  const soldTags =
-    new Set(
-      sold
-        .map(getTag)
-        .filter(Boolean)
-    );
-
-
-  let selected;
-
-
-  if(sheet === "stocks"){
-
-    selected =
-      stocks.filter(
-        function(row){
-
-          return !soldTags.has(
-            getTag(row)
-          );
-
-        }
-      );
-
-  }else if(sheet === "sold"){
-
-    selected =
-      sold;
-
-  }else{
-
-    selected =
-      audit;
-
-  }
 
 
   if(search){
 
-    selected =
-      selected.filter(
-        function(row){
-
-          return matchesSearch(
-            row,
-            search
-          );
-
-        }
-      );
+    refreshDashboard();
 
   }
 
+}
 
-  return {
 
-    stocks,
-    sold,
-    audit,
-    selected
+function sheetChanged(){
 
-  };
+  currentPage = 1;
+
+  resetDashboardDisplay();
+
+  const search =
+    document
+      .getElementById("search")
+      .value
+      .trim();
+
+
+  if(search){
+
+    refreshDashboard();
+
+  }
 
 }
 
 
 /* =========================================================
-   DASHBOARD LOAD
+   SEARCH
+   ========================================================= */
+
+function runSearch(){
+
+  currentPage = 1;
+
+  refreshDashboard();
+
+}
+
+
+function searchKey(event){
+
+  if(
+    event.key === "Enter"
+  ){
+
+    runSearch();
+
+  }
+
+}
+
+
+function clearSearch(){
+
+  document
+    .getElementById("search")
+    .value =
+      "";
+
+  currentPage = 1;
+
+  resetDashboardDisplay();
+
+}
+
+
+/* =========================================================
+   DIRECT SUPABASE DASHBOARD
    ========================================================= */
 
 async function refreshDashboard(){
 
-  try{
-
-    await requireAuth();
-
-  }catch(error){
-
-    if(
-      error.message ===
-      "SESSION_EXPIRED"
-    ){
-
-      logout();
-
-      return;
-
-    }
-
-
-    showStatus(
-      error.message
-    );
+  if(!currentUser){
 
     return;
 
   }
-
-
-  const requestId =
-    ++currentRequest;
 
 
   const branch =
@@ -2488,146 +2700,56 @@ async function refreshDashboard(){
       .trim();
 
 
+  if(!search){
+
+    resetDashboardDisplay();
+
+    return;
+
+  }
+
+
   setLoading(true);
 
 
   try{
 
-    const branches =
-      branch === "ALL"
-        ? BRANCHES
-        : [branch];
-
-
-    const allSelected = [];
-
-    let totalAvailable = 0;
-
-    let totalSold = 0;
-
-    let totalAudit = 0;
-
-
     /*
-     * Read branches independently.
-     *
-     * Promise.all allows multiple branches
-     * to load simultaneously.
+     * Re-check authorization before
+     * sensitive database work.
      */
 
-    const results =
-      await Promise.all(
-        branches.map(
-          function(b){
-
-            return loadBranchData(
-              b,
-              sheet,
-              search
-            );
-
-          }
-        )
+    const allowed =
+      await getAllowedUser(
+        currentEmail
       );
 
 
-    if(
-      requestId !== currentRequest
-    ){
-
-      return;
-
-    }
+    currentIsAdmin =
+      allowed.is_admin === true;
 
 
-    results.forEach(
-      function(result,index){
-
-        const b =
-          branches[index];
-
-
-        totalAvailable +=
-          result.stocks.filter(
-            function(row){
-
-              return !result
-                .sold
-                .some(
-                  function(soldRow){
-
-                    return (
-                      getTag(soldRow) &&
-                      getTag(soldRow) ===
-                      getTag(row)
-                    );
-
-                  }
-                );
-
-            }
-          ).length;
-
-
-        totalSold +=
-          result.sold.length;
-
-
-        totalAudit +=
-          result.audit.length;
-
-
-        result.selected.forEach(
-          function(row){
-
-            allSelected.push(
-              normalizeRow(
-                row,
-                b
-              )
-            );
-
-          }
-        );
-
-      }
-    );
-
-
-    totalRows =
-      allSelected.length;
-
-
-    const start =
-      (
-        currentPage -
-        1
-      ) *
-      rowsPerPage;
+    const data =
+      await loadDashboardData(
+        branch,
+        sheet,
+        search,
+        currentPage,
+        rowsPerPage
+      );
 
 
     lastRows =
-      allSelected.slice(
-        start,
-        start + rowsPerPage
-      );
+      data.rows;
 
 
-    updateStats({
+    totalRows =
+      data.total;
 
-      availableTotal:
-        totalAvailable,
 
-      soldTotal:
-        totalSold,
-
-      auditTotal:
-        totalAudit,
-
-      showing:
-        totalRows
-
-    });
+    updateStats(
+      data.stats
+    );
 
 
     renderTable(
@@ -2635,20 +2757,27 @@ async function refreshDashboard(){
     );
 
 
-    updateTableTitle(
-      branch,
-      sheet,
-      search,
-      totalRows
-    );
-
-
   }catch(error){
 
     console.error(
-      "Dashboard:",
+      "Dashboard error:",
       error
     );
+
+
+    if(
+      isAuthError(error)
+    ){
+
+      await logout();
+
+      setLoginStatus(
+        "Your session has expired."
+      );
+
+      return;
+
+    }
 
 
     showStatus(
@@ -2667,66 +2796,440 @@ async function refreshDashboard(){
 
 
 /* =========================================================
-   BRANCH / SHEET
+   LOAD DASHBOARD
    ========================================================= */
 
-function branchChanged(){
+async function loadDashboardData(
+  branch,
+  sheet,
+  search,
+  page,
+  limit
+){
 
-  currentPage = 1;
+  let branches =
+    branch === "ALL"
+      ? BRANCHES.slice()
+      : [branch];
 
-  refreshDashboard();
 
-}
+  let allRows = [];
 
 
-function sheetChanged(){
+  /*
+   * For normal searches, retrieve
+   * matching rows from each branch.
+   */
 
-  currentPage = 1;
+  for(
+    const branchCode of branches
+  ){
 
-  refreshDashboard();
+    const rows =
+      await queryBranch(
+        branchCode,
+        sheet,
+        search
+      );
+
+
+    rows.forEach(
+      row => {
+
+        row.__branch =
+          branchCode;
+
+      }
+    );
+
+
+    allRows =
+      allRows.concat(
+        rows
+      );
+
+  }
+
+
+  /*
+   * Sort newest/last imported first
+   * when possible.
+   */
+
+  allRows.sort(
+    function(a,b){
+
+      const da =
+        String(
+          valueOf(
+            a,
+            "DATE AND TIME"
+          )
+        );
+
+
+      const db =
+        String(
+          valueOf(
+            b,
+            "DATE AND TIME"
+          )
+        );
+
+
+      return db.localeCompare(
+        da
+      );
+
+    }
+  );
+
+
+  const total =
+    allRows.length;
+
+
+  const start =
+    (page - 1) * limit;
+
+
+  const paged =
+    allRows.slice(
+      start,
+      start + limit
+    );
+
+
+  /*
+   * Counts are calculated separately
+   * so the dashboard cards remain useful.
+   */
+
+  const stats =
+    await calculateStats(
+      branch
+    );
+
+
+  return {
+    rows:paged,
+    total:total,
+    stats:stats
+  };
 
 }
 
 
 /* =========================================================
-   SEARCH
+   QUERY ONE BRANCH
    ========================================================= */
 
-function runSearch(){
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-function searchKey(
-  event
+async function queryBranch(
+  branch,
+  sheet,
+  search
 ){
 
-  if(
-    event.key ===
-    "Enter"
-  ){
+  const searchText =
+    String(
+      search || ""
+    )
+    .trim();
 
-    runSearch();
+
+  if(sheet === "stocks"){
+
+    return await queryAvailable(
+      branch,
+      searchText
+    );
 
   }
 
+
+  if(sheet === "sold"){
+
+    return await querySold(
+      branch,
+      searchText
+    );
+
+  }
+
+
+  if(sheet === "audit"){
+
+    return await queryAudit(
+      branch,
+      searchText
+    );
+
+  }
+
+
+  return [];
+
 }
 
 
-function clearSearch(){
+/* =========================================================
+   SEARCH STOCKS
+   ========================================================= */
 
-  document
-    .getElementById("search")
-    .value = "";
+async function queryAvailable(
+  branch,
+  searchText
+){
+
+  /*
+   * Get matching stock rows.
+   */
+
+  let query =
+    supabase
+      .from(
+        tableName(
+          branch,
+          "stocks"
+        )
+      )
+      .select(
+        "*"
+      );
 
 
-  currentPage = 1;
+  /*
+   * Search the fields used by
+   * the original dashboard.
+   */
 
-  refreshDashboard();
+  if(searchText){
+
+    const safe =
+      searchText
+        .replace(/,/g," ")
+        .replace(/\./g," ");
+
+
+    query =
+      query.or(
+        [
+          `"NTAGN".ilike.%${safe}%`,
+          `"DESCRIPTION".ilike.%${safe}%`,
+          `"LENSTYPE".ilike.%${safe}%`,
+          `"SI NO.".ilike.%${safe}%`,
+          `"QR".ilike.%${safe}%`,
+          `"LENSCODE".ilike.%${safe}%`
+        ].join(",")
+      );
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await query
+      .limit(1000);
+
+
+  if(error){
+
+    throw error;
+
+  }
+
+
+  const stocks =
+    data || [];
+
+
+  /*
+   * Remove sold tags.
+   *
+   * This preserves the original
+   * dashboard behavior:
+   *
+   * AVAILABLE = stocks - sold tags
+   */
+
+  const {
+    data:soldData,
+    error:soldError
+  } =
+    await supabase
+      .from(
+        tableName(
+          branch,
+          "scanresults"
+        )
+      )
+      .select(
+        "NTAGN"
+      )
+      .limit(100000);
+
+
+  if(soldError){
+
+    throw soldError;
+
+  }
+
+
+  const soldTags =
+    new Set(
+      (soldData || [])
+        .map(
+          row =>
+            String(
+              valueOf(
+                row,
+                "NTAGN"
+              )
+            )
+        )
+        .filter(Boolean)
+    );
+
+
+  return stocks.filter(
+    row =>
+      !soldTags.has(
+        rowTag(row)
+      )
+  );
+
+}
+
+
+/* =========================================================
+   SEARCH SOLD
+   ========================================================= */
+
+async function querySold(
+  branch,
+  searchText
+){
+
+  let query =
+    supabase
+      .from(
+        tableName(
+          branch,
+          "scanresults"
+        )
+      )
+      .select(
+        "*"
+      );
+
+
+  if(searchText){
+
+    const safe =
+      searchText
+        .replace(/,/g," ")
+        .replace(/\./g," ");
+
+
+    query =
+      query.or(
+        [
+          `"NTAGN".ilike.%${safe}%`,
+          `"DESCRIPTION".ilike.%${safe}%`,
+          `"LENSTYPE".ilike.%${safe}%`,
+          `"SI NO.".ilike.%${safe}%`,
+          `"QR".ilike.%${safe}%`,
+          `"LENSCODE".ilike.%${safe}%`
+        ].join(",")
+      );
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await query
+      .limit(1000);
+
+
+  if(error){
+
+    throw error;
+
+  }
+
+
+  return data || [];
+
+}
+
+
+/* =========================================================
+   SEARCH AUDIT
+   ========================================================= */
+
+async function queryAudit(
+  branch,
+  searchText
+){
+
+  let query =
+    supabase
+      .from(
+        tableName(
+          branch,
+          "audit"
+        )
+      )
+      .select(
+        "*"
+      );
+
+
+  if(searchText){
+
+    const safe =
+      searchText
+        .replace(/,/g," ")
+        .replace(/\./g," ");
+
+
+    query =
+      query.or(
+        [
+          `"NTAGN".ilike.%${safe}%`,
+          `"DESCRIPTION".ilike.%${safe}%`,
+          `"LENSTYPE".ilike.%${safe}%`,
+          `"SI NO.".ilike.%${safe}%`,
+          `"QR".ilike.%${safe}%`,
+          `"LENSCODE".ilike.%${safe}%`
+        ].join(",")
+      );
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await query
+      .limit(1000);
+
+
+  if(error){
+
+    throw error;
+
+  }
+
+
+  return data || [];
 
 }
 
@@ -2735,9 +3238,257 @@ function clearSearch(){
    STATS
    ========================================================= */
 
-function updateStats(
-  data
+async function calculateStats(
+  selectedBranch
 ){
+
+  const branches =
+    selectedBranch === "ALL"
+      ? BRANCHES
+      : [selectedBranch];
+
+
+  let availableTotal = 0;
+
+  let soldTotal = 0;
+
+  let auditTotal = 0;
+
+
+  /*
+   * Run branch requests in parallel.
+   */
+
+  const results =
+    await Promise.all(
+
+      branches.map(
+        async branch => {
+
+          const stockPromise =
+            supabase
+              .from(
+                tableName(
+                  branch,
+                  "stocks"
+                )
+              )
+              .select(
+                "NTAGN",
+                {
+                  count:"exact",
+                  head:true
+                }
+              );
+
+
+          const soldPromise =
+            supabase
+              .from(
+                tableName(
+                  branch,
+                  "scanresults"
+                )
+              )
+              .select(
+                "NTAGN",
+                {
+                  count:"exact",
+                  head:true
+                }
+              );
+
+
+          const auditPromise =
+            supabase
+              .from(
+                tableName(
+                  branch,
+                  "audit"
+                )
+              )
+              .select(
+                "NTAGN",
+                {
+                  count:"exact",
+                  head:true
+                }
+              );
+
+
+          const [
+            stockResult,
+            soldResult,
+            auditResult
+          ] =
+            await Promise.all([
+              stockPromise,
+              soldPromise,
+              auditPromise
+            ]);
+
+
+          if(stockResult.error){
+            throw stockResult.error;
+          }
+
+          if(soldResult.error){
+            throw soldResult.error;
+          }
+
+          if(auditResult.error){
+            throw auditResult.error;
+          }
+
+
+          /*
+           * Exact available count requires
+           * comparing stock tags against sold tags.
+           *
+           * Retrieve tags only.
+           */
+
+          const [
+            stockTagsResult,
+            soldTagsResult
+          ] =
+            await Promise.all([
+
+              supabase
+                .from(
+                  tableName(
+                    branch,
+                    "stocks"
+                  )
+                )
+                .select(
+                  "NTAGN"
+                )
+                .limit(100000),
+
+              supabase
+                .from(
+                  tableName(
+                    branch,
+                    "scanresults"
+                  )
+                )
+                .select(
+                  "NTAGN"
+                )
+                .limit(100000)
+
+            ]);
+
+
+          if(stockTagsResult.error){
+            throw stockTagsResult.error;
+          }
+
+          if(soldTagsResult.error){
+            throw soldTagsResult.error;
+          }
+
+
+          const soldTags =
+            new Set(
+              (soldTagsResult.data || [])
+                .map(
+                  r =>
+                    String(
+                      valueOf(
+                        r,
+                        "NTAGN"
+                      )
+                    )
+                )
+                .filter(Boolean)
+            );
+
+
+          let available = 0;
+
+
+          (stockTagsResult.data || [])
+            .forEach(
+              r => {
+
+                const tag =
+                  String(
+                    valueOf(
+                      r,
+                      "NTAGN"
+                    )
+                  );
+
+
+                if(
+                  tag &&
+                  !soldTags.has(tag)
+                ){
+
+                  available++;
+
+                }
+
+              }
+            );
+
+
+          return {
+
+            available,
+
+            sold:
+              soldResult.count || 0,
+
+            audit:
+              auditResult.count || 0
+
+          };
+
+        }
+      )
+
+    );
+
+
+  results.forEach(
+    result => {
+
+      availableTotal +=
+        result.available;
+
+      soldTotal +=
+        result.sold;
+
+      auditTotal +=
+        result.audit;
+
+    }
+  );
+
+
+  return {
+
+    availableTotal,
+
+    soldTotal,
+
+    auditTotal,
+
+    showing:totalRows
+
+  };
+
+}
+
+
+/* =========================================================
+   STATS UI
+   ========================================================= */
+
+function updateStats(data){
 
   document
     .getElementById("availableTotal")
@@ -2767,54 +3518,7 @@ function updateStats(
     .getElementById("showingTotal")
     .textContent =
       formatNumber(
-        data.showing
-      );
-
-}
-
-
-/* =========================================================
-   TABLE TITLE
-   ========================================================= */
-
-function updateTableTitle(
-  branch,
-  sheet,
-  search,
-  total
-){
-
-  const branchText =
-    branch === "ALL"
-      ? "All branches"
-      : branch;
-
-
-  const sheetText =
-    sheet === "stocks"
-      ? "Available stocks"
-      : sheet === "sold"
-        ? "Sold out"
-        : "Audit";
-
-
-  document
-    .getElementById("tableTitle")
-    .textContent =
-      sheetText;
-
-
-  document
-    .getElementById("tableSub")
-    .textContent =
-      branchText +
-      " • " +
-      total.toLocaleString() +
-      " matching records" +
-      (
-        search
-          ? " • Search: " + search
-          : ""
+        totalRows
       );
 
 }
@@ -2824,9 +3528,7 @@ function updateTableTitle(
    TABLE
    ========================================================= */
 
-function renderTable(
-  rows
-){
+function renderTable(rows){
 
   const body =
     document.getElementById(
@@ -2840,7 +3542,8 @@ function renderTable(
     );
 
 
-  body.innerHTML = "";
+  body.innerHTML =
+    "";
 
 
   if(
@@ -2858,23 +3561,7 @@ function renderTable(
         "No records found";
 
 
-    document
-      .getElementById("pageCurrent")
-      .textContent =
-        currentPage;
-
-
-    document
-      .getElementById("prevBtn")
-      .disabled =
-        currentPage <= 1;
-
-
-    document
-      .getElementById("nextBtn")
-      .disabled =
-        true;
-
+    updatePagination();
 
     return;
 
@@ -2894,124 +3581,85 @@ function renderTable(
         );
 
 
+      const branch =
+        String(
+          row.__branch || ""
+        );
+
+
+      const type =
+        rowLensType(row);
+
+
+      const description =
+        rowDescription(row);
+
+
+      const tag =
+        rowTag(row);
+
+
+      const si =
+        rowSI(row);
+
+
+      const date =
+        rowDate(row);
+
+
       tr.innerHTML = `
 
         <td>
           <span class="branchTag">
-            ${escapeHtml(row.branch)}
+            ${escapeHtml(branch)}
           </span>
         </td>
 
         <td>
           <span class="typeTag">
-            ${escapeHtml(row.lenstype || "—")}
+            ${escapeHtml(type || "—")}
           </span>
         </td>
 
         <td>
-          ${escapeHtml(row.description || "—")}
+          ${escapeHtml(description || "—")}
         </td>
 
         <td>
           <span class="tag">
-            ${escapeHtml(row.tag || "—")}
+            ${escapeHtml(tag || "—")}
           </span>
         </td>
 
-        <td></td>
-
         <td>
-          ${escapeHtml(row.date || "—")}
+          <input
+            class="siInput"
+            value="${escapeHtml(si)}"
+            data-tag="${escapeHtml(tag)}"
+            data-branch="${escapeHtml(branch)}"
+            onchange="saveSI(this)"
+          >
         </td>
 
-        <td></td>
+        <td>
+          ${escapeHtml(date || "—")}
+        </td>
+
+        <td>
+
+          <button
+            class="actionBtn danger"
+            onclick="deleteRow(
+              '${jsEscape(branch)}',
+              '${jsEscape(tag)}'
+            )"
+          >
+            Delete
+          </button>
+
+        </td>
 
       `;
-
-
-      /*
-       * SI input
-       */
-
-      const siCell =
-        tr.children[4];
-
-
-      const siInput =
-        document.createElement(
-          "input"
-        );
-
-
-      siInput.className =
-        "siInput";
-
-
-      siInput.value =
-        row.si;
-
-
-      siInput.dataset.tag =
-        row.tag;
-
-
-      siInput.dataset.branch =
-        row.branch;
-
-
-      siInput.addEventListener(
-        "change",
-        function(){
-
-          saveSI(
-            siInput
-          );
-
-        }
-      );
-
-
-      siCell.appendChild(
-        siInput
-      );
-
-
-      /*
-       * Delete button
-       */
-
-      const actionCell =
-        tr.children[6];
-
-
-      const deleteButton =
-        document.createElement(
-          "button"
-        );
-
-
-      deleteButton.className =
-        "actionBtn danger";
-
-
-      deleteButton.textContent =
-        "Delete";
-
-
-      deleteButton.onclick =
-        function(){
-
-          deleteRow(
-            row.branch,
-            row.tag
-          );
-
-        };
-
-
-      actionCell.appendChild(
-        deleteButton
-      );
 
 
       body.appendChild(
@@ -3023,17 +3671,14 @@ function renderTable(
 
 
   const start =
-    (
-      currentPage -
-      1
-    ) *
-    rowsPerPage;
+    totalRows === 0
+      ? 0
+      : ((currentPage - 1) * rowsPerPage) + 1;
 
 
   const end =
     Math.min(
-      start +
-      rows.length,
+      currentPage * rowsPerPage,
       totalRows
     );
 
@@ -3042,31 +3687,120 @@ function renderTable(
     .getElementById("pageInfo")
     .textContent =
       "Showing " +
-      (
-        start + 1
-      ).toLocaleString() +
+      start +
       "–" +
-      end.toLocaleString() +
+      end +
       " of " +
-      totalRows.toLocaleString();
+      totalRows;
 
 
-  document
-    .getElementById("pageCurrent")
-    .textContent =
-      currentPage;
+  updatePagination();
+
+}
 
 
-  document
-    .getElementById("prevBtn")
-    .disabled =
-      currentPage <= 1;
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+function updatePagination(){
+
+  const pageCurrent =
+    document.getElementById(
+      "pageCurrent"
+    );
 
 
-  document
-    .getElementById("nextBtn")
-    .disabled =
-      end >= totalRows;
+  const prev =
+    document.getElementById(
+      "prevBtn"
+    );
+
+
+  const next =
+    document.getElementById(
+      "nextBtn"
+    );
+
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        totalRows /
+        rowsPerPage
+      )
+    );
+
+
+  pageCurrent.textContent =
+    currentPage;
+
+
+  prev.disabled =
+    currentPage <= 1;
+
+
+  next.disabled =
+    currentPage >= totalPages;
+
+
+  prev.style.opacity =
+    prev.disabled
+      ? ".45"
+      : "1";
+
+
+  next.style.opacity =
+    next.disabled
+      ? ".45"
+      : "1";
+
+}
+
+
+function previousPage(){
+
+  if(
+    currentPage <= 1
+  ){
+
+    return;
+
+  }
+
+
+  currentPage--;
+
+  refreshDashboard();
+
+}
+
+
+function nextPage(){
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        totalRows /
+        rowsPerPage
+      )
+    );
+
+
+  if(
+    currentPage >= totalPages
+  ){
+
+    return;
+
+  }
+
+
+  currentPage++;
+
+  refreshDashboard();
 
 }
 
@@ -3075,9 +3809,7 @@ function renderTable(
    SAVE SI
    ========================================================= */
 
-async function saveSI(
-  input
-){
+async function saveSI(input){
 
   const branch =
     input.dataset.branch;
@@ -3104,24 +3836,20 @@ async function saveSI(
 
   try{
 
-    await requireAuth();
-
-
-    const table =
-      stockTable(
-        branch
-      );
-
-
     /*
-     * Only SI NO. is changed.
+     * Update ONLY SI NO.
      */
 
     const {
       error
     } =
       await supabase
-        .from(table)
+        .from(
+          tableName(
+            branch,
+            "stocks"
+          )
+        )
         .update({
           "SI NO.":si
         })
@@ -3131,10 +3859,86 @@ async function saveSI(
         );
 
 
-    throwSupabaseError(
-      error,
-      "Saving SI No."
-    );
+    if(error){
+
+      throw error;
+
+    }
+
+
+    /*
+     * Also update scanresults/audit
+     * only if the displayed record
+     * belongs to those sheets.
+     *
+     * For AVAILABLE STOCKS the
+     * primary update is stocks.
+     */
+
+    const sheet =
+      document
+        .getElementById("sheet")
+        .value;
+
+
+    if(sheet === "sold"){
+
+      const {
+        error:soldError
+      } =
+        await supabase
+          .from(
+            tableName(
+              branch,
+              "scanresults"
+            )
+          )
+          .update({
+            "SI NO.":si
+          })
+          .eq(
+            "NTAGN",
+            tag
+          );
+
+
+      if(soldError){
+
+        throw soldError;
+
+      }
+
+    }
+
+
+    if(sheet === "audit"){
+
+      const {
+        error:auditError
+      } =
+        await supabase
+          .from(
+            tableName(
+              branch,
+              "audit"
+            )
+          )
+          .update({
+            "SI NO.":si
+          })
+          .eq(
+            "NTAGN",
+            tag
+          );
+
+
+      if(auditError){
+
+        throw auditError;
+
+      }
+
+    }
 
 
     showStatus(
@@ -3144,8 +3948,15 @@ async function saveSI(
 
   }catch(error){
 
+    console.error(
+      "SI update:",
+      error
+    );
+
+
     showStatus(
-      error.message
+      error.message ||
+      "Unable to update SI No."
     );
 
   }
@@ -3179,39 +3990,25 @@ async function deleteRow(
 
   try{
 
-    await requireAuth();
-
-
     const sheet =
       document
         .getElementById("sheet")
         .value;
 
 
-    let table;
+    let targetType;
 
 
     if(sheet === "stocks"){
+      targetType = "stocks";
+    }
 
-      table =
-        stockTable(
-          branch
-        );
+    else if(sheet === "sold"){
+      targetType = "scanresults";
+    }
 
-    }else if(sheet === "sold"){
-
-      table =
-        soldTable(
-          branch
-        );
-
-    }else{
-
-      table =
-        auditTable(
-          branch
-        );
-
+    else{
+      targetType = "audit";
     }
 
 
@@ -3219,7 +4016,12 @@ async function deleteRow(
       error
     } =
       await supabase
-        .from(table)
+        .from(
+          tableName(
+            branch,
+            targetType
+          )
+        )
         .delete()
         .eq(
           "NTAGN",
@@ -3227,10 +4029,11 @@ async function deleteRow(
         );
 
 
-    throwSupabaseError(
-      error,
-      "Deleting record"
-    );
+    if(error){
+
+      throw error;
+
+    }
 
 
     showStatus(
@@ -3243,8 +4046,15 @@ async function deleteRow(
 
   }catch(error){
 
+    console.error(
+      "Delete:",
+      error
+    );
+
+
     showStatus(
-      error.message
+      error.message ||
+      "Unable to delete record."
     );
 
   }
@@ -3256,9 +4066,7 @@ async function deleteRow(
    INLINE CONFIRMATION
    ========================================================= */
 
-function inlineConfirm(
-  text
-){
+function inlineConfirm(text){
 
   return new Promise(
     function(resolve){
@@ -3318,13 +4126,21 @@ function inlineConfirm(
       `;
 
 
-      document
-        .getElementById("queuePanel")
-        .appendChild(panel);
+      const queue =
+        document.getElementById(
+          "queuePanel"
+        );
+
+
+      queue.appendChild(
+        panel
+      );
 
 
       panel
-        .querySelectorAll("[data-no]")
+        .querySelectorAll(
+          "[data-no]"
+        )
         .forEach(
           function(btn){
 
@@ -3342,7 +4158,9 @@ function inlineConfirm(
 
 
       panel
-        .querySelector("[data-yes]")
+        .querySelector(
+          "[data-yes]"
+        )
         .onclick =
           function(){
 
@@ -3359,60 +4177,17 @@ function inlineConfirm(
 
 
 /* =========================================================
-   PAGINATION
-   ========================================================= */
-
-function previousPage(){
-
-  if(
-    currentPage <= 1
-  ){
-
-    return;
-
-  }
-
-
-  currentPage--;
-
-  refreshDashboard();
-
-}
-
-
-function nextPage(){
-
-  if(
-    currentPage *
-    rowsPerPage >=
-    totalRows
-  ){
-
-    return;
-
-  }
-
-
-  currentPage++;
-
-  refreshDashboard();
-
-}
-
-
-/* =========================================================
    IMPORT
    ========================================================= */
 
-async function handleImportFile(
-  event
-){
+async function handleImportFile(event){
 
   const file =
     event.target.files[0];
 
 
-  event.target.value = "";
+  event.target.value =
+    "";
 
 
   if(!file){
@@ -3450,26 +4225,12 @@ async function handleImportFile(
   }
 
 
-  if(importRunning){
-
-    showStatus(
-      "An import is already running."
-    );
-
-    return;
-
-  }
-
-
-  importRunning = true;
-
-
-  const queueId =
-    "IMPORT_" +
-    Date.now();
-
-
   try{
+
+    const queueId =
+      "IMPORT_" +
+      Date.now();
+
 
     createQueueCard(
       queueId,
@@ -3492,6 +4253,22 @@ async function handleImportFile(
       );
 
 
+    if(
+      !workbook.SheetNames.length
+    ){
+
+      throw new Error(
+        "No worksheet found."
+      );
+
+    }
+
+
+    /*
+     * Same existing stock-upload behavior:
+     * first worksheet is imported.
+     */
+
     const firstSheet =
       workbook.Sheets[
         workbook.SheetNames[0]
@@ -3509,8 +4286,10 @@ async function handleImportFile(
 
     if(!rows.length){
 
-      updateQueueError(
+      updateQueue(
         queueId,
+        0,
+        0,
         "No rows found."
       );
 
@@ -3519,11 +4298,21 @@ async function handleImportFile(
     }
 
 
+    updateQueue(
+      queueId,
+      0,
+      rows.length,
+      "Preparing " +
+      rows.length.toLocaleString() +
+      " rows..."
+    );
+
+
     await importRowsDirect(
       branch,
       rows,
-      file.name,
-      queueId
+      queueId,
+      file.name
     );
 
 
@@ -3535,14 +4324,33 @@ async function handleImportFile(
     );
 
 
-    updateQueueError(
-      queueId,
-      error.message
+    const cards =
+      document.querySelectorAll(
+        ".queueCard"
+      );
+
+
+    const last =
+      cards[cards.length - 1];
+
+
+    if(last){
+
+      updateQueueError(
+        last.id.replace(
+          "queue_",
+          ""
+        ),
+        error.message
+      );
+
+    }
+
+
+    showStatus(
+      error.message ||
+      "Import failed."
     );
-
-  }finally{
-
-    importRunning = false;
 
   }
 
@@ -3550,122 +4358,128 @@ async function handleImportFile(
 
 
 /* =========================================================
-   IMPORT ROW NORMALIZATION
+   NORMALIZE IMPORT ROW
    ========================================================= */
 
-function normalizeImportRow(
-  source
-){
+function normalizeImportRow(row){
 
-  const row = {};
+  const result = {};
 
 
-  DB_COLUMNS.forEach(
+  /*
+   * Preserve the exact database
+   * column names.
+   */
+
+  const columns = [
+
+    "SDATE",
+    "SUPPLIER",
+    "DR",
+    "COST",
+    "ASG",
+    "CB",
+    "FD",
+    "UNITS",
+    "POWER",
+    "LENSTYPE",
+    "PUNIT",
+    "BR",
+    "NTAGN",
+    "CATEGORY",
+    "DESCRIPTION",
+    "LENSCODE",
+    "SELLINGPRICE",
+    "DELIVERYDATE",
+    "ORNUMBER",
+    "ORDATE",
+    "REMARKS",
+    "TAGPRICE",
+    "QR",
+    "SI NO.",
+    "DATE AND TIME",
+    "USER EMAIL",
+    "STATUS"
+
+  ];
+
+
+  columns.forEach(
     function(column){
 
-      let value =
-        source[column];
-
-
       /*
-       * Accept common variations
-       * from Excel headers.
+       * Accept exact column header.
        */
 
       if(
-        value === undefined
+        Object.prototype.hasOwnProperty.call(
+          row,
+          column
+        )
       ){
 
-        const lower =
-          column.toLowerCase();
+        result[column] =
+          normalizeCell(
+            row[column]
+          );
 
-
-        const key =
-          Object.keys(source)
-            .find(
-              function(k){
-
-                return (
-                  String(k)
-                    .trim()
-                    .toLowerCase() ===
-                  lower
-                );
-
-              }
-            );
-
-
-        if(key !== undefined){
-
-          value =
-            source[key];
-
-        }
+        return;
 
       }
 
 
-      if(
-        value instanceof Date
-      ){
+      /*
+       * Case-insensitive fallback.
+       */
 
-        value =
-          formatDateTime(
-            value
+      const found =
+        Object.keys(row)
+          .find(
+            key =>
+              String(key)
+                .trim()
+                .toLowerCase() ===
+              column
+                .trim()
+                .toLowerCase()
+          );
+
+
+      if(found){
+
+        result[column] =
+          normalizeCell(
+            row[found]
           );
 
       }
-
-
-      if(
-        value === undefined ||
-        value === null
-      ){
-
-        value = "";
-
-      }
-
-
-      row[column] =
-        String(value);
 
     }
   );
 
 
-  return row;
+  return result;
 
 }
 
 
 /* =========================================================
-   DIRECT IMPORT
+   IMPORT DIRECT TO SUPABASE
    ========================================================= */
 
 async function importRowsDirect(
   branch,
   rows,
-  fileName,
-  queueId
+  queueId,
+  fileName
 ){
 
-  await requireAuth();
-
-
-  const table =
-    stockTable(
-      branch
+  const target =
+    tableName(
+      branch,
+      "stocks"
     );
 
-
-  /*
-   * 500 rows per request.
-   *
-   * Browser stays usable while the
-   * async upload continues.
-   */
 
   const chunkSize =
     500;
@@ -3674,50 +4488,76 @@ async function importRowsDirect(
   let processed = 0;
 
 
-  updateQueue(
-    queueId,
-    0,
-    rows.length,
-    "Preparing " +
-    fileName
-  );
-
-
   for(
     let i = 0;
     i < rows.length;
     i += chunkSize
   ){
 
+    const sourceChunk =
+      rows.slice(
+        i,
+        i + chunkSize
+      );
+
+
     const chunk =
-      rows
-        .slice(
-          i,
-          i + chunkSize
-        )
-        .map(
-          normalizeImportRow
-        );
+      sourceChunk.map(
+        normalizeImportRow
+      );
 
 
-    const {
-      error
-    } =
-      await supabase
-        .from(table)
-        .insert(
-          chunk
-        );
+    /*
+     * Skip completely empty rows.
+     */
+
+    const usable =
+      chunk.filter(
+        row =>
+          Object.keys(row).some(
+            key =>
+              String(
+                row[key] ?? ""
+              ).trim() !== ""
+          )
+      );
 
 
-    throwSupabaseError(
-      error,
-      "Import chunk"
-    );
+    if(usable.length){
+
+      /*
+       * Upsert using NTAGN as the
+       * inventory tag.
+       *
+       * This requires a UNIQUE constraint
+       * on NTAGN in the stocks table.
+       */
+
+      const {
+        error
+      } =
+        await supabase
+          .from(target)
+          .upsert(
+            usable,
+            {
+              onConflict:"NTAGN",
+              ignoreDuplicates:false
+            }
+          );
+
+
+      if(error){
+
+        throw error;
+
+      }
+
+    }
 
 
     processed +=
-      chunk.length;
+      sourceChunk.length;
 
 
     updateQueue(
@@ -3730,11 +4570,17 @@ async function importRowsDirect(
 
 
     /*
-     * Give the browser a frame between
-     * upload chunks.
+     * Yield to browser so the dashboard
+     * remains responsive.
      */
 
-    await sleep(0);
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          0
+        )
+    );
 
   }
 
@@ -3770,18 +4616,10 @@ async function importRowsDirect(
 
 async function startExport(){
 
-  if(exportRunning){
-
-    showStatus(
-      "An export is already running."
-    );
-
-    return;
-
-  }
-
-
-  exportRunning = true;
+  const branch =
+    document
+      .getElementById("branch")
+      .value;
 
 
   const queueId =
@@ -3789,29 +4627,17 @@ async function startExport(){
     Date.now();
 
 
+  createQueueCard(
+    queueId,
+    "Preparing XLSX..."
+  );
+
+
   try{
 
-    const branch =
-      document
-        .getElementById("branch")
-        .value;
-
-
-    const sheet =
-      document
-        .getElementById("sheet")
-        .value;
-
-
-    createQueueCard(
-      queueId,
-      "Preparing XLSX..."
-    );
-
-
-    const branches =
+    let branches =
       branch === "ALL"
-        ? BRANCHES
+        ? BRANCHES.slice()
         : [branch];
 
 
@@ -3819,223 +4645,178 @@ async function startExport(){
       XLSX.utils.book_new();
 
 
-    /*
-     * EXPORT AVAILABLE
-     */
+    let stockExport = [];
 
-    if(sheet === "stocks"){
+    let soldExport = [];
 
-      const exportRows = [];
+    let auditExport = [];
 
 
-      for(
-        let i = 0;
-        i < branches.length;
-        i++
-      ){
+    for(
+      let i = 0;
+      i < branches.length;
+      i++
+    ){
 
-        const b =
-          branches[i];
+      const branchCode =
+        branches[i];
 
 
-        updateQueue(
-          queueId,
-          i,
-          branches.length,
-          "Reading " +
-          b
+      const percent =
+        Math.round(
+          (
+            i /
+            branches.length
+          ) *
+          100
         );
 
 
-        const stocks =
-          await fetchStocks(
-            b
-          );
+      updateQueue(
+        queueId,
+        percent,
+        100,
+        "Reading " +
+        branchCode +
+        "..."
+      );
 
 
-        const sold =
-          await fetchSold(
-            b
-          );
+      const [
+        stockResult,
+        soldResult,
+        auditResult
+      ] =
+        await Promise.all([
+
+          supabase
+            .from(
+              tableName(
+                branchCode,
+                "stocks"
+              )
+            )
+            .select("*")
+            .limit(100000),
+
+          supabase
+            .from(
+              tableName(
+                branchCode,
+                "scanresults"
+              )
+            )
+            .select("*")
+            .limit(100000),
+
+          supabase
+            .from(
+              tableName(
+                branchCode,
+                "audit"
+              )
+            )
+            .select("*")
+            .limit(100000)
+
+        ]);
 
 
-        const soldTags =
-          new Set(
-            sold
-              .map(getTag)
-              .filter(Boolean)
-          );
+      if(stockResult.error){
+        throw stockResult.error;
+      }
+
+      if(soldResult.error){
+        throw soldResult.error;
+      }
+
+      if(auditResult.error){
+        throw auditResult.error;
+      }
 
 
-        stocks
-          .filter(
-            function(row){
+      /*
+       * Add branch marker for ALL export.
+       */
 
-              return !soldTags.has(
-                getTag(row)
-              );
+      stockExport =
+        stockExport.concat(
+          (stockResult.data || [])
+            .map(
+              row => {
 
-            }
+                const copy =
+                  Object.assign(
+                    {},
+                    row
+                  );
+
+                if(branch === "ALL"){
+                  copy.BRANCH =
+                    branchCode;
+                }
+
+                return copy;
+
+              }
+            )
+        );
+
+
+      soldExport =
+        soldExport.concat(
+          (soldResult.data || [])
+            .map(
+              row => {
+
+                const copy =
+                  Object.assign(
+                    {},
+                    row
+                  );
+
+                if(branch === "ALL"){
+                  copy.BRANCH =
+                    branchCode;
+                }
+
+                return copy;
+
+              }
+            )
+        );
+
+
+      auditExport =
+        auditExport.concat(
+          (auditResult.data || [])
+            .map(
+              row => {
+
+                const copy =
+                  Object.assign(
+                    {},
+                    row
+                  );
+
+                if(branch === "ALL"){
+                  copy.BRANCH =
+                    branchCode;
+                }
+
+                return copy;
+
+              }
+            )
+        );
+
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            0
           )
-          .forEach(
-            function(row){
-
-              exportRows.push({
-                BRANCH:b,
-                ...row
-              });
-
-            }
-          );
-
-
-        await sleep(0);
-
-      }
-
-
-      const worksheet =
-        XLSX.utils.json_to_sheet(
-          exportRows
-        );
-
-
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "STOCKS"
-      );
-
-    }
-
-
-    /*
-     * EXPORT SOLD
-     */
-
-    else if(sheet === "sold"){
-
-      const exportRows = [];
-
-
-      for(
-        let i = 0;
-        i < branches.length;
-        i++
-      ){
-
-        const b =
-          branches[i];
-
-
-        updateQueue(
-          queueId,
-          i,
-          branches.length,
-          "Reading sold " +
-          b
-        );
-
-
-        const rows =
-          await fetchSold(
-            b
-          );
-
-
-        rows.forEach(
-          function(row){
-
-            exportRows.push({
-              BRANCH:b,
-              ...row
-            });
-
-          }
-        );
-
-
-        await sleep(0);
-
-      }
-
-
-      const worksheet =
-        XLSX.utils.json_to_sheet(
-          exportRows
-        );
-
-
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "SOLD"
-      );
-
-    }
-
-
-    /*
-     * EXPORT AUDIT
-     */
-
-    else{
-
-      const exportRows = [];
-
-
-      for(
-        let i = 0;
-        i < branches.length;
-        i++
-      ){
-
-        const b =
-          branches[i];
-
-
-        updateQueue(
-          queueId,
-          i,
-          branches.length,
-          "Reading audit " +
-          b
-        );
-
-
-        const rows =
-          await fetchAudit(
-            b
-          );
-
-
-        rows.forEach(
-          function(row){
-
-            exportRows.push({
-              BRANCH:b,
-              ...row
-            });
-
-          }
-        );
-
-
-        await sleep(0);
-
-      }
-
-
-      const worksheet =
-        XLSX.utils.json_to_sheet(
-          exportRows
-        );
-
-
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "AUDIT"
       );
 
     }
@@ -4043,17 +4824,99 @@ async function startExport(){
 
     updateQueue(
       queueId,
-      95,
+      90,
       100,
-      "Creating XLSX..."
+      "Building XLSX..."
     );
 
 
     /*
-     * Generate the XLSX directly in memory.
+     * AVAILABLE STOCKS:
+     * Remove sold tags.
      */
 
-    const arrayBuffer =
+    const soldTags =
+      new Set(
+        soldExport
+          .map(
+            row =>
+              String(
+                valueOf(
+                  row,
+                  "NTAGN"
+                )
+              )
+          )
+          .filter(Boolean)
+      );
+
+
+    const availableExport =
+      stockExport.filter(
+        row =>
+          !soldTags.has(
+            String(
+              valueOf(
+                row,
+                "NTAGN"
+              )
+            )
+          )
+      );
+
+
+    const stockSheet =
+      XLSX.utils.json_to_sheet(
+        availableExport
+      );
+
+
+    const soldSheet =
+      XLSX.utils.json_to_sheet(
+        soldExport
+      );
+
+
+    const auditSheet =
+      XLSX.utils.json_to_sheet(
+        auditExport
+      );
+
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      stockSheet,
+      "stocks"
+    );
+
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      soldSheet,
+      "SOLD"
+    );
+
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      auditSheet,
+      "AUDIT"
+    );
+
+
+    const fileName =
+      "Acebedo_Inventory_" +
+      (
+        branch === "ALL"
+          ? "ALL"
+          : branch
+      ) +
+      "_" +
+      formatFileDate() +
+      ".xlsx";
+
+
+    const output =
       XLSX.write(
         workbook,
         {
@@ -4065,9 +4928,7 @@ async function startExport(){
 
     const blob =
       new Blob(
-        [
-          arrayBuffer
-        ],
+        [output],
         {
           type:
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -4079,22 +4940,6 @@ async function startExport(){
       URL.createObjectURL(
         blob
       );
-
-
-    const branchName =
-      branch === "ALL"
-        ? "ALL"
-        : branch;
-
-
-    const fileName =
-      "Acebedo_Inventory_" +
-      branchName +
-      "_" +
-      formatFileDate(
-        new Date()
-      ) +
-      ".xlsx";
 
 
     updateQueueDownload(
@@ -4119,12 +4964,14 @@ async function startExport(){
 
     updateQueueError(
       queueId,
-      error.message
+      error.message ||
+      "Export failed."
     );
 
-  }finally{
 
-    exportRunning = false;
+    showStatus(
+      "Export failed."
+    );
 
   }
 
@@ -4142,7 +4989,8 @@ function createQueueCard(
 
   let card =
     document.getElementById(
-      "queue_" + id
+      "queue_" +
+      id
     );
 
 
@@ -4168,16 +5016,18 @@ function createQueueCard(
     id;
 
 
+  const title =
+    id.startsWith("IMPORT")
+      ? "↑ Import"
+      : "↓ Export";
+
+
   card.innerHTML = `
 
     <div class="queueHead">
 
       <div class="queueTitle">
-        ${
-          id.startsWith("IMPORT")
-            ? "↑ Import"
-            : "↓ Export"
-        }
+        ${title}
       </div>
 
       <button
@@ -4219,13 +5069,15 @@ function createQueueCard(
 
   document
     .getElementById("queuePanel")
-    .appendChild(card);
+    .appendChild(
+      card
+    );
 
 }
 
 
 /* =========================================================
-   UPDATE QUEUE
+   QUEUE UPDATE
    ========================================================= */
 
 function updateQueue(
@@ -4237,7 +5089,8 @@ function updateQueue(
 
   const card =
     document.getElementById(
-      "queue_" + id
+      "queue_" +
+      id
     );
 
 
@@ -4273,19 +5126,25 @@ function updateQueue(
 
 
   card
-    .querySelector("[data-progress]")
+    .querySelector(
+      "[data-progress]"
+    )
     .style.width =
       percent + "%";
 
 
   card
-    .querySelector("[data-percent]")
+    .querySelector(
+      "[data-percent]"
+    )
     .textContent =
       percent + "%";
 
 
   card
-    .querySelector("[data-status]")
+    .querySelector(
+      "[data-status]"
+    )
     .textContent =
       text ||
       "Working...";
@@ -4304,7 +5163,8 @@ function updateQueueError(
 
   const card =
     document.getElementById(
-      "queue_" + id
+      "queue_" +
+      id
     );
 
 
@@ -4364,7 +5224,8 @@ function updateQueueDownload(
 
   const card =
     document.getElementById(
-      "queue_" + id
+      "queue_" +
+      id
     );
 
 
@@ -4387,19 +5248,41 @@ function updateQueueDownload(
     "100%";
 
 
-  card.querySelector(
-    "[data-status]"
-  ).innerHTML = `
+  const status =
+    card.querySelector(
+      "[data-status]"
+    );
 
-    <a
-      class="queueDownload"
-      href="${escapeHtml(url)}"
-      download="${escapeHtml(fileName)}"
-    >
-      Download ${escapeHtml(fileName)}
-    </a>
 
-  `;
+  status.innerHTML = "";
+
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  link.className =
+    "queueDownload";
+
+
+  link.href =
+    url;
+
+
+  link.download =
+    fileName;
+
+
+  link.textContent =
+    "Download " +
+    fileName;
+
+
+  status.appendChild(
+    link
+  );
 
 }
 
@@ -4467,116 +5350,8 @@ function setLoading(
 
 
 /* =========================================================
-   DATE
-   ========================================================= */
-
-function formatDateTime(
-  value
-){
-
-  if(
-    !value
-  ){
-
-    return "";
-
-  }
-
-
-  const d =
-    value instanceof Date
-      ? value
-      : new Date(value);
-
-
-  if(
-    Number.isNaN(
-      d.getTime()
-    )
-  ){
-
-    return String(
-      value
-    );
-
-  }
-
-
-  return (
-    d.getFullYear() +
-    "-" +
-    String(
-      d.getMonth() + 1
-    ).padStart(2,"0") +
-    "-" +
-    String(
-      d.getDate()
-    ).padStart(2,"0") +
-    " " +
-    String(
-      d.getHours()
-    ).padStart(2,"0") +
-    ":" +
-    String(
-      d.getMinutes()
-    ).padStart(2,"0") +
-    ":" +
-    String(
-      d.getSeconds()
-    ).padStart(2,"0")
-  );
-
-}
-
-
-function formatFileDate(
-  date
-){
-
-  return (
-    date.getFullYear() +
-    String(
-      date.getMonth() + 1
-    ).padStart(2,"0") +
-    String(
-      date.getDate()
-    ).padStart(2,"0") +
-    "_" +
-    String(
-      date.getHours()
-    ).padStart(2,"0") +
-    String(
-      date.getMinutes()
-    ).padStart(2,"0") +
-    String(
-      date.getSeconds()
-    ).padStart(2,"0")
-  );
-
-}
-
-
-/* =========================================================
    HELPERS
    ========================================================= */
-
-function sleep(
-  milliseconds
-){
-
-  return new Promise(
-    function(resolve){
-
-      setTimeout(
-        resolve,
-        milliseconds
-      );
-
-    }
-  );
-
-}
-
 
 function formatNumber(
   value
@@ -4585,6 +5360,64 @@ function formatNumber(
   return Number(
     value || 0
   ).toLocaleString();
+
+}
+
+
+function normalizeCell(
+  value
+){
+
+  if(
+    value === null ||
+    value === undefined
+  ){
+
+    return "";
+
+  }
+
+
+  if(
+    value instanceof Date
+  ){
+
+    return value.toISOString();
+
+  }
+
+
+  return String(
+    value
+  );
+
+}
+
+
+function formatFileDate(){
+
+  const d =
+    new Date();
+
+
+  const pad =
+    n =>
+      String(n)
+        .padStart(
+          2,
+          "0"
+        );
+
+
+  return (
+    d.getFullYear() +
+    pad(d.getMonth()+1) +
+    pad(d.getDate()) +
+    "_" +
+    pad(d.getHours()) +
+    pad(d.getMinutes()) +
+    pad(d.getSeconds())
+  );
 
 }
 
@@ -4623,6 +5456,63 @@ function escapeHtml(
 }
 
 
+function jsEscape(
+  value
+){
+
+  return String(
+    value || ""
+  )
+  .replace(
+    /\\/g,
+    "\\\\"
+  )
+  .replace(
+    /'/g,
+    "\\'"
+  )
+  .replace(
+    /\n/g,
+    "\\n"
+  )
+  .replace(
+    /\r/g,
+    "\\r"
+  );
+
+}
+
+
+function isAuthError(
+  error
+){
+
+  const message =
+    String(
+      error?.message ||
+      ""
+    )
+    .toLowerCase();
+
+
+  return (
+    message.includes(
+      "jwt"
+    ) ||
+    message.includes(
+      "session"
+    ) ||
+    message.includes(
+      "not authenticated"
+    ) ||
+    message.includes(
+      "unauthorized"
+    )
+  );
+
+}
+
+
 /* =========================================================
    SUPABASE AUTH STATE
    ========================================================= */
@@ -4633,14 +5523,22 @@ supabase.auth.onAuthStateChange(
     session
   ){
 
+    console.log(
+      "Supabase auth:",
+      event
+    );
+
+
     if(
       event ===
       "SIGNED_OUT"
     ){
 
-      localStorage.removeItem(
-        SESSION_KEY
-      );
+      currentUser =
+        null;
+
+      currentEmail =
+        "";
 
       return;
 
@@ -4648,17 +5546,21 @@ supabase.auth.onAuthStateChange(
 
 
     if(
-      event ===
-      "TOKEN_REFRESHED" &&
       session &&
       session.user
     ){
 
+      /*
+       * Do not automatically show the
+       * dashboard from an unverified /
+       * unauthorized session.
+       *
+       * checkExistingSession handles
+       * authorization.
+       */
+
       currentUser =
         session.user;
-
-      currentEmail =
-        session.user.email || "";
 
     }
 
@@ -4671,6 +5573,10 @@ supabase.auth.onAuthStateChange(
    ========================================================= */
 
 (async function(){
+
+  /*
+   * Check Supabase session.
+   */
 
   const loggedIn =
     await checkExistingSession();
@@ -4685,7 +5591,7 @@ supabase.auth.onAuthStateChange(
     document
       .getElementById("loginScreen")
       .style.display =
-      "flex";
+        "flex";
 
   }
 
@@ -4694,4 +5600,5 @@ supabase.auth.onAuthStateChange(
 </script>
 
 </body>
+
 </html>

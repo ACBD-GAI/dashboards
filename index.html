@@ -1,28 +1,38 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
 
 <title>Acebedo Optical Inventory</title>
 
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
+
 :root{
   --bg:#f4f7fb;
   --card:#ffffff;
   --text:#182230;
   --muted:#718096;
   --line:#e6ebf2;
+
   --primary:#2563eb;
   --primary-dark:#1d4ed8;
+
   --success:#16a34a;
   --danger:#dc2626;
   --warning:#d97706;
+
   --shadow:0 12px 35px rgba(15,23,42,.08);
   --radius:18px;
 }
@@ -47,6 +57,7 @@ body{
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+
   background:
     linear-gradient(
       135deg,
@@ -54,10 +65,13 @@ body{
       #f3f6fb 55%,
       #eef3fa 100%
     );
+
   color:var(--text);
 }
 
-/* LOGIN */
+/* =========================================================
+   LOGIN
+   ========================================================= */
 
 #loginScreen{
   min-height:100vh;
@@ -69,25 +83,47 @@ body{
 
 .loginCard{
   width:min(430px,100%);
-  background:rgba(255,255,255,.94);
-  border:1px solid rgba(255,255,255,.8);
+
+  background:
+    rgba(255,255,255,.94);
+
+  border:
+    1px solid rgba(255,255,255,.8);
+
   border-radius:28px;
+
   padding:42px;
-  box-shadow:0 30px 80px rgba(30,64,175,.13);
+
+  box-shadow:
+    0 30px 80px rgba(30,64,175,.13);
+
   backdrop-filter:blur(16px);
 }
 
 .logo{
   width:66px;
   height:66px;
+
   border-radius:20px;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   font-size:29px;
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed
+    );
+
   color:#fff;
-  box-shadow:0 15px 30px rgba(37,99,235,.28);
+
+  box-shadow:
+    0 15px 30px rgba(37,99,235,.28);
+
   margin-bottom:22px;
 }
 
@@ -118,38 +154,67 @@ body{
 
 .input{
   width:100%;
-  border:1px solid var(--line);
+
+  border:
+    1px solid var(--line);
+
   background:#f8fafc;
+
   padding:14px 15px;
+
   border-radius:13px;
+
   outline:none;
+
   font-size:15px;
+
   transition:.18s;
 }
 
 .input:focus{
   background:#fff;
+
   border-color:#93b4ff;
-  box-shadow:0 0 0 4px rgba(37,99,235,.09);
+
+  box-shadow:
+    0 0 0 4px rgba(37,99,235,.09);
 }
 
 .primaryBtn{
   width:100%;
+
   border:0;
+
   padding:14px 18px;
+
   border-radius:13px;
+
   cursor:pointer;
+
   color:#fff;
+
   font-weight:750;
+
   font-size:14px;
-  background:linear-gradient(135deg,var(--primary),#4f46e5);
-  box-shadow:0 12px 25px rgba(37,99,235,.23);
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      #4f46e5
+    );
+
+  box-shadow:
+    0 12px 25px rgba(37,99,235,.23);
+
   transition:.18s;
 }
 
 .primaryBtn:hover{
   transform:translateY(-1px);
-  box-shadow:0 15px 30px rgba(37,99,235,.28);
+
+  box-shadow:
+    0 15px 30px rgba(37,99,235,.28);
 }
 
 .primaryBtn:disabled{
@@ -158,12 +223,29 @@ body{
   transform:none;
 }
 
+.secondaryBtn{
+  width:100%;
+  border:1px solid var(--line);
+  padding:12px 18px;
+  border-radius:13px;
+  cursor:pointer;
+  color:#334155;
+  font-weight:700;
+  font-size:13px;
+  background:#fff;
+  margin-top:9px;
+}
+
+.secondaryBtn:hover{
+  background:#f8fafc;
+}
+
 .loginStatus{
   min-height:20px;
   margin-top:15px;
   font-size:13px;
   color:var(--muted);
-  line-height:1.5;
+  line-height:1.45;
 }
 
 .loginStatus.error{
@@ -174,7 +256,9 @@ body{
   color:#16a34a;
 }
 
-/* DASHBOARD */
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
 
 #dashboard{
   display:none;
@@ -187,7 +271,9 @@ body{
   padding:22px;
 }
 
-/* TOPBAR */
+/* =========================================================
+   TOP BAR
+   ========================================================= */
 
 .topbar{
   display:flex;
@@ -206,14 +292,26 @@ body{
 .brandLogo{
   width:46px;
   height:46px;
+
   border-radius:14px;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   color:white;
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed
+    );
+
   font-size:21px;
-  box-shadow:0 9px 20px rgba(37,99,235,.2);
+
+  box-shadow:
+    0 9px 20px rgba(37,99,235,.2);
 }
 
 .brandTitle{
@@ -245,11 +343,17 @@ body{
 .iconBtn{
   width:40px;
   height:40px;
+
   border:1px solid var(--line);
+
   border-radius:12px;
+
   background:#fff;
+
   cursor:pointer;
+
   color:#475569;
+
   transition:.15s;
 }
 
@@ -258,35 +362,53 @@ body{
   background:#f8fafc;
 }
 
-/* CONTROLS */
+/* =========================================================
+   CONTROL BAR
+   ========================================================= */
 
 .controls{
   background:rgba(255,255,255,.9);
+
   border:1px solid rgba(226,232,240,.9);
+
   border-radius:var(--radius);
+
   box-shadow:var(--shadow);
+
   padding:15px;
+
   display:grid;
-  grid-template-columns:170px 170px minmax(220px,1fr) auto auto auto auto;
+
+  grid-template-columns:
+    170px
+    170px
+    minmax(220px,1fr)
+    auto
+    auto
+    auto
+    auto;
+
   gap:10px;
+
   margin-bottom:18px;
 }
 
 .select,
 .searchInput{
   width:100%;
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:12px 13px;
-  background:#f8fafc;
-  outline:none;
-  color:var(--text);
-}
 
-.select:focus,
-.searchInput:focus{
-  border-color:#93b4ff;
-  box-shadow:0 0 0 3px rgba(37,99,235,.08);
+  border:
+    1px solid var(--line);
+
+  border-radius:12px;
+
+  padding:12px 13px;
+
+  background:#f8fafc;
+
+  outline:none;
+
+  color:var(--text);
 }
 
 .searchWrap{
@@ -295,9 +417,12 @@ body{
 
 .searchIcon{
   position:absolute;
+
   left:13px;
   top:50%;
+
   transform:translateY(-50%);
+
   color:#94a3b8;
 }
 
@@ -306,14 +431,23 @@ body{
 }
 
 .controlBtn{
-  border:1px solid var(--line);
+  border:
+    1px solid var(--line);
+
   background:#fff;
+
   color:#334155;
+
   border-radius:12px;
+
   padding:0 16px;
+
   cursor:pointer;
+
   font-weight:700;
+
   white-space:nowrap;
+
   transition:.15s;
 }
 
@@ -324,11 +458,20 @@ body{
 
 .controlBtn.primary{
   color:#fff;
+
   border-color:transparent;
-  background:linear-gradient(135deg,#2563eb,#4f46e5);
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #4f46e5
+    );
 }
 
-/* CARDS */
+/* =========================================================
+   CARDS
+   ========================================================= */
 
 .cards{
   display:grid;
@@ -342,7 +485,9 @@ body{
   border:1px solid var(--line);
   border-radius:18px;
   padding:19px;
-  box-shadow:0 7px 25px rgba(15,23,42,.055);
+
+  box-shadow:
+    0 7px 25px rgba(15,23,42,.055);
 }
 
 .statTop{
@@ -360,10 +505,13 @@ body{
 .statIcon{
   width:35px;
   height:35px;
+
   border-radius:11px;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   background:#eff6ff;
 }
 
@@ -380,13 +528,19 @@ body{
   margin-top:4px;
 }
 
-/* TABLE */
+/* =========================================================
+   TABLE
+   ========================================================= */
 
 .tableCard{
   background:#fff;
+
   border:1px solid var(--line);
+
   border-radius:20px;
+
   box-shadow:var(--shadow);
+
   overflow:hidden;
 }
 
@@ -394,7 +548,9 @@ body{
   display:flex;
   align-items:center;
   justify-content:space-between;
+
   padding:17px 19px;
+
   border-bottom:1px solid var(--line);
 }
 
@@ -420,18 +576,27 @@ table{
 
 thead th{
   text-align:left;
+
   padding:12px 15px;
+
   font-size:11px;
+
   color:#64748b;
+
   background:#f8fafc;
+
   border-bottom:1px solid var(--line);
+
   white-space:nowrap;
 }
 
 tbody td{
   padding:13px 15px;
+
   border-bottom:1px solid #eef2f7;
+
   font-size:13px;
+
   white-space:nowrap;
 }
 
@@ -486,25 +651,41 @@ tbody tr:hover{
   color:#dc2626;
 }
 
+/* =========================================================
+   SI
+   ========================================================= */
+
 .siInput{
   width:100px;
+
   padding:7px 8px;
-  border:1px solid #cbd5e1;
+
+  border:
+    1px solid #cbd5e1;
+
   border-radius:8px;
+
   outline:none;
 }
 
 .siInput:focus{
   border-color:#60a5fa;
-  box-shadow:0 0 0 3px rgba(59,130,246,.1);
+
+  box-shadow:
+    0 0 0 3px rgba(59,130,246,.1);
 }
 
-/* PAGINATION */
+/* =========================================================
+   PAGINATION
+   ========================================================= */
 
 .pagination{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   padding:13px 17px;
 }
 
@@ -521,10 +702,15 @@ tbody tr:hover{
 .pageBtn{
   min-width:36px;
   height:36px;
+
   border:1px solid var(--line);
+
   background:#fff;
+
   border-radius:9px;
+
   cursor:pointer;
+
   font-weight:700;
 }
 
@@ -538,7 +724,9 @@ tbody tr:hover{
   border-color:#2563eb;
 }
 
-/* EMPTY */
+/* =========================================================
+   EMPTY
+   ========================================================= */
 
 .empty{
   text-align:center;
@@ -561,34 +749,55 @@ tbody tr:hover{
   margin-top:4px;
 }
 
-/* QUEUE */
+/* =========================================================
+   QUEUE
+   ========================================================= */
 
 #queuePanel{
   position:fixed;
+
   right:20px;
   bottom:20px;
+
   width:min(380px,calc(100vw - 40px));
+
   z-index:9999;
+
   display:flex;
+
   flex-direction:column;
+
   gap:10px;
+
   pointer-events:none;
 }
 
 .queueCard{
   pointer-events:auto;
-  background:rgba(255,255,255,.96);
-  border:1px solid rgba(226,232,240,.95);
+
+  background:
+    rgba(255,255,255,.96);
+
+  border:
+    1px solid rgba(226,232,240,.95);
+
   border-radius:17px;
+
   padding:14px 15px;
-  box-shadow:0 18px 55px rgba(15,23,42,.16);
+
+  box-shadow:
+    0 18px 55px rgba(15,23,42,.16);
+
   backdrop-filter:blur(15px);
 }
 
 .queueHead{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   gap:10px;
 }
 
@@ -613,25 +822,41 @@ tbody tr:hover{
 
 .progress{
   height:7px;
+
   background:#edf2f7;
+
   border-radius:999px;
+
   overflow:hidden;
+
   margin-top:11px;
 }
 
 .progressBar{
   height:100%;
   width:0%;
+
   border-radius:999px;
-  background:linear-gradient(90deg,#2563eb,#7c3aed);
-  transition:width .25s ease;
+
+  background:
+    linear-gradient(
+      90deg,
+      #2563eb,
+      #7c3aed
+    );
+
+  transition:
+    width .25s ease;
 }
 
 .queueBottom{
   display:flex;
   justify-content:space-between;
+
   margin-top:8px;
+
   color:#94a3b8;
+
   font-size:10px;
 }
 
@@ -641,71 +866,113 @@ tbody tr:hover{
   text-decoration:none;
 }
 
-/* STATUS */
+/* =========================================================
+   STATUS
+   ========================================================= */
 
 #globalStatus{
   position:fixed;
+
   left:50%;
   bottom:20px;
-  transform:translate(-50%,20px);
+
+  transform:
+    translate(-50%,20px);
+
   opacity:0;
+
   pointer-events:none;
+
   background:#172033;
+
   color:#fff;
+
   padding:10px 15px;
+
   border-radius:11px;
+
   font-size:12px;
-  box-shadow:0 12px 30px rgba(15,23,42,.2);
+
+  box-shadow:
+    0 12px 30px rgba(15,23,42,.2);
+
   transition:.22s;
+
   z-index:10000;
-  max-width:90vw;
 }
 
 #globalStatus.show{
-  transform:translate(-50%,0);
+  transform:
+    translate(-50%,0);
+
   opacity:1;
 }
 
-/* LOADING */
+/* =========================================================
+   LOADING
+   ========================================================= */
 
 .loadingLine{
   height:2px;
   width:100%;
-  background:linear-gradient(90deg,transparent,#2563eb,transparent);
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      #2563eb,
+      transparent
+    );
+
   background-size:200% 100%;
-  animation:loading 1.2s infinite;
+
+  animation:
+    loading 1.2s infinite;
 }
 
 @keyframes loading{
+
   from{
     background-position:200% 0;
   }
+
   to{
     background-position:-200% 0;
   }
+
 }
 
 .hidden{
   display:none !important;
 }
 
-@media(max-width:1250px){
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1200px){
+
   .controls{
-    grid-template-columns:1fr 1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
   }
 
   .searchWrap{
     grid-column:1 / -1;
   }
+
 }
 
 @media(max-width:1100px){
+
   .cards{
     grid-template-columns:repeat(2,1fr);
   }
+
 }
 
 @media(max-width:700px){
+
   .app{
     padding:12px;
   }
@@ -734,528 +1001,549 @@ tbody tr:hover{
     font-size:23px;
   }
 
-  .loginCard{
-    padding:30px;
-  }
 }
+
 </style>
 
 </head>
 
 <body>
 
-<!-- LOGIN -->
+<!-- =======================================================
+     LOGIN
+     ======================================================= -->
 
 <section id="loginScreen">
 
   <div class="loginCard">
 
+    <div class="logo">
+      ◉
+    </div>
 
-<div class="logo">◉</div>
+    <h1 class="loginTitle">
+      Acebedo Optical
+    </h1>
 
-<h1 class="loginTitle">
-  Acebedo Optical
-</h1>
+    <p class="loginSub">
+      Central Inventory Dashboard
+    </p>
 
-<p class="loginSub">
-  Central Inventory Dashboard
-</p>
+    <!-- EMAIL -->
 
-<div id="emailStep">
+    <div id="emailStep">
 
-  <div class="field">
+      <div class="field">
 
-    <label>EMAIL ADDRESS</label>
+        <label>
+          AUTHORIZED EMAIL
+        </label>
 
-    <input
-      id="email"
-      class="input"
-      type="email"
-      placeholder="Enter your authorized Gmail"
-      autocomplete="email"
+        <input
+          id="email"
+          class="input"
+          type="email"
+          placeholder="Enter your authorized email"
+          autocomplete="email"
+        >
+
+      </div>
+
+      <button
+        id="sendOtpBtn"
+        class="primaryBtn"
+        onclick="sendOTP()"
+      >
+        Send OTP code
+      </button>
+
+    </div>
+
+    <!-- OTP -->
+
+    <div
+      id="otpStep"
+      class="hidden"
     >
 
-  </div>
+      <div class="field">
 
-  <button
-    id="sendOtpBtn"
-    class="primaryBtn"
-    onclick="sendOTP()"
-  >
-    Send verification code
-  </button>
+        <label>
+          6-DIGIT OTP CODE
+        </label>
 
-</div>
+        <input
+          id="otp"
+          class="input"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          autocomplete="one-time-code"
+          placeholder="Enter 6-digit code"
+        >
 
-<div
-  id="otpStep"
-  class="hidden"
->
+      </div>
 
-  <div class="field">
+      <button
+        id="verifyBtn"
+        class="primaryBtn"
+        onclick="verifyOTP()"
+      >
+        Verify & Enter Dashboard
+      </button>
 
-    <label>VERIFICATION CODE</label>
+      <button
+        class="secondaryBtn"
+        onclick="backToEmail()"
+      >
+        Change email
+      </button>
 
-    <input
-      id="otp"
-      class="input"
-      type="text"
-      inputmode="numeric"
-      maxlength="6"
-      autocomplete="one-time-code"
-      placeholder="Enter 6-digit code"
-    >
+    </div>
 
-  </div>
-
-  <button
-    id="verifyBtn"
-    class="primaryBtn"
-    onclick="verifyOTP()"
-  >
-    Verify & enter dashboard
-  </button>
-
-  <button
-    id="backEmailBtn"
-    class="controlBtn"
-    style="width:100%;height:45px;margin-top:10px"
-    onclick="backToEmail()"
-  >
-    Change email
-  </button>
-
-</div>
-
-<div
-  id="loginStatus"
-  class="loginStatus"
-></div>
-
+    <div
+      id="loginStatus"
+      class="loginStatus"
+    ></div>
 
   </div>
 
 </section>
 
-<!-- DASHBOARD -->
+
+<!-- =======================================================
+     DASHBOARD
+     ======================================================= -->
 
 <section id="dashboard">
 
   <div class="app">
 
+    <header class="topbar">
 
-<header class="topbar">
+      <div class="brand">
 
-  <div class="brand">
+        <div class="brandLogo">
+          ◉
+        </div>
 
-    <div class="brandLogo">
-      ◉
-    </div>
+        <div>
 
-    <div>
+          <div class="brandTitle">
+            Central Inventory
+          </div>
 
-      <div class="brandTitle">
-        Central Inventory
+          <div class="brandSub">
+            Acebedo Optical • Direct Supabase
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="brandSub">
-        Acebedo Optical • Direct Supabase Inventory
+      <div class="userArea">
+
+        <div
+          id="userEmail"
+          class="userEmail"
+        ></div>
+
+        <button
+          class="iconBtn"
+          title="Refresh"
+          onclick="refreshDashboard()"
+        >
+          ↻
+        </button>
+
+        <button
+          class="iconBtn"
+          title="Logout"
+          onclick="logout()"
+        >
+          ⇥
+        </button>
+
       </div>
+
+    </header>
+
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+      <select
+        id="branch"
+        class="select"
+        onchange="refreshDashboard()"
+      >
+
+        <option value="ALL">
+          ALL BRANCHES
+        </option>
+
+        <option value="GAI">GAI</option>
+        <option value="CAS">CAS</option>
+        <option value="BAC">BAC</option>
+        <option value="BIN">BIN</option>
+        <option value="BIS">BIS</option>
+        <option value="CAD">CAD</option>
+        <option value="DGT">DGT</option>
+        <option value="KAB">KAB</option>
+        <option value="KAL">KAL</option>
+        <option value="PAS">PAS</option>
+        <option value="POT">POT</option>
+        <option value="SAN">SAN</option>
+        <option value="TAB">TAB</option>
+        <option value="TAN">TAN</option>
+        <option value="TIS">TIS</option>
+        <option value="TOL">TOL</option>
+
+      </select>
+
+
+      <select
+        id="sheet"
+        class="select"
+        onchange="refreshDashboard()"
+      >
+
+        <option value="stocks">
+          AVAILABLE STOCKS
+        </option>
+
+        <option value="sold">
+          SOLD OUT
+        </option>
+
+        <option value="audit">
+          AUDIT
+        </option>
+
+      </select>
+
+
+      <div class="searchWrap">
+
+        <span class="searchIcon">
+          ⌕
+        </span>
+
+        <input
+          id="search"
+          class="searchInput"
+          placeholder="Search tag, description, lens type, SI No., QR..."
+          onkeydown="searchKey(event)"
+        >
+
+      </div>
+
+
+      <button
+        class="controlBtn"
+        onclick="clearSearch()"
+      >
+        Clear
+      </button>
+
+
+      <button
+        class="controlBtn primary"
+        onclick="runSearch()"
+      >
+        Search
+      </button>
+
+
+      <button
+        class="controlBtn"
+        onclick="document.getElementById('importFile').click()"
+      >
+        ↑ Import
+      </button>
+
+
+      <button
+        class="controlBtn"
+        onclick="startExport()"
+      >
+        ↓ Export
+      </button>
+
+
+      <input
+        id="importFile"
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        class="hidden"
+        onchange="handleImportFile(event)"
+      >
 
     </div>
 
-  </div>
-
-  <div class="userArea">
 
     <div
-      id="userEmail"
-      class="userEmail"
+      id="loadingLine"
+      class="loadingLine hidden"
     ></div>
 
-    <button
-      class="iconBtn"
-      title="Refresh"
-      onclick="refreshDashboard()"
-    >
-      ↻
-    </button>
 
-    <button
-      class="iconBtn"
-      title="Logout"
-      onclick="logout()"
-    >
-      ⇥
-    </button>
+    <!-- STAT CARDS -->
 
-  </div>
+    <div class="cards">
 
-</header>
+      <div class="statCard">
 
+        <div class="statTop">
 
-<!-- CONTROLS -->
+          <span class="statLabel">
+            AVAILABLE
+          </span>
 
-<div class="controls">
+          <span class="statIcon">
+            ✓
+          </span>
 
-  <select
-    id="branch"
-    class="select"
-    onchange="branchChanged()"
-  >
+        </div>
 
-    <option value="ALL">ALL BRANCHES</option>
-    <option value="GAI">GAI</option>
-    <option value="CAS">CAS</option>
-    <option value="BAC">BAC</option>
-    <option value="BIN">BIN</option>
-    <option value="BIS">BIS</option>
-    <option value="CAD">CAD</option>
-    <option value="DGT">DGT</option>
-    <option value="KAB">KAB</option>
-    <option value="KAL">KAL</option>
-    <option value="PAS">PAS</option>
-    <option value="POT">POT</option>
-    <option value="SAN">SAN</option>
-    <option value="TAB">TAB</option>
-    <option value="TAN">TAN</option>
-    <option value="TIS">TIS</option>
-    <option value="TOL">TOL</option>
+        <div
+          id="availableTotal"
+          class="statNumber"
+        >
+          —
+        </div>
 
-  </select>
+        <div class="statHint">
+          Stock not sold
+        </div>
 
-
-  <select
-    id="sheet"
-    class="select"
-    onchange="sheetChanged()"
-  >
-
-    <option value="stocks">
-      AVAILABLE STOCKS
-    </option>
-
-    <option value="sold">
-      SOLD OUT
-    </option>
-
-    <option value="audit">
-      AUDIT
-    </option>
-
-  </select>
-
-
-  <div class="searchWrap">
-
-    <span class="searchIcon">
-      ⌕
-    </span>
-
-    <input
-      id="search"
-      class="searchInput"
-      placeholder="Search tag, description, lens type, SI No., QR..."
-      onkeydown="searchKey(event)"
-    >
-
-  </div>
-
-
-  <button
-    class="controlBtn"
-    onclick="clearSearch()"
-  >
-    Clear
-  </button>
-
-
-  <button
-    class="controlBtn primary"
-    onclick="runSearch()"
-  >
-    Search
-  </button>
-
-
-  <button
-    class="controlBtn"
-    onclick="document.getElementById('importFile').click()"
-  >
-    ↑ Import
-  </button>
-
-
-  <button
-    class="controlBtn"
-    onclick="startExport()"
-  >
-    ↓ Export
-  </button>
-
-
-  <input
-    id="importFile"
-    type="file"
-    accept=".xlsx,.xls,.csv"
-    class="hidden"
-    onchange="handleImportFile(event)"
-  >
-
-</div>
-
-
-<div
-  id="loadingLine"
-  class="loadingLine hidden"
-></div>
-
-
-<!-- STAT CARDS -->
-
-<div class="cards">
-
-  <div class="statCard">
-
-    <div class="statTop">
-
-      <span class="statLabel">
-        AVAILABLE
-      </span>
-
-      <span class="statIcon">
-        ✓
-      </span>
-
-    </div>
-
-    <div
-      id="availableTotal"
-      class="statNumber"
-    >
-      —
-    </div>
-
-    <div class="statHint">
-      Stock not sold
-    </div>
-
-  </div>
-
-
-  <div class="statCard">
-
-    <div class="statTop">
-
-      <span class="statLabel">
-        SOLD OUT
-      </span>
-
-      <span class="statIcon">
-        $
-      </span>
-
-    </div>
-
-    <div
-      id="soldTotal"
-      class="statNumber"
-    >
-      —
-    </div>
-
-    <div class="statHint">
-      Recorded sales
-    </div>
-
-  </div>
-
-
-  <div class="statCard">
-
-    <div class="statTop">
-
-      <span class="statLabel">
-        AUDITED
-      </span>
-
-      <span class="statIcon">
-        ✓
-      </span>
-
-    </div>
-
-    <div
-      id="auditTotal"
-      class="statNumber"
-    >
-      —
-    </div>
-
-    <div class="statHint">
-      Audit records
-    </div>
-
-  </div>
-
-
-  <div class="statCard">
-
-    <div class="statTop">
-
-      <span class="statLabel">
-        SHOWING
-      </span>
-
-      <span class="statIcon">
-        ≡
-      </span>
-
-    </div>
-
-    <div
-      id="showingTotal"
-      class="statNumber"
-    >
-      —
-    </div>
-
-    <div class="statHint">
-      Current results
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- TABLE -->
-
-<section class="tableCard">
-
-  <div class="tableHeader">
-
-    <div>
-
-      <div
-        id="tableTitle"
-        class="tableTitle"
-      >
-        Inventory
       </div>
 
-      <div
-        id="tableSub"
-        class="tableSub"
-      >
-        Search your inventory.
+
+      <div class="statCard">
+
+        <div class="statTop">
+
+          <span class="statLabel">
+            SOLD OUT
+          </span>
+
+          <span class="statIcon">
+            $
+          </span>
+
+        </div>
+
+        <div
+          id="soldTotal"
+          class="statNumber"
+        >
+          —
+        </div>
+
+        <div class="statHint">
+          Recorded sales
+        </div>
+
+      </div>
+
+
+      <div class="statCard">
+
+        <div class="statTop">
+
+          <span class="statLabel">
+            AUDITED
+          </span>
+
+          <span class="statIcon">
+            ✓
+          </span>
+
+        </div>
+
+        <div
+          id="auditTotal"
+          class="statNumber"
+        >
+          —
+        </div>
+
+        <div class="statHint">
+          Audit records
+        </div>
+
+      </div>
+
+
+      <div class="statCard">
+
+        <div class="statTop">
+
+          <span class="statLabel">
+            SHOWING
+          </span>
+
+          <span class="statIcon">
+            ≡
+          </span>
+
+        </div>
+
+        <div
+          id="showingTotal"
+          class="statNumber"
+        >
+          —
+        </div>
+
+        <div class="statHint">
+          Current results
+        </div>
+
       </div>
 
     </div>
 
-  </div>
+
+    <!-- TABLE -->
+
+    <section class="tableCard">
+
+      <div class="tableHeader">
+
+        <div>
+
+          <div
+            id="tableTitle"
+            class="tableTitle"
+          >
+            Inventory
+          </div>
+
+          <div
+            id="tableSub"
+            class="tableSub"
+          >
+            Select a branch and search inventory.
+          </div>
+
+        </div>
+
+      </div>
 
 
-  <div class="tableScroll">
+      <div class="tableScroll">
 
-    <table>
+        <table>
 
-      <thead>
+          <thead>
 
-        <tr>
+            <tr>
 
-          <th>BRANCH</th>
-          <th>LENS TYPE</th>
-          <th>DESCRIPTION</th>
-          <th>TAG</th>
-          <th>SI NO.</th>
-          <th>DATE</th>
-          <th>ACTIONS</th>
+              <th>BRANCH</th>
+              <th>LENS TYPE</th>
+              <th>DESCRIPTION</th>
+              <th>TAG</th>
+              <th>SI NO.</th>
+              <th>DATE</th>
+              <th>ACTIONS</th>
 
-        </tr>
+            </tr>
 
-      </thead>
+          </thead>
 
-      <tbody id="tableBody"></tbody>
+          <tbody id="tableBody"></tbody>
 
-    </table>
+        </table>
 
-  </div>
-
-
-  <div
-    id="emptyState"
-    class="empty"
-  >
-
-    <div class="emptyIcon">
-      ⌕
-    </div>
-
-    <div class="emptyTitle">
-      Ready to search
-    </div>
-
-    <div class="emptyText">
-      Search your inventory to display records.
-    </div>
-
-  </div>
+      </div>
 
 
-  <div class="pagination">
-
-    <div
-      id="pageInfo"
-      class="pageInfo"
-    >
-      —
-    </div>
-
-    <div class="pageButtons">
-
-      <button
-        id="prevBtn"
-        class="pageBtn"
-        onclick="previousPage()"
+      <div
+        id="emptyState"
+        class="empty"
       >
-        ‹
-      </button>
 
-      <button
-        id="pageCurrent"
-        class="pageBtn active"
-      >
-        1
-      </button>
+        <div class="emptyIcon">
+          ⌕
+        </div>
 
-      <button
-        id="nextBtn"
-        class="pageBtn"
-        onclick="nextPage()"
-      >
-        ›
-      </button>
+        <div class="emptyTitle">
+          Ready to search
+        </div>
 
-    </div>
+        <div class="emptyText">
+          Search your inventory to display records.
+        </div>
+
+      </div>
+
+
+      <div class="pagination">
+
+        <div
+          id="pageInfo"
+          class="pageInfo"
+        >
+          —
+        </div>
+
+        <div class="pageButtons">
+
+          <button
+            id="prevBtn"
+            class="pageBtn"
+            onclick="previousPage()"
+          >
+            ‹
+          </button>
+
+          <button
+            id="pageCurrent"
+            class="pageBtn active"
+          >
+            1
+          </button>
+
+          <button
+            id="nextBtn"
+            class="pageBtn"
+            onclick="nextPage()"
+          >
+            ›
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
 
   </div>
 
 </section>
 
 
-  </div>
-
-</section>
+<!-- QUEUE -->
 
 <div id="queuePanel"></div>
 
 <div id="globalStatus"></div>
 
+
 <script>
 
 /* =========================================================
-   SUPABASE CONFIG
+   SUPABASE CONFIGURATION
+   =========================================================
+
+   IMPORTANT:
+
+   Use your PUBLIC / ANON / PUBLISHABLE key.
+
+   NEVER put the service_role key in GitHub Pages.
    ========================================================= */
 
 const SUPABASE_URL =
@@ -1265,16 +1553,13 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 
-/*
- * IMPORTANT:
- *
- * Use your Supabase ANON/PUBLISHABLE key here.
- *
- * NEVER use the service_role key in GitHub Pages.
- */
+const {
+  createClient
+} = window.supabase;
 
-const supabaseClient =
-  window.supabase.createClient(
+
+const supabase =
+  createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
     {
@@ -1290,6 +1575,12 @@ const supabaseClient =
 /* =========================================================
    CONFIG
    ========================================================= */
+
+const SESSION_KEY =
+  "acebedoSupabaseSession";
+
+const USER_KEY =
+  "acebedoCurrentEmail";
 
 const BRANCHES = [
   "GAI",
@@ -1312,42 +1603,37 @@ const BRANCHES = [
 
 const ROWS_PER_PAGE = 50;
 
-const IMPORT_CHUNK_SIZE = 500;
-
 
 /* =========================================================
    STATE
    ========================================================= */
 
-let currentUser = null;
+let currentEmail =
+  localStorage.getItem(USER_KEY) || "";
 
 let currentPage = 1;
 
 let lastRows = [];
 
-let hasNextPage = false;
+let currentTotal = 0;
 
-let searchInProgress = false;
+let otpCooldown = 0;
 
-let importRunning = false;
-
-let exportRunning = false;
+let otpTimer = null;
 
 
 /* =========================================================
-   TABLE MAP
+   TABLE HELPERS
    ========================================================= */
 
-function tableName(branch,sheet){
+function tableName(
+  branch,
+  sheet
+){
 
   const b =
     String(branch || "")
-      .trim()
       .toLowerCase();
-
-  if(sheet === "stocks"){
-    return b + "_stocks";
-  }
 
   if(sheet === "sold"){
     return b + "_scanresults";
@@ -1357,75 +1643,59 @@ function tableName(branch,sheet){
     return b + "_audit";
   }
 
-  throw new Error(
-    "Invalid inventory table."
-  );
-
+  return b + "_stocks";
 }
 
 
 /* =========================================================
-   FIELD HELPERS
+   ESCAPE
    ========================================================= */
 
-function field(row,name){
+function escapeHtml(value){
 
-  if(!row){
-    return "";
-  }
-
-  return (
-    row[name] ??
-    row[name.toUpperCase()] ??
-    ""
-  );
-
+  return String(
+    value === undefined ||
+    value === null
+      ? ""
+      : value
+  )
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;");
 }
 
 
-function normalizeRow(
-  row,
-  branch
+/* =========================================================
+   LOGIN STATUS
+   ========================================================= */
+
+function setLoginStatus(
+  message,
+  type=""
 ){
 
-  return {
+  const el =
+    document.getElementById(
+      "loginStatus"
+    );
 
-    branch:branch,
+  el.textContent =
+    message || "";
 
-    lenstype:String(
-      field(row,"LENSTYPE")
-    ),
-
-    description:String(
-      field(row,"DESCRIPTION")
-    ),
-
-    tag:String(
-      field(row,"NTAGN")
-    ),
-
-    si:String(
-      field(row,"SI NO.")
-    ),
-
-    date:String(
-      field(row,"DATE AND TIME")
-    ),
-
-    qr:String(
-      field(row,"QR")
-    )
-
-  };
+  el.className =
+    "loginStatus " +
+    type;
 
 }
 
 
 /* =========================================================
-   AUTHORIZED USER
+   CHECK ALLOWED USER
    ========================================================= */
 
-async function getAllowedUser(
+async function checkAllowedUser(
   email
 ){
 
@@ -1434,14 +1704,18 @@ async function getAllowedUser(
       .trim()
       .toLowerCase();
 
-
   if(!normalized){
-    return null;
+    return {
+      allowed:false,
+      error:"Email address is required."
+    };
   }
 
-
-  const result =
-    await supabaseClient
+  const {
+    data,
+    error
+  } =
+    await supabase
       .from("app_allowed_users")
       .select(
         "email,is_admin,active"
@@ -1450,64 +1724,90 @@ async function getAllowedUser(
         "email",
         normalized
       )
-      .eq(
-        "active",
-        true
-      )
       .maybeSingle();
 
+  if(error){
 
-  if(result.error){
-
-    throw new Error(
-      "Unable to check allowed users: " +
-      result.error.message
+    console.error(
+      "Allowed-user query error:",
+      error
     );
+
+    return {
+      allowed:false,
+      error:
+        "Could not check authorized users. " +
+        error.message
+    };
 
   }
 
+  if(!data){
 
-  return result.data || null;
+    return {
+      allowed:false,
+      error:
+        "This email is not authorized."
+    };
+
+  }
+
+  if(data.active !== true){
+
+    return {
+      allowed:false,
+      error:
+        "This account is inactive."
+    };
+
+  }
+
+  return {
+    allowed:true,
+    isAdmin:
+      data.is_admin === true
+  };
 
 }
 
 
 /* =========================================================
-   LOGIN
+   SEND OTP
    ========================================================= */
 
 async function sendOTP(){
 
-  const email =
-    document
-      .getElementById("email")
-      .value
-      .trim()
-      .toLowerCase();
-
-
-  if(!email){
+  if(otpCooldown > 0){
 
     setLoginStatus(
-      "Enter your authorized email address.",
-      true
+      "Please wait " +
+      otpCooldown +
+      " seconds before requesting another OTP.",
+      "error"
     );
 
     return;
 
   }
 
+  const input =
+    document.getElementById(
+      "email"
+    );
 
-  if(
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      email
-    )
-  ){
+  const email =
+    input.value
+      .trim()
+      .toLowerCase();
+
+  if(!email){
 
     setLoginStatus(
-      "Enter a valid email address.",
-      true
+      "Enter your authorized email address.",
+      "error"
     );
+
+    input.focus();
 
     return;
 
@@ -1519,7 +1819,6 @@ async function sendOTP(){
       "sendOtpBtn"
     );
 
-
   button.disabled = true;
 
   button.textContent =
@@ -1529,47 +1828,89 @@ async function sendOTP(){
   try{
 
     /*
-     * Check app_allowed_users BEFORE
-     * requesting an Auth OTP.
+     * FIRST:
+     * Check app_allowed_users.
      */
 
     const allowed =
-      await getAllowedUser(
+      await checkAllowedUser(
         email
       );
 
-
-    if(!allowed){
+    if(!allowed.allowed){
 
       throw new Error(
+        allowed.error ||
         "This email is not authorized."
       );
 
     }
 
 
+    /*
+     * SECOND:
+     * Ask Supabase Auth to send OTP.
+     *
+     * IMPORTANT:
+     * This does NOT use the old Apps Script.
+     */
+
     button.textContent =
-      "Sending code...";
+      "Sending OTP...";
 
 
-    const result =
-      await supabaseClient.auth.signInWithOtp(
-        {
-          email:email,
+    const {
+      error
+    } =
+      await supabase.auth.signInWithOtp({
 
-          options:{
-            shouldCreateUser:false
-          }
+        email:email,
+
+        options:{
+
+          shouldCreateUser:false
+
         }
+
+      });
+
+
+    if(error){
+
+      console.error(
+        "Supabase OTP error:",
+        error
       );
 
+      const msg =
+        String(
+          error.message || ""
+        );
 
-    if(result.error){
 
-      throw result.error;
+      if(
+        msg.toLowerCase()
+          .includes(
+            "rate limit"
+          )
+      ){
+
+        throw new Error(
+          "Supabase email rate limit exceeded. " +
+          "Do not request another code repeatedly. " +
+          "Wait for the Supabase email limit to reset."
+        );
+
+      }
+
+      throw error;
 
     }
 
+
+    /*
+     * OTP sent successfully.
+     */
 
     document
       .getElementById(
@@ -1577,7 +1918,6 @@ async function sendOTP(){
       )
       .classList
       .add("hidden");
-
 
     document
       .getElementById(
@@ -1595,46 +1935,40 @@ async function sendOTP(){
 
 
     setLoginStatus(
-      "Verification code sent to " +
+      "OTP code sent to " +
       email +
-      ". Check your inbox and spam folder.",
-      false,
-      true
+      ". Check your email.",
+      "success"
     );
+
+
+    /*
+     * Prevent accidental repeated
+     * requests.
+     */
+
+    startOtpCooldown(60);
 
 
   }catch(error){
 
-    let message =
-      error?.message ||
-      "Unable to send verification code.";
-
-
-    if(
-      /rate limit/i.test(
-        message
-      )
-    ){
-
-      message =
-        "Supabase email rate limit exceeded. " +
-        "Stop requesting codes and wait for the rate limit to reset.";
-
-    }
-
-
-    setLoginStatus(
-      message,
-      true
+    console.error(
+      error
     );
 
+    setLoginStatus(
+      error.message ||
+      "Unable to send OTP.",
+      "error"
+    );
 
   }finally{
 
-    button.disabled = false;
+    button.disabled =
+      false;
 
     button.textContent =
-      "Send verification code";
+      "Send OTP code";
 
   }
 
@@ -1642,148 +1976,50 @@ async function sendOTP(){
 
 
 /* =========================================================
-   VERIFY OTP
+   OTP COOLDOWN
    ========================================================= */
 
-async function verifyOTP(){
+function startOtpCooldown(
+  seconds
+){
 
-  const email =
-    document
-      .getElementById("email")
-      .value
-      .trim()
-      .toLowerCase();
+  clearInterval(
+    otpTimer
+  );
 
-
-  const token =
-    document
-      .getElementById("otp")
-      .value
-      .trim();
-
-
-  if(!email){
-
-    setLoginStatus(
-      "Email address is missing.",
-      true
-    );
-
-    return;
-
-  }
-
-
-  if(!/^\d{6}$/.test(token)){
-
-    setLoginStatus(
-      "Enter the 6-digit verification code.",
-      true
-    );
-
-    return;
-
-  }
+  otpCooldown =
+    Number(seconds) || 60;
 
 
   const button =
     document.getElementById(
-      "verifyBtn"
+      "sendOtpBtn"
     );
 
 
-  button.disabled = true;
+  otpTimer =
+    setInterval(
+      function(){
 
-  button.textContent =
-    "Verifying...";
+        otpCooldown--;
 
+        if(
+          otpCooldown <= 0
+        ){
 
-  try{
+          clearInterval(
+            otpTimer
+          );
 
-    /*
-     * Verify the six digit email OTP.
-     */
+          otpTimer = null;
 
-    const result =
-      await supabaseClient.auth.verifyOtp(
-        {
-          email:email,
+          return;
 
-          token:token,
-
-          type:"email"
         }
-      );
 
-
-    if(result.error){
-
-      throw result.error;
-
-    }
-
-
-    const session =
-      result.data?.session;
-
-
-    const user =
-      result.data?.user;
-
-
-    if(!session || !user){
-
-      throw new Error(
-        "Login succeeded but no Supabase session was returned."
-      );
-
-    }
-
-
-    /*
-     * Check allowed users AGAIN after
-     * authentication.
-     */
-
-    const allowed =
-      await getAllowedUser(
-        user.email
-      );
-
-
-    if(!allowed){
-
-      await supabaseClient.auth.signOut();
-
-      throw new Error(
-        "Your account is not authorized."
-      );
-
-    }
-
-
-    currentUser = user;
-
-
-    showDashboard();
-
-
-  }catch(error){
-
-    setLoginStatus(
-      error?.message ||
-      "Invalid verification code.",
-      true
+      },
+      1000
     );
-
-  }finally{
-
-    button.disabled = false;
-
-    button.textContent =
-      "Verify & enter dashboard";
-
-  }
 
 }
 
@@ -1801,7 +2037,6 @@ function backToEmail(){
     .classList
     .add("hidden");
 
-
   document
     .getElementById(
       "emailStep"
@@ -1809,32 +2044,214 @@ function backToEmail(){
     .classList
     .remove("hidden");
 
-
   document
     .getElementById(
       "otp"
     )
     .value = "";
 
-
-  setLoginStatus("");
+  setLoginStatus(
+    ""
+  );
 
 }
 
 
 /* =========================================================
-   AUTH SESSION
+   VERIFY OTP
+   ========================================================= */
+
+async function verifyOTP(){
+
+  const email =
+    document
+      .getElementById(
+        "email"
+      )
+      .value
+      .trim()
+      .toLowerCase();
+
+  const otp =
+    document
+      .getElementById(
+        "otp"
+      )
+      .value
+      .trim();
+
+
+  if(!email){
+
+    setLoginStatus(
+      "Email address is missing.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if(!/^\d{6}$/.test(otp)){
+
+    setLoginStatus(
+      "Enter the 6-digit OTP code.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "verifyBtn"
+    );
+
+  button.disabled = true;
+
+  button.textContent =
+    "Verifying...";
+
+
+  try{
+
+    /*
+     * Verify directly with Supabase.
+     */
+
+    const {
+      data,
+      error
+    } =
+      await supabase.auth.verifyOtp({
+
+        email:email,
+
+        token:otp,
+
+        type:"email"
+
+      });
+
+
+    if(error){
+
+      console.error(
+        "OTP verification error:",
+        error
+      );
+
+      throw error;
+
+    }
+
+
+    if(!data.session){
+
+      throw new Error(
+        "Supabase did not create a session."
+      );
+
+    }
+
+
+    /*
+     * Check the user AGAIN after login.
+     *
+     * This prevents an authorized account
+     * from continuing if it was disabled.
+     */
+
+    const allowed =
+      await checkAllowedUser(
+        email
+      );
+
+    if(!allowed.allowed){
+
+      await supabase.auth.signOut();
+
+      throw new Error(
+        allowed.error ||
+        "This account is no longer authorized."
+      );
+
+    }
+
+
+    currentEmail =
+      email;
+
+
+    localStorage.setItem(
+      USER_KEY,
+      currentEmail
+    );
+
+
+    localStorage.setItem(
+      SESSION_KEY,
+      "supabase"
+    );
+
+
+    setLoginStatus(
+      "Login successful.",
+      "success"
+    );
+
+
+    showDashboard();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+    setLoginStatus(
+      error.message ||
+      "Invalid or expired OTP.",
+      "error"
+    );
+
+  }finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      "Verify & Enter Dashboard";
+
+  }
+
+}
+
+
+/* =========================================================
+   SESSION CHECK
    ========================================================= */
 
 async function checkExistingSession(){
 
   try{
 
-    const result =
-      await supabaseClient.auth.getSession();
+    const {
+      data,
+      error
+    } =
+      await supabase.auth.getSession();
 
 
-    if(result.error){
+    if(error){
+
+      console.error(
+        error
+      );
 
       return false;
 
@@ -1842,7 +2259,8 @@ async function checkExistingSession(){
 
 
     const session =
-      result.data?.session;
+      data &&
+      data.session;
 
 
     if(!session){
@@ -1856,36 +2274,54 @@ async function checkExistingSession(){
       session.user;
 
 
-    if(!user?.email){
-
-      await supabaseClient.auth.signOut();
+    if(
+      !user ||
+      !user.email
+    ){
 
       return false;
 
     }
+
+
+    const email =
+      user.email
+        .trim()
+        .toLowerCase();
 
 
     /*
-     * Validate app_allowed_users.
+     * Check allowed table every time.
      */
 
     const allowed =
-      await getAllowedUser(
-        user.email
+      await checkAllowedUser(
+        email
       );
 
 
-    if(!allowed){
+    if(!allowed.allowed){
 
-      await supabaseClient.auth.signOut();
+      await supabase.auth.signOut();
 
       return false;
 
     }
 
 
-    currentUser =
-      user;
+    currentEmail =
+      email;
+
+
+    localStorage.setItem(
+      USER_KEY,
+      email
+    );
+
+    localStorage.setItem(
+      SESSION_KEY,
+      "supabase"
+    );
 
 
     return true;
@@ -1893,7 +2329,6 @@ async function checkExistingSession(){
   }catch(error){
 
     console.error(
-      "Session check error:",
       error
     );
 
@@ -1905,42 +2340,6 @@ async function checkExistingSession(){
 
 
 /* =========================================================
-   AUTH STATE
-   ========================================================= */
-
-supabaseClient.auth.onAuthStateChange(
-  async function(
-    event,
-    session
-  ){
-
-    if(
-      event === "SIGNED_OUT"
-    ){
-
-      currentUser = null;
-
-      showLogin();
-
-      return;
-
-    }
-
-
-    if(
-      session?.user
-    ){
-
-      currentUser =
-        session.user;
-
-    }
-
-  }
-);
-
-
-/* =========================================================
    LOGOUT
    ========================================================= */
 
@@ -1948,7 +2347,7 @@ async function logout(){
 
   try{
 
-    await supabaseClient.auth.signOut();
+    await supabase.auth.signOut();
 
   }catch(error){
 
@@ -1959,18 +2358,17 @@ async function logout(){
   }
 
 
-  currentUser = null;
+  localStorage.removeItem(
+    USER_KEY
+  );
 
-  showLogin();
+  localStorage.removeItem(
+    SESSION_KEY
+  );
 
-}
 
+  currentEmail = "";
 
-/* =========================================================
-   LOGIN SCREEN
-   ========================================================= */
-
-function showLogin(){
 
   document
     .getElementById(
@@ -2010,6 +2408,11 @@ function showLogin(){
     )
     .value = "";
 
+
+  setLoginStatus(
+    ""
+  );
+
 }
 
 
@@ -2040,11 +2443,8 @@ function showDashboard(){
       "userEmail"
     )
     .textContent =
-      currentUser?.email ||
-      "";
+      currentEmail;
 
-
-  currentPage = 1;
 
   refreshDashboard();
 
@@ -2052,354 +2452,209 @@ function showDashboard(){
 
 
 /* =========================================================
-   LOGIN STATUS
+   SUPABASE FETCH
    ========================================================= */
 
-function setLoginStatus(
-  message,
-  isError,
-  isSuccess
-){
-
-  const el =
-    document.getElementById(
-      "loginStatus"
-    );
-
-
-  el.textContent =
-    message || "";
-
-
-  el.classList.toggle(
-    "error",
-    !!isError
-  );
-
-
-  el.classList.toggle(
-    "success",
-    !!isSuccess
-  );
-
-}
-
-
-/* =========================================================
-   SEARCH
-   ========================================================= */
-
-function runSearch(){
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-function searchKey(event){
-
-  if(
-    event.key === "Enter"
-  ){
-
-    event.preventDefault();
-
-    runSearch();
-
-  }
-
-}
-
-
-function clearSearch(){
-
-  document
-    .getElementById(
-      "search"
-    )
-    .value = "";
-
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-function branchChanged(){
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-function sheetChanged(){
-
-  currentPage = 1;
-
-  refreshDashboard();
-
-}
-
-
-/* =========================================================
-   SEARCH CONDITIONS
-   ========================================================= */
-
-function buildSearchFilter(
-  search
-){
-
-  const value =
-    String(search || "")
-      .trim();
-
-
-  if(!value){
-
-    return null;
-
-  }
-
-
-  const escaped =
-    value
-      .replace(
-        /,/g,
-        " "
-      )
-      .replace(
-        /%/g,
-        "\\%"
-      )
-      .replace(
-        /_/g,
-        "\\_"
-      );
-
-
-  return [
-    `NTAGN.ilike.%${escaped}%`,
-    `DESCRIPTION.ilike.%${escaped}%`,
-    `LENSTYPE.ilike.%${escaped}%`,
-    `"SI NO.".ilike.%${escaped}%`,
-    `QR.ilike.%${escaped}%`,
-    `SUPPLIER.ilike.%${escaped}%`,
-    `LENSCODE.ilike.%${escaped}%`,
-    `BR.ilike.%${escaped}%`
-  ].join(",");
-
-}
-
-
-/* =========================================================
-   QUERY ONE BRANCH
-   ========================================================= */
-
-async function queryBranch(
-  branch,
-  sheet,
+async function getRows(
+  table,
   search,
-  from,
-  to
+  page,
+  limit
 ){
 
-  const table =
-    tableName(
-      branch,
-      sheet
-    );
+  const start =
+    (page - 1) *
+    limit;
+
+  const end =
+    start +
+    limit -
+    1;
 
 
   let query =
-    supabaseClient
+    supabase
       .from(table)
       .select(
         "*",
         {
           count:"exact"
         }
+      )
+      .range(
+        start,
+        end
       );
 
 
-  const filter =
-    buildSearchFilter(
+  if(search){
+
+    const escaped =
       search
-    );
+        .replace(
+          /[%_]/g,
+          "\\$&"
+        )
+        .replace(
+          /,/g,
+          ""
+        );
 
-
-  if(filter){
 
     query =
       query.or(
-        filter
+        [
+          `NTAGN.ilike.%${escaped}%`,
+          `DESCRIPTION.ilike.%${escaped}%`,
+          `LENSTYPE.ilike.%${escaped}%`,
+          `"SI NO.".ilike.%${escaped}%`,
+          `QR.ilike.%${escaped}%`,
+          `BR.ilike.%${escaped}%`
+        ].join(",")
       );
 
   }
 
 
-  query =
-    query
-      .order(
-        "NTAGN",
-        {
-          ascending:true
-        }
-      )
-      .range(
-        from,
-        to
-      );
-
-
-  const result =
+  const {
+    data,
+    error,
+    count
+  } =
     await query;
 
 
-  if(result.error){
+  if(error){
 
-    throw new Error(
-      branch +
-      " " +
-      sheet +
-      ": " +
-      result.error.message
+    console.error(
+      table,
+      error
     );
+
+    throw error;
 
   }
 
 
   return {
-
-    branch:branch,
-
-    rows:result.data || [],
-
-    count:result.count || 0
-
+    data:data || [],
+    count:Number(count || 0)
   };
 
 }
 
 
 /* =========================================================
-   QUERY ALL BRANCHES
+   SOLD TAGS
    ========================================================= */
 
-async function queryAllBranches(
-  sheet,
-  search,
-  page
+async function getSoldTags(
+  branches
 ){
 
-  /*
-   * For ALL branches we query each branch
-   * in parallel.
-   *
-   * We request enough rows to create the
-   * requested page.
-   */
-
-  const neededEnd =
-    page *
-    ROWS_PER_PAGE;
+  const tags =
+    new Set();
 
 
-  const results =
-    await Promise.all(
-      BRANCHES.map(
-        function(branch){
+  for(
+    const branch of branches
+  ){
 
-          return queryBranch(
-            branch,
-            sheet,
-            search,
-            0,
-            neededEnd - 1
-          );
-
-        }
-      )
-    );
+    const table =
+      tableName(
+        branch,
+        "sold"
+      );
 
 
-  let combined = [];
+    const {
+      data,
+      error
+    } =
+      await supabase
+        .from(table)
+        .select("NTAGN")
+        .limit(100000);
 
 
-  let total = 0;
+    if(error){
+
+      console.error(
+        table,
+        error
+      );
+
+      throw error;
+
+    }
 
 
-  results.forEach(
-    function(result){
-
-      total +=
-        result.count;
-
-
-      result.rows.forEach(
+    (data || [])
+      .forEach(
         function(row){
 
-          combined.push(
-            normalizeRow(
-              row,
-              result.branch
-            )
-          );
+          const tag =
+            String(
+              row.NTAGN ||
+              ""
+            ).trim();
+
+          if(tag){
+            tags.add(
+              branch +
+              "|" +
+              tag
+            );
+          }
 
         }
       );
 
-    }
-  );
+  }
 
 
-  /*
-   * Sort ALL branch results by tag.
-   */
+  return tags;
 
-  combined.sort(
-    function(a,b){
-
-      return String(a.tag)
-        .localeCompare(
-          String(b.tag),
-          undefined,
-          {
-            numeric:true,
-            sensitivity:"base"
-          }
-        );
-
-    }
-  );
+}
 
 
-  const start =
-    (page - 1) *
-    ROWS_PER_PAGE;
+/* =========================================================
+   NORMALIZE ROW
+   ========================================================= */
 
-
-  const rows =
-    combined.slice(
-      start,
-      start + ROWS_PER_PAGE
-    );
-
+function normalizeRow(
+  row,
+  branch
+){
 
   return {
 
-    rows:rows,
+    branch:
+      branch,
 
-    total:total,
+    lenstype:
+      row.LENSTYPE || "",
 
-    hasNext:
-      combined.length >
-      start + ROWS_PER_PAGE
+    description:
+      row.DESCRIPTION || "",
+
+    tag:
+      row.NTAGN || "",
+
+    si:
+      row["SI NO."] || "",
+
+    date:
+      row["DATE AND TIME"] || "",
+
+    qr:
+      row.QR || "",
+
+    br:
+      row.BR || "",
+
+    raw:
+      row
 
   };
 
@@ -2407,24 +2662,27 @@ async function queryAllBranches(
 
 
 /* =========================================================
-   QUERY DASHBOARD
+   DASHBOARD
    ========================================================= */
 
 async function refreshDashboard(){
 
+  const {
+    data
+  } =
+    await supabase.auth.getSession();
+
+
   if(
-    !currentUser ||
-    searchInProgress
+    !data ||
+    !data.session
   ){
+
+    logout();
 
     return;
 
   }
-
-
-  searchInProgress = true;
-
-  setLoading(true);
 
 
   const branch =
@@ -2452,93 +2710,338 @@ async function refreshDashboard(){
       .trim();
 
 
+  setLoading(true);
+
+
   try{
 
-    const stats =
-      await getStats(
-        branch
-      );
+    const branches =
+      branch === "ALL"
+        ? BRANCHES
+        : [branch];
 
 
-    let result;
+    /*
+     * SOLD
+     */
+
+    let soldTotal = 0;
+
+    let soldTags =
+      new Set();
 
 
-    if(branch === "ALL"){
+    for(
+      const b of branches
+    ){
 
-      result =
-        await queryAllBranches(
-          sheet,
-          search,
-          currentPage
-        );
-
-    }else{
-
-      const start =
-        (currentPage - 1) *
-        ROWS_PER_PAGE;
-
-
-      const end =
-        start +
-        ROWS_PER_PAGE -
-        1;
-
-
-      const resultOne =
-        await queryBranch(
-          branch,
-          sheet,
-          search,
-          start,
-          end
+      const soldTable =
+        tableName(
+          b,
+          "sold"
         );
 
 
-      result = {
+      const {
+        count,
+        error
+      } =
+        await supabase
+          .from(
+            soldTable
+          )
+          .select(
+            "NTAGN",
+            {
+              count:"exact",
+              head:true
+            }
+          );
 
-        rows:
-          resultOne.rows.map(
+
+      if(error){
+        throw error;
+      }
+
+
+      soldTotal +=
+        Number(count || 0);
+
+
+      /*
+       * Only fetch sold tags when
+       * displaying available stock.
+       */
+
+      if(sheet === "stocks"){
+
+        const {
+          data,
+          error:
+            soldError
+        } =
+          await supabase
+            .from(
+              soldTable
+            )
+            .select(
+              "NTAGN"
+            )
+            .limit(
+              100000
+            );
+
+
+        if(soldError){
+          throw soldError;
+        }
+
+
+        (data || [])
+          .forEach(
             function(row){
 
-              return normalizeRow(
-                row,
-                branch
-              );
+              const tag =
+                String(
+                  row.NTAGN ||
+                  ""
+                ).trim();
+
+              if(tag){
+
+                soldTags.add(
+                  b +
+                  "|" +
+                  tag
+                );
+
+              }
 
             }
-          ),
+          );
 
-        total:
-          resultOne.count,
-
-        hasNext:
-          resultOne.count >
-          currentPage *
-          ROWS_PER_PAGE
-
-      };
+      }
 
     }
 
 
+    /*
+     * AUDIT COUNT
+     */
+
+    let auditTotal = 0;
+
+
+    for(
+      const b of branches
+    ){
+
+      const {
+        count,
+        error
+      } =
+        await supabase
+          .from(
+            tableName(
+              b,
+              "audit"
+            )
+          )
+          .select(
+            "NTAGN",
+            {
+              count:"exact",
+              head:true
+            }
+          );
+
+
+      if(error){
+        throw error;
+      }
+
+
+      auditTotal +=
+        Number(count || 0);
+
+    }
+
+
+    /*
+     * CURRENT TABLE
+     */
+
+    let allRows = [];
+
+    let total = 0;
+
+
+    for(
+      const b of branches
+    ){
+
+      const table =
+        tableName(
+          b,
+          sheet
+        );
+
+
+      const result =
+        await getRows(
+          table,
+          search,
+          1,
+          100000
+        );
+
+
+      let rows =
+        result.data
+          .map(
+            row =>
+              normalizeRow(
+                row,
+                b
+              )
+          );
+
+
+      /*
+       * AVAILABLE STOCKS:
+       * remove sold NTAGN values.
+       */
+
+      if(sheet === "stocks"){
+
+        rows =
+          rows.filter(
+            function(row){
+
+              return !soldTags.has(
+                b +
+                "|" +
+                String(
+                  row.tag ||
+                  ""
+                ).trim()
+              );
+
+            }
+          );
+
+      }
+
+
+      allRows =
+        allRows.concat(
+          rows
+        );
+
+    }
+
+
+    /*
+     * CLIENT-SIDE SEARCH
+     *
+     * This catches values that may
+     * contain punctuation.
+     */
+
+    if(search){
+
+      const q =
+        search.toLowerCase();
+
+
+      allRows =
+        allRows.filter(
+          function(row){
+
+            return [
+
+              row.branch,
+              row.lenstype,
+              row.description,
+              row.tag,
+              row.si,
+              row.date,
+              row.qr,
+              row.br
+
+            ]
+            .some(
+              value =>
+                String(
+                  value || ""
+                )
+                .toLowerCase()
+                .includes(q)
+            );
+
+          }
+        );
+
+    }
+
+
+    total =
+      allRows.length;
+
+
+    /*
+     * Pagination
+     */
+
+    const start =
+      (currentPage - 1) *
+      ROWS_PER_PAGE;
+
+
+    const pageRows =
+      allRows.slice(
+        start,
+        start +
+        ROWS_PER_PAGE
+      );
+
+
     lastRows =
-      result.rows || [];
+      pageRows;
 
 
-    hasNextPage =
-      !!result.hasNext;
+    currentTotal =
+      total;
 
 
-    updateStats(
-      stats,
-      result
-    );
+    updateStats({
+
+      availableTotal:
+        sheet === "stocks"
+          ? total
+          : await getAvailableCount(
+              branches,
+              soldTags
+            ),
+
+      soldTotal:
+        soldTotal,
+
+      auditTotal:
+        auditTotal,
+
+      showing:
+        pageRows.length
+
+    });
 
 
     renderTable(
-      lastRows
+      pageRows
     );
+
+
+    updatePagination();
 
 
   }catch(error){
@@ -2547,30 +3050,12 @@ async function refreshDashboard(){
       error
     );
 
-
-    if(
-      /JWT|expired|invalid.*token|unauthorized/i
-        .test(
-          error.message || ""
-        )
-    ){
-
-      await logout();
-
-      return;
-
-    }
-
-
     showStatus(
       error.message ||
-      "Unable to load inventory."
+      "Unable to load Supabase data."
     );
 
-
   }finally{
-
-    searchInProgress = false;
 
     setLoading(false);
 
@@ -2580,172 +3065,118 @@ async function refreshDashboard(){
 
 
 /* =========================================================
+   AVAILABLE COUNT
+   ========================================================= */
+
+async function getAvailableCount(
+  branches,
+  soldTags
+){
+
+  let total = 0;
+
+
+  for(
+    const b of branches
+  ){
+
+    const {
+      data,
+      error
+    } =
+      await supabase
+        .from(
+          tableName(
+            b,
+            "stocks"
+          )
+        )
+        .select(
+          "NTAGN"
+        )
+        .limit(
+          100000
+        );
+
+
+    if(error){
+      throw error;
+    }
+
+
+    total +=
+      (data || [])
+        .filter(
+          row =>
+            !soldTags.has(
+              b +
+              "|" +
+              String(
+                row.NTAGN ||
+                ""
+              ).trim()
+            )
+        )
+        .length;
+
+  }
+
+
+  return total;
+
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+function runSearch(){
+
+  currentPage = 1;
+
+  refreshDashboard();
+
+}
+
+
+function searchKey(
+  event
+){
+
+  if(
+    event.key ===
+    "Enter"
+  ){
+
+    runSearch();
+
+  }
+
+}
+
+
+function clearSearch(){
+
+  document
+    .getElementById(
+      "search"
+    )
+    .value = "";
+
+  currentPage = 1;
+
+  refreshDashboard();
+
+}
+
+
+/* =========================================================
    STATS
    ========================================================= */
 
-async function countTable(
-  table,
-  search
-){
-
-  let query =
-    supabaseClient
-      .from(table)
-      .select(
-        "NTAGN",
-        {
-          count:"exact",
-          head:true
-        }
-      );
-
-
-  const filter =
-    buildSearchFilter(
-      search
-    );
-
-
-  if(filter){
-
-    query =
-      query.or(
-        filter
-      );
-
-  }
-
-
-  const result =
-    await query;
-
-
-  if(result.error){
-
-    throw result.error;
-
-  }
-
-
-  return result.count || 0;
-
-}
-
-
-async function getStats(
-  branch
-){
-
-  const branches =
-    branch === "ALL"
-      ? BRANCHES
-      : [branch];
-
-
-  const results =
-    await Promise.all(
-      branches.map(
-        async function(b){
-
-          const [
-            stock,
-            sold,
-            audit
-          ] =
-            await Promise.all(
-              [
-                countTable(
-                  tableName(
-                    b,
-                    "stocks"
-                  )
-                ),
-
-                countTable(
-                  tableName(
-                    b,
-                    "sold"
-                  )
-                ),
-
-                countTable(
-                  tableName(
-                    b,
-                    "audit"
-                  )
-                )
-              ]
-            );
-
-
-          return {
-            stock,
-            sold,
-            audit
-          };
-
-        }
-      )
-    );
-
-
-  let stockTotal = 0;
-
-  let soldTotal = 0;
-
-  let auditTotal = 0;
-
-
-  results.forEach(
-    function(item){
-
-      stockTotal +=
-        item.stock;
-
-      soldTotal +=
-        item.sold;
-
-      auditTotal +=
-        item.audit;
-
-    }
-  );
-
-
-  /*
-   * Your inventory model is:
-   *
-   * AVAILABLE =
-   * STOCKS - SOLD
-   *
-   * because scanresults represents sold
-   * records.
-   */
-
-  const available =
-    Math.max(
-      0,
-      stockTotal -
-      soldTotal
-    );
-
-
-  return {
-
-    stockTotal,
-    soldTotal,
-    auditTotal,
-    availableTotal:
-      available
-
-  };
-
-}
-
-
 function updateStats(
-  stats,
-  result
+  data
 ){
 
   document
@@ -2754,7 +3185,7 @@ function updateStats(
     )
     .textContent =
       formatNumber(
-        stats.availableTotal
+        data.availableTotal
       );
 
 
@@ -2764,7 +3195,7 @@ function updateStats(
     )
     .textContent =
       formatNumber(
-        stats.soldTotal
+        data.soldTotal
       );
 
 
@@ -2774,7 +3205,7 @@ function updateStats(
     )
     .textContent =
       formatNumber(
-        stats.auditTotal
+        data.auditTotal
       );
 
 
@@ -2784,7 +3215,7 @@ function updateStats(
     )
     .textContent =
       formatNumber(
-        result.total
+        data.showing
       );
 
 }
@@ -2830,11 +3261,6 @@ function renderTable(
         "No records found";
 
 
-    updatePagination(
-      0
-    );
-
-
     return;
 
   }
@@ -2858,30 +3284,25 @@ function renderTable(
           row.branch
         );
 
-
       const type =
         escapeHtml(
           row.lenstype
         );
-
 
       const description =
         escapeHtml(
           row.description
         );
 
-
       const tag =
         escapeHtml(
           row.tag
         );
 
-
       const si =
         escapeHtml(
           row.si
         );
-
 
       const date =
         escapeHtml(
@@ -2914,13 +3335,29 @@ function renderTable(
         </td>
 
         <td>
-          <input
-            class="siInput"
-            value="${si}"
-            data-tag="${tag}"
-            data-branch="${branch}"
-            onchange="saveSI(this)"
-          >
+
+          ${
+            document.getElementById(
+              "sheet"
+            ).value === "stocks"
+
+            ?
+
+            `
+            <input
+              class="siInput"
+              value="${si}"
+              data-tag="${escapeHtml(row.tag)}"
+              data-branch="${escapeHtml(row.branch)}"
+              onchange="saveSI(this)"
+            >
+            `
+
+            :
+
+            (si || "—")
+          }
+
         </td>
 
         <td>
@@ -2958,20 +3395,20 @@ function renderTable(
     )
     .textContent =
       "Showing " +
-      rows.length +
-      " records";
+      (
+        (currentPage - 1) *
+        ROWS_PER_PAGE +
+        1
+      ) +
+      "–" +
+      (
+        (currentPage - 1) *
+        ROWS_PER_PAGE +
+        rows.length
+      ) +
+      " of " +
+      currentTotal;
 
-
-  updatePagination(
-    rows.length
-  );
-
-}
-
-
-function updatePagination(
-  count
-){
 
   document
     .getElementById(
@@ -2980,28 +3417,18 @@ function updatePagination(
     .textContent =
       currentPage;
 
-
-  document
-    .getElementById(
-      "prevBtn"
-    )
-    .disabled =
-      currentPage <= 1;
-
-
-  document
-    .getElementById(
-      "nextBtn"
-    )
-    .disabled =
-      !hasNextPage ||
-      count < ROWS_PER_PAGE;
-
 }
 
 
 /* =========================================================
    SAVE SI
+   =========================================================
+
+   PRIMARY KEY:
+   BR + NTAGN
+
+   Therefore update BOTH key fields in
+   the filter.
    ========================================================= */
 
 async function saveSI(
@@ -3021,7 +3448,7 @@ async function saveSI(
   if(!branch || !tag){
 
     showStatus(
-      "Branch or tag is missing."
+      "Missing branch or tag."
     );
 
     return;
@@ -3031,10 +3458,6 @@ async function saveSI(
 
   try{
 
-    /*
-     * BR + NTAGN is the composite primary key.
-     */
-
     const table =
       tableName(
         branch,
@@ -3042,14 +3465,18 @@ async function saveSI(
       );
 
 
-    const result =
-      await supabaseClient
+    const {
+      data,
+      error
+    } =
+      await supabase
         .from(table)
-        .update(
-          {
-            "SI NO.":si
-          }
-        )
+        .update({
+
+          "SI NO.":
+            si
+
+        })
         .eq(
           "BR",
           branch
@@ -3057,12 +3484,24 @@ async function saveSI(
         .eq(
           "NTAGN",
           tag
-        );
+        )
+        .select();
 
 
-    if(result.error){
+    if(error){
+      throw error;
+    }
 
-      throw result.error;
+
+    if(
+      !data ||
+      !data.length
+    ){
+
+      throw new Error(
+        "No stock record was updated. " +
+        "Check BR + NTAGN."
+      );
 
     }
 
@@ -3074,9 +3513,13 @@ async function saveSI(
 
   }catch(error){
 
+    console.error(
+      error
+    );
+
     showStatus(
-      "Unable to save SI No.: " +
-      error.message
+      error.message ||
+      "Unable to save SI No."
     );
 
   }
@@ -3102,21 +3545,19 @@ async function deleteRow(
 
 
   if(!confirmed){
-
     return;
-
   }
 
 
-  const sheet =
-    document
-      .getElementById(
-        "sheet"
-      )
-      .value;
-
-
   try{
+
+    const sheet =
+      document
+        .getElementById(
+          "sheet"
+        )
+        .value;
+
 
     const table =
       tableName(
@@ -3125,8 +3566,10 @@ async function deleteRow(
       );
 
 
-    const result =
-      await supabaseClient
+    const {
+      error
+    } =
+      await supabase
         .from(table)
         .delete()
         .eq(
@@ -3139,10 +3582,8 @@ async function deleteRow(
         );
 
 
-    if(result.error){
-
-      throw result.error;
-
+    if(error){
+      throw error;
     }
 
 
@@ -3156,9 +3597,13 @@ async function deleteRow(
 
   }catch(error){
 
+    console.error(
+      error
+    );
+
     showStatus(
-      "Delete failed: " +
-      error.message
+      error.message ||
+      "Delete failed."
     );
 
   }
@@ -3185,6 +3630,10 @@ function inlineConfirm(
 
       panel.className =
         "queueCard";
+
+
+      panel.style.pointerEvents =
+        "auto";
 
 
       panel.innerHTML = `
@@ -3228,13 +3677,15 @@ function inlineConfirm(
       `;
 
 
-      document
-        .getElementById(
+      const queue =
+        document.getElementById(
           "queuePanel"
-        )
-        .appendChild(
-          panel
         );
+
+
+      queue.appendChild(
+        panel
+      );
 
 
       panel
@@ -3242,9 +3693,9 @@ function inlineConfirm(
           "[data-no]"
         )
         .forEach(
-          function(button){
+          function(btn){
 
-            button.onclick =
+            btn.onclick =
               function(){
 
                 panel.remove();
@@ -3280,14 +3731,51 @@ function inlineConfirm(
    PAGINATION
    ========================================================= */
 
+function updatePagination(){
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        currentTotal /
+        ROWS_PER_PAGE
+      )
+    );
+
+
+  document
+    .getElementById(
+      "prevBtn"
+    )
+    .disabled =
+      currentPage <= 1;
+
+
+  document
+    .getElementById(
+      "nextBtn"
+    )
+    .disabled =
+      currentPage >=
+      totalPages;
+
+
+  document
+    .getElementById(
+      "pageCurrent"
+    )
+    .textContent =
+      currentPage;
+
+}
+
+
 function previousPage(){
 
   if(
     currentPage <= 1
   ){
-
     return;
-
   }
 
 
@@ -3300,12 +3788,21 @@ function previousPage(){
 
 function nextPage(){
 
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        currentTotal /
+        ROWS_PER_PAGE
+      )
+    );
+
+
   if(
-    !hasNextPage
+    currentPage >=
+    totalPages
   ){
-
     return;
-
   }
 
 
@@ -3332,6 +3829,15 @@ async function handleImportFile(
 
 
   if(!file){
+    return;
+  }
+
+
+  if(!window.XLSX){
+
+    showStatus(
+      "XLSX library is not loaded."
+    );
 
     return;
 
@@ -3350,17 +3856,6 @@ async function handleImportFile(
 
     showStatus(
       "Select one branch before importing."
-    );
-
-    return;
-
-  }
-
-
-  if(importRunning){
-
-    showStatus(
-      "An import is already running."
     );
 
     return;
@@ -3391,28 +3886,15 @@ async function handleImportFile(
       );
 
 
-    const sheetName =
-      workbook.SheetNames[0];
-
-
-    if(!sheetName){
-
-      throw new Error(
-        "The workbook has no worksheet."
-      );
-
-    }
-
-
-    const worksheet =
+    const firstSheet =
       workbook.Sheets[
-        sheetName
+        workbook.SheetNames[0]
       ];
 
 
     const rows =
       XLSX.utils.sheet_to_json(
-        worksheet,
+        firstSheet,
         {
           defval:""
         }
@@ -3421,10 +3903,8 @@ async function handleImportFile(
 
     if(!rows.length){
 
-      updateQueue(
+      updateQueueError(
         "IMPORT",
-        0,
-        1,
         "No rows found."
       );
 
@@ -3442,6 +3922,10 @@ async function handleImportFile(
 
   }catch(error){
 
+    console.error(
+      error
+    );
+
     updateQueueError(
       "IMPORT",
       error.message
@@ -3453,142 +3937,7 @@ async function handleImportFile(
 
 
 /* =========================================================
-   IMPORT FIELD CONVERSION
-   ========================================================= */
-
-const COLUMN_NAMES = [
-  "SDATE",
-  "SUPPLIER",
-  "DR",
-  "COST",
-  "ASG",
-  "CB",
-  "FD",
-  "UNITS",
-  "POWER",
-  "LENSTYPE",
-  "PUNIT",
-  "BR",
-  "NTAGN",
-  "CATEGORY",
-  "DESCRIPTION",
-  "LENSCODE",
-  "SELLINGPRICE",
-  "DELIVERYDATE",
-  "ORNUMBER",
-  "ORDATE",
-  "REMARKS",
-  "TAGPRICE",
-  "QR",
-  "SI NO.",
-  "DATE AND TIME",
-  "USER EMAIL",
-  "STATUS"
-];
-
-
-function getImportValue(
-  row,
-  column
-){
-
-  if(
-    row[column] !== undefined
-  ){
-
-    return row[column];
-
-  }
-
-
-  const lower =
-    column.toLowerCase();
-
-
-  for(
-    const key of Object.keys(row)
-  ){
-
-    if(
-      String(key)
-        .trim()
-        .toLowerCase() ===
-      lower
-    ){
-
-      return row[key];
-
-    }
-
-  }
-
-
-  return "";
-
-}
-
-
-function normalizeImportRow(
-  source,
-  branch
-){
-
-  const row = {};
-
-
-  COLUMN_NAMES.forEach(
-    function(column){
-
-      let value =
-        getImportValue(
-          source,
-          column
-        );
-
-
-      if(
-        value instanceof Date
-      ){
-
-        value =
-          value.toISOString();
-
-      }
-
-
-      if(
-        value === null ||
-        value === undefined
-      ){
-
-        value = "";
-
-      }
-
-
-      row[column] =
-        String(value);
-
-    }
-  );
-
-
-  /*
-   * Always use the selected branch
-   * as the BR value.
-   */
-
-  row.BR =
-    branch;
-
-
-  return row;
-
-}
-
-
-/* =========================================================
-   IMPORT JOB
+   IMPORT DIRECT TO SUPABASE
    ========================================================= */
 
 async function startImportJob(
@@ -3597,16 +3946,11 @@ async function startImportJob(
   branch
 ){
 
-  if(importRunning){
-
-    throw new Error(
-      "An import is already running."
+  const table =
+    tableName(
+      branch,
+      "stocks"
     );
-
-  }
-
-
-  importRunning = true;
 
 
   const total =
@@ -3623,123 +3967,241 @@ async function startImportJob(
   let processed = 0;
 
 
-  try{
+  /*
+   * Convert spreadsheet headers into
+   * your exact Supabase column names.
+   */
 
-    for(
-      let i = 0;
-      i < total;
-      i += IMPORT_CHUNK_SIZE
-    ){
-
-      const sourceChunk =
-        rows.slice(
-          i,
-          i +
-          IMPORT_CHUNK_SIZE
-        );
+  const normalized =
+    rows.map(
+      normalizeImportRow
+    );
 
 
-      const chunk =
-        sourceChunk.map(
-          function(row){
+  /*
+   * Remove completely empty rows.
+   */
 
-            return normalizeImportRow(
-              row,
-              branch
-            );
+  const cleanRows =
+    normalized.filter(
+      function(row){
 
+        return String(
+          row.NTAGN ||
+          ""
+        ).trim() !== "";
+
+      }
+    );
+
+
+  const chunkSize =
+    500;
+
+
+  for(
+    let i = 0;
+    i < cleanRows.length;
+    i += chunkSize
+  ){
+
+    const chunk =
+      cleanRows.slice(
+        i,
+        i + chunkSize
+      );
+
+
+    /*
+     * Upsert using composite
+     * primary key:
+     *
+     * BR + NTAGN
+     */
+
+    const {
+      error
+    } =
+      await supabase
+        .from(table)
+        .upsert(
+          chunk,
+          {
+            onConflict:
+              "BR,NTAGN"
           }
         );
 
 
-      /*
-       * The primary key is:
-       *
-       * BR + NTAGN
-       *
-       */
+    if(error){
 
-      const table =
-        tableName(
-          branch,
-          "stocks"
-        );
-
-
-      const result =
-        await supabaseClient
-          .from(table)
-          .upsert(
-            chunk,
-            {
-              onConflict:
-                "BR,NTAGN",
-              ignoreDuplicates:
-                false
-            }
-          );
-
-
-      if(result.error){
-
-        throw result.error;
-
-      }
-
-
-      processed +=
-        chunk.length;
-
-
-      updateQueue(
-        "IMPORT",
-        processed,
-        total,
-        "Imported " +
-        processed.toLocaleString() +
-        " / " +
-        total.toLocaleString()
+      console.error(
+        "Import chunk error:",
+        error
       );
 
-
-      /*
-       * Yield control to the browser.
-       * Dashboard remains responsive.
-       */
-
-      await sleep(10);
+      throw error;
 
     }
 
 
+    processed +=
+      chunk.length;
+
+
     updateQueue(
       "IMPORT",
-      total,
-      total,
-      "Import complete."
+      processed,
+      cleanRows.length,
+      "Importing " +
+      fileName
     );
 
 
-    showStatus(
-      "Import completed."
+    /*
+     * Give browser event loop
+     * time to remain responsive.
+     */
+
+    await new Promise(
+      resolve =>
+        setTimeout(
+          resolve,
+          10
+        )
     );
-
-
-    setTimeout(
-      function(){
-
-        refreshDashboard();
-
-      },
-      500
-    );
-
-
-  }finally{
-
-    importRunning = false;
 
   }
+
+
+  updateQueue(
+    "IMPORT",
+    cleanRows.length,
+    cleanRows.length,
+    "Import complete."
+  );
+
+
+  showStatus(
+    "Import completed."
+  );
+
+
+  setTimeout(
+    function(){
+      refreshDashboard();
+    },
+    500
+  );
+
+}
+
+
+/* =========================================================
+   NORMALIZE IMPORT
+   ========================================================= */
+
+function normalizeImportRow(
+  source
+){
+
+  const row = {};
+
+
+  const columns = [
+
+    "SDATE",
+    "SUPPLIER",
+    "DR",
+    "COST",
+    "ASG",
+    "CB",
+    "FD",
+    "UNITS",
+    "POWER",
+    "LENSTYPE",
+    "PUNIT",
+    "BR",
+    "NTAGN",
+    "CATEGORY",
+    "DESCRIPTION",
+    "LENSCODE",
+    "SELLINGPRICE",
+    "DELIVERYDATE",
+    "ORNUMBER",
+    "ORDATE",
+    "REMARKS",
+    "TAGPRICE",
+    "QR",
+    "SI NO.",
+    "DATE AND TIME",
+    "USER EMAIL",
+    "STATUS"
+
+  ];
+
+
+  columns.forEach(
+    function(column){
+
+      let value =
+        source[column];
+
+
+      /*
+       * Handle common Excel header
+       * variations.
+       */
+
+      if(
+        value === undefined
+      ){
+
+        const keys =
+          Object.keys(source);
+
+
+        const found =
+          keys.find(
+            key =>
+              key
+                .trim()
+                .toUpperCase() ===
+              column
+                .trim()
+                .toUpperCase()
+          );
+
+
+        if(found){
+          value =
+            source[found];
+        }
+
+      }
+
+
+      if(
+        value instanceof Date
+      ){
+
+        value =
+          value.toISOString();
+
+      }
+
+
+      row[column] =
+        value === undefined ||
+        value === null
+          ? ""
+          : String(value);
+
+    }
+  );
+
+
+  return row;
 
 }
 
@@ -3750,29 +4212,15 @@ async function startImportJob(
 
 async function startExport(){
 
-  if(exportRunning){
-
-    showStatus(
-      "An export is already running."
-    );
-
-    return;
-
-  }
-
-
-  exportRunning = true;
-
-
-  const branch =
-    document
-      .getElementById(
-        "branch"
-      )
-      .value;
-
-
   try{
+
+    const branch =
+      document
+        .getElementById(
+          "branch"
+        )
+        .value;
+
 
     createQueueCard(
       "EXPORT",
@@ -3790,191 +4238,241 @@ async function startExport(){
       XLSX.utils.book_new();
 
 
-    let totalRows = 0;
+    /*
+     * STOCKS
+     */
+
+    const stockRows = [];
 
 
     for(
-      let i = 0;
-      i < branches.length;
-      i++
+      const b of branches
     ){
 
-      const b =
-        branches[i];
-
-
-      updateQueue(
-        "EXPORT",
-        i,
-        branches.length,
-        "Reading " +
-        b
-      );
-
-
-      const [
-        stocks,
-        sold,
-        audit
-      ] =
-        await Promise.all(
-          [
-            fetchAllRows(
-              tableName(
-                b,
-                "stocks"
-              )
-            ),
-
-            fetchAllRows(
-              tableName(
-                b,
-                "sold"
-              )
-            ),
-
-            fetchAllRows(
-              tableName(
-                b,
-                "audit"
-              )
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            tableName(
+              b,
+              "stocks"
             )
-          ]
-        );
-
-
-      /*
-       * AVAILABLE STOCKS
-       *
-       * Remove stock tags that exist
-       * in scanresults.
-       */
-
-      const soldTags =
-        new Set(
-          sold.map(
-            function(row){
-
-              return String(
-                field(
-                  row,
-                  "NTAGN"
-                )
-              );
-
-            }
           )
-        );
+          .select("*")
+          .limit(
+            100000
+          );
 
 
-      const available =
-        stocks.filter(
+      if(error){
+        throw error;
+      }
+
+
+      (data || [])
+        .forEach(
           function(row){
 
-            return !soldTags.has(
-              String(
-                field(
-                  row,
-                  "NTAGN"
-                )
-              )
+            stockRows.push(
+              row
             );
 
           }
         );
-
-
-      totalRows +=
-        available.length +
-        sold.length +
-        audit.length;
-
-
-      addSheetSafe(
-        workbook,
-        b + " STOCKS",
-        available
-      );
-
-
-      addSheetSafe(
-        workbook,
-        b + " SOLD",
-        sold
-      );
-
-
-      addSheetSafe(
-        workbook,
-        b + " AUDIT",
-        audit
-      );
-
-
-      updateQueue(
-        "EXPORT",
-        i + 1,
-        branches.length,
-        "Processed " +
-        b
-      );
-
-
-      await sleep(10);
 
     }
 
 
     updateQueue(
       "EXPORT",
+      25,
       100,
-      100,
-      "Creating XLSX..."
+      "Preparing STOCKS..."
     );
 
 
-    const output =
-      XLSX.write(
-        workbook,
-        {
-          bookType:"xlsx",
-          type:"array"
-        }
+    const stockSheet =
+      XLSX.utils.json_to_sheet(
+        stockRows
       );
 
 
-    const blob =
-      new Blob(
-        [output],
-        {
-          type:
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        }
+    XLSX.utils.book_append_sheet(
+      workbook,
+      stockSheet,
+      "STOCKS"
+    );
+
+
+    /*
+     * SOLD
+     */
+
+    const soldRows = [];
+
+
+    for(
+      const b of branches
+    ){
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            tableName(
+              b,
+              "sold"
+            )
+          )
+          .select("*")
+          .limit(
+            100000
+          );
+
+
+      if(error){
+        throw error;
+      }
+
+
+      (data || [])
+        .forEach(
+          function(row){
+
+            soldRows.push(
+              row
+            );
+
+          }
+        );
+
+    }
+
+
+    updateQueue(
+      "EXPORT",
+      50,
+      100,
+      "Preparing SOLD..."
+    );
+
+
+    const soldSheet =
+      XLSX.utils.json_to_sheet(
+        soldRows
       );
 
 
-    const url =
-      URL.createObjectURL(
-        blob
+    XLSX.utils.book_append_sheet(
+      workbook,
+      soldSheet,
+      "SOLD"
+    );
+
+
+    /*
+     * AUDIT
+     */
+
+    const auditRows = [];
+
+
+    for(
+      const b of branches
+    ){
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            tableName(
+              b,
+              "audit"
+            )
+          )
+          .select("*")
+          .limit(
+            100000
+          );
+
+
+      if(error){
+        throw error;
+      }
+
+
+      (data || [])
+        .forEach(
+          function(row){
+
+            auditRows.push(
+              row
+            );
+
+          }
+        );
+
+    }
+
+
+    updateQueue(
+      "EXPORT",
+      75,
+      100,
+      "Preparing AUDIT..."
+    );
+
+
+    const auditSheet =
+      XLSX.utils.json_to_sheet(
+        auditRows
       );
+
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      auditSheet,
+      "AUDIT"
+    );
+
+
+    /*
+     * Create XLSX locally.
+     */
+
+    updateQueue(
+      "EXPORT",
+      90,
+      100,
+      "Creating XLSX..."
+    );
 
 
     const fileName =
       "Acebedo_Inventory_" +
       new Date()
         .toISOString()
-        .slice(
-          0,
-          10
-        ) +
+        .slice(0,10) +
       ".xlsx";
 
 
-    updateQueueDownload(
+    XLSX.writeFile(
+      workbook,
+      fileName
+    );
+
+
+    updateQueue(
       "EXPORT",
-      url,
-      fileName,
-      totalRows
+      100,
+      100,
+      "Export complete."
     );
 
 
@@ -3989,15 +4487,11 @@ async function startExport(){
       error
     );
 
-
     updateQueueError(
       "EXPORT",
-      error.message
+      error.message ||
+      "Export failed."
     );
-
-  }finally{
-
-    exportRunning = false;
 
   }
 
@@ -4005,167 +4499,7 @@ async function startExport(){
 
 
 /* =========================================================
-   FETCH ALL ROWS
-   ========================================================= */
-
-async function fetchAllRows(
-  table
-){
-
-  const all = [];
-
-  const pageSize =
-    1000;
-
-  let offset = 0;
-
-
-  while(true){
-
-    const result =
-      await supabaseClient
-        .from(table)
-        .select("*")
-        .order(
-          "NTAGN",
-          {
-            ascending:true
-          }
-        )
-        .range(
-          offset,
-          offset +
-          pageSize -
-          1
-        );
-
-
-    if(result.error){
-
-      throw result.error;
-
-    }
-
-
-    const rows =
-      result.data || [];
-
-
-    all.push(
-      ...rows
-    );
-
-
-    if(
-      rows.length <
-      pageSize
-    ){
-
-      break;
-
-    }
-
-
-    offset +=
-      pageSize;
-
-
-    await sleep(0);
-
-  }
-
-
-  return all;
-
-}
-
-
-/* =========================================================
-   XLSX SHEET
-   ========================================================= */
-
-function rowToExportArray(
-  row
-){
-
-  return COLUMN_NAMES.map(
-    function(column){
-
-      return field(
-        row,
-        column
-      );
-
-    }
-  );
-
-}
-
-
-function addSheetSafe(
-  workbook,
-  name,
-  rows
-){
-
-  /*
-   * Excel worksheet names have a 31
-   * character limit.
-   */
-
-  let safeName =
-    String(name)
-      .slice(
-        0,
-        31
-      );
-
-
-  if(
-    workbook.SheetNames.includes(
-      safeName
-    )
-  ){
-
-    safeName =
-      safeName.slice(
-        0,
-        27
-      ) +
-      "_" +
-      Math.floor(
-        Math.random() *
-        999
-      );
-
-  }
-
-
-  const matrix = [
-    COLUMN_NAMES,
-    ...rows.map(
-      rowToExportArray
-    )
-  ];
-
-
-  const worksheet =
-    XLSX.utils.aoa_to_sheet(
-      matrix
-    );
-
-
-  XLSX.utils.book_append_sheet(
-    workbook,
-    worksheet,
-    safeName
-  );
-
-}
-
-
-/* =========================================================
-   QUEUE
+   QUEUE CARD
    ========================================================= */
 
 function createQueueCard(
@@ -4173,21 +4507,19 @@ function createQueueCard(
   text
 ){
 
-  const existing =
+  let card =
     document.getElementById(
       "queue_" +
       id
     );
 
 
-  if(existing){
-
+  if(card){
     return;
-
   }
 
 
-  const card =
+  card =
     document.createElement(
       "div"
     );
@@ -4202,25 +4534,23 @@ function createQueueCard(
     id;
 
 
-  const title =
-    id.startsWith(
-      "IMPORT"
-    )
-      ? "↑ Import"
-      : "↓ Export";
-
-
   card.innerHTML = `
 
     <div class="queueHead">
 
       <div class="queueTitle">
-        ${title}
+        ${
+          id.startsWith("IMPORT")
+            ? "↑ Import"
+            : "↓ Export"
+        }
       </div>
 
       <button
         class="queueClose"
-        onclick="this.closest('.queueCard').remove()"
+        onclick="
+          this.closest('.queueCard').remove()
+        "
       >
         ×
       </button>
@@ -4266,6 +4596,10 @@ function createQueueCard(
 }
 
 
+/* =========================================================
+   UPDATE QUEUE
+   ========================================================= */
+
 function updateQueue(
   id,
   current,
@@ -4273,7 +4607,7 @@ function updateQueue(
   text
 ){
 
-  let card =
+  const card =
     document.getElementById(
       "queue_" +
       id
@@ -4287,11 +4621,12 @@ function updateQueue(
       text
     );
 
-    card =
-      document.getElementById(
-        "queue_" +
-        id
-      );
+    return updateQueue(
+      id,
+      current,
+      total,
+      text
+    );
 
   }
 
@@ -4301,8 +4636,8 @@ function updateQueue(
       ? Math.min(
           100,
           Math.round(
-            Number(current) /
-            Number(total) *
+            current /
+            total *
             100
           )
         )
@@ -4338,12 +4673,16 @@ function updateQueue(
 }
 
 
+/* =========================================================
+   QUEUE ERROR
+   ========================================================= */
+
 function updateQueueError(
   id,
   message
 ){
 
-  let card =
+  const card =
     document.getElementById(
       "queue_" +
       id
@@ -4357,11 +4696,10 @@ function updateQueueError(
       "Error"
     );
 
-    card =
-      document.getElementById(
-        "queue_" +
-        id
-      );
+    return updateQueueError(
+      id,
+      message
+    );
 
   }
 
@@ -4374,7 +4712,6 @@ function updateQueueError(
 
   bar.style.width =
     "100%";
-
 
   bar.style.background =
     "#dc2626";
@@ -4389,58 +4726,7 @@ function updateQueueError(
   card.querySelector(
     "[data-status]"
   ).textContent =
-    message ||
-    "Operation failed.";
-
-}
-
-
-function updateQueueDownload(
-  id,
-  url,
-  fileName,
-  totalRows
-){
-
-  const card =
-    document.getElementById(
-      "queue_" +
-      id
-    );
-
-
-  if(!card){
-
-    return;
-
-  }
-
-
-  card.querySelector(
-    "[data-progress]"
-  ).style.width =
-    "100%";
-
-
-  card.querySelector(
-    "[data-percent]"
-  ).textContent =
-    "100%";
-
-
-  card.querySelector(
-    "[data-status]"
-  ).innerHTML = `
-
-    <a
-      class="queueDownload"
-      href="${escapeHtml(url)}"
-      download="${escapeHtml(fileName)}"
-    >
-      Download ${escapeHtml(fileName)}
-    </a>
-
-  `;
+    message;
 
 }
 
@@ -4510,7 +4796,7 @@ function setLoading(
 
 
 /* =========================================================
-   HELPERS
+   NUMBER
    ========================================================= */
 
 function formatNumber(
@@ -4524,57 +4810,9 @@ function formatNumber(
 }
 
 
-function sleep(
-  ms
-){
-
-  return new Promise(
-    function(resolve){
-
-      setTimeout(
-        resolve,
-        ms
-      );
-
-    }
-  );
-
-}
-
-
-function escapeHtml(
-  value
-){
-
-  return String(
-    value === undefined ||
-    value === null
-      ? ""
-      : value
-  )
-  .replace(
-    /&/g,
-    "&amp;"
-  )
-  .replace(
-    /</g,
-    "&lt;"
-  )
-  .replace(
-    />/g,
-    "&gt;"
-  )
-  .replace(
-    /"/g,
-    "&quot;"
-  )
-  .replace(
-    /'/g,
-    "&#039;"
-  );
-
-}
-
+/* =========================================================
+   JS ESCAPE
+   ========================================================= */
 
 function jsEscape(
   value
@@ -4604,53 +4842,88 @@ function jsEscape(
 
 
 /* =========================================================
-   STARTUP
+   SUPABASE AUTH STATE
    ========================================================= */
 
-(async function(){
+supabase.auth.onAuthStateChange(
+  async function(
+    event,
+    session
+  ){
 
-  try{
+    console.log(
+      "Supabase auth:",
+      event
+    );
+
 
     if(
-      SUPABASE_ANON_KEY ===
-      "YOUR_SUPABASE_ANON_KEY"
+      event ===
+      "SIGNED_OUT"
     ){
-
-      setLoginStatus(
-        "Add your Supabase anon/publishable key in the HTML first.",
-        true
-      );
 
       return;
 
     }
 
 
-    const loggedIn =
-      await checkExistingSession();
+    if(
+      event ===
+      "SIGNED_IN" &&
+      session &&
+      session.user &&
+      session.user.email
+    ){
+
+      currentEmail =
+        session.user.email
+          .trim()
+          .toLowerCase();
 
 
-    if(loggedIn){
-
-      showDashboard();
-
-    }else{
-
-      showLogin();
+      localStorage.setItem(
+        USER_KEY,
+        currentEmail
+      );
 
     }
 
-  }catch(error){
+  }
+);
 
-    console.error(
-      error
-    );
 
-    showLogin();
+/* =========================================================
+   STARTUP
+   ========================================================= */
+
+(async function(){
+
+  /*
+   * Supabase automatically restores
+   * the authenticated session.
+   */
+
+  const loggedIn =
+    await checkExistingSession();
+
+
+  if(loggedIn){
+
+    showDashboard();
+
+  }else{
+
+    document
+      .getElementById(
+        "loginScreen"
+      )
+      .style.display =
+      "flex";
 
   }
 
 })();
+
 </script>
 
 </body>

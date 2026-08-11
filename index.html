@@ -147,7 +147,7 @@ button{
 
 #loginScreen{
   min-height:100vh;
-  display:flex;
+  display:none;
   align-items:center;
   justify-content:center;
 
@@ -7025,28 +7025,46 @@ function escapeHtmlAttribute(
 
 (async function(){
 
-  const loggedIn =
-    await checkExistingSession();
+  const loginScreen =
+    document.getElementById("loginScreen");
 
-  if(loggedIn){
+  const dashboard =
+    document.getElementById("dashboard");
 
-    showDashboard();
+  /*
+   * IMPORTANT:
+   * If a saved session exists, do NOT show the
+   * login screen while checkExistingSession()
+   * is contacting the server.
+   */
+  if(sessionId){
+
+    loginScreen.style.display = "none";
+    dashboard.style.display = "block";
+
+    if(currentEmail){
+      document.getElementById("userEmail").textContent =
+        currentEmail;
+    }
+
+    const loggedIn =
+      await checkExistingSession();
+
+    if(loggedIn){
+
+      showDashboard();
+
+    }else{
+
+      dashboard.style.display = "none";
+      loginScreen.style.display = "flex";
+
+    }
 
   }else{
 
-    document
-      .getElementById(
-        "loginScreen"
-      )
-      .style.display =
-        "flex";
-
-    document
-      .getElementById(
-        "dashboard"
-      )
-      .style.display =
-        "none";
+    dashboard.style.display = "none";
+    loginScreen.style.display = "flex";
 
   }
 

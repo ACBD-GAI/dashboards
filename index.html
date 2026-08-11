@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +29,8 @@
   box-sizing:border-box;
 }
 
-html,body{
+html,
+body{
   margin:0;
   padding:0;
   min-height:100%;
@@ -493,6 +495,14 @@ tbody tr:hover{
 
 .actionBtn.danger{
   color:#dc2626;
+  border-color:#fecaca;
+  background:#fff;
+}
+
+.actionBtn.danger:hover{
+  color:#fff;
+  background:#dc2626;
+  border-color:#dc2626;
 }
 
 .siInput{
@@ -506,6 +516,10 @@ tbody tr:hover{
 .siInput:focus{
   border-color:#93b4ff;
   box-shadow:0 0 0 3px rgba(37,99,235,.08);
+}
+
+.siInput:disabled{
+  opacity:.6;
 }
 
 /* =========================================================
@@ -656,7 +670,7 @@ tbody tr:hover{
 }
 
 /* =========================================================
-   CLEAR MODAL
+   MODAL
 ========================================================= */
 
 .modalBackdrop{
@@ -689,6 +703,17 @@ tbody tr:hover{
   font-size:12px;
   margin-top:5px;
   margin-bottom:18px;
+  line-height:1.5;
+}
+
+.modalWarning{
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#9a3412;
+  font-size:12px;
+  line-height:1.5;
 }
 
 .modalActions{
@@ -731,12 +756,15 @@ tbody tr:hover{
 }
 
 @media(max-width:1250px){
+
   .controls{
     grid-template-columns:1fr 1fr 2fr auto auto auto auto;
   }
+
 }
 
 @media(max-width:1050px){
+
   .controls{
     grid-template-columns:1fr 1fr;
   }
@@ -748,9 +776,11 @@ tbody tr:hover{
   .cards{
     grid-template-columns:repeat(2,1fr);
   }
+
 }
 
 @media(max-width:700px){
+
   .app{
     padding:12px;
   }
@@ -774,6 +804,7 @@ tbody tr:hover{
   .tableActions{
     display:none;
   }
+
 }
 </style>
 </head>
@@ -801,6 +832,7 @@ tbody tr:hover{
     <div id="emailStep">
 
       <div class="field">
+
         <label>EMAIL ADDRESS</label>
 
         <input
@@ -811,6 +843,7 @@ tbody tr:hover{
           autocomplete="email"
           onkeydown="if(event.key==='Enter')sendOTP()"
         >
+
       </div>
 
       <button
@@ -826,6 +859,7 @@ tbody tr:hover{
     <div id="otpStep" class="hidden">
 
       <div class="field">
+
         <label>VERIFICATION CODE</label>
 
         <input
@@ -837,6 +871,7 @@ tbody tr:hover{
           placeholder="Enter 6-digit code"
           onkeydown="if(event.key==='Enter')verifyOTP()"
         >
+
       </div>
 
       <button
@@ -878,6 +913,7 @@ tbody tr:hover{
         <div class="brandLogo">◉</div>
 
         <div>
+
           <div class="brandTitle">
             Central Inventory
           </div>
@@ -885,6 +921,7 @@ tbody tr:hover{
           <div class="brandSub">
             Acebedo Optical • Direct Supabase Inventory
           </div>
+
         </div>
 
       </div>
@@ -920,7 +957,9 @@ tbody tr:hover{
         class="select"
         onchange="branchChanged()"
       >
+
         <option value="ALL">ALL BRANCHES</option>
+
         <option value="GAI">GAI</option>
         <option value="CAS">CAS</option>
         <option value="BAC">BAC</option>
@@ -937,6 +976,7 @@ tbody tr:hover{
         <option value="TAN">TAN</option>
         <option value="TIS">TIS</option>
         <option value="TOL">TOL</option>
+
       </select>
 
       <select
@@ -944,9 +984,19 @@ tbody tr:hover{
         class="select"
         onchange="reportChanged()"
       >
-        <option value="stocks">AVAILABLE STOCKS</option>
-        <option value="sold">SOLD OUT</option>
-        <option value="audit">AUDIT</option>
+
+        <option value="stocks">
+          AVAILABLE STOCKS
+        </option>
+
+        <option value="sold">
+          SOLD OUT
+        </option>
+
+        <option value="audit">
+          AUDIT
+        </option>
+
       </select>
 
       <div class="searchWrap">
@@ -1007,11 +1057,23 @@ tbody tr:hover{
       <div class="statCard">
 
         <div class="statTop">
-          <span class="statLabel">AVAILABLE</span>
-          <span class="statIcon">✓</span>
+
+          <span class="statLabel">
+            AVAILABLE
+          </span>
+
+          <span class="statIcon">
+            ✓
+          </span>
+
         </div>
 
-        <div id="availableTotal" class="statNumber">—</div>
+        <div
+          id="availableTotal"
+          class="statNumber"
+        >
+          —
+        </div>
 
         <div class="statHint">
           Stock not sold
@@ -1022,11 +1084,23 @@ tbody tr:hover{
       <div class="statCard">
 
         <div class="statTop">
-          <span class="statLabel">SOLD OUT</span>
-          <span class="statIcon">$</span>
+
+          <span class="statLabel">
+            SOLD OUT
+          </span>
+
+          <span class="statIcon">
+            $
+          </span>
+
         </div>
 
-        <div id="soldTotal" class="statNumber">—</div>
+        <div
+          id="soldTotal"
+          class="statNumber"
+        >
+          —
+        </div>
 
         <div class="statHint">
           Recorded sales
@@ -1037,11 +1111,23 @@ tbody tr:hover{
       <div class="statCard">
 
         <div class="statTop">
-          <span class="statLabel">AUDITED</span>
-          <span class="statIcon">✓</span>
+
+          <span class="statLabel">
+            AUDITED
+          </span>
+
+          <span class="statIcon">
+            ✓
+          </span>
+
         </div>
 
-        <div id="auditTotal" class="statNumber">—</div>
+        <div
+          id="auditTotal"
+          class="statNumber"
+        >
+          —
+        </div>
 
         <div class="statHint">
           Audit records
@@ -1052,11 +1138,23 @@ tbody tr:hover{
       <div class="statCard">
 
         <div class="statTop">
-          <span class="statLabel">SHOWING</span>
-          <span class="statIcon">≡</span>
+
+          <span class="statLabel">
+            SHOWING
+          </span>
+
+          <span class="statIcon">
+            ≡
+          </span>
+
         </div>
 
-        <div id="showingTotal" class="statNumber">—</div>
+        <div
+          id="showingTotal"
+          class="statNumber"
+        >
+          —
+        </div>
 
         <div class="statHint">
           Current results
@@ -1072,11 +1170,17 @@ tbody tr:hover{
 
         <div>
 
-          <div id="tableTitle" class="tableTitle">
+          <div
+            id="tableTitle"
+            class="tableTitle"
+          >
             Available Stocks
           </div>
 
-          <div id="tableSub" class="tableSub">
+          <div
+            id="tableSub"
+            class="tableSub"
+          >
             Select a branch and search inventory.
           </div>
 
@@ -1100,7 +1204,9 @@ tbody tr:hover{
         <table>
 
           <thead>
+
             <tr>
+
               <th>BRANCH</th>
               <th>LENS TYPE</th>
               <th>DESCRIPTION</th>
@@ -1108,7 +1214,9 @@ tbody tr:hover{
               <th>SI NO.</th>
               <th>DATE</th>
               <th>ACTIONS</th>
+
             </tr>
+
           </thead>
 
           <tbody id="tableBody"></tbody>
@@ -1117,9 +1225,14 @@ tbody tr:hover{
 
       </div>
 
-      <div id="emptyState" class="empty">
+      <div
+        id="emptyState"
+        class="empty"
+      >
 
-        <div class="emptyIcon">⌕</div>
+        <div class="emptyIcon">
+          ⌕
+        </div>
 
         <div class="emptyTitle">
           Ready to search
@@ -1133,7 +1246,10 @@ tbody tr:hover{
 
       <div class="pagination">
 
-        <div id="pageInfo" class="pageInfo">
+        <div
+          id="pageInfo"
+          class="pageInfo"
+        >
           —
         </div>
 
@@ -1186,7 +1302,7 @@ const SUPABASE_URL =
   "https://hvurhnarllvfinpdkfkp.supabase.co";
 
 const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNyIsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
   "https://script.google.com/macros/s/AKfycbxySytHT2kT6OsHeXf1jA7_uriXtqI6-m3Ub9TNnO4ls_otXFYqHQG4FQa2T0Y0S8J93A/exec";
@@ -1202,24 +1318,12 @@ const ADMIN_KEY =
 
 const ROWS_PER_PAGE = 50;
 
-/*
- * Supabase pagination size.
- */
 const SUPABASE_PAGE_SIZE = 1000;
 
-/*
- * Import insert batch.
- */
 const IMPORT_CHUNK_SIZE = 500;
 
-/*
- * Existing-row update concurrency.
- */
 const IMPORT_CONCURRENCY = 8;
 
-/*
- * Maximum rows used by general report searches.
- */
 const MAX_FETCH_ROWS = 100000;
 
 const BRANCHES = [
@@ -1308,13 +1412,20 @@ function loginApiGet(action, params = {}){
       "cb_" +
       Date.now() +
       "_" +
-      Math.floor(Math.random()*100000);
+      Math.floor(Math.random() * 100000);
 
     const query =
       new URLSearchParams();
 
-    query.set("action",action);
-    query.set("callback",callback);
+    query.set(
+      "action",
+      action
+    );
+
+    query.set(
+      "callback",
+      callback
+    );
 
     Object.keys(params).forEach(key=>{
 
@@ -1340,14 +1451,18 @@ function loginApiGet(action, params = {}){
     const timeout =
       setTimeout(()=>{
 
-        if(finished)return;
+        if(finished){
+          return;
+        }
 
         finished = true;
 
         cleanup();
 
         reject(
-          new Error("Login server timed out.")
+          new Error(
+            "Login server timed out."
+          )
         );
 
       },30000);
@@ -1355,7 +1470,9 @@ function loginApiGet(action, params = {}){
     window[callback] =
       data=>{
 
-        if(finished)return;
+        if(finished){
+          return;
+        }
 
         finished = true;
 
@@ -1363,7 +1480,10 @@ function loginApiGet(action, params = {}){
 
         cleanup();
 
-        if(data && data.ok === false){
+        if(
+          data &&
+          data.ok === false
+        ){
 
           reject(
             new Error(
@@ -1373,9 +1493,12 @@ function loginApiGet(action, params = {}){
           );
 
           return;
+
         }
 
-        resolve(data || {});
+        resolve(
+          data || {}
+        );
 
       };
 
@@ -1394,7 +1517,9 @@ function loginApiGet(action, params = {}){
     script.onerror =
       ()=>{
 
-        if(finished)return;
+        if(finished){
+          return;
+        }
 
         finished = true;
 
@@ -1441,15 +1566,19 @@ async function sendOTP(){
     );
 
     return;
+
   }
 
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+  if(
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  ){
 
     setLoginStatus(
       "Enter a valid email address."
     );
 
     return;
+
   }
 
   const button =
@@ -1464,7 +1593,9 @@ async function sendOTP(){
 
     await loginApiGet(
       "sendOTP",
-      {email:email}
+      {
+        email:email
+      }
     );
 
     document
@@ -1480,14 +1611,17 @@ async function sendOTP(){
       .focus();
 
     setLoginStatus(
-      "Verification code sent to " + email
+      "Verification code sent to " +
+      email
     );
 
   }catch(error){
 
     console.error(error);
 
-    setLoginStatus(error.message);
+    setLoginStatus(
+      error.message
+    );
 
   }finally{
 
@@ -1526,6 +1660,7 @@ async function verifyOTP(){
     );
 
     return;
+
   }
 
   const button =
@@ -1547,7 +1682,10 @@ async function verifyOTP(){
         }
       );
 
-    if(!data || !data.sessionId){
+    if(
+      !data ||
+      !data.sessionId
+    ){
 
       throw new Error(
         "Login server did not return a session."
@@ -1585,7 +1723,9 @@ async function verifyOTP(){
 
     console.error(error);
 
-    setLoginStatus(error.message);
+    setLoginStatus(
+      error.message
+    );
 
   }finally{
 
@@ -1635,7 +1775,9 @@ async function checkExistingSession(){
     const data =
       await loginApiGet(
         "checkSession",
-        {sessionId:sessionId}
+        {
+          sessionId:sessionId
+        }
       );
 
     if(
@@ -1661,6 +1803,7 @@ async function checkExistingSession(){
       );
 
       return true;
+
     }
 
   }catch(error){
@@ -1675,6 +1818,7 @@ async function checkExistingSession(){
   clearLoginSession();
 
   return false;
+
 }
 
 /* =========================================================
@@ -1689,7 +1833,9 @@ async function logout(){
 
       await loginApiGet(
         "logout",
-        {sessionId:sessionId}
+        {
+          sessionId:sessionId
+        }
       );
 
     }
@@ -1728,12 +1874,22 @@ async function logout(){
 
 function clearLoginSession(){
 
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem(USER_KEY);
-  localStorage.removeItem(ADMIN_KEY);
+  localStorage.removeItem(
+    SESSION_KEY
+  );
+
+  localStorage.removeItem(
+    USER_KEY
+  );
+
+  localStorage.removeItem(
+    ADMIN_KEY
+  );
 
   sessionId = null;
+
   currentEmail = "";
+
   currentAdmin = false;
 
 }
@@ -1754,7 +1910,8 @@ function showDashboard(){
 
   document
     .getElementById("userEmail")
-    .textContent = currentEmail;
+    .textContent =
+      currentEmail;
 
   resetDashboardDisplay();
 
@@ -1776,10 +1933,12 @@ async function supabaseRequest(
 
   const headers = {
 
-    "apikey":SUPABASE_KEY,
+    "apikey":
+      SUPABASE_KEY,
 
     "Authorization":
-      "Bearer " + SUPABASE_KEY,
+      "Bearer " +
+      SUPABASE_KEY,
 
     "Content-Type":
       "application/json",
@@ -1790,14 +1949,19 @@ async function supabaseRequest(
   };
 
   if(options.prefer){
-    headers["Prefer"] = options.prefer;
+
+    headers["Prefer"] =
+      options.prefer;
+
   }
 
   if(options.headers){
+
     Object.assign(
       headers,
       options.headers
     );
+
   }
 
   const response =
@@ -1824,9 +1988,15 @@ async function supabaseRequest(
   if(text){
 
     try{
-      data = JSON.parse(text);
+
+      data =
+        JSON.parse(text);
+
     }catch(e){
-      data = text;
+
+      data =
+        text;
+
     }
 
   }
@@ -1854,11 +2024,15 @@ async function supabaseRequest(
 
     }else if(text){
 
-      message += ": " + text;
+      message +=
+        ": " +
+        text;
 
     }
 
-    throw new Error(message);
+    throw new Error(
+      message
+    );
 
   }
 
@@ -1870,7 +2044,10 @@ async function supabaseRequest(
    TABLE NAME
 ========================================================= */
 
-function tableName(branch,report){
+function tableName(
+  branch,
+  report
+){
 
   const b =
     String(branch)
@@ -1900,6 +2077,14 @@ function reportLabel(){
       .getElementById("sheet")
       .value;
 
+  return reportLabelFor(
+    report
+  );
+
+}
+
+function reportLabelFor(report){
+
   if(report === "sold"){
     return "Sold Out";
   }
@@ -1928,7 +2113,8 @@ function updateReportTitle(){
 
   document
     .getElementById("tableTitle")
-    .textContent = title;
+    .textContent =
+      title;
 
   document
     .getElementById("tableSub")
@@ -1970,8 +2156,6 @@ function escapePostgrestValue(value){
 /* =========================================================
    BUILD SEARCH PARAMS
 
-   IMPORTANT:
-
    NTAGN       = PARTIAL
    DESCRIPTION = PARTIAL
    LENSTYPE    = PARTIAL
@@ -1979,19 +2163,11 @@ function escapePostgrestValue(value){
    BR          = PARTIAL
 
    SI NO.      = EXACT
-
-   Therefore:
-
-   Search 12345
-
-   matches:
-   SI = 12345
-
-   but DOES NOT match:
-   SI = 123456
 ========================================================= */
 
-function buildSearchParams(search=""){
+function buildSearchParams(
+  search=""
+){
 
   const params =
     new URLSearchParams();
@@ -2007,26 +2183,38 @@ function buildSearchParams(search=""){
   if(clean){
 
     const safe =
-      escapePostgrestValue(clean);
+      escapePostgrestValue(
+        clean
+      );
 
     const pattern =
-      "*" + safe + "*";
+      "*" +
+      safe +
+      "*";
 
-    /*
-     * SI NO. deliberately uses eq.
-     */
     const exactSI =
       safe;
 
     params.set(
       "or",
       "(" +
-      "NTAGN.ilike." + pattern +
-      ",DESCRIPTION.ilike." + pattern +
-      ",LENSTYPE.ilike." + pattern +
-      ",QR.ilike." + pattern +
-      ",BR.ilike." + pattern +
-      ',"SI NO.".eq.' + exactSI +
+      "NTAGN.ilike." +
+      pattern +
+      "," +
+      "DESCRIPTION.ilike." +
+      pattern +
+      "," +
+      "LENSTYPE.ilike." +
+      pattern +
+      "," +
+      "QR.ilike." +
+      pattern +
+      "," +
+      "BR.ilike." +
+      pattern +
+      ',' +
+      '"SI NO.".eq.' +
+      exactSI +
       ")"
     );
 
@@ -2055,98 +2243,20 @@ async function fetchAllRows(
 
   let offset = 0;
 
-  while(offset < maxRows){
+  while(
+    offset < maxRows
+  ){
 
     const params =
-      buildSearchParams(search);
-
-    params.set(
-      "limit",
-      String(SUPABASE_PAGE_SIZE)
-    );
-
-    params.set(
-      "offset",
-      String(offset)
-    );
-
-    const rows =
-      await supabaseRequest(
-        table + "?" + params.toString()
+      buildSearchParams(
+        search
       );
 
-    const batch =
-      Array.isArray(rows)
-        ? rows
-        : [];
-
-    all.push(...batch);
-
-    if(
-      batch.length <
-      SUPABASE_PAGE_SIZE
-    ){
-      break;
-    }
-
-    offset +=
-      SUPABASE_PAGE_SIZE;
-
-    if(all.length >= maxRows){
-      break;
-    }
-
-  }
-
-  return all.slice(0,maxRows);
-
-}
-
-/* =========================================================
-   FETCH BRANCH DATA
-========================================================= */
-
-async function fetchBranchData(
-  branch,
-  report,
-  search=""
-){
-
-  return fetchAllRows(
-    tableName(branch,report),
-    search,
-    MAX_FETCH_ROWS
-  );
-
-}
-
-/* =========================================================
-   GET SOLD TAGS
-========================================================= */
-
-async function getSoldTags(branch){
-
-  const table =
-    tableName(branch,"sold");
-
-  const tags =
-    new Set();
-
-  let offset = 0;
-
-  while(true){
-
-    const params =
-      new URLSearchParams();
-
-    params.set(
-      "select",
-      "NTAGN"
-    );
-
     params.set(
       "limit",
-      String(SUPABASE_PAGE_SIZE)
+      String(
+        SUPABASE_PAGE_SIZE
+      )
     );
 
     params.set(
@@ -2166,24 +2276,136 @@ async function getSoldTags(branch){
         ? rows
         : [];
 
-    batch.forEach(row=>{
-
-      const tag =
-        String(
-          row?.NTAGN ?? ""
-        ).trim();
-
-      if(tag){
-        tags.add(tag);
-      }
-
-    });
+    all.push(
+      ...batch
+    );
 
     if(
       batch.length <
       SUPABASE_PAGE_SIZE
     ){
+
       break;
+
+    }
+
+    offset +=
+      SUPABASE_PAGE_SIZE;
+
+    if(
+      all.length >=
+      maxRows
+    ){
+
+      break;
+
+    }
+
+  }
+
+  return all.slice(
+    0,
+    maxRows
+  );
+
+}
+
+/* =========================================================
+   FETCH BRANCH DATA
+========================================================= */
+
+async function fetchBranchData(
+  branch,
+  report,
+  search=""
+){
+
+  return fetchAllRows(
+    tableName(
+      branch,
+      report
+    ),
+    search,
+    MAX_FETCH_ROWS
+  );
+
+}
+
+/* =========================================================
+   GET SOLD TAGS
+========================================================= */
+
+async function getSoldTags(
+  branch
+){
+
+  const table =
+    tableName(
+      branch,
+      "sold"
+    );
+
+  const tags =
+    new Set();
+
+  let offset = 0;
+
+  while(true){
+
+    const params =
+      new URLSearchParams();
+
+    params.set(
+      "select",
+      "NTAGN"
+    );
+
+    params.set(
+      "limit",
+      String(
+        SUPABASE_PAGE_SIZE
+      )
+    );
+
+    params.set(
+      "offset",
+      String(offset)
+    );
+
+    const rows =
+      await supabaseRequest(
+        table +
+        "?" +
+        params.toString()
+      );
+
+    const batch =
+      Array.isArray(rows)
+        ? rows
+        : [];
+
+    batch.forEach(
+      row=>{
+
+        const tag =
+          String(
+            row?.NTAGN ?? ""
+          ).trim();
+
+        if(tag){
+          tags.add(tag);
+        }
+
+      }
+    );
+
+    if(
+      batch.length <
+      SUPABASE_PAGE_SIZE
+    ){
+
+      break;
+
     }
 
     offset +=
@@ -2199,7 +2421,10 @@ async function getSoldTags(branch){
    MAP ROW
 ========================================================= */
 
-function mapRow(row,branch){
+function mapRow(
+  row,
+  branch
+){
 
   return {
 
@@ -2233,15 +2458,6 @@ function mapRow(row,branch){
 
 /* =========================================================
    BRANCH CHANGE
-
-   IMPORTANT:
-
-   DO NOT call clearReport() here.
-
-   clearReport() opens the popup.
-
-   Changing branch should silently clear
-   the currently displayed report.
 ========================================================= */
 
 function branchChanged(){
@@ -2256,10 +2472,6 @@ function branchChanged(){
 
 /* =========================================================
    REPORT CHANGE
-
-   IMPORTANT:
-
-   DO NOT call clearReport() here.
 ========================================================= */
 
 function reportChanged(){
@@ -2279,8 +2491,11 @@ function reportChanged(){
 function resetDashboardDisplay(){
 
   currentRows = [];
+
   totalRows = 0;
+
   currentPage = 1;
+
   currentSearch = "";
 
   document
@@ -2292,12 +2507,18 @@ function resetDashboardDisplay(){
     .innerHTML = "";
 
   const empty =
-    document.getElementById("emptyState");
+    document.getElementById(
+      "emptyState"
+    );
 
-  empty.style.display = "block";
+  empty.style.display =
+    "block";
 
   empty.innerHTML = `
-    <div class="emptyIcon">⌕</div>
+
+    <div class="emptyIcon">
+      ⌕
+    </div>
 
     <div class="emptyTitle">
       Ready to search
@@ -2306,6 +2527,7 @@ function resetDashboardDisplay(){
     <div class="emptyText">
       Search your inventory to display records.
     </div>
+
   `;
 
   document
@@ -2315,19 +2537,23 @@ function resetDashboardDisplay(){
 
   document
     .getElementById("availableTotal")
-    .textContent = "—";
+    .textContent =
+      "—";
 
   document
     .getElementById("soldTotal")
-    .textContent = "—";
+    .textContent =
+      "—";
 
   document
     .getElementById("auditTotal")
-    .textContent = "—";
+    .textContent =
+      "—";
 
   document
     .getElementById("showingTotal")
-    .textContent = "—";
+    .textContent =
+      "—";
 
   updateReportTitle();
 
@@ -2338,12 +2564,7 @@ function resetDashboardDisplay(){
 /* =========================================================
    SILENT CLEAR
 
-   Used by:
-   - branch change
-   - report change
-   - reset
-
-   It NEVER opens a popup.
+   DOES NOT DELETE DATABASE DATA.
 ========================================================= */
 
 function silentlyClearReport(){
@@ -2351,8 +2572,11 @@ function silentlyClearReport(){
   searchGeneration++;
 
   currentRows = [];
+
   totalRows = 0;
+
   currentPage = 1;
+
   currentSearch = "";
 
   document
@@ -2364,12 +2588,18 @@ function silentlyClearReport(){
     .innerHTML = "";
 
   const empty =
-    document.getElementById("emptyState");
+    document.getElementById(
+      "emptyState"
+    );
 
-  empty.style.display = "block";
+  empty.style.display =
+    "block";
 
   empty.innerHTML = `
-    <div class="emptyIcon">⌕</div>
+
+    <div class="emptyIcon">
+      ⌕
+    </div>
 
     <div class="emptyTitle">
       Ready to search
@@ -2378,23 +2608,28 @@ function silentlyClearReport(){
     <div class="emptyText">
       Press Search to load records.
     </div>
+
   `;
 
   document
     .getElementById("availableTotal")
-    .textContent = "—";
+    .textContent =
+      "—";
 
   document
     .getElementById("soldTotal")
-    .textContent = "—";
+    .textContent =
+      "—";
 
   document
     .getElementById("auditTotal")
-    .textContent = "—";
+    .textContent =
+      "—";
 
   document
     .getElementById("showingTotal")
-    .textContent = "—";
+    .textContent =
+      "—";
 
   document
     .getElementById("pageInfo")
@@ -2406,9 +2641,13 @@ function silentlyClearReport(){
 }
 
 /* =========================================================
-   CLEAR REPORT BUTTON
+   CLEAR REPORT
 
-   ONLY THIS FUNCTION OPENS THE POPUP.
+   THIS IS THE ONLY CLEAR BUTTON THAT
+   DELETES DATABASE DATA.
+
+   It deletes ONLY the selected branch
+   and ONLY the selected report.
 ========================================================= */
 
 function clearReport(){
@@ -2438,9 +2677,8 @@ function clearReport(){
       </div>
 
       <div class="modalSub">
-        Choose the branch and report you want
-        to clear from the screen.
-        Database records will NOT be deleted.
+        Select the branch and report you want
+        to permanently delete from Supabase.
       </div>
 
       <div class="field">
@@ -2458,9 +2696,11 @@ function clearReport(){
 
           ${BRANCHES.map(
             b =>
-              `<option value="${b}">
-                ${b}
-              </option>`
+              `
+                <option value="${escapeHtmlAttribute(b)}">
+                  ${escapeHtml(b)}
+                </option>
+              `
           ).join("")}
 
         </select>
@@ -2492,6 +2732,17 @@ function clearReport(){
 
       </div>
 
+      <div class="modalWarning">
+
+        ⚠️ This permanently deletes the selected
+        report records from Supabase.
+
+        <br><br>
+
+        It does NOT merely clear the screen.
+
+      </div>
+
       <div class="modalActions">
 
         <button
@@ -2505,15 +2756,18 @@ function clearReport(){
           class="controlBtn primary"
           data-clear
         >
-          Clear Report
+          Delete Report
         </button>
 
       </div>
 
     </div>
+
   `;
 
-  document.body.appendChild(modal);
+  document.body.appendChild(
+    modal
+  );
 
   modal.querySelector(
     "#clearBranch"
@@ -2535,7 +2789,7 @@ function clearReport(){
   modal.querySelector(
     "[data-clear]"
   ).onclick =
-    ()=>{
+    async ()=>{
 
       const branch =
         modal.querySelector(
@@ -2547,25 +2801,167 @@ function clearReport(){
           "#clearReportType"
         ).value;
 
-      document
-        .getElementById("branch")
-        .value = branch;
+      const button =
+        modal.querySelector(
+          "[data-clear]"
+        );
 
-      document
-        .getElementById("sheet")
-        .value = report;
+      button.disabled =
+        true;
 
-      modal.remove();
+      button.textContent =
+        "Deleting...";
 
-      updateReportTitle();
+      try{
 
-      silentlyClearReport();
+        const deleted =
+          await deleteSelectedReport(
+            branch,
+            report
+          );
 
-      showStatus(
-        "Report cleared."
-      );
+        modal.remove();
+
+        document
+          .getElementById("branch")
+          .value =
+            branch;
+
+        document
+          .getElementById("sheet")
+          .value =
+            report;
+
+        updateReportTitle();
+
+        silentlyClearReport();
+
+        showStatus(
+          reportLabelFor(report) +
+          " deleted: " +
+          formatNumber(deleted) +
+          " record(s)."
+        );
+
+      }catch(error){
+
+        console.error(
+          "Clear Report failed:",
+          error
+        );
+
+        button.disabled =
+          false;
+
+        button.textContent =
+          "Delete Report";
+
+        showStatus(
+          error?.message ||
+          "Unable to delete report."
+        );
+
+      }
 
     };
+
+}
+
+/* =========================================================
+   DELETE SELECTED REPORT FROM SUPABASE
+
+   IMPORTANT:
+
+   Selected branch only.
+   Selected report only.
+
+   stocks → branch_stocks
+   sold   → branch_scanresults
+   audit  → branch_audit
+========================================================= */
+
+async function deleteSelectedReport(
+  branch,
+  report
+){
+
+  if(!branch){
+    throw new Error(
+      "No branch selected."
+    );
+  }
+
+  if(!report){
+    throw new Error(
+      "No report selected."
+    );
+  }
+
+  const branches =
+    branch === "ALL"
+      ? BRANCHES
+      : [branch];
+
+  let deletedTotal = 0;
+
+  for(
+    const b of branches
+  ){
+
+    const table =
+      tableName(
+        b,
+        report
+      );
+
+    /*
+     * NTAGN is the inventory identifier.
+     *
+     * All normal inventory records contain
+     * NTAGN, so this is used as the required
+     * PostgREST DELETE filter.
+     *
+     * This is intentionally NOT:
+     *
+     * BR=eq.GAI
+     *
+     * because the table itself is already
+     * branch-specific.
+     */
+
+    const params =
+      new URLSearchParams();
+
+    params.set(
+      "NTAGN",
+      "not.is.null"
+    );
+
+    const deleted =
+      await supabaseRequest(
+        table +
+        "?" +
+        params.toString(),
+        {
+          method:"DELETE",
+          prefer:"return=representation"
+        }
+      );
+
+    if(
+      Array.isArray(deleted)
+    ){
+
+      deletedTotal +=
+        deleted.length;
+
+    }
+
+    await yieldToBrowser();
+
+  }
+
+  return deletedTotal;
 
 }
 
@@ -2587,7 +2983,9 @@ function runSearch(){
 
 function searchKey(event){
 
-  if(event.key === "Enter"){
+  if(
+    event.key === "Enter"
+  ){
 
     event.preventDefault();
 
@@ -2633,7 +3031,8 @@ async function refreshDashboard(){
         .value
     );
 
-  currentSearch = search;
+  currentSearch =
+    search;
 
   setLoading(true);
 
@@ -2641,14 +3040,18 @@ async function refreshDashboard(){
 
     let combined = [];
 
-    if(branch === "ALL"){
+    if(
+      branch === "ALL"
+    ){
 
       const results =
         await Promise.all(
           BRANCHES.map(
             async b=>{
 
-              if(report === "stocks"){
+              if(
+                report === "stocks"
+              ){
 
                 const [
                   stocks,
@@ -2667,19 +3070,21 @@ async function refreshDashboard(){
                   ]);
 
                 const available =
-                  stocks.filter(row=>{
+                  stocks.filter(
+                    row=>{
 
-                    const tag =
-                      String(
-                        row?.NTAGN ?? ""
-                      ).trim();
+                      const tag =
+                        String(
+                          row?.NTAGN ?? ""
+                        ).trim();
 
-                    return (
-                      !tag ||
-                      !sold.has(tag)
-                    );
+                      return (
+                        !tag ||
+                        !sold.has(tag)
+                      );
 
-                  });
+                    }
+                  );
 
                 return {
                   branch:b,
@@ -2697,7 +3102,8 @@ async function refreshDashboard(){
 
               return {
                 branch:b,
-                rows:rows || []
+                rows:
+                  rows || []
               };
 
             }
@@ -2708,27 +3114,35 @@ async function refreshDashboard(){
         generation !==
         searchGeneration
       ){
+
         return;
+
       }
 
-      results.forEach(result=>{
+      results.forEach(
+        result=>{
 
-        result.rows.forEach(row=>{
+          result.rows.forEach(
+            row=>{
 
-          combined.push(
-            mapRow(
-              row,
-              result.branch
-            )
+              combined.push(
+                mapRow(
+                  row,
+                  result.branch
+                )
+              );
+
+            }
           );
 
-        });
-
-      });
+        }
+      );
 
     }else{
 
-      if(report === "stocks"){
+      if(
+        report === "stocks"
+      ){
 
         const [
           stocks,
@@ -2742,27 +3156,35 @@ async function refreshDashboard(){
               search
             ),
 
-            getSoldTags(branch)
+            getSoldTags(
+              branch
+            )
 
           ]);
 
         combined =
           stocks
-            .filter(row=>{
+            .filter(
+              row=>{
 
-              const tag =
-                String(
-                  row?.NTAGN ?? ""
-                ).trim();
+                const tag =
+                  String(
+                    row?.NTAGN ?? ""
+                  ).trim();
 
-              return (
-                !tag ||
-                !sold.has(tag)
-              );
+                return (
+                  !tag ||
+                  !sold.has(tag)
+                );
 
-            })
-            .map(row=>
-              mapRow(row,branch)
+              }
+            )
+            .map(
+              row =>
+                mapRow(
+                  row,
+                  branch
+                )
             );
 
       }else{
@@ -2775,8 +3197,12 @@ async function refreshDashboard(){
           );
 
         combined =
-          rows.map(row=>
-            mapRow(row,branch)
+          rows.map(
+            row =>
+              mapRow(
+                row,
+                branch
+              )
           );
 
       }
@@ -2787,10 +3213,13 @@ async function refreshDashboard(){
       generation !==
       searchGeneration
     ){
+
       return;
+
     }
 
-    currentRows = combined;
+    currentRows =
+      combined;
 
     totalRows =
       combined.length;
@@ -2800,20 +3229,23 @@ async function refreshDashboard(){
     renderCurrentPage();
 
     /*
-     * Calculate statistics separately,
-     * but don't block the report from appearing.
+     * Statistics are loaded separately.
+     * They don't block report rendering.
      */
+
     updateStatsDirect(
       branch,
       generation
-    ).catch(error=>{
+    ).catch(
+      error=>{
 
-      console.error(
-        "Statistics error:",
-        error
-      );
+        console.error(
+          "Statistics error:",
+          error
+        );
 
-    });
+      }
+    );
 
   }catch(error){
 
@@ -2827,7 +3259,9 @@ async function refreshDashboard(){
       searchGeneration
     ){
 
-      renderError(error);
+      renderError(
+        error
+      );
 
     }
 
@@ -2868,26 +3302,30 @@ async function updateStatsDirect(
     branches.map(
       async b=>{
 
-        /*
-         * For statistics only, request the
-         * required columns instead of SELECT *.
-         */
-
         const stockPromise =
           fetchAllRowsForStats(
-            tableName(b,"stocks"),
+            tableName(
+              b,
+              "stocks"
+            ),
             "NTAGN"
           );
 
         const soldPromise =
           fetchAllRowsForStats(
-            tableName(b,"sold"),
+            tableName(
+              b,
+              "sold"
+            ),
             "NTAGN"
           );
 
         const auditPromise =
           fetchAllRowsForStats(
-            tableName(b,"audit"),
+            tableName(
+              b,
+              "audit"
+            ),
             "NTAGN"
           );
 
@@ -2907,36 +3345,40 @@ async function updateStatsDirect(
         const soldTags =
           new Set();
 
-        soldRows.forEach(row=>{
+        soldRows.forEach(
+          row=>{
 
-          const tag =
-            String(
-              row?.NTAGN ?? ""
-            ).trim();
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim();
 
-          if(tag){
-            soldTags.add(tag);
-          }
-
-        });
-
-        stocks.forEach(row=>{
-
-          const tag =
-            String(
-              row?.NTAGN ?? ""
-            ).trim();
-
-          if(
-            !tag ||
-            !soldTags.has(tag)
-          ){
-
-            available++;
+            if(tag){
+              soldTags.add(tag);
+            }
 
           }
+        );
 
-        });
+        stocks.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim();
+
+            if(
+              !tag ||
+              !soldTags.has(tag)
+            ){
+
+              available++;
+
+            }
+
+          }
+        );
 
         sold +=
           soldRows.length;
@@ -2952,28 +3394,46 @@ async function updateStatsDirect(
     generation !==
     searchGeneration
   ){
+
     return;
+
   }
 
   document
-    .getElementById("availableTotal")
+    .getElementById(
+      "availableTotal"
+    )
     .textContent =
-      formatNumber(available);
+      formatNumber(
+        available
+      );
 
   document
-    .getElementById("soldTotal")
+    .getElementById(
+      "soldTotal"
+    )
     .textContent =
-      formatNumber(sold);
+      formatNumber(
+        sold
+      );
 
   document
-    .getElementById("auditTotal")
+    .getElementById(
+      "auditTotal"
+    )
     .textContent =
-      formatNumber(audit);
+      formatNumber(
+        audit
+      );
 
   document
-    .getElementById("showingTotal")
+    .getElementById(
+      "showingTotal"
+    )
     .textContent =
-      formatNumber(totalRows);
+      formatNumber(
+        totalRows
+      );
 
 }
 
@@ -3002,7 +3462,9 @@ async function fetchAllRowsForStats(
 
     params.set(
       "limit",
-      String(SUPABASE_PAGE_SIZE)
+      String(
+        SUPABASE_PAGE_SIZE
+      )
     );
 
     params.set(
@@ -3022,13 +3484,17 @@ async function fetchAllRowsForStats(
         ? rows
         : [];
 
-    all.push(...batch);
+    all.push(
+      ...batch
+    );
 
     if(
       batch.length <
       SUPABASE_PAGE_SIZE
     ){
+
       break;
+
     }
 
     offset +=
@@ -3041,7 +3507,7 @@ async function fetchAllRowsForStats(
 }
 
 /* =========================================================
-   RENDER
+   RENDER CURRENT PAGE
 ========================================================= */
 
 function renderCurrentPage(){
@@ -3056,11 +3522,19 @@ function renderCurrentPage(){
       start + ROWS_PER_PAGE
     );
 
-  renderTable(rows);
+  renderTable(
+    rows
+  );
 
 }
 
-function renderTable(rows){
+/* =========================================================
+   RENDER TABLE
+========================================================= */
+
+function renderTable(
+  rows
+){
 
   const body =
     document.getElementById(
@@ -3076,7 +3550,8 @@ function renderTable(rows){
 
   if(!rows.length){
 
-    empty.style.display = "block";
+    empty.style.display =
+      "block";
 
     empty.innerHTML = `
 
@@ -3096,7 +3571,9 @@ function renderTable(rows){
     `;
 
     document
-      .getElementById("pageInfo")
+      .getElementById(
+        "pageInfo"
+      )
       .textContent =
         totalRows
           ? "No records on this page"
@@ -3108,145 +3585,236 @@ function renderTable(rows){
 
   }
 
-  empty.style.display = "none";
+  empty.style.display =
+    "none";
 
   const report =
     document
-      .getElementById("sheet")
+      .getElementById(
+        "sheet"
+      )
       .value;
 
   /*
-   * ACTIONS ONLY EXIST FOR SOLD OUT.
+   * CRITICAL:
+   *
+   * Edit and Delete exist ONLY
+   * when the current report is SOLD OUT.
    */
 
   const canEdit =
     report === "sold";
 
-  rows.forEach(row=>{
+  rows.forEach(
+    row=>{
 
-    const tr =
-      document.createElement("tr");
+      const tr =
+        document.createElement(
+          "tr"
+        );
 
-    const branch =
-      escapeHtml(row.branch);
+      const branch =
+        escapeHtml(
+          row.branch
+        );
 
-    const type =
-      escapeHtml(row.lenstype);
+      const type =
+        escapeHtml(
+          row.lenstype
+        );
 
-    const description =
-      escapeHtml(row.description);
+      const description =
+        escapeHtml(
+          row.description
+        );
 
-    const tag =
-      escapeHtml(row.tag);
+      const tag =
+        escapeHtml(
+          row.tag
+        );
 
-    const si =
-      escapeHtml(row.si);
+      const si =
+        escapeHtml(
+          row.si
+        );
 
-    const date =
-      escapeHtml(row.date);
+      const date =
+        escapeHtml(
+          row.date
+        );
 
-    let actionHTML =
-      `<span style="color:#94a3b8">—</span>`;
+      /*
+       * Default:
+       *
+       * NO ACTION
+       *
+       * for AVAILABLE and AUDIT.
+       */
 
-    if(canEdit){
+      let actionHTML =
+        `<span style="color:#94a3b8">—</span>`;
 
-      actionHTML = `
+      /*
+       * SOLD OUT ONLY:
+       *
+       * Show a real Delete button.
+       *
+       * We use a generated data-action
+       * instead of putting complex row data
+       * directly into inline JavaScript.
+       */
 
-        <button
-          class="actionBtn danger"
-          onclick="deleteSoldRow(
-            ${JSON.stringify(row.branch)},
-            ${JSON.stringify(row.tag)}
-          )"
-        >
-          Delete
-        </button>
+      if(canEdit){
+
+        actionHTML = `
+
+          <button
+            type="button"
+            class="actionBtn danger"
+            data-sold-delete="1"
+            data-branch="${escapeHtmlAttribute(row.branch)}"
+            data-tag="${escapeHtmlAttribute(row.tag)}"
+          >
+            Delete
+          </button>
+
+        `;
+
+      }
+
+      tr.innerHTML = `
+
+        <td>
+
+          <span class="branchTag">
+            ${branch}
+          </span>
+
+        </td>
+
+        <td>
+
+          <span class="typeTag">
+            ${type || "—"}
+          </span>
+
+        </td>
+
+        <td>
+          ${description || "—"}
+        </td>
+
+        <td>
+
+          <span class="tag">
+            ${tag || "—"}
+          </span>
+
+        </td>
+
+        <td>
+
+          ${
+            canEdit
+
+              ? `
+
+                <input
+                  class="siInput"
+                  value="${escapeHtmlAttribute(row.si)}"
+                  data-tag="${escapeHtmlAttribute(row.tag)}"
+                  data-branch="${escapeHtmlAttribute(row.branch)}"
+                  onchange="saveSoldSI(this)"
+                >
+
+              `
+
+              : escapeHtml(row.si) || "—"
+
+          }
+
+        </td>
+
+        <td>
+          ${date || "—"}
+        </td>
+
+        <td>
+          ${actionHTML}
+        </td>
 
       `;
 
+      body.appendChild(
+        tr
+      );
+
     }
+  );
 
-    tr.innerHTML = `
+  /*
+   * Attach SOLD DELETE handlers AFTER
+   * the rows are inserted.
+   *
+   * This fixes the Delete button issue.
+   */
 
-      <td>
-        <span class="branchTag">
-          ${branch}
-        </span>
-      </td>
+  if(canEdit){
 
-      <td>
-        <span class="typeTag">
-          ${type || "—"}
-        </span>
-      </td>
+    body
+      .querySelectorAll(
+        "[data-sold-delete]"
+      )
+      .forEach(
+        button=>{
 
-      <td>
-        ${description || "—"}
-      </td>
+          button.addEventListener(
+            "click",
+            ()=>{
 
-      <td>
-        <span class="tag">
-          ${tag || "—"}
-        </span>
-      </td>
+              deleteSoldRow(
+                button.dataset.branch,
+                button.dataset.tag
+              );
 
-      <td>
-
-        ${
-          canEdit
-
-            ? `
-
-              <input
-                class="siInput"
-                value="${escapeHtmlAttribute(row.si)}"
-                data-tag="${escapeHtmlAttribute(row.tag)}"
-                data-branch="${escapeHtmlAttribute(row.branch)}"
-                onchange="saveSoldSI(this)"
-              >
-
-            `
-
-            : escapeHtml(row.si) || "—"
+            }
+          );
 
         }
+      );
 
-      </td>
-
-      <td>
-        ${date || "—"}
-      </td>
-
-      <td>
-        ${actionHTML}
-      </td>
-
-    `;
-
-    body.appendChild(tr);
-
-  });
+  }
 
   const start =
     (currentPage - 1) *
     ROWS_PER_PAGE;
 
   document
-    .getElementById("pageInfo")
+    .getElementById(
+      "pageInfo"
+    )
     .textContent =
       "Showing " +
-      formatNumber(start + 1) +
+      formatNumber(
+        start + 1
+      ) +
       "–" +
       formatNumber(
         start + rows.length
       ) +
       " of " +
-      formatNumber(totalRows);
+      formatNumber(
+        totalRows
+      );
 
   document
-    .getElementById("showingTotal")
+    .getElementById(
+      "showingTotal"
+    )
     .textContent =
-      formatNumber(totalRows);
+      formatNumber(
+        totalRows
+      );
 
   updatePagination();
 
@@ -3268,17 +3836,23 @@ function updatePagination(){
     );
 
   document
-    .getElementById("pageCurrent")
+    .getElementById(
+      "pageCurrent"
+    )
     .textContent =
       currentPage;
 
   document
-    .getElementById("prevBtn")
+    .getElementById(
+      "prevBtn"
+    )
     .disabled =
       currentPage <= 1;
 
   document
-    .getElementById("nextBtn")
+    .getElementById(
+      "nextBtn"
+    )
     .disabled =
       currentPage >= totalPages;
 
@@ -3286,8 +3860,12 @@ function updatePagination(){
 
 function previousPage(){
 
-  if(currentPage <= 1){
+  if(
+    currentPage <= 1
+  ){
+
     return;
+
   }
 
   currentPage--;
@@ -3307,8 +3885,13 @@ function nextPage(){
       )
     );
 
-  if(currentPage >= totalPages){
+  if(
+    currentPage >=
+    totalPages
+  ){
+
     return;
+
   }
 
   currentPage++;
@@ -3319,27 +3902,44 @@ function nextPage(){
 
 /* =========================================================
    SAVE SI — SOLD ONLY
-
-   FIX:
-   Do NOT encodeURIComponent() before
-   passing to URLSearchParams.
 ========================================================= */
 
-async function saveSoldSI(input){
+async function saveSoldSI(
+  input
+){
 
   const branch =
-    input.dataset.branch;
+    String(
+      input.dataset.branch ||
+      ""
+    ).trim();
 
   const tag =
-    input.dataset.tag;
+    String(
+      input.dataset.tag ||
+      ""
+    ).trim();
 
   const si =
-    input.value.trim();
+    String(
+      input.value ||
+      ""
+    ).trim();
 
-  if(!branch || !tag){
+  if(!branch){
 
     showStatus(
-      "Missing branch or NTAGN."
+      "Missing branch."
+    );
+
+    return;
+
+  }
+
+  if(!tag){
+
+    showStatus(
+      "Missing NTAGN."
     );
 
     return;
@@ -3349,13 +3949,23 @@ async function saveSoldSI(input){
   const row =
     currentRows.find(
       r =>
-        r.branch === branch &&
-        String(r.tag).trim() ===
-        String(tag).trim()
+        String(
+          r.branch
+        ).trim() === branch &&
+        String(
+          r.tag
+        ).trim() === tag
     );
 
   const oldValue =
-    row ? row.si : "";
+    row
+      ? String(
+          row.si || ""
+        )
+      : "";
+
+  input.disabled =
+    true;
 
   try{
 
@@ -3369,21 +3979,11 @@ async function saveSoldSI(input){
       new URLSearchParams();
 
     /*
-     * IMPORTANT:
+     * The branch-specific table already
+     * identifies the branch.
      *
-     * Old:
-     * eq. + encodeURIComponent(branch)
-     *
-     * New:
-     * eq.branch
-     *
-     * URLSearchParams handles encoding.
+     * Only NTAGN is needed.
      */
-
-    params.set(
-      "BR",
-      "eq." + branch
-    );
 
     params.set(
       "NTAGN",
@@ -3406,8 +4006,14 @@ async function saveSoldSI(input){
     );
 
     if(row){
-      row.si = si;
+
+      row.si =
+        si;
+
     }
+
+    input.value =
+      si;
 
     showStatus(
       "Sold SI No. saved."
@@ -3421,11 +4027,17 @@ async function saveSoldSI(input){
     );
 
     input.value =
-      oldValue || "";
+      oldValue;
 
     showStatus(
-      error.message
+      error?.message ||
+      "Unable to save sold SI No."
     );
+
+  }finally{
+
+    input.disabled =
+      false;
 
   }
 
@@ -3433,6 +4045,20 @@ async function saveSoldSI(input){
 
 /* =========================================================
    DELETE SOLD ONLY
+
+   THIS IS THE FIXED SOLD DELETE FUNCTION.
+
+   It deletes:
+   
+   GAI → gai_scanresults
+   CAS → cas_scanresults
+   BAC → bac_scanresults
+   etc.
+
+   ONLY the selected NTAGN.
+
+   It does NOT delete stocks.
+   It does NOT delete audit.
 ========================================================= */
 
 async function deleteSoldRow(
@@ -3440,10 +4066,30 @@ async function deleteSoldRow(
   tag
 ){
 
-  if(!branch || !tag){
+  branch =
+    String(
+      branch || ""
+    ).trim();
+
+  tag =
+    String(
+      tag || ""
+    ).trim();
+
+  if(!branch){
 
     showStatus(
-      "Missing branch or tag."
+      "Missing branch."
+    );
+
+    return;
+
+  }
+
+  if(!tag){
+
+    showStatus(
+      "Missing sold record tag."
     );
 
     return;
@@ -3460,8 +4106,18 @@ async function deleteSoldRow(
     );
 
   if(!confirmed){
+
     return;
+
   }
+
+  /*
+   * Prevent another search from overwriting
+   * this delete operation.
+   */
+
+  const deleteGeneration =
+    searchGeneration;
 
   try{
 
@@ -3471,43 +4127,145 @@ async function deleteSoldRow(
         "sold"
       );
 
-    const params =
-      new URLSearchParams();
-
     /*
-     * FIXED FILTER.
+     * IMPORTANT:
      *
-     * No double encoding.
+     * DO NOT use BR here.
+     *
+     * The table already belongs to
+     * the selected branch.
+     *
+     * Example:
+     *
+     * GAI + SOLD
+     * = gai_scanresults
+     *
+     * Therefore:
+     *
+     * NTAGN=eq.TAG
+     *
+     * is enough.
      */
 
-    params.set(
-      "BR",
-      "eq." + branch
-    );
+    const params =
+      new URLSearchParams();
 
     params.set(
       "NTAGN",
       "eq." + tag
     );
 
-    await supabaseRequest(
-      table +
-      "?" +
-      params.toString(),
-      {
-        method:"DELETE",
-        prefer:"return=minimal"
-      }
-    );
+    /*
+     * return=representation lets us verify
+     * that Supabase actually deleted something.
+     */
+
+    const deleted =
+      await supabaseRequest(
+        table +
+        "?" +
+        params.toString(),
+        {
+          method:"DELETE",
+
+          prefer:
+            "return=representation"
+        }
+      );
+
+    if(
+      !Array.isArray(deleted) ||
+      deleted.length === 0
+    ){
+
+      throw new Error(
+        "Supabase did not delete the sold record. " +
+        "NTAGN " +
+        tag +
+        " was not found in " +
+        table +
+        "."
+      );
+
+    }
+
+    /*
+     * Remove the deleted row from the local
+     * result immediately.
+     */
+
+    currentRows =
+      currentRows.filter(
+        row =>
+          !(
+            String(
+              row.branch
+            ).trim() === branch &&
+            String(
+              row.tag
+            ).trim() === tag
+          )
+      );
+
+    totalRows =
+      currentRows.length;
+
+    /*
+     * Make sure pagination doesn't point to
+     * a page that no longer exists.
+     */
+
+    const totalPages =
+      Math.max(
+        1,
+        Math.ceil(
+          totalRows /
+          ROWS_PER_PAGE
+        )
+      );
+
+    if(
+      currentPage >
+      totalPages
+    ){
+
+      currentPage =
+        totalPages;
+
+    }
+
+    renderCurrentPage();
 
     showStatus(
-      "Sold record deleted."
+      "Sold record " +
+      tag +
+      " deleted successfully."
     );
 
     /*
-     * Refresh SOLD report.
+     * Refresh counters in the background.
      */
-    await refreshDashboard();
+
+    const selectedBranch =
+      document
+        .getElementById(
+          "branch"
+        )
+        .value;
+
+    updateStatsDirect(
+      selectedBranch,
+      deleteGeneration
+    ).catch(
+      error=>{
+
+        console.error(
+          "Statistics refresh after delete failed:",
+          error
+        );
+
+      }
+    );
 
   }catch(error){
 
@@ -3517,7 +4275,8 @@ async function deleteSoldRow(
     );
 
     showStatus(
-      error.message
+      error?.message ||
+      "Unable to delete sold record."
     );
 
   }
@@ -3528,85 +4287,103 @@ async function deleteSoldRow(
    CONFIRM
 ========================================================= */
 
-function inlineConfirm(text){
+function inlineConfirm(
+  text
+){
 
-  return new Promise(resolve=>{
+  return new Promise(
+    resolve=>{
 
-    const panel =
-      document.createElement("div");
+      const panel =
+        document.createElement(
+          "div"
+        );
 
-    panel.className =
-      "queueCard";
+      panel.className =
+        "queueCard";
 
-    panel.innerHTML = `
+      panel.innerHTML = `
 
-      <div class="queueHead">
+        <div class="queueHead">
 
-        <div class="queueTitle">
-          ${escapeHtml(text)}
+          <div class="queueTitle">
+            ${escapeHtml(text)}
+          </div>
+
+          <button
+            class="queueClose"
+            data-no
+          >
+            ×
+          </button>
+
         </div>
 
-        <button
-          class="queueClose"
-          data-no
+        <div
+          class="queueText"
+          style="margin-top:10px"
         >
-          ×
-        </button>
 
-      </div>
+          <button
+            class="controlBtn"
+            data-no
+          >
+            Cancel
+          </button>
 
-      <div
-        class="queueText"
-        style="margin-top:10px"
-      >
+          <button
+            class="controlBtn primary"
+            data-yes
+          >
+            Delete
+          </button>
 
-        <button
-          class="controlBtn"
-          data-no
-        >
-          Cancel
-        </button>
+        </div>
 
-        <button
-          class="controlBtn primary"
-          data-yes
-        >
-          Delete
-        </button>
+      `;
 
-      </div>
+      document
+        .getElementById(
+          "queuePanel"
+        )
+        .appendChild(
+          panel
+        );
 
-    `;
+      panel
+        .querySelectorAll(
+          "[data-no]"
+        )
+        .forEach(
+          btn=>{
 
-    document
-      .getElementById("queuePanel")
-      .appendChild(panel);
+            btn.onclick =
+              ()=>{
 
-    panel
-      .querySelectorAll("[data-no]")
-      .forEach(btn=>{
+                panel.remove();
 
-        btn.onclick = ()=>{
+                resolve(false);
+
+              };
+
+          }
+        );
+
+      panel
+        .querySelector(
+          "[data-yes]"
+        )
+        .onclick =
+        ()=>{
 
           panel.remove();
 
-          resolve(false);
+          resolve(true);
 
         };
 
-      });
-
-    panel
-      .querySelector("[data-yes]")
-      .onclick = ()=>{
-
-        panel.remove();
-
-        resolve(true);
-
-      };
-
-  });
+    }
+  );
 
 }
 
@@ -3614,12 +4391,15 @@ function inlineConfirm(text){
    IMPORT FILE
 ========================================================= */
 
-async function handleImportFile(event){
+async function handleImportFile(
+  event
+){
 
   const file =
     event.target.files[0];
 
-  event.target.value = "";
+  event.target.value =
+    "";
 
   if(!file){
     return;
@@ -3627,10 +4407,14 @@ async function handleImportFile(event){
 
   const branch =
     document
-      .getElementById("branch")
+      .getElementById(
+        "branch"
+      )
       .value;
 
-  if(branch === "ALL"){
+  if(
+    branch === "ALL"
+  ){
 
     showStatus(
       "Select one branch before importing."
@@ -3642,7 +4426,8 @@ async function handleImportFile(event){
 
   createQueueCard(
     "IMPORT",
-    "Reading " + file.name
+    "Reading " +
+    file.name
   );
 
   try{
@@ -3716,32 +4501,40 @@ async function handleImportFile(event){
    NORMALIZE IMPORT ROW
 ========================================================= */
 
-function normalizeImportRow(input){
+function normalizeImportRow(
+  input
+){
 
   const output = {};
 
   const inputKeys =
-    Object.keys(input);
+    Object.keys(
+      input
+    );
 
-  DB_COLUMNS.forEach(header=>{
+  DB_COLUMNS.forEach(
+    header=>{
 
-    const found =
-      inputKeys.find(
-        key =>
-          normalizeHeader(key) ===
-          normalizeHeader(header)
-      );
-
-    if(found !== undefined){
-
-      output[header] =
-        normalizeCellValue(
-          input[found]
+      const found =
+        inputKeys.find(
+          key =>
+            normalizeHeader(key) ===
+            normalizeHeader(header)
         );
 
-    }
+      if(
+        found !== undefined
+      ){
 
-  });
+        output[header] =
+          normalizeCellValue(
+            input[found]
+          );
+
+      }
+
+    }
+  );
 
   if(
     output["NTAGN"] === undefined ||
@@ -3771,69 +4564,101 @@ function normalizeImportRow(input){
 
 }
 
-function normalizeHeader(value){
+function normalizeHeader(
+  value
+){
 
-  return String(value || "")
+  return String(
+    value || ""
+  )
     .trim()
-    .replace(/\s+/g," ")
+    .replace(
+      /\s+/g,
+      " "
+    )
     .toUpperCase();
 
 }
 
-function normalizeCellValue(value){
+function normalizeCellValue(
+  value
+){
 
   if(
     value === null ||
     value === undefined
   ){
+
     return "";
+
   }
 
-  if(value instanceof Date){
-    return formatDateValue(value);
+  if(
+    value instanceof Date
+  ){
+
+    return formatDateValue(
+      value
+    );
+
   }
 
-  return String(value).trim();
+  return String(
+    value
+  ).trim();
 
 }
 
-function formatDateValue(date){
+function formatDateValue(
+  date
+){
 
-  if(!(date instanceof Date)){
-    return String(date || "");
+  if(
+    !(date instanceof Date)
+  ){
+
+    return String(
+      date || ""
+    );
+
   }
 
   const pad =
     n =>
-      String(n).padStart(2,"0");
+      String(n)
+        .padStart(
+          2,
+          "0"
+        );
 
   return (
     date.getFullYear() +
     "-" +
-    pad(date.getMonth()+1) +
+    pad(
+      date.getMonth()+1
+    ) +
     "-" +
-    pad(date.getDate()) +
+    pad(
+      date.getDate()
+    ) +
     " " +
-    pad(date.getHours()) +
+    pad(
+      date.getHours()
+    ) +
     ":" +
-    pad(date.getMinutes()) +
+    pad(
+      date.getMinutes()
+    ) +
     ":" +
-    pad(date.getSeconds())
+    pad(
+      date.getSeconds()
+    )
   );
 
 }
 
 /* =========================================================
-   GET EXISTING TAGS FOR IMPORT ONLY
-
-   THIS IS THE BIG IMPORT SPEED FIX.
-
-   OLD CODE:
-   Downloaded the ENTIRE stocks table.
-
-   NEW CODE:
-   Only asks Supabase about the NTAGN values
-   actually present in the uploaded file.
+   GET EXISTING TAGS FOR IMPORT
 ========================================================= */
 
 async function getExistingImportTags(
@@ -3845,13 +4670,12 @@ async function getExistingImportTags(
     new Set();
 
   const tagArray =
-    Array.from(tags);
+    Array.from(
+      tags
+    );
 
-  /*
-   * Supabase URL length can become large.
-   * Keep batches relatively small.
-   */
-  const TAG_QUERY_BATCH = 200;
+  const TAG_QUERY_BATCH =
+    200;
 
   for(
     let i=0;
@@ -3869,23 +4693,30 @@ async function getExistingImportTags(
       continue;
     }
 
-    /*
-     * Build:
-     *
-     * NTAGN=in.(TAG1,TAG2,TAG3)
-     *
-     * Values are escaped for PostgREST.
-     */
-
     const escaped =
       batch.map(
         value =>
           String(value)
-            .replace(/\\/g,"\\\\")
-            .replace(/"/g,'\\"')
-            .replace(/,/g,"\\,")
-            .replace(/\(/g,"\\(")
-            .replace(/\)/g,"\\)")
+            .replace(
+              /\\/g,
+              "\\\\"
+            )
+            .replace(
+              /"/g,
+              '\\"'
+            )
+            .replace(
+              /,/g,
+              "\\,"
+            )
+            .replace(
+              /\(/g,
+              "\\("
+            )
+            .replace(
+              /\)/g,
+              "\\)"
+            )
       );
 
     const params =
@@ -3910,20 +4741,28 @@ async function getExistingImportTags(
         params.toString()
       );
 
-    if(Array.isArray(rows)){
+    if(
+      Array.isArray(rows)
+    ){
 
-      rows.forEach(row=>{
+      rows.forEach(
+        row=>{
 
-        const tag =
-          String(
-            row?.NTAGN ?? ""
-          ).trim();
+          const tag =
+            String(
+              row?.NTAGN ?? ""
+            ).trim();
 
-        if(tag){
-          existing.add(tag);
+          if(tag){
+
+            existing.add(
+              tag
+            );
+
+          }
+
         }
-
-      });
+      );
 
     }
 
@@ -3964,12 +4803,11 @@ async function importDirect(
       "stocks"
     );
 
-  /*
-   * Normalize uploaded rows.
-   */
   let mappedRows =
     rows
-      .map(normalizeImportRow)
+      .map(
+        normalizeImportRow
+      )
       .filter(
         row =>
           String(
@@ -3985,49 +4823,43 @@ async function importDirect(
 
   }
 
-  /*
-   * Force branch.
-   */
-  mappedRows.forEach(row=>{
+  mappedRows.forEach(
+    row=>{
 
-    row["BR"] =
-      branch;
+      row["BR"] =
+        branch;
 
-  });
+    }
+  );
 
-  /*
-   * Remove duplicate NTAGN values
-   * from uploaded file.
-   *
-   * Last occurrence wins.
-   */
   const unique =
     new Map();
 
-  mappedRows.forEach(row=>{
+  mappedRows.forEach(
+    row=>{
 
-    const tag =
-      String(
-        row["NTAGN"] || ""
-      ).trim();
+      const tag =
+        String(
+          row["NTAGN"] || ""
+        ).trim();
 
-    if(tag){
-      unique.set(
-        tag,
-        row
-      );
+      if(tag){
+
+        unique.set(
+          tag,
+          row
+        );
+
+      }
+
     }
-
-  });
+  );
 
   mappedRows =
     Array.from(
       unique.values()
     );
 
-  /*
-   * Create tag list.
-   */
   const uploadedTags =
     mappedRows.map(
       row =>
@@ -4046,52 +4878,48 @@ async function importDirect(
     "Checking existing uploaded tags..."
   );
 
-  /*
-   * BIG SPEED IMPROVEMENT:
-   *
-   * Do NOT fetch the entire stock table.
-   *
-   * Only retrieve existing uploaded NTAGN.
-   */
   const existingTags =
     await getExistingImportTags(
       table,
-      new Set(uploadedTags)
+      new Set(
+        uploadedTags
+      )
     );
 
   const newRows = [];
 
   const existingRowsToUpdate = [];
 
-  mappedRows.forEach(row=>{
+  mappedRows.forEach(
+    row=>{
 
-    const tag =
-      String(
-        row["NTAGN"] || ""
-      ).trim();
+      const tag =
+        String(
+          row["NTAGN"] || ""
+        ).trim();
 
-    if(existingTags.has(tag)){
+      if(
+        existingTags.has(tag)
+      ){
 
-      existingRowsToUpdate.push(
-        row
-      );
+        existingRowsToUpdate.push(
+          row
+        );
 
-    }else{
+      }else{
 
-      newRows.push(
-        row
-      );
+        newRows.push(
+          row
+        );
+
+      }
 
     }
-
-  });
+  );
 
   let inserted = 0;
   let updated = 0;
 
-  /*
-   * BULK INSERT NEW RECORDS.
-   */
   for(
     let i=0;
     i<newRows.length;
@@ -4111,7 +4939,8 @@ async function importDirect(
 
         body:chunk,
 
-        prefer:"return=minimal"
+        prefer:
+          "return=minimal"
       }
     );
 
@@ -4135,17 +4964,6 @@ async function importDirect(
 
   }
 
-  /*
-   * Existing records:
-   *
-   * Different rows can contain different
-   * values, therefore ordinary PATCH
-   * cannot update all rows with different
-   * values in one request.
-   *
-   * We use controlled concurrency.
-   */
-
   let updateIndex = 0;
 
   async function updateWorker(){
@@ -4165,7 +4983,9 @@ async function importDirect(
       }
 
       const row =
-        existingRowsToUpdate[index];
+        existingRowsToUpdate[
+          index
+        ];
 
       const tag =
         String(
@@ -4174,29 +4994,29 @@ async function importDirect(
 
       const body = {};
 
-      DB_COLUMNS.forEach(column=>{
+      DB_COLUMNS.forEach(
+        column=>{
 
-        if(column === "NTAGN"){
-          return;
+          if(
+            column === "NTAGN"
+          ){
+
+            return;
+
+          }
+
+          if(
+            row[column] !== undefined
+          ){
+
+            body[column] =
+              row[column];
+
+          }
+
         }
+      );
 
-        if(
-          row[column] !== undefined
-        ){
-
-          body[column] =
-            row[column];
-
-        }
-
-      });
-
-      /*
-       * FIXED FILTER:
-       *
-       * Do NOT encodeURIComponent()
-       * before URLSearchParams.
-       */
       const params =
         new URLSearchParams();
 
@@ -4219,7 +5039,8 @@ async function importDirect(
 
           body:body,
 
-          prefer:"return=minimal"
+          prefer:
+            "return=minimal"
         }
       );
 
@@ -4227,7 +5048,8 @@ async function importDirect(
 
       updateQueue(
         "IMPORT",
-        newRows.length + updated,
+        newRows.length +
+        updated,
         Math.max(
           1,
           newRows.length +
@@ -4286,9 +5108,6 @@ async function importDirect(
     " updated."
   );
 
-  /*
-   * Refresh only AFTER import finishes.
-   */
   setTimeout(
     ()=>{
       refreshDashboard();
@@ -4322,7 +5141,9 @@ async function startExport(){
 
   const branch =
     document
-      .getElementById("branch")
+      .getElementById(
+        "branch"
+      )
       .value;
 
   createQueueCard(
@@ -4383,33 +5204,41 @@ async function startExport(){
       const soldTags =
         new Set();
 
-      sold.forEach(row=>{
-
-        const tag =
-          String(
-            row?.NTAGN ?? ""
-          ).trim();
-
-        if(tag){
-          soldTags.add(tag);
-        }
-
-      });
-
-      const available =
-        stock.filter(row=>{
+      sold.forEach(
+        row=>{
 
           const tag =
             String(
               row?.NTAGN ?? ""
             ).trim();
 
-          return (
-            !tag ||
-            !soldTags.has(tag)
-          );
+          if(tag){
 
-        });
+            soldTags.add(
+              tag
+            );
+
+          }
+
+        }
+      );
+
+      const available =
+        stock.filter(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim();
+
+            return (
+              !tag ||
+              !soldTags.has(tag)
+            );
+
+          }
+        );
 
       XLSX.utils.book_append_sheet(
         wb,
@@ -4503,9 +5332,13 @@ async function startExport(){
    SAFE SHEET NAME
 ========================================================= */
 
-function safeSheetName(name){
+function safeSheetName(
+  name
+){
 
-  return String(name)
+  return String(
+    name
+  )
     .replace(
       /[\\\/\?\*\[\]\:]/g,
       "_"
@@ -4529,16 +5362,29 @@ function formatFileDate(){
   const pad =
     n =>
       String(n)
-        .padStart(2,"0");
+        .padStart(
+          2,
+          "0"
+        );
 
   return (
     d.getFullYear() +
-    pad(d.getMonth()+1) +
-    pad(d.getDate()) +
+    pad(
+      d.getMonth()+1
+    ) +
+    pad(
+      d.getDate()
+    ) +
     "_" +
-    pad(d.getHours()) +
-    pad(d.getMinutes()) +
-    pad(d.getSeconds())
+    pad(
+      d.getHours()
+    ) +
+    pad(
+      d.getMinutes()
+    ) +
+    pad(
+      d.getSeconds()
+    )
   );
 
 }
@@ -4562,7 +5408,9 @@ function createQueueCard(
   }
 
   card =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   card.className =
     "queueCard";
@@ -4623,8 +5471,12 @@ function createQueueCard(
   `;
 
   document
-    .getElementById("queuePanel")
-    .appendChild(card);
+    .getElementById(
+      "queuePanel"
+    )
+    .appendChild(
+      card
+    );
 
 }
 
@@ -4759,7 +5611,9 @@ function updateQueueError(
    STATUS
 ========================================================= */
 
-function showStatus(message){
+function showStatus(
+  message
+){
 
   const el =
     document.getElementById(
@@ -4769,7 +5623,9 @@ function showStatus(message){
   el.textContent =
     message;
 
-  el.classList.add("show");
+  el.classList.add(
+    "show"
+  );
 
   clearTimeout(
     window.__statusTimer
@@ -4791,10 +5647,14 @@ function showStatus(message){
    LOGIN STATUS
 ========================================================= */
 
-function setLoginStatus(message){
+function setLoginStatus(
+  message
+){
 
   document
-    .getElementById("loginStatus")
+    .getElementById(
+      "loginStatus"
+    )
     .textContent =
       message || "";
 
@@ -4804,12 +5664,17 @@ function setLoginStatus(message){
    LOADING
 ========================================================= */
 
-function setLoading(value){
+function setLoading(
+  value
+){
 
-  isLoading = value;
+  isLoading =
+    value;
 
   document
-    .getElementById("loadingLine")
+    .getElementById(
+      "loadingLine"
+    )
     .classList.toggle(
       "hidden",
       !value
@@ -4821,7 +5686,9 @@ function setLoading(value){
    ERROR
 ========================================================= */
 
-function renderError(error){
+function renderError(
+  error
+){
 
   const body =
     document.getElementById(
@@ -4833,7 +5700,8 @@ function renderError(error){
       "emptyState"
     );
 
-  body.innerHTML = "";
+  body.innerHTML =
+    "";
 
   empty.style.display =
     "block";
@@ -4858,12 +5726,16 @@ function renderError(error){
   `;
 
   document
-    .getElementById("pageInfo")
+    .getElementById(
+      "pageInfo"
+    )
     .textContent =
       "Supabase request failed";
 
   document
-    .getElementById("showingTotal")
+    .getElementById(
+      "showingTotal"
+    )
     .textContent =
       "0";
 
@@ -4878,7 +5750,9 @@ function renderError(error){
    NUMBER
 ========================================================= */
 
-function formatNumber(value){
+function formatNumber(
+  value
+){
 
   return Number(
     value || 0
@@ -4890,7 +5764,9 @@ function formatNumber(value){
    ESCAPE HTML
 ========================================================= */
 
-function escapeHtml(value){
+function escapeHtml(
+  value
+){
 
   return String(
     value === undefined ||
@@ -4898,17 +5774,36 @@ function escapeHtml(value){
       ? ""
       : value
   )
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
 }
 
-function escapeHtmlAttribute(value){
+function escapeHtmlAttribute(
+  value
+){
 
-  return escapeHtml(value);
+  return escapeHtml(
+    value
+  );
 
 }
 
@@ -4928,12 +5823,16 @@ function escapeHtmlAttribute(value){
   }else{
 
     document
-      .getElementById("loginScreen")
+      .getElementById(
+        "loginScreen"
+      )
       .style.display =
         "flex";
 
     document
-      .getElementById("dashboard")
+      .getElementById(
+        "dashboard"
+      )
       .style.display =
         "none";
 
@@ -4944,3 +5843,4 @@ function escapeHtmlAttribute(value){
 
 </body>
 </html>
+```

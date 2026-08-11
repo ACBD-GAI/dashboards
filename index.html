@@ -5667,19 +5667,103 @@ async function handleImportFile(
         }
       );
 
-    if(!rows.length){
+   if(!rows.length){
 
-      throw new Error(
-        "No rows found in the file."
+  throw new Error(
+    "No rows found in the file."
+  );
+
+}
+
+/* =========================================================
+   CHECK UPLOADED FILE BRANCH BEFORE IMPORT
+   DO NOT IMPORT IF BR DOES NOT MATCH SELECTED BRANCH
+========================================================= */
+
+const selectedBranch =
+  String(branch || "")
+    .trim()
+    .toUpperCase();
+
+const fileBranchSet =
+  new Set();
+
+let missingBranchRows = 0;
+
+rows.forEach(
+  inputRow=>{
+
+    const normalized =
+      normalizeImportRow(inputRow);
+
+    const fileBranch =
+      String(
+        normalized["BR"] || ""
+      )
+        .trim()
+        .toUpperCase();
+
+    if(fileBranch){
+      fileBranchSet.add(
+        fileBranch
       );
-
+    }else{
+      missingBranchRows++;
     }
 
-    await importDirect(
-      branch,
-      rows,
-      file.name
-    );
+  }
+);
+
+/* BR column missing or empty */
+if(
+  fileBranchSet.size === 0
+){
+
+  throw new Error(
+    "Import failed: BR column is missing or empty."
+  );
+
+}
+
+/* Check every BR value against selected branch */
+const wrongBranches =
+  [...fileBranchSet].filter(
+    fileBranch =>
+      fileBranch !== selectedBranch
+  );
+
+/* Wrong branch OR mixed branches */
+if(
+  wrongBranches.length > 0 ||
+  missingBranchRows > 0 ||
+  fileBranchSet.size > 1
+){
+
+  const detectedBranches =
+    [...fileBranchSet].join(", ");
+
+  throw new Error(
+    "BRANCH DOES NOT MATCH\n\n" +
+    "Selected branch: " +
+    selectedBranch +
+    "\n" +
+    "File branch: " +
+    detectedBranches +
+    "\n\n" +
+    "Nothing was imported."
+  );
+
+}
+
+/* =========================================================
+   BRANCH VERIFIED — CONTINUE EXISTING IMPORT
+========================================================= */
+
+await importDirect(
+  branch,
+  rows,
+  file.name
+);
 
   }catch(error){
 

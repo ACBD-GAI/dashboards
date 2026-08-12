@@ -2318,6 +2318,15 @@ body{
         ↓ Export
       </button>
 
+      <button
+        id="addUserBtn"
+        class="controlBtn primary"
+        onclick="openAddUserModal()"
+        style="display:none"
+      >
+        ＋ Add User
+      </button>
+
       <input
         id="importFile"
         type="file"
@@ -2566,6 +2575,83 @@ body{
 
 </section>
 
+<!-- =========================================================
+     ADD ALLOWED USER MODAL
+========================================================= -->
+
+<div
+  id="addUserModal"
+  class="modalBackdrop hidden"
+>
+
+  <div class="modalCard">
+
+    <div class="modalTitle">
+      Add Allowed User
+    </div>
+
+    <div class="modalSub">
+      Add an email address and assign its allowed branch.
+    </div>
+
+    <div class="field">
+      <label>EMAIL ADDRESS</label>
+
+      <input
+        id="newUserEmail"
+        class="input"
+        type="email"
+        placeholder="user@gmail.com"
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="field">
+      <label>ALLOWED BRANCH</label>
+
+      <select
+        id="newUserBranch"
+        class="select"
+      >
+        <option value="">SELECT BRANCH</option>
+        ${BRANCHES.map(
+          b =>
+            `<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`
+        ).join("")}
+      </select>
+    </div>
+
+    <div
+      id="addUserStatus"
+      class="loginStatus"
+      style="margin-top:6px"
+    ></div>
+
+    <div class="modalActions">
+
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="closeAddUserModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        id="saveAllowedUserBtn"
+        class="controlBtn primary"
+        onclick="saveAllowedUser()"
+      >
+        Add User
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
 <div id="queuePanel"></div>
 
 <div id="globalStatus"></div>
@@ -2583,7 +2669,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbyif7xLQLcoR5AaPg42ec8xMeAtXo5dVKHHjbKBWZEjL-vUkiVu89U-nM22jsConFI/exec";
+  "https://script.google.com/macros/s/AKfycbyleoBZcaKNuSbrG3PqocRkeiAqww2csfqmmrIf9cZENfBLIE3HaD9eWcwtDqcuqumM/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -3320,9 +3406,176 @@ function showDashboard(){
     .textContent =
       currentEmail;
 
+  const addUserBtn =
+    document.getElementById("addUserBtn");
+
+  if(addUserBtn){
+    addUserBtn.style.display =
+      currentAdmin ? "inline-flex" : "none";
+  }
+
   resetDashboardDisplay();
 
   startSessionMonitor();
+
+}
+
+/* =========================================================
+   ADD ALLOWED USER — ADMIN ONLY
+========================================================= */
+
+function openAddUserModal(){
+
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  const modal =
+    document.getElementById("addUserModal");
+
+  if(!modal){
+    return;
+  }
+
+  document
+    .getElementById("newUserEmail")
+    .value = "";
+
+  document
+    .getElementById("newUserBranch")
+    .value = "";
+
+  document
+    .getElementById("addUserStatus")
+    .textContent = "";
+
+  document
+    .getElementById("saveAllowedUserBtn")
+    .disabled = false;
+
+  modal.classList.remove("hidden");
+
+  setTimeout(()=>{
+    document
+      .getElementById("newUserEmail")
+      .focus();
+  },50);
+
+}
+
+function closeAddUserModal(){
+
+  const modal =
+    document.getElementById("addUserModal");
+
+  if(modal){
+    modal.classList.add("hidden");
+  }
+
+}
+
+async function saveAllowedUser(){
+
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    closeAddUserModal();
+    return;
+  }
+
+  if(!sessionId){
+    showStatus("Session expired. Please login again.");
+    closeAddUserModal();
+    return;
+  }
+
+  const email =
+    document
+      .getElementById("newUserEmail")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const branch =
+    document
+      .getElementById("newUserBranch")
+      .value
+      .trim()
+      .toUpperCase();
+
+  const status =
+    document.getElementById("addUserStatus");
+
+  const button =
+    document.getElementById("saveAllowedUserBtn");
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    status.textContent =
+      "Enter a valid email address.";
+    return;
+  }
+
+  if(!BRANCHES.includes(branch)){
+    status.textContent =
+      "Select a valid allowed branch.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Saving...";
+  status.textContent = "Adding user...";
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "addAllowedUser",
+        {
+          sessionId:sessionId,
+          email:email,
+          branch:branch
+        }
+      );
+
+    if(!data || data.ok !== true){
+      throw new Error(
+        data?.error ||
+        "Unable to add user."
+      );
+    }
+
+    status.textContent =
+      "User added successfully.";
+
+    showStatus(
+      email +
+      " added to " +
+      branch +
+      "."
+    );
+
+    setTimeout(
+      closeAddUserModal,
+      700
+    );
+
+  }catch(error){
+
+    console.error(
+      "Add allowed user failed:",
+      error
+    );
+
+    status.textContent =
+      error?.message ||
+      "Unable to add user.";
+
+  }finally{
+
+    button.disabled = false;
+    button.textContent = "Add User";
+
+  }
 
 }
 

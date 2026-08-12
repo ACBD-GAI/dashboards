@@ -2614,10 +2614,22 @@ body{
         class="select"
       >
         <option value="">SELECT BRANCH</option>
-        ${BRANCHES.map(
-          b =>
-            `<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`
-        ).join("")}
+        <option value="GAI">GAI</option>
+        <option value="CAS">CAS</option>
+        <option value="BAC">BAC</option>
+        <option value="BIN">BIN</option>
+        <option value="BIS">BIS</option>
+        <option value="CAD">CAD</option>
+        <option value="DGT">DGT</option>
+        <option value="KAB">KAB</option>
+        <option value="KAL">KAL</option>
+        <option value="PAS">PAS</option>
+        <option value="POT">POT</option>
+        <option value="SAN">SAN</option>
+        <option value="TAB">TAB</option>
+        <option value="TAN">TAN</option>
+        <option value="TIS">TIS</option>
+        <option value="TOL">TOL</option>
       </select>
     </div>
 
@@ -2669,7 +2681,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbyleoBZcaKNuSbrG3PqocRkeiAqww2csfqmmrIf9cZENfBLIE3HaD9eWcwtDqcuqumM/exec";
+  "https://script.google.com/macros/s/AKfycbwGdh4RdCWgKv_UL2w8d_tTLdk-RZtBASjnpi7fWLylUW9Wo84JDPcMIr3067VXFxhN/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";

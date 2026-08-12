@@ -2074,6 +2074,14 @@ body{
   border-radius:inherit;
 }
 
+
+
+   #addUserBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
    
 
 </style>
@@ -2319,13 +2327,13 @@ body{
       </button>
 
       <button
-        id="addUserBtn"
-        class="controlBtn primary"
-        onclick="openAddUserModal()"
-        style="display:none"
-      >
-        ＋ Add User
-      </button>
+  id="addUserBtn"
+  class="controlBtn primary"
+  onclick="openAddUserModal()"
+  style="display:none; display:flex; align-items:center; justify-content:center;"
+>
+  ＋ Add User
+</button>
 
       <input
         id="importFile"

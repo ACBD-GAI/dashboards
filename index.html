@@ -6572,7 +6572,14 @@ async function getExistingImportTags(
 }
 
 /* =========================================================
-   FAST IMPORT
+   FAST IMPORT — REPLACE STOCKS COMPLETELY
+
+   IMPORTANT:
+   1. Selected branch stocks are DELETED FIRST.
+   2. Uploaded file is then inserted as the new stock list.
+   3. NO existing-tag checking.
+   4. NO PATCH / individual updates.
+   5. Much faster for large imports.
 ========================================================= */
 
 async function importDirect(
@@ -6586,6 +6593,10 @@ async function importDirect(
       branch,
       "stocks"
     );
+
+  /* =======================================================
+     NORMALIZE FILE
+  ======================================================= */
 
   let mappedRows =
     rows
@@ -6607,6 +6618,10 @@ async function importDirect(
 
   }
 
+  /* =======================================================
+     FORCE SELECTED BRANCH
+  ======================================================= */
+
   mappedRows.forEach(
     row=>{
 
@@ -6615,6 +6630,10 @@ async function importDirect(
 
     }
   );
+
+  /* =======================================================
+     REMOVE DUPLICATE NTAGN
+  ======================================================= */
 
   const unique =
     new Map();
@@ -6644,13 +6663,17 @@ async function importDirect(
       unique.values()
     );
 
-  const uploadedTags =
-    mappedRows.map(
-      row =>
-        String(
-          row["NTAGN"] || ""
-        ).trim()
+  if(!mappedRows.length){
+
+    throw new Error(
+      "No valid stock records found after processing."
     );
+
+  }
+
+  /* =======================================================
+     DELETE OLD STOCKS FIRST
+  ======================================================= */
 
   updateQueue(
     "IMPORT",
@@ -6659,59 +6682,68 @@ async function importDirect(
       1,
       mappedRows.length
     ),
-    "Checking existing uploaded tags..."
+    "Deleting old " +
+    branch +
+    " stocks..."
   );
 
-  const existingTags =
-    await getExistingImportTags(
-      table,
-      new Set(
-        uploadedTags
-      )
-    );
+  const deleteParams =
+    new URLSearchParams();
 
-  const newRows = [];
+  /*
+   * The table is already branch-specific.
+   * NTAGN not null is used so PostgREST
+   * accepts the DELETE filter.
+   */
 
-  const existingRowsToUpdate = [];
+  deleteParams.set(
+    "NTAGN",
+    "not.is.null"
+  );
 
-  mappedRows.forEach(
-    row=>{
+  await supabaseRequest(
+    table +
+    "?" +
+    deleteParams.toString(),
+    {
+      method:"DELETE",
 
-      const tag =
-        String(
-          row["NTAGN"] || ""
-        ).trim();
+      /*
+       * Do NOT return deleted rows.
+       * Returning them makes the delete slower.
+       */
 
-      if(
-        existingTags.has(tag)
-      ){
-
-        existingRowsToUpdate.push(
-          row
-        );
-
-      }else{
-
-        newRows.push(
-          row
-        );
-
-      }
-
+      prefer:
+        "return=minimal"
     }
   );
 
+  updateQueue(
+    "IMPORT",
+    0,
+    Math.max(
+      1,
+      mappedRows.length
+    ),
+    "Old stocks deleted. Importing new stocks..."
+  );
+
+  await yieldToBrowser();
+
+  /* =======================================================
+     INSERT NEW STOCKS IN BULK CHUNKS
+  ======================================================= */
+
   let inserted = 0;
-  let updated = 0;
 
   for(
     let i=0;
-    i<newRows.length;
+    i<mappedRows.length;
     i+=IMPORT_CHUNK_SIZE
   ){
 
     const chunk =
-      newRows.slice(
+      mappedRows.slice(
         i,
         i + IMPORT_CHUNK_SIZE
       );
@@ -6722,6 +6754,11 @@ async function importDirect(
         method:"POST",
 
         body:chunk,
+
+        /*
+         * Do not return inserted rows.
+         * This significantly reduces response data.
+         */
 
         prefer:
           "return=minimal"
@@ -6734,144 +6771,21 @@ async function importDirect(
     updateQueue(
       "IMPORT",
       inserted,
-      Math.max(
-        1,
-        newRows.length +
-        existingRowsToUpdate.length
-      ),
-      "Inserted " +
+      mappedRows.length,
+      "Importing " +
       inserted +
-      " new records..."
+      "/" +
+      mappedRows.length +
+      " stocks..."
     );
 
     await yieldToBrowser();
 
   }
 
-  let updateIndex = 0;
-
-  async function updateWorker(){
-
-    while(true){
-
-      const index =
-        updateIndex++;
-
-      if(
-        index >=
-        existingRowsToUpdate.length
-      ){
-
-        return;
-
-      }
-
-      const row =
-        existingRowsToUpdate[
-          index
-        ];
-
-      const tag =
-        String(
-          row["NTAGN"] || ""
-        ).trim();
-
-      const body = {};
-
-      DB_COLUMNS.forEach(
-        column=>{
-
-          if(
-            column === "NTAGN"
-          ){
-
-            return;
-
-          }
-
-          if(
-            row[column] !== undefined
-          ){
-
-            body[column] =
-              row[column];
-
-          }
-
-        }
-      );
-
-      const params =
-        new URLSearchParams();
-
-      params.set(
-        "BR",
-        "eq." + branch
-      );
-
-      params.set(
-        "NTAGN",
-        "eq." + tag
-      );
-
-      await supabaseRequest(
-        table +
-        "?" +
-        params.toString(),
-        {
-          method:"PATCH",
-
-          body:body,
-
-          prefer:
-            "return=minimal"
-        }
-      );
-
-      updated++;
-
-      updateQueue(
-        "IMPORT",
-        newRows.length +
-        updated,
-        Math.max(
-          1,
-          newRows.length +
-          existingRowsToUpdate.length
-        ),
-        "Updating " +
-        updated +
-        "/" +
-        existingRowsToUpdate.length
-      );
-
-    }
-
-  }
-
-  const workers = [];
-
-  const workerCount =
-    Math.min(
-      IMPORT_CONCURRENCY,
-      existingRowsToUpdate.length
-    );
-
-  for(
-    let i=0;
-    i<workerCount;
-    i++
-  ){
-
-    workers.push(
-      updateWorker()
-    );
-
-  }
-
-  await Promise.all(
-    workers
-  );
+  /* =======================================================
+     COMPLETE
+  ======================================================= */
 
   updateQueue(
     "IMPORT",
@@ -6879,17 +6793,13 @@ async function importDirect(
     mappedRows.length,
     "Complete • " +
     inserted +
-    " new • " +
-    updated +
-    " updated"
+    " stocks imported"
   );
 
   showStatus(
     "Import completed: " +
     inserted +
-    " new, " +
-    updated +
-    " updated."
+    " stocks imported. Old stocks were replaced."
   );
 
   setTimeout(
@@ -6900,7 +6810,6 @@ async function importDirect(
   );
 
 }
-
 /* =========================================================
    BROWSER YIELD
 ========================================================= */

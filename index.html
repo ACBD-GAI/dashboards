@@ -3667,7 +3667,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbwdbjM1YGo5NIAED8z3aF-7qiLzzbPHiQ5K60_aaDGKdZESSfU5hor7AH7uazhnLGCg/exec";
+  "https://script.google.com/macros/s/AKfycbyfuDoH3SWU0yy_OodkQ72JfwJSXHCFZwqTze0LJFwxHfPaT3DebsSZRq_0vM3NvLme/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -4546,6 +4546,9 @@ async function loadActiveUsers(){
         email.toLowerCase() ===
         String(currentEmail || "").toLowerCase();
 
+      const branch =
+        String(user.branch || "").trim().toUpperCase();
+
       const role =
         user.isAdmin ? "ADMIN" : "USER";
 
@@ -4603,6 +4606,24 @@ async function loadActiveUsers(){
               ">
                 ${role}
               </span>
+
+              ${
+                branch
+                  ? `
+                    <span style="
+                      padding:3px 7px;
+                      border-radius:999px;
+                      font-size:8px;
+                      font-weight:900;
+                      letter-spacing:.06em;
+                      background:#eff6ff;
+                      color:#2563eb;
+                    ">
+                      ${escapeHtml(branch)}
+                    </span>
+                  `
+                  : ""
+              }
 
             </div>
 

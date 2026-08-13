@@ -3240,15 +3240,6 @@ select:disabled{
   ＋ Add User
 </button>
 
-      <button
-        id="forceLogoutBtn"
-        class="controlBtn danger"
-        onclick="openForceLogoutModal()"
-        style="display:none; align-items:center; justify-content:center;"
-      >
-        ⛔ Force Logout
-      </button>
-
       <input
         id="importFile"
         type="file"
@@ -3498,6 +3489,63 @@ select:disabled{
 </section>
 
 <!-- =========================================================
+     FORCE LOGOUT — ACTIVE SCANNER USERS
+========================================================= -->
+<div
+  id="forceLogoutModal"
+  class="modalBackdrop hidden"
+>
+
+  <div
+    class="modalCard"
+    style="width:min(620px,100%);max-height:80vh;overflow:auto"
+  >
+
+    <div class="modalTitle">
+      Active Scanner Users
+    </div>
+
+    <div class="modalSub">
+      These are the users currently logged in to the scanner.
+      Force Logout immediately invalidates their scanner session.
+    </div>
+
+    <div
+      id="activeScannerStatus"
+      class="loginStatus"
+      style="margin:4px 0 12px"
+    >
+      Loading active scanner users...
+    </div>
+
+    <div
+      id="activeScannerUsersList"
+      style="display:flex;flex-direction:column;gap:8px"
+    ></div>
+
+    <div class="modalActions" style="margin-top:18px">
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="loadActiveScannerUsers()"
+      >
+        ↻ Refresh
+      </button>
+
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="closeForceLogoutModal()"
+      >
+        Close
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================================
      ADD ALLOWED USER MODAL
 ========================================================= -->
 
@@ -3586,23 +3634,6 @@ select:disabled{
 
 </div>
 
-<!-- =========================================================
-     FORCE LOGOUT — SCANNER USERS ONLY
-========================================================= -->
-
-<div id="forceLogoutModal" class="modalBackdrop hidden">
-  <div class="modalCard" style="max-width:680px;">
-    <div class="modalTitle">Active Logged-In Users</div>
-    <div class="modalSub">Select a user currently logged in to the inventory system and force that session to end.</div>
-    <div id="forceLogoutStatus" class="loginStatus" style="margin-top:6px"></div>
-    <div id="activeScannerUsers" style="margin-top:14px; max-height:420px; overflow:auto;"></div>
-    <div class="modalActions">
-      <button type="button" class="controlBtn" onclick="loadActiveScannerUsers()">↻ Refresh</button>
-      <button type="button" class="controlBtn" onclick="closeForceLogoutModal()">Close</button>
-    </div>
-  </div>
-</div>
-
 <div id="queuePanel"></div>
 
 <div id="globalStatus"></div>
@@ -3620,7 +3651,9 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbx5kvqBjgo3hdnxt8N4q4sQjLR7mbMjIXL9dG1uMLvrKlNvsUwmSr1A2cgNKh50gO6p/exec";
+  "https://script.google.com/macros/s/AKfycbwPfQovWIvKinHhwEfy03JuXwdKEP_Fx4fhWx1PNerRPJRrEM-AxG3IQv8VSXIPP7IQ/exec";
+
+const LOGIN_APP = "dashboard";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -4000,7 +4033,7 @@ async function verifyOTP(){
         {
           email:email,
           otp:otp,
-          app:'dashboard'
+          source:LOGIN_APP
         }
       );
 
@@ -4367,144 +4400,17 @@ function showDashboard(){
   }
 
   const forceLogoutBtn =
-    document.getElementById('forceLogoutBtn');
+    document.getElementById("forceLogoutBtn");
 
   if(forceLogoutBtn){
     forceLogoutBtn.style.display =
-      currentAdmin ? 'inline-flex' : 'none';
+      currentAdmin ? "inline-flex" : "none";
   }
 
   resetDashboardDisplay();
 
   startSessionMonitor();
 
-}
-
-/* =========================================================
-   FORCE LOGOUT — SCANNER USERS ONLY
-========================================================= */
-
-function openForceLogoutModal(){
-  if(!currentAdmin){
-    showStatus('Administrator access required.');
-    return;
-  }
-
-  const modal = document.getElementById('forceLogoutModal');
-  if(!modal) return;
-
-  document.getElementById('forceLogoutStatus').textContent = '';
-  document.getElementById('activeScannerUsers').innerHTML =
-    '<div style="padding:18px;text-align:center;color:var(--muted);">Loading active Scanner users...</div>';
-
-  modal.classList.remove('hidden');
-  loadActiveScannerUsers();
-}
-
-function closeForceLogoutModal(){
-  const modal = document.getElementById('forceLogoutModal');
-  if(modal) modal.classList.add('hidden');
-}
-
-async function loadActiveScannerUsers(){
-  if(!currentAdmin || !sessionId) return;
-
-  const container = document.getElementById('activeScannerUsers');
-  const status = document.getElementById('forceLogoutStatus');
-  if(!container) return;
-
-  container.innerHTML =
-    '<div style="padding:18px;text-align:center;color:var(--muted);">Loading active Scanner users...</div>';
-  if(status) status.textContent = '';
-
-  try{
-    const data = await loginApiGet('getActiveSessions', { sessionId:sessionId });
-
-    if(!data || data.ok !== true){
-      throw new Error(data?.error || 'Unable to load active Scanner users.');
-    }
-
-    const users = Array.isArray(data.users) ? data.users : [];
-
-    if(!users.length){
-      container.innerHTML =
-        '<div style="padding:20px;text-align:center;color:var(--muted);">No Scanner users are currently logged in.</div>';
-      return;
-    }
-
-    container.innerHTML = '';
-
-    users.forEach(user=>{
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-soft);';
-
-      const info = document.createElement('div');
-      info.style.minWidth = '0';
-
-      const email = document.createElement('div');
-      email.style.cssText = 'font-weight:700;color:var(--text);word-break:break-word;';
-      email.textContent = '🟢 ' + String(user.email || 'Unknown user');
-
-      const branch = document.createElement('div');
-      branch.style.cssText = 'margin-top:4px;color:var(--muted);font-size:13px;';
-      branch.textContent = 'Branch: ' + String(user.branch || 'Not assigned');
-
-      info.appendChild(email);
-      info.appendChild(branch);
-
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'controlBtn danger';
-      button.textContent = 'Force Logout';
-      button.addEventListener('click', function(){
-        forceLogoutScannerUser(user.sessionId, user.email, button);
-      });
-
-      row.appendChild(info);
-      row.appendChild(button);
-      container.appendChild(row);
-    });
-
-  }catch(error){
-    console.error('Load active Scanner users failed:', error);
-    container.innerHTML =
-      '<div style="padding:18px;text-align:center;color:var(--danger);">Unable to load active users: ' +
-      escapeHtml(String(error?.message || error)) +
-      '</div>';
-  }
-}
-
-async function forceLogoutScannerUser(targetSessionId, email, button){
-  if(!currentAdmin || !targetSessionId) return;
-
-  if(!window.confirm('Force logout ' + String(email || 'this Scanner user') + '?')) return;
-
-  if(button){
-    button.disabled = true;
-    button.textContent = 'Logging out...';
-  }
-
-  try{
-    const data = await loginApiGet('forceLogoutUser', {
-      sessionId:sessionId,
-      targetSessionId:targetSessionId
-    });
-
-    if(!data || data.ok !== true){
-      throw new Error(data?.error || 'Unable to force logout Scanner user.');
-    }
-
-    showStatus(String(email || 'User') + ' has been forced to logout.');
-    await loadActiveScannerUsers();
-
-  }catch(error){
-    console.error('Force logout failed:', error);
-    showStatus(error?.message || 'Unable to force logout Scanner user.');
-    if(button){
-      button.disabled = false;
-      button.textContent = 'Force Logout';
-    }
-  }
 }
 
 /* =========================================================
@@ -4664,6 +4570,241 @@ async function saveAllowedUser(){
 
   }
 
+}
+
+/* =========================================================
+   FORCE LOGOUT — ACTIVE SCANNER USERS
+   ADMIN ONLY
+========================================================= */
+
+function openForceLogoutModal(){
+
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  if(!sessionId){
+    showStatus("Session expired. Please login again.");
+    return;
+  }
+
+  const modal =
+    document.getElementById("forceLogoutModal");
+
+  if(!modal){
+    return;
+  }
+
+  modal.classList.remove("hidden");
+  loadActiveScannerUsers();
+}
+
+function closeForceLogoutModal(){
+
+  const modal =
+    document.getElementById("forceLogoutModal");
+
+  if(modal){
+    modal.classList.add("hidden");
+  }
+}
+
+async function loadActiveScannerUsers(){
+
+  if(!currentAdmin || !sessionId){
+    return;
+  }
+
+  const status =
+    document.getElementById("activeScannerStatus");
+
+  const list =
+    document.getElementById("activeScannerUsersList");
+
+  if(!status || !list){
+    return;
+  }
+
+  status.textContent =
+    "Loading active scanner users...";
+
+  list.innerHTML = "";
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "listActiveScannerUsers",
+        {
+          sessionId:sessionId
+        }
+      );
+
+    if(!data || data.ok !== true){
+      throw new Error(
+        data?.error ||
+        "Unable to load active scanner users."
+      );
+    }
+
+    const users =
+      Array.isArray(data.users)
+        ? data.users
+        : [];
+
+    if(!users.length){
+      status.textContent =
+        "No scanner users are currently active.";
+      return;
+    }
+
+    status.textContent =
+      users.length +
+      (users.length === 1
+        ? " scanner user is active."
+        : " scanner users are active.");
+
+    users.forEach(user=>{
+
+      const row =
+        document.createElement("div");
+
+      row.style.cssText =
+        "display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #d7e5ef;border-radius:12px;background:#f8fbff";
+
+      const info =
+        document.createElement("div");
+
+      info.style.cssText =
+        "min-width:0;flex:1";
+
+      const email =
+        document.createElement("div");
+
+      email.textContent =
+        user.email || "Unknown email";
+
+      email.style.cssText =
+        "font-size:13px;font-weight:800;color:#102033;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+
+      const branch =
+        document.createElement("div");
+
+      branch.textContent =
+        "Branch: " +
+        (user.branch || "—");
+
+      branch.style.cssText =
+        "margin-top:3px;font-size:11px;color:#64748b";
+
+      info.appendChild(email);
+      info.appendChild(branch);
+
+      const button =
+        document.createElement("button");
+
+      button.type = "button";
+      button.className = "controlBtn";
+      button.textContent = "Force Logout";
+      button.style.cssText =
+        "color:#dc2626;border-color:#fecaca;white-space:nowrap";
+      button.dataset.email =
+        user.email || "";
+
+      button.onclick =
+        ()=>forceLogoutScannerUser(
+          button.dataset.email
+        );
+
+      row.appendChild(info);
+      row.appendChild(button);
+      list.appendChild(row);
+    });
+
+  }catch(error){
+
+    console.error(
+      "Load active scanner users failed:",
+      error
+    );
+
+    status.textContent =
+      error?.message ||
+      "Unable to load active scanner users.";
+  }
+}
+
+async function forceLogoutScannerUser(email){
+
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  if(!sessionId){
+    showStatus("Session expired. Please login again.");
+    return;
+  }
+
+  email =
+    String(email || "")
+      .trim()
+      .toLowerCase();
+
+  if(!email){
+    return;
+  }
+
+  if(!window.confirm(
+    "Force logout " +
+    email +
+    " from the scanner?"
+  )){
+    return;
+  }
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "forceLogoutScannerUser",
+        {
+          sessionId:sessionId,
+          email:email
+        }
+      );
+
+    if(!data || data.ok !== true){
+      throw new Error(
+        data?.error ||
+        "Unable to force logout this scanner user."
+      );
+    }
+
+    showStatus(
+      email +
+      " was logged out from the scanner."
+    );
+
+    await loadActiveScannerUsers();
+
+  }catch(error){
+
+    console.error(
+      "Force logout scanner user failed:",
+      error
+    );
+
+    const status =
+      document.getElementById("activeScannerStatus");
+
+    if(status){
+      status.textContent =
+        error?.message ||
+        "Unable to force logout this scanner user.";
+    }
+  }
 }
 
 /* =========================================================

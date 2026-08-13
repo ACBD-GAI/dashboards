@@ -5848,7 +5848,7 @@ if (password !== "12345") {
   alert("❌ Incorrect password. Nothing was deleted.");
   return;
 }
-
+modal.remove();
 const deleted =
   await deleteSelectedReport(
     branch,

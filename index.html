@@ -5762,34 +5762,30 @@ function clearReport(){
 
       </div>
 
-      <div class="modalWarning">
+     <div class="modalWarning">
+  ⚠️ WARNING: This will permanently delete the selected
+  report records.
 
-        ⚠️ This permanently deletes the selected
-        report records from Supabase.
+  <br><br>
 
-        <br><br>
-
-        It does NOT merely clear the screen.
-
-      </div>
+  Are you sure you want to continue?
+</div>
 
       <div class="modalActions">
+  <button
+    class="controlBtn"
+    data-cancel
+  >
+    NO
+  </button>
 
-        <button
-          class="controlBtn"
-          data-cancel
-        >
-          Cancel
-        </button>
-
-        <button
-          class="controlBtn primary"
-          data-clear
-        >
-          Delete Report
-        </button>
-
-      </div>
+  <button
+    class="controlBtn danger"
+    data-clear
+  >
+    YES, DELETE
+  </button>
+</div>
 
     </div>
 

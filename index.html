@@ -760,6 +760,123 @@ button{
 }
 
 /* =========================================================
+   ADMIN FORCE LOGOUT BAR
+   ADMIN ONLY — ADDITIVE FEATURE
+========================================================= */
+
+#adminForceLogoutBar{
+  display:none;
+
+  align-items:center;
+  gap:8px;
+
+  margin:-5px 0 16px;
+  padding:9px;
+
+  border:1px solid #ead1d1;
+  border-radius:14px;
+
+  background:
+    linear-gradient(135deg,#fffafa,#fff5f5);
+
+  box-shadow:
+    0 5px 16px rgba(127,29,29,.06);
+}
+
+#adminForceLogoutBar.show{
+  display:flex;
+}
+
+#adminForceLogoutBar .forceLogoutLabel{
+  display:flex;
+  align-items:center;
+  gap:7px;
+
+  padding:0 4px 0 5px;
+
+  color:#991b1b;
+  font-size:10px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+#adminForceLogoutEmail{
+  flex:1;
+  min-width:180px;
+  min-height:38px;
+  padding:9px 12px;
+
+  border:1px solid #e5caca;
+  border-radius:10px;
+  outline:none;
+
+  background:#ffffff;
+  color:#111827;
+  font-size:12px;
+}
+
+#adminForceLogoutEmail:focus{
+  border-color:#dc2626;
+  box-shadow:0 0 0 3px rgba(220,38,38,.08);
+}
+
+#adminForceLogoutButton{
+  min-height:38px;
+  padding:0 14px;
+
+  border:0;
+  border-radius:10px;
+
+  background:linear-gradient(135deg,#dc2626,#b91c1c);
+  color:#fff;
+
+  cursor:pointer;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+
+  box-shadow:0 6px 15px rgba(220,38,38,.18);
+}
+
+#adminForceLogoutButton:hover{
+  filter:brightness(1.04);
+  transform:translateY(-1px);
+}
+
+#adminForceLogoutButton:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none;
+}
+
+#adminForceLogoutStatus{
+  min-width:150px;
+  color:#64748b;
+  font-size:10px;
+  line-height:1.35;
+}
+
+@media(max-width:700px){
+  #adminForceLogoutBar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  #adminForceLogoutBar .forceLogoutLabel{
+    padding:2px 3px;
+  }
+
+  #adminForceLogoutEmail,
+  #adminForceLogoutButton{
+    width:100%;
+  }
+
+  #adminForceLogoutStatus{
+    min-width:0;
+  }
+}
+
+/* =========================================================
    LOADING
 ========================================================= */
 
@@ -1634,116 +1751,6 @@ tbody tr:last-child td{
 }
 
 /* =========================================================
-   INLINE ADMIN FORCE LOGOUT
-========================================================= */
-
-.forceLogoutControl{
-
-  grid-column:1 / -1;
-
-  display:flex;
-  align-items:center;
-  gap:8px;
-
-  min-width:0;
-
-  padding:8px;
-
-  border:1px solid #f1caca;
-  border-radius:14px;
-
-  background:
-    linear-gradient(135deg,#fffafa,#fff5f5);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.9),
-    0 4px 12px rgba(220,38,38,.04);
-
-}
-
-.forceLogoutIcon{
-
-  width:32px;
-  height:32px;
-
-  flex:0 0 32px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  border-radius:9px;
-
-  background:#fff0f0;
-  border:1px solid #fecaca;
-
-  font-size:14px;
-
-}
-
-.forceLogoutInput{
-
-  flex:1 1 auto;
-  min-width:150px;
-  height:39px;
-
-  padding:0 12px;
-
-  border:1px solid #e5caca;
-  border-radius:10px;
-
-  outline:none;
-
-  background:#ffffff;
-  color:#243447;
-
-  font-size:11px;
-  font-weight:650;
-
-  transition:
-    border-color .18s ease,
-    box-shadow .18s ease;
-
-}
-
-.forceLogoutInput::placeholder{
-  color:#a58a8a;
-}
-
-.forceLogoutInput:hover{
-  border-color:#e5aaaa;
-}
-
-.forceLogoutInput:focus{
-
-  border-color:#ef4444;
-
-  box-shadow:
-    0 0 0 3px rgba(239,68,68,.09);
-
-}
-
-.forceLogoutBtn{
-  flex:0 0 auto;
-  min-width:125px;
-}
-
-.forceLogoutStatus{
-
-  flex:0 1 260px;
-  min-width:0;
-
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-
-  color:#9f4a4a;
-  font-size:9px;
-  font-weight:750;
-
-}
-
-/* =========================================================
    GLOBAL STATUS
 ========================================================= */
 
@@ -2093,39 +2100,6 @@ button:disabled{
 }
 
 /* =========================================================
-   INLINE FORCE LOGOUT — MOBILE
-========================================================= */
-
-@media(max-width:700px){
-
-  .forceLogoutControl{
-
-    display:grid;
-
-    grid-template-columns:32px minmax(0,1fr);
-
-    gap:7px;
-
-  }
-
-  .forceLogoutInput{
-    width:100%;
-  }
-
-  .forceLogoutBtn{
-    grid-column:1 / -1;
-    width:100%;
-  }
-
-  .forceLogoutStatus{
-    grid-column:1 / -1;
-    width:100%;
-    text-align:center;
-  }
-
-}
-
-/* =========================================================
    REDUCED MOTION
 ========================================================= */
 
@@ -2461,37 +2435,14 @@ body{
         ↓ Export
       </button>
 
-      <div
-        id="forceLogoutControl"
-        class="forceLogoutControl"
+      <button
+        id="adminSessionBtn"
+        class="controlBtn"
         style="display:none"
+        onclick="openSessionControl()"
       >
-
-        <span class="forceLogoutIcon">🔐</span>
-
-        <input
-          id="forceLogoutEmailInline"
-          class="forceLogoutInput"
-          type="email"
-          autocomplete="off"
-          placeholder="Enter user email to force logout"
-          onkeydown="if(event.key==='Enter')forceLogoutInline()"
-        >
-
-        <button
-          id="forceLogoutInlineBtn"
-          class="controlBtn danger forceLogoutBtn"
-          onclick="forceLogoutInline()"
-        >
-          🔴 Force Logout
-        </button>
-
-        <span
-          id="forceLogoutInlineStatus"
-          class="forceLogoutStatus"
-        ></span>
-
-      </div>
+        🔐 Sessions
+      </button>
 
       <input
         id="importFile"
@@ -2500,6 +2451,42 @@ body{
         class="hidden"
         onchange="handleImportFile(event)"
       >
+
+    </div>
+
+    <!-- =====================================================
+         ADMIN FORCE LOGOUT
+         ADDITIVE ONLY — DOES NOT REPLACE OTHER CONTROLS
+    ====================================================== -->
+    <div
+      id="adminForceLogoutBar"
+      aria-label="Administrator force logout"
+    >
+
+      <div class="forceLogoutLabel">
+        🔐 FORCE LOGOUT USER
+      </div>
+
+      <input
+        id="adminForceLogoutEmail"
+        type="email"
+        autocomplete="off"
+        placeholder="Enter user email..."
+        onkeydown="if(event.key==='Enter')forceLogoutFromDashboard()"
+      >
+
+      <button
+        id="adminForceLogoutButton"
+        type="button"
+        onclick="forceLogoutFromDashboard()"
+      >
+        🔴 Force Logout
+      </button>
+
+      <div
+        id="adminForceLogoutStatus"
+        aria-live="polite"
+      ></div>
 
     </div>
 
@@ -2758,7 +2745,14 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbyP53U7W61jcdEzqbo8fOkGCG2hVXwXOpLSqxx2t7kFQpUTpTmxTmlulqzIgfhmHLU4/exec";
+  "https://script.google.com/macros/s/AKfycbx2BpDbV6f8OPC4oAERaT63LsZaobckJu5TPloYCw3-5dHrYtmXBsHbSVns6lpVQqsH/exec";
+
+/* FORCE LOGOUT CONTROL API
+   This is intentionally separate from the normal login API.
+   It points to the existing Force Logout web app deployment.
+*/
+const FORCE_LOGOUT_API_URL =
+  "https://script.google.com/macros/s/AKfycbw2XDxES64OjWH7pNGlVmq-C08DCFeab6RYqX_StdKzEXwvNHc5v311pPDjjSrBj9NL/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -3435,25 +3429,18 @@ function clearLoginSession(){
 
   currentAdmin = false;
 
-  const forceLogoutControl =
-    document.getElementById("forceLogoutControl");
+  const adminSessionBtn =
+    document.getElementById("adminSessionBtn");
 
-  if(forceLogoutControl){
-    forceLogoutControl.style.display = "none";
+  if(adminSessionBtn){
+    adminSessionBtn.style.display = "none";
   }
 
-  const forceLogoutInput =
-    document.getElementById("forceLogoutEmailInline");
+  const adminForceLogoutBar =
+    document.getElementById("adminForceLogoutBar");
 
-  const forceLogoutStatus =
-    document.getElementById("forceLogoutInlineStatus");
-
-  if(forceLogoutInput){
-    forceLogoutInput.value = "";
-  }
-
-  if(forceLogoutStatus){
-    forceLogoutStatus.textContent = "";
+  if(adminForceLogoutBar){
+    adminForceLogoutBar.classList.remove("show");
   }
 
 }
@@ -3477,14 +3464,24 @@ function showDashboard(){
     .textContent =
       currentEmail;
 
-  const forceLogoutControl =
-    document.getElementById("forceLogoutControl");
+  const adminSessionBtn =
+    document.getElementById("adminSessionBtn");
 
-  if(forceLogoutControl){
+  if(adminSessionBtn){
 
-    forceLogoutControl.style.display =
-      currentAdmin ? "flex" : "none";
+    adminSessionBtn.style.display =
+      currentAdmin ? "inline-flex" : "none";
 
+  }
+
+  const adminForceLogoutBar =
+    document.getElementById("adminForceLogoutBar");
+
+  if(adminForceLogoutBar){
+    adminForceLogoutBar.classList.toggle(
+      "show",
+      currentAdmin === true
+    );
   }
 
   resetDashboardDisplay();
@@ -4217,14 +4214,140 @@ function silentlyClearReport(){
 }
 
 /* =========================================================
-   INLINE ADMIN FORCE LOGOUT
+   FORCE LOGOUT API
 
-   Allows an authenticated administrator to enter
-   a user email directly on the dashboard and
-   invalidate that user's active scanner session.
+   IMPORTANT:
+   This intentionally uses the separate web URL supplied
+   for Force Logout. Normal login/session traffic continues
+   using LOGIN_API_URL.
 ========================================================= */
 
-async function forceLogoutInline(){
+function forceLogoutApiGet(action, params = {}){
+
+  return new Promise((resolve,reject)=>{
+
+    const callback =
+      "forceLogoutCb_" +
+      Date.now() +
+      "_" +
+      Math.floor(Math.random() * 100000);
+
+    const query =
+      new URLSearchParams();
+
+    query.set("action", action);
+    query.set("callback", callback);
+
+    Object.keys(params).forEach(key=>{
+
+      if(
+        params[key] !== undefined &&
+        params[key] !== null
+      ){
+        query.set(
+          key,
+          String(params[key])
+        );
+      }
+
+    });
+
+    const script =
+      document.createElement("script");
+
+    let finished = false;
+
+    const cleanup = ()=>{
+
+      clearTimeout(timeout);
+
+      try{
+        delete window[callback];
+      }catch(e){}
+
+      if(script.parentNode){
+        script.parentNode.removeChild(script);
+      }
+
+    };
+
+    const timeout =
+      setTimeout(()=>{
+
+        if(finished){
+          return;
+        }
+
+        finished = true;
+        cleanup();
+
+        reject(
+          new Error(
+            "Force Logout server timed out."
+          )
+        );
+
+      },30000);
+
+    window[callback] = data=>{
+
+      if(finished){
+        return;
+      }
+
+      finished = true;
+      cleanup();
+
+      if(data && data.ok === false){
+        reject(
+          new Error(
+            data.error ||
+            "Force Logout request failed."
+          )
+        );
+        return;
+      }
+
+      resolve(data || {});
+
+    };
+
+    script.onerror = ()=>{
+
+      if(finished){
+        return;
+      }
+
+      finished = true;
+      cleanup();
+
+      reject(
+        new Error(
+          "Unable to connect to Force Logout server."
+        )
+      );
+
+    };
+
+    script.src =
+      FORCE_LOGOUT_API_URL +
+      "?" +
+      query.toString();
+
+    document.body.appendChild(script);
+
+  });
+
+}
+
+/* =========================================================
+   ADMIN FORCE LOGOUT — DASHBOARD CONTROL
+
+   This is the ONLY new dashboard action.
+   All existing controls remain untouched.
+========================================================= */
+
+async function forceLogoutFromDashboard(){
 
   if(!currentAdmin){
 
@@ -4238,17 +4361,17 @@ async function forceLogoutInline(){
 
   const input =
     document.getElementById(
-      "forceLogoutEmailInline"
+      "adminForceLogoutEmail"
     );
 
   const button =
     document.getElementById(
-      "forceLogoutInlineBtn"
+      "adminForceLogoutButton"
     );
 
   const status =
     document.getElementById(
-      "forceLogoutInlineStatus"
+      "adminForceLogoutStatus"
     );
 
   if(!input || !button || !status){
@@ -4263,18 +4386,17 @@ async function forceLogoutInline(){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
 
     status.textContent =
-      "Enter a valid email.";
+      "Enter a valid user email.";
 
     input.focus();
-
     return;
 
   }
 
-  if(email === currentEmail.toLowerCase()){
+  if(!sessionId){
 
     status.textContent =
-      "Use Logout if you want to log out yourself.";
+      "Administrator session is missing.";
 
     return;
 
@@ -4285,12 +4407,12 @@ async function forceLogoutInline(){
     "Logging out...";
 
   status.textContent =
-    "Checking...";
+    "Contacting Force Logout server...";
 
   try{
 
     const data =
-      await loginApiGet(
+      await forceLogoutApiGet(
         "forceLogoutUser",
         {
           sessionId:sessionId,
@@ -4299,41 +4421,41 @@ async function forceLogoutInline(){
       );
 
     if(!data || data.ok !== true){
-
       throw new Error(
         data && data.error
           ? data.error
           : "Unable to force logout user."
       );
-
     }
 
     if(data.found){
 
       status.textContent =
-        "✓ " + email + " logged out.";
+        "✓ " + email + " has been logged out.";
 
       showStatus(
-        "User session logged out."
+        "User session logged out: " + email
       );
+
+      input.value = "";
 
     }else{
 
       status.textContent =
-        "No active session found.";
+        "No active session found for " + email + ".";
 
       showStatus(
-        "No active session found for " +
-        email + "."
+        "No active session found for " + email + "."
       );
 
     }
 
-    input.value = "";
-
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "Force Logout error:",
+      error
+    );
 
     status.textContent =
       error && error.message
@@ -4364,13 +4486,9 @@ async function forceLogoutInline(){
 
   }finally{
 
-    if(document.body.contains(button)){
-
-      button.disabled = false;
-      button.textContent =
-        "🔴 Force Logout";
-
-    }
+    button.disabled = false;
+    button.textContent =
+      "🔴 Force Logout";
 
   }
 

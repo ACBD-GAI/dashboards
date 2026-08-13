@@ -5812,99 +5812,182 @@ function clearReport(){
       modal.remove();
     };
 
- modal.querySelector(
-  "[data-clear]"
-).onclick =
-  async ()=>{
+ function showDeletePasswordModal(){
 
-    const branch =
-      modal.querySelector(
-        "#clearBranch"
-      ).value;
+  return new Promise(resolve => {
 
-    const report =
-      modal.querySelector(
-        "#clearReportType"
-      ).value;
+    const passwordModal =
+      document.createElement("div");
 
-    const password = prompt(
-      "Enter password to permanently delete this report:"
+    passwordModal.className =
+      "modalBackdrop";
+
+    passwordModal.innerHTML = `
+
+      <div class="modalBox">
+
+        <div class="modalHeader">
+
+          <div>
+            <div class="modalTitle">
+              🔐 Confirm Deletion
+            </div>
+
+            <div class="modalSubtitle">
+              Enter the password to permanently delete this report.
+            </div>
+          </div>
+
+          <button
+            class="modalClose"
+            type="button"
+            data-password-cancel
+          >
+            ×
+          </button>
+
+        </div>
+
+        <div class="modalBody">
+
+          <div class="modalWarning">
+            ⚠️ This action cannot be undone.
+          </div>
+
+          <label
+            style="
+              display:block;
+              font-weight:800;
+              margin-bottom:7px;
+            "
+          >
+            PASSWORD
+          </label>
+
+          <input
+            type="password"
+            id="deletePasswordInput"
+            placeholder="Enter password"
+            autocomplete="off"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px 14px;
+              border:1px solid #cbd5e1;
+              border-radius:10px;
+              font-size:15px;
+              outline:none;
+            "
+          >
+
+          <div
+            class="modalActions"
+            style="margin-top:18px;"
+          >
+
+            <button
+              class="controlBtn"
+              type="button"
+              data-password-cancel
+            >
+              CANCEL
+            </button>
+
+            <button
+              class="controlBtn danger"
+              type="button"
+              data-password-confirm
+            >
+              DELETE
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(
+      passwordModal
     );
 
-    if(password !== "12345"){
-
-      alert(
-        "❌ Incorrect password. Nothing was deleted."
+    const input =
+      passwordModal.querySelector(
+        "#deletePasswordInput"
       );
 
-      modal.remove();
+    input.focus();
 
-      return;
-    }
+    passwordModal
+      .querySelectorAll(
+        "[data-password-cancel]"
+      )
+      .forEach(button => {
 
-    const button =
-      modal.querySelector(
-        "[data-clear]"
-      );
+        button.onclick = () => {
 
-    button.disabled =
-      true;
+          passwordModal.remove();
 
-    button.textContent =
-      "Deleting...";
+          resolve(false);
 
-    try{
+        };
 
-      const deleted =
-        await deleteSelectedReport(
-          branch,
-          report
+      });
+
+    passwordModal.querySelector(
+      "[data-password-confirm]"
+    ).onclick = () => {
+
+      const password =
+        input.value;
+
+      passwordModal.remove();
+
+      if(password === "12345"){
+
+        resolve(true);
+
+      }else{
+
+        showStatus(
+          "❌ Incorrect password. Nothing was deleted."
         );
 
-      modal.remove();
+        resolve(false);
 
-      document
-        .getElementById("branch")
-        .value =
-          branch;
+      }
 
-      document
-        .getElementById("sheet")
-        .value =
-          report;
+    };
 
-      updateReportTitle();
+    input.addEventListener(
+      "keydown",
+      event => {
 
-      silentlyClearReport();
+        if(event.key === "Enter"){
 
-      showStatus(
-        reportLabelFor(report) +
-        " deleted: " +
-        formatNumber(deleted) +
-        " record(s)."
-      );
+          passwordModal
+            .querySelector(
+              "[data-password-confirm]"
+            )
+            .click();
 
-    }catch(error){
+        }
 
-      console.error(
-        "Clear Report failed:",
-        error
-      );
+        if(event.key === "Escape"){
 
-      button.disabled =
-        false;
+          passwordModal
+            .querySelector(
+              "[data-password-cancel]"
+            )
+            .click();
 
-      button.textContent =
-        "Delete Report";
+        }
 
-      showStatus(
-        error?.message ||
-        "Unable to delete report."
-      );
+      }
+    );
 
-    }
-
-  };
+  });
 
 }
 /* =========================================================

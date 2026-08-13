@@ -8283,15 +8283,135 @@ async function startExport(){
         )
       );
 
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.json_to_sheet(
-          audit
-        ),
-        safeSheetName(
-          b + "_AUDIT"
-        )
-      );
+/* =========================================================
+   AUDIT EXPORT
+
+   AUDITED =
+     Existing audit records
+
+   MISSING =
+     STOCKS - (SOLD + AUDIT)
+
+   STATUS:
+     AUDITED
+     MISSING
+========================================================= */
+
+
+/* =========================================================
+   GET AUDITED TAGS
+========================================================= */
+
+const auditedTags =
+  new Set();
+
+audit.forEach(
+  row=>{
+    const tag =
+      String(
+        row?.NTAGN ?? ""
+      ).trim();
+
+    if(tag){
+      auditedTags.add(tag);
+    }
+  }
+);
+
+
+/* =========================================================
+   EXISTING AUDIT RECORDS
+========================================================= */
+
+const auditedExport =
+  audit.map(
+    row=>({
+      ...row,
+      STATUS:"AUDITED"
+    })
+  );
+
+
+/* =========================================================
+   FIND MISSING STOCKS
+
+   MISSING =
+   STOCKS - (SOLD + AUDIT)
+========================================================= */
+
+const missingExport =
+  stock
+    .filter(
+      row=>{
+        const tag =
+          String(
+            row?.NTAGN ?? ""
+          ).trim();
+
+        if(!tag){
+          return false;
+        }
+
+        /*
+         * Already SOLD
+         * → NOT MISSING
+         */
+        if(
+          soldTags.has(tag)
+        ){
+          return false;
+        }
+
+        /*
+         * Already AUDITED
+         * → NOT MISSING
+         */
+        if(
+          auditedTags.has(tag)
+        ){
+          return false;
+        }
+
+        /*
+         * In STOCKS but neither
+         * SOLD nor AUDITED
+         * → MISSING
+         */
+        return true;
+      }
+    )
+    .map(
+      row=>({
+        ...row,
+        STATUS:"MISSING"
+      })
+    );
+
+
+/* =========================================================
+   COMBINE AUDITED + MISSING
+========================================================= */
+
+const auditExport =
+  [
+    ...auditedExport,
+    ...missingExport
+  ];
+
+
+/* =========================================================
+   CREATE AUDIT SHEET
+========================================================= */
+
+XLSX.utils.book_append_sheet(
+  wb,
+  XLSX.utils.json_to_sheet(
+    auditExport
+  ),
+  safeSheetName(
+    b + "_AUDIT"
+  )
+);
 
       completed++;
 

@@ -3235,9 +3235,18 @@ select:disabled{
   id="addUserBtn"
   class="controlBtn primary"
   onclick="openAddUserModal()"
-  style="display:none; display:flex; align-items:center; justify-content:center;"
+  style="display:none; align-items:center; justify-content:center;"
 >
   ＋ Add User
+</button>
+
+<button
+  id="forceLogoutBtn"
+  class="controlBtn"
+  onclick="openForceLogoutModal()"
+  style="display:none; align-items:center; justify-content:center; border-color:#fecaca; color:#b91c1c; background:#fff5f5;"
+>
+  ⛔ Force Logout
 </button>
 
       <input
@@ -3489,6 +3498,59 @@ select:disabled{
 </section>
 
 <!-- =========================================================
+     FORCE LOGOUT MODAL — ADMIN ONLY
+========================================================= -->
+
+<div
+  id="forceLogoutModal"
+  class="modalBackdrop hidden"
+>
+
+  <div class="modalCard" style="width:min(620px,94vw);">
+
+    <div class="modalTitle">
+      Active Logged-In Users
+    </div>
+
+    <div class="modalSub">
+      Select a user currently logged in to the inventory system and force that session to end.
+    </div>
+
+    <div
+      id="activeUsersList"
+      style="margin:18px 0; max-height:360px; overflow:auto;"
+    >
+      Loading active users...
+    </div>
+
+    <div
+      id="forceLogoutStatus"
+      style="min-height:22px; margin-bottom:12px; font-size:12px; color:#64748b;"
+    ></div>
+
+    <div class="modalActions">
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="loadActiveSessions()"
+      >
+        ↻ Refresh
+      </button>
+
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="closeForceLogoutModal()"
+      >
+        Close
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================================
      ADD ALLOWED USER MODAL
 ========================================================= -->
 
@@ -3594,7 +3656,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbzya_exDPmd5iRGSp-MqGh2eAdemg93_LHrZuFO6JRcTHjAbopyebEcNTbd5UhYDsTA/exec";
+  "https://script.google.com/macros/s/AKfycbx6PjVvPeGQEE7wht4aOMuzVjQBfwjFiHBHdYtI-aWj35mAwp5IDP1QWyhXGrRZPSA_/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -4339,10 +4401,224 @@ function showDashboard(){
       currentAdmin ? "inline-flex" : "none";
   }
 
+  const forceLogoutBtn =
+    document.getElementById("forceLogoutBtn");
+
+  if(forceLogoutBtn){
+    forceLogoutBtn.style.display =
+      currentAdmin ? "inline-flex" : "none";
+  }
+
   resetDashboardDisplay();
 
   startSessionMonitor();
 
+}
+
+/* =========================================================
+   FORCE LOGOUT — ADMIN ONLY
+========================================================= */
+
+function openForceLogoutModal(){
+
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  const modal =
+    document.getElementById("forceLogoutModal");
+
+  if(!modal){
+    return;
+  }
+
+  modal.classList.remove("hidden");
+
+  document.getElementById("forceLogoutStatus").textContent = "";
+
+  loadActiveSessions();
+}
+
+function closeForceLogoutModal(){
+
+  const modal =
+    document.getElementById("forceLogoutModal");
+
+  if(modal){
+    modal.classList.add("hidden");
+  }
+}
+
+async function loadActiveSessions(){
+
+  const list =
+    document.getElementById("activeUsersList");
+
+  const status =
+    document.getElementById("forceLogoutStatus");
+
+  if(!list){
+    return;
+  }
+
+  if(!currentAdmin || !sessionId){
+    list.innerHTML =
+      '<div style="padding:18px;text-align:center;color:#64748b;">Administrator session is not available.</div>';
+    return;
+  }
+
+  list.innerHTML =
+    '<div style="padding:18px;text-align:center;color:#64748b;">Loading active users...</div>';
+
+  if(status){
+    status.textContent = "";
+  }
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "getActiveSessions",
+        {
+          sessionId:sessionId
+        }
+      );
+
+    if(!data || data.ok !== true){
+      throw new Error(
+        data?.error || "Unable to load active users."
+      );
+    }
+
+    const users =
+      Array.isArray(data.users) ? data.users : [];
+
+    if(!users.length){
+      list.innerHTML =
+        '<div style="padding:22px;text-align:center;color:#64748b;">No other users are currently logged in.</div>';
+      return;
+    }
+
+    list.innerHTML = users.map(user=>{
+
+      const email =
+        escapeHtmlForceLogout(user.email || "Unknown user");
+
+      const branch =
+        escapeHtmlForceLogout(user.branch || "Branch not specified");
+
+      const sid =
+        escapeHtmlForceLogout(user.sessionId || "");
+
+      return `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 12px;margin-bottom:9px;border:1px solid #d7e5ef;border-radius:13px;background:#fff;box-shadow:0 3px 10px rgba(15,23,42,.04);">
+          <div style="min-width:0;">
+            <div style="font-weight:800;color:#102033;word-break:break-word;">🟢 ${email}</div>
+            <div style="margin-top:4px;font-size:11px;color:#64748b;">Branch: ${branch}</div>
+          </div>
+          <button
+            type="button"
+            class="controlBtn"
+            style="flex:0 0 auto;border-color:#fecaca;color:#b91c1c;background:#fff5f5;"
+            onclick="forceLogoutSelected('${sid}')"
+          >
+            Force Logout
+          </button>
+        </div>
+      `;
+    }).join("");
+
+  }catch(error){
+
+    console.error(
+      "Unable to load active users:",
+      error
+    );
+
+    list.innerHTML =
+      '<div style="padding:18px;text-align:center;color:#b91c1c;">Unable to load active users.</div>';
+
+    if(status){
+      status.textContent =
+        error?.message || "Unable to load active users.";
+    }
+  }
+}
+
+async function forceLogoutSelected(targetSessionId){
+
+  if(!currentAdmin || !sessionId){
+    return;
+  }
+
+  if(!targetSessionId){
+    return;
+  }
+
+  const confirmed =
+    window.confirm(
+      "Force logout this user from the inventory system?"
+    );
+
+  if(!confirmed){
+    return;
+  }
+
+  const status =
+    document.getElementById("forceLogoutStatus");
+
+  if(status){
+    status.textContent = "Forcing logout...";
+  }
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "forceLogoutUser",
+        {
+          sessionId:sessionId,
+          targetSessionId:targetSessionId
+        }
+      );
+
+    if(!data || data.ok !== true){
+      throw new Error(
+        data?.error || "Unable to force logout user."
+      );
+    }
+
+    if(status){
+      status.textContent =
+        (data.email || "User") +
+        " has been forced to logout.";
+    }
+
+    await loadActiveSessions();
+
+  }catch(error){
+
+    console.error(
+      "Force logout failed:",
+      error
+    );
+
+    if(status){
+      status.textContent =
+        error?.message || "Unable to force logout user.";
+    }
+  }
+}
+
+function escapeHtmlForceLogout(value){
+
+  return String(value || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
 /* =========================================================

@@ -13,77 +13,61 @@
 
 
 <style>
-
 /* =========================================================
-   ACEBEDO OPTICAL
-   PREMIUM SKY / GLASS DASHBOARD
-   CSS REPLACEMENT ONLY
-   NO HTML / JS CHANGES REQUIRED
+   ACEBEDO OPTICAL — DARK BACKGROUND / WHITE SURFACE UI
+   CSS ONLY — NO HTML / JS CHANGES
 ========================================================= */
 
 :root{
+  /* ===== DARK WORKSPACE ===== */
+  --bg:#172131;
+  --bg-2:#1d2939;
+  --bg-3:#202e40;
 
-  /* ===== MAIN COLORS ===== */
-
-  --sky:#38bdf8;
-  --sky-dark:#0284c7;
-  --blue:#2563eb;
-  --indigo:#4f46e5;
-  --violet:#7c3aed;
-
-  --bg:#eaf7ff;
-  --bg-2:#dff3ff;
-
+  /* ===== WHITE SURFACES ===== */
   --surface:#ffffff;
-  --surface-soft:#f8fbff;
-  --surface-blue:#f0f8ff;
+  --surface-soft:#f8fafc;
+  --surface-blue:#f4f7ff;
 
-  --text:#102033;
-  --text-2:#243447;
-  --muted:#64748b;
-  --muted-2:#94a3b8;
+  /* ===== DARK TEXT ===== */
+  --text:#111827;
+  --text-2:#1f2937;
+  --muted:#475569;
+  --muted-2:#64748b;
 
-  --line:#d7e5ef;
-  --line-soft:#e8f0f6;
+  /* ===== BORDERS ===== */
+  --line:#d9e0e8;
+  --line-soft:#e8edf2;
 
-  --success:#16a34a;
+  /* ===== BLUE ===== */
+  --primary:#2563eb;
+  --primary-dark:#1d4ed8;
+  --primary-light:#eff6ff;
+
+  --indigo:#4f46e5;
+  --purple:#7c3aed;
+
+  /* ===== STATUS ===== */
+  --success:#15803d;
   --success-bg:#ecfdf3;
 
   --danger:#dc2626;
-  --danger-bg:#fff1f2;
+  --danger-bg:#fef2f2;
 
-  --warning:#d97706;
+  --warning:#b45309;
   --warning-bg:#fff7ed;
 
-  /* ===== RADIUS ===== */
-
-  --radius-xs:8px;
-  --radius-sm:11px;
-  --radius:15px;
-  --radius-lg:19px;
-  --radius-xl:25px;
-
   /* ===== SHADOWS ===== */
+  --shadow-xs:0 1px 3px rgba(15,23,42,.06);
+  --shadow-sm:0 4px 14px rgba(15,23,42,.08);
+  --shadow:0 10px 30px rgba(15,23,42,.12);
+  --shadow-lg:0 24px 70px rgba(0,0,0,.22);
 
-  --shadow-xs:
-    0 2px 7px rgba(15,23,42,.05);
-
-  --shadow-sm:
-    0 6px 18px rgba(15,23,42,.07);
-
-  --shadow:
-    0 12px 32px rgba(15,23,42,.10);
-
-  --shadow-lg:
-    0 25px 70px rgba(15,23,42,.18);
-
-  /* ===== TRANSITIONS ===== */
-
-  --ease:
-    cubic-bezier(.2,.8,.2,1);
-
+  --radius-sm:10px;
+  --radius:14px;
+  --radius-lg:18px;
+  --radius-xl:22px;
 }
-
 
 /* =========================================================
    GLOBAL
@@ -99,7 +83,6 @@ html{
 }
 
 body{
-
   margin:0;
   min-height:100vh;
 
@@ -115,41 +98,26 @@ body{
   color:var(--text);
 
   background:
-
     radial-gradient(
-      circle at 5% 0%,
-      rgba(56,189,248,.30),
-      transparent 25%
+      circle at 0% 0%,
+      rgba(37,99,235,.13),
+      transparent 28%
     ),
-
     radial-gradient(
-      circle at 95% 5%,
-      rgba(99,102,241,.16),
-      transparent 27%
+      circle at 100% 0%,
+      rgba(79,70,229,.10),
+      transparent 28%
     ),
-
-    radial-gradient(
-      circle at 50% 100%,
-      rgba(14,165,233,.12),
-      transparent 30%
-    ),
-
     linear-gradient(
       135deg,
-      #e8f7ff 0%,
-      #f7fcff 48%,
-      #eaf6ff 100%
+      #172131 0%,
+      #1b2737 48%,
+      #202d3e 100%
     );
 
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
-
 }
-
-
-/* =========================================================
-   FORM ELEMENTS
-========================================================= */
 
 button,
 input,
@@ -162,8 +130,8 @@ button{
 }
 
 ::selection{
-  background:rgba(37,99,235,.18);
-  color:#0f172a;
+  background:rgba(37,99,235,.20);
+  color:#111827;
 }
 
 ::-webkit-scrollbar{
@@ -172,34 +140,24 @@ button{
 }
 
 ::-webkit-scrollbar-track{
-  background:#e7f1f7;
+  background:#dfe5ec;
 }
 
 ::-webkit-scrollbar-thumb{
-
-  background:
-    linear-gradient(
-      180deg,
-      #9ccce5,
-      #72afd1
-    );
-
-  border:2px solid #e7f1f7;
+  background:#aeb9c7;
   border-radius:999px;
-
+  border:2px solid #dfe5ec;
 }
 
 ::-webkit-scrollbar-thumb:hover{
-  background:#4ea1ce;
+  background:#8997a9;
 }
-
 
 /* =========================================================
    LOGIN
 ========================================================= */
 
 #loginScreen{
-
   min-height:100vh;
 
   display:none;
@@ -212,32 +170,24 @@ button{
   overflow:hidden;
 
   background:
-
     radial-gradient(
-      circle at 15% 15%,
-      rgba(255,255,255,.75),
-      transparent 30%
+      circle at 20% 20%,
+      rgba(37,99,235,.18),
+      transparent 32%
     ),
-
     radial-gradient(
-      circle at 85% 80%,
-      rgba(56,189,248,.24),
+      circle at 80% 80%,
+      rgba(124,58,237,.14),
       transparent 34%
     ),
-
     linear-gradient(
       135deg,
-      #8ed8f7,
-      #e9f9ff
+      #172131,
+      #202d3e
     );
-
 }
 
-
-/* decorative circles */
-
 #loginScreen::before{
-
   content:"";
 
   position:absolute;
@@ -245,33 +195,8 @@ button{
   width:520px;
   height:520px;
 
-  top:-290px;
+  top:-270px;
   left:-180px;
-
-  border-radius:50%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(255,255,255,.55),
-      transparent 68%
-    );
-
-  pointer-events:none;
-
-}
-
-#loginScreen::after{
-
-  content:"";
-
-  position:absolute;
-
-  width:600px;
-  height:600px;
-
-  right:-300px;
-  bottom:-350px;
 
   border-radius:50%;
 
@@ -283,294 +208,194 @@ button{
     );
 
   pointer-events:none;
-
 }
 
+#loginScreen::after{
+  content:"";
 
-/* =========================================================
-   LOGIN CARD
-========================================================= */
+  position:absolute;
+
+  width:600px;
+  height:600px;
+
+  right:-300px;
+  bottom:-330px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(124,58,237,.14),
+      transparent 68%
+    );
+
+  pointer-events:none;
+}
 
 .loginCard{
-
   width:min(440px,100%);
 
   position:relative;
   z-index:1;
 
-  padding:40px;
+  padding:42px;
 
-  border-radius:28px;
+  border-radius:26px;
 
-  background:
-    rgba(255,255,255,.92);
+  background:#ffffff;
 
-  border:
-    1px solid rgba(255,255,255,.95);
+  border:1px solid rgba(255,255,255,.95);
 
   box-shadow:
+    0 35px 90px rgba(0,0,0,.28),
+    0 10px 30px rgba(0,0,0,.14);
 
-    0 35px 90px rgba(14,116,144,.20),
-
-    0 10px 30px rgba(15,23,42,.08),
-
-    inset 0 1px 0 rgba(255,255,255,.95);
-
-  backdrop-filter:
-    blur(22px);
-
-  animation:
-    cardEnter .45s var(--ease);
-
+  backdrop-filter:blur(20px);
 }
-
-@keyframes cardEnter{
-
-  from{
-    opacity:0;
-    transform:
-      translateY(14px)
-      scale(.98);
-  }
-
-  to{
-    opacity:1;
-    transform:
-      translateY(0)
-      scale(1);
-  }
-
-}
-
-
-/* =========================================================
-   LOGIN LOGO
-========================================================= */
 
 .logo{
-
-  width:68px;
-  height:68px;
+  width:64px;
+  height:64px;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  margin-bottom:20px;
+  border-radius:19px;
 
-  border-radius:20px;
+  color:#fff;
 
-  overflow:hidden;
-
-  background:#ffffff;
-
-  border:
-    1px solid #dcecf5;
-
-  box-shadow:
-
-    0 12px 28px rgba(14,165,233,.18),
-
-    inset 0 1px 0 #fff;
-
-}
-
-.logo img{
-
-  width:100%;
-  height:100%;
-
-  display:block;
-
-  object-fit:contain;
-
-  border-radius:inherit;
-
-}
-
-
-/* =========================================================
-   LOGIN TEXT
-========================================================= */
-
-.loginTitle{
-
-  margin:0 0 6px;
-
-  color:#102033;
-
-  font-size:28px;
-
-  line-height:1.15;
-
+  font-size:27px;
   font-weight:900;
-
-  letter-spacing:-1px;
-
-}
-
-.loginSub{
-
-  margin:0 0 28px;
-
-  color:#64748b;
-
-  font-size:13px;
-
-  line-height:1.55;
-
-}
-
-
-/* =========================================================
-   FIELDS
-========================================================= */
-
-.field{
-  margin-bottom:16px;
-}
-
-.field label{
-
-  display:block;
-
-  margin-bottom:8px;
-
-  color:#334155;
-
-  font-size:10px;
-
-  font-weight:900;
-
-  letter-spacing:.09em;
-
-}
-
-
-/* =========================================================
-   INPUT
-========================================================= */
-
-.input{
-
-  width:100%;
-
-  min-height:46px;
-
-  padding:12px 14px;
-
-  border:
-    1px solid #cbdde9;
-
-  border-radius:13px;
-
-  outline:none;
 
   background:
     linear-gradient(
-      180deg,
-      #ffffff,
-      #f7fbfe
+      135deg,
+      #2563eb,
+      #4f46e5 55%,
+      #7c3aed
     );
 
-  color:#102033;
+  box-shadow:
+    0 15px 32px rgba(37,99,235,.28),
+    inset 0 1px 0 rgba(255,255,255,.3);
+
+  margin-bottom:22px;
+}
+
+.loginTitle{
+  margin:0 0 6px;
+
+  font-size:28px;
+  line-height:1.15;
+
+  font-weight:850;
+  letter-spacing:-1px;
+
+  color:#111827;
+}
+
+.loginSub{
+  margin:0 0 28px;
+
+  color:#475569;
+
+  font-size:13px;
+  line-height:1.55;
+}
+
+.field{
+  margin-bottom:15px;
+}
+
+.field label{
+  display:block;
+
+  margin-bottom:7px;
+
+  color:#1f2937;
+
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.08em;
+}
+
+.input{
+  width:100%;
+
+  padding:13px 14px;
+
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+
+  outline:none;
+
+  background:#f8fafc;
+
+  color:#111827;
 
   font-size:14px;
 
-  box-shadow:
-    0 2px 7px rgba(15,23,42,.03);
-
   transition:
-
-    border-color .18s var(--ease),
-    box-shadow .18s var(--ease),
-    transform .18s var(--ease),
-    background .18s var(--ease);
-
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
 }
 
 .input:hover{
-
-  border-color:#9fc6db;
-
+  border-color:#94a3b8;
 }
 
 .input:focus{
+  background:#fff;
 
-  background:#ffffff;
-
-  border-color:#38aee2;
+  border-color:#2563eb;
 
   box-shadow:
-
-    0 0 0 4px rgba(56,189,248,.12),
-
-    0 8px 22px rgba(14,165,233,.07);
-
+    0 0 0 4px rgba(37,99,235,.09),
+    0 5px 18px rgba(37,99,235,.05);
 }
 
-
-/* =========================================================
-   PRIMARY LOGIN BUTTON
-========================================================= */
-
 .primaryBtn{
-
   width:100%;
 
-  min-height:46px;
-
-  padding:12px 18px;
+  padding:13px 18px;
 
   border:0;
-
-  border-radius:13px;
+  border-radius:12px;
 
   cursor:pointer;
 
   color:#fff;
 
   font-size:13px;
-
-  font-weight:850;
-
-  letter-spacing:.01em;
+  font-weight:800;
 
   background:
-
     linear-gradient(
       135deg,
-      #0284c7,
-      #2563eb 55%,
+      #2563eb,
       #4f46e5
     );
 
   box-shadow:
-
-    0 10px 24px rgba(37,99,235,.24),
-
-    inset 0 1px 0 rgba(255,255,255,.25);
+    0 10px 24px rgba(37,99,235,.25),
+    inset 0 1px 0 rgba(255,255,255,.2);
 
   transition:
-
-    transform .18s var(--ease),
-    box-shadow .18s var(--ease),
-    filter .18s var(--ease);
-
+    transform .16s ease,
+    box-shadow .16s ease,
+    filter .16s ease;
 }
 
 .primaryBtn:hover{
-
-  transform:translateY(-2px);
+  transform:translateY(-1px);
 
   filter:brightness(1.04);
 
   box-shadow:
-
-    0 15px 32px rgba(37,99,235,.29),
-
-    inset 0 1px 0 rgba(255,255,255,.25);
-
+    0 14px 30px rgba(37,99,235,.30);
 }
 
 .primaryBtn:active{
@@ -578,715 +403,367 @@ button{
 }
 
 .primaryBtn:disabled{
-
-  opacity:.5;
-
+  opacity:.55;
   cursor:not-allowed;
-
   transform:none;
-
 }
 
-
-/* =========================================================
-   LOGIN STATUS
-========================================================= */
-
 .loginStatus{
-
   min-height:20px;
 
   margin-top:14px;
 
-  color:#64748b;
+  color:#475569;
 
   font-size:11px;
-
   line-height:1.5;
-
 }
-
 
 /* =========================================================
    DASHBOARD
 ========================================================= */
 
 #dashboard{
-
   display:none;
-
   min-height:100vh;
-
 }
 
 .app{
-
   width:100%;
-
-  max-width:1750px;
+  max-width:1700px;
 
   margin:0 auto;
 
-  padding:24px 28px 38px;
-
+  padding:24px 28px 35px;
 }
 
-
 /* =========================================================
-   TOP BAR
+   TOPBAR
 ========================================================= */
 
 .topbar{
-
   display:flex;
-
   align-items:center;
-
   justify-content:space-between;
 
   gap:20px;
 
   margin-bottom:20px;
 
-  padding:3px 1px;
-
+  padding:2px 1px;
 }
 
 .brand{
-
   display:flex;
-
   align-items:center;
-
   gap:13px;
-
 }
 
-
-/* =========================================================
-   BRAND LOGO
-========================================================= */
-
 .brandLogo{
-
-  width:49px;
-  height:49px;
+  width:47px;
+  height:47px;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  border-radius:15px;
+  border-radius:14px;
 
-  overflow:hidden;
-
-  background:#fff;
-
-  border:
-    1px solid rgba(255,255,255,.9);
-
-  box-shadow:
-
-    0 10px 26px rgba(14,165,233,.18),
-
-    0 2px 5px rgba(15,23,42,.06);
-
-}
-
-.brandLogo img{
-
-  width:100%;
-  height:100%;
-
-  display:block;
-
-  object-fit:contain;
-
-  border-radius:inherit;
-
-}
-
-
-.brandTitle{
-
-  color:#102033;
+  color:#fff;
 
   font-size:20px;
-
-  line-height:1.1;
-
   font-weight:900;
 
-  letter-spacing:-.6px;
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #4f46e5 55%,
+      #7c3aed
+    );
 
+  box-shadow:
+    0 9px 24px rgba(37,99,235,.28),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+.brandTitle{
+  color:#ffffff;
+
+  font-size:20px;
+  line-height:1.1;
+
+  font-weight:850;
+
+  letter-spacing:-.55px;
 }
 
 .brandSub{
-
   margin-top:4px;
 
-  color:#527084;
+  color:#cbd5e1;
 
   font-size:10px;
-
-  font-weight:600;
-
+  font-weight:500;
 }
 
-
-/* =========================================================
-   USER AREA
-========================================================= */
-
 .userArea{
-
   display:flex;
-
   align-items:center;
-
   gap:8px;
-
 }
 
 .userEmail{
-
   max-width:270px;
 
   overflow:hidden;
-
   text-overflow:ellipsis;
-
   white-space:nowrap;
 
-  padding:9px 12px;
+  padding:8px 11px;
 
-  border:
-    1px solid rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:10px;
 
-  border-radius:12px;
+  background:rgba(255,255,255,.08);
 
-  background:
-    rgba(255,255,255,.72);
-
-  color:#243447;
+  color:#e2e8f0;
 
   font-size:11px;
-
-  box-shadow:
-    0 4px 13px rgba(15,23,42,.04);
-
-  backdrop-filter:blur(10px);
-
 }
 
-
-/* =========================================================
-   ICON BUTTONS
-========================================================= */
-
 .iconBtn{
-
-  width:40px;
-  height:40px;
+  width:39px;
+  height:39px;
 
   display:flex;
   align-items:center;
   justify-content:center;
 
-  border:
-    1px solid rgba(255,255,255,.9);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:11px;
 
-  border-radius:12px;
+  background:rgba(255,255,255,.09);
 
-  background:
-    rgba(255,255,255,.75);
-
-  color:#1e3a4c;
+  color:#e2e8f0;
 
   cursor:pointer;
 
-  font-size:18px;
+  font-size:17px;
 
   box-shadow:
-    0 5px 14px rgba(15,23,42,.07);
+    0 4px 12px rgba(0,0,0,.10);
 
   transition:
-
-    transform .18s var(--ease),
-    border-color .18s ease,
-    background .18s ease,
-    box-shadow .18s ease;
-
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
 }
 
 .iconBtn:hover{
+  transform:translateY(-1px);
 
-  transform:translateY(-2px);
+  border-color:rgba(255,255,255,.20);
 
-  background:#ffffff;
-
-  border-color:#b7d9ea;
+  background:rgba(255,255,255,.14);
 
   box-shadow:
-    0 9px 20px rgba(15,23,42,.11);
-
+    0 7px 18px rgba(0,0,0,.16);
 }
 
 .iconBtn:active{
   transform:translateY(0);
 }
 
-
 /* =========================================================
-   CONTROL BAR
+   CONTROLS
 ========================================================= */
 
 .controls{
-
   display:grid;
 
   grid-template-columns:
+    160px
     175px
-    190px
     minmax(280px,1fr)
-    82px
+    80px
+    88px
     90px
-    94px
-    94px;
+    90px;
 
-  gap:9px;
+  gap:8px;
 
-  padding:12px;
+  padding:11px;
 
-  margin-bottom:17px;
+  margin-bottom:16px;
 
-  border:
-    1px solid rgba(201,222,235,.95);
-
-  border-radius:19px;
-
-  background:
-    rgba(255,255,255,.82);
-
-  box-shadow:
-
-    0 12px 30px rgba(15,23,42,.08),
-
-    inset 0 1px 0 rgba(255,255,255,.95);
-
-  backdrop-filter:
-    blur(18px);
-
-}
-
-
-/* =========================================================
-   PREMIUM DROPDOWNS
-========================================================= */
-
-.select{
-
-  width:100%;
-
-  min-height:43px;
-
-  padding:
-    0 40px 0 14px;
-
-  border:
-    1px solid #c9dce8;
-
-  border-radius:13px;
-
-  outline:none;
-
-  appearance:none;
-
-  -webkit-appearance:none;
-
-  cursor:pointer;
-
-  color:#173247;
-
-  font-size:12px;
-
-  font-weight:750;
-
-  letter-spacing:.01em;
-
-  background-color:#ffffff;
-
-  background-image:
-
-    linear-gradient(
-      45deg,
-      transparent 50%,
-      #2b789d 50%
-    ),
-
-    linear-gradient(
-      135deg,
-      #2b789d 50%,
-      transparent 50%
-    ),
-
-    linear-gradient(
-      180deg,
-      #ffffff,
-      #f4faff
-    );
-
-  background-position:
-
-    calc(100% - 19px) 18px,
-    calc(100% - 14px) 18px,
-    0 0;
-
-  background-size:
-    5px 5px,
-    5px 5px,
-    100% 100%;
-
-  background-repeat:
-    no-repeat,
-    no-repeat,
-    no-repeat;
-
-  box-shadow:
-
-    0 3px 9px rgba(15,23,42,.04),
-
-    inset 0 1px 0 rgba(255,255,255,.9);
-
-  transition:
-
-    border-color .18s var(--ease),
-    box-shadow .18s var(--ease),
-    transform .18s var(--ease),
-    background-color .18s ease;
-
-}
-
-.select:hover{
-
-  border-color:#8dbbd2;
-
-  transform:translateY(-1px);
-
-  box-shadow:
-    0 6px 15px rgba(14,165,233,.08);
-
-}
-
-.select:focus{
-
-  border-color:#38aee2;
-
-  box-shadow:
-
-    0 0 0 4px rgba(56,189,248,.11),
-
-    0 8px 18px rgba(14,165,233,.08);
-
-}
-
-.select option{
-
-  color:#173247;
+  border:1px solid #d4dce5;
+  border-radius:16px;
 
   background:#ffffff;
 
-  font-weight:650;
-
+  box-shadow:
+    0 9px 26px rgba(0,0,0,.12),
+    inset 0 1px 0 rgba(255,255,255,.9);
 }
 
+.select,
+.searchInput{
+  width:100%;
 
-/* Make the important branch selector stand out */
+  min-height:40px;
 
-#branch{
+  padding:10px 12px;
 
-  border-color:#a9d6eb;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
 
-  background-color:#fafdff;
+  outline:none;
 
-  font-weight:850;
+  background:#f8fafc;
 
+  color:#111827;
+
+  font-size:12px;
+
+  transition:
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
 }
 
-#branch:focus{
+.select:hover,
+.searchInput:hover{
+  border-color:#94a3b8;
+}
 
-  border-color:#0284c7;
+.select:focus,
+.searchInput:focus{
+  background:#ffffff;
+
+  border-color:#2563eb;
 
   box-shadow:
-
-    0 0 0 4px rgba(2,132,199,.11),
-
-    0 8px 20px rgba(2,132,199,.08);
-
+    0 0 0 3px rgba(37,99,235,.08);
 }
-
-
-/* Report selector */
-
-#sheet{
-
-  border-color:#c7d7f4;
-
-}
-
-
-/* Modal dropdowns */
-
-.modalCard .select{
-
-  min-height:45px;
-
-  background-color:#fafdff;
-
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
 
 .searchWrap{
-
   position:relative;
-
 }
 
 .searchIcon{
-
   position:absolute;
 
-  left:13px;
-
+  left:12px;
   top:50%;
 
   transform:translateY(-50%);
 
-  color:#5c8aa3;
+  color:#64748b;
 
-  font-size:18px;
+  font-size:17px;
 
   pointer-events:none;
-
-  transition:
-    color .18s ease;
-
-}
-
-.searchWrap:focus-within .searchIcon{
-
-  color:#0284c7;
-
 }
 
 .searchInput{
-
-  width:100%;
-
-  min-height:43px;
-
-  padding:
-    0 14px 0 38px;
-
-  border:
-    1px solid #c9dce8;
-
-  border-radius:13px;
-
-  outline:none;
-
-  background:
-    linear-gradient(
-      180deg,
-      #ffffff,
-      #f6fbfe
-    );
-
-  color:#173247;
-
-  font-size:12px;
-
-  box-shadow:
-    0 3px 9px rgba(15,23,42,.03);
-
-  transition:
-
-    border-color .18s var(--ease),
-    box-shadow .18s var(--ease),
-    background .18s ease;
-
+  padding-left:36px;
 }
-
-.searchInput::placeholder{
-
-  color:#8aa0af;
-
-}
-
-.searchInput:hover{
-
-  border-color:#8dbbd2;
-
-}
-
-.searchInput:focus{
-
-  background:#ffffff;
-
-  border-color:#38aee2;
-
-  box-shadow:
-
-    0 0 0 4px rgba(56,189,248,.10),
-
-    0 8px 20px rgba(14,165,233,.06);
-
-}
-
-
-/* =========================================================
-   GENERAL CONTROL BUTTON
-========================================================= */
 
 .controlBtn{
-
-  min-height:43px;
+  min-height:40px;
 
   padding:0 13px;
 
-  border:
-    1px solid #c9dce8;
-
-  border-radius:12px;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
 
   background:
     linear-gradient(
       180deg,
       #ffffff,
-      #f5f9fc
+      #f8fafc
     );
 
-  color:#243b4d;
+  color:#111827;
 
   cursor:pointer;
 
   font-size:11px;
-
-  font-weight:850;
+  font-weight:800;
 
   white-space:nowrap;
 
-  box-shadow:
-    0 3px 8px rgba(15,23,42,.04);
+  box-shadow:var(--shadow-xs);
 
   transition:
-
-    transform .17s var(--ease),
-    background .17s ease,
-    border-color .17s ease,
-    box-shadow .17s ease;
-
+    transform .15s ease,
+    background .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease;
 }
 
 .controlBtn:hover{
+  transform:translateY(-1px);
 
-  transform:translateY(-2px);
-
-  border-color:#8fbcd2;
+  border-color:#94a3b8;
 
   background:#ffffff;
 
   box-shadow:
-    0 7px 17px rgba(15,23,42,.09);
-
+    0 5px 13px rgba(15,23,42,.08);
 }
 
 .controlBtn:active{
-
   transform:translateY(0);
-
 }
 
 .controlBtn.primary{
-
-  color:#ffffff;
+  color:#fff;
 
   border-color:transparent;
 
   background:
-
     linear-gradient(
       135deg,
-      #0284c7,
-      #2563eb 55%,
+      #2563eb,
       #4f46e5
     );
 
   box-shadow:
-    0 7px 17px rgba(37,99,235,.22);
-
+    0 7px 17px rgba(37,99,235,.23);
 }
 
 .controlBtn.primary:hover{
-
   background:
-
     linear-gradient(
       135deg,
-      #0369a1,
-      #1d4ed8 55%,
+      #1d4ed8,
       #4338ca
     );
 
   box-shadow:
-    0 11px 24px rgba(37,99,235,.28);
-
+    0 10px 21px rgba(37,99,235,.28);
 }
 
 .controlBtn.danger{
-
   color:#b91c1c;
-
-  border-color:#fecaca;
-
-  background:#fffafa;
-
-}
-
-.controlBtn.danger:hover{
-
-  color:#ffffff;
-
-  border-color:#dc2626;
-
-  background:#dc2626;
-
-  box-shadow:
-    0 8px 18px rgba(220,38,38,.20);
-
 }
 
 .controlBtn:disabled{
-
-  opacity:.45;
+  opacity:.5;
 
   cursor:not-allowed;
 
   transform:none;
-
 }
 
-
 /* =========================================================
-   LOADING LINE
+   LOADING
 ========================================================= */
 
 .loadingLine{
-
   width:100%;
   height:3px;
 
@@ -1296,28 +773,24 @@ button{
   border-radius:999px;
 
   background:
-
     linear-gradient(
       90deg,
       transparent,
-      #38bdf8,
       #2563eb,
       #6366f1,
+      #7c3aed,
       transparent
     );
 
   background-size:200% 100%;
 
-  animation:
-    loading 1.15s linear infinite;
+  animation:loading 1.15s linear infinite;
 
   box-shadow:
     0 0 14px rgba(37,99,235,.25);
-
 }
 
 @keyframes loading{
-
   from{
     background-position:200% 0;
   }
@@ -1325,61 +798,48 @@ button{
   to{
     background-position:-200% 0;
   }
-
 }
-
 
 /* =========================================================
    STAT CARDS
 ========================================================= */
 
 .cards{
-
   display:grid;
 
   grid-template-columns:
     repeat(4,minmax(0,1fr));
 
-  gap:13px;
+  gap:12px;
 
-  margin-bottom:17px;
-
+  margin-bottom:16px;
 }
 
 .statCard{
-
   position:relative;
 
-  min-height:118px;
+  min-height:115px;
 
   overflow:hidden;
 
-  padding:18px;
+  padding:17px 18px;
 
-  border:
-    1px solid #d3e2eb;
+  border:1px solid #d5dde6;
+  border-radius:16px;
 
-  border-radius:18px;
-
-  background:
-    rgba(255,255,255,.92);
+  background:#ffffff;
 
   box-shadow:
-
-    0 9px 25px rgba(15,23,42,.07),
-
+    0 8px 24px rgba(0,0,0,.10),
     inset 0 1px 0 rgba(255,255,255,.95);
 
   transition:
-
-    transform .20s var(--ease),
-    box-shadow .20s ease,
-    border-color .20s ease;
-
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
 }
 
 .statCard::before{
-
   content:"";
 
   position:absolute;
@@ -1391,284 +851,213 @@ button{
   height:3px;
 
   background:
-
     linear-gradient(
       90deg,
-      #38bdf8,
       #2563eb,
-      #6366f1
+      #6366f1,
+      #7c3aed
     );
 
+  opacity:.85;
 }
 
 .statCard::after{
-
   content:"";
 
   position:absolute;
 
-  width:150px;
-  height:150px;
+  width:130px;
+  height:130px;
 
-  right:-70px;
-  bottom:-80px;
+  right:-65px;
+  bottom:-70px;
 
   border-radius:50%;
 
   background:
     radial-gradient(
       circle,
-      rgba(56,189,248,.09),
+      rgba(37,99,235,.055),
       transparent 70%
     );
 
   pointer-events:none;
-
 }
 
 .statCard:hover{
+  transform:translateY(-2px);
 
-  transform:translateY(-3px);
-
-  border-color:#b8d8e8;
+  border-color:#c5d0dc;
 
   box-shadow:
-    0 15px 34px rgba(15,23,42,.11);
-
+    0 13px 31px rgba(0,0,0,.14);
 }
 
 .statTop{
-
   display:flex;
-
   align-items:center;
-
   justify-content:space-between;
 
   position:relative;
-
   z-index:1;
-
 }
 
 .statLabel{
-
-  color:#35566a;
+  color:#111827;
 
   font-size:10px;
+  font-weight:850;
 
-  font-weight:900;
-
-  letter-spacing:.08em;
-
+  letter-spacing:.07em;
 }
 
 .statIcon{
-
-  width:34px;
-  height:34px;
+  width:32px;
+  height:32px;
 
   display:flex;
-
   align-items:center;
   justify-content:center;
 
-  border:
-    1px solid #cbe5f3;
-
-  border-radius:11px;
+  border:1px solid #d6e0f0;
+  border-radius:10px;
 
   background:
-
     linear-gradient(
       135deg,
-      #eaf8ff,
-      #eef4ff
+      #eff6ff,
+      #eef2ff
     );
 
-  color:#0284c7;
+  color:#2563eb;
 
   font-size:14px;
-
   font-weight:900;
-
 }
 
 .statNumber{
-
   position:relative;
-
   z-index:1;
 
-  margin-top:9px;
+  margin-top:8px;
 
-  color:#102033;
+  color:#111827;
 
-  font-size:27px;
-
+  font-size:26px;
   line-height:1;
 
-  font-weight:900;
+  font-weight:850;
 
-  letter-spacing:-.8px;
-
+  letter-spacing:-.7px;
 }
 
 .statHint{
-
   position:relative;
-
   z-index:1;
 
-  margin-top:7px;
+  margin-top:6px;
 
-  color:#7890a0;
+  color:#475569;
 
   font-size:9px;
-
 }
-
 
 /* =========================================================
    TABLE CARD
 ========================================================= */
 
 .tableCard{
-
   overflow:hidden;
 
-  border:
-    1px solid #d2e1ea;
-
-  border-radius:20px;
+  border:1px solid #d3dce6;
+  border-radius:18px;
 
   background:#ffffff;
 
   box-shadow:
-
-    0 13px 36px rgba(15,23,42,.09),
-
+    0 12px 34px rgba(0,0,0,.12),
     inset 0 1px 0 rgba(255,255,255,.95);
-
 }
 
 .tableHeader{
-
-  min-height:72px;
+  min-height:70px;
 
   display:flex;
-
   align-items:center;
-
   justify-content:space-between;
 
   gap:15px;
 
-  padding:15px 20px;
+  padding:15px 19px;
 
-  border-bottom:
-    1px solid #dce9f0;
+  border-bottom:1px solid #dce3eb;
 
   background:
-
     linear-gradient(
       180deg,
       #ffffff,
-      #f7fbfd
+      #f8fafc
     );
-
 }
 
 .tableTitle{
-
-  color:#102033;
+  color:#111827;
 
   font-size:14px;
-
-  font-weight:900;
+  font-weight:850;
 
   letter-spacing:-.2px;
-
 }
 
 .tableSub{
-
   margin-top:4px;
 
-  color:#718897;
+  color:#475569;
 
   font-size:10px;
-
 }
 
 .tableActions{
-
   display:flex;
-
   gap:7px;
-
 }
 
 .tableScroll{
-
   width:100%;
 
   overflow:auto;
-
-  -webkit-overflow-scrolling:touch;
-
 }
 
-
-/* =========================================================
-   TABLE
-========================================================= */
-
 table{
-
   width:100%;
 
   min-width:950px;
 
   border-collapse:separate;
-
   border-spacing:0;
-
 }
 
 thead th{
-
   position:sticky;
-
   top:0;
-
   z-index:5;
 
-  padding:12px 14px;
+  padding:11px 14px;
 
   text-align:left;
 
-  color:#315267;
+  color:#111827;
 
-  background:
+  background:#eef2f6;
 
-    linear-gradient(
-      180deg,
-      #f0f8fc,
-      #e8f2f7
-    );
-
-  border-bottom:
-    1px solid #cfdfe8;
+  border-bottom:1px solid #d6dee7;
 
   font-size:9px;
+  font-weight:850;
 
-  font-weight:900;
-
-  letter-spacing:.08em;
+  letter-spacing:.07em;
 
   white-space:nowrap;
-
 }
 
 thead th:first-child{
@@ -1676,22 +1065,19 @@ thead th:first-child{
 }
 
 tbody td{
+  padding:11px 14px;
 
-  padding:12px 14px;
-
-  color:#203443;
+  color:#111827;
 
   background:#ffffff;
 
-  border-bottom:
-    1px solid #e7eef3;
+  border-bottom:1px solid #e8edf2;
 
   font-size:11px;
 
   white-space:nowrap;
 
   vertical-align:middle;
-
 }
 
 tbody td:first-child{
@@ -1699,24 +1085,21 @@ tbody td:first-child{
 }
 
 tbody tr{
-
   transition:
-    background .15s ease;
+    background .13s ease;
+}
 
+tbody tr:hover{
+  background:#f5f8fc;
 }
 
 tbody tr:hover td{
-
-  background:#f3faff;
-
-  border-bottom-color:#d7e8f1;
-
+  background:#f5f8fc;
 }
 
 tbody tr:last-child td{
   border-bottom:0;
 }
-
 
 /* =========================================================
    TAGS
@@ -1725,104 +1108,82 @@ tbody tr:last-child td{
 .tag,
 .branchTag,
 .typeTag{
-
   display:inline-flex;
-
   align-items:center;
 
-  min-height:25px;
+  min-height:24px;
 
-  padding:4px 9px;
+  padding:4px 8px;
 
-  border-radius:8px;
+  border-radius:7px;
 
   font-size:9px;
-
-  font-weight:900;
+  font-weight:850;
 
   letter-spacing:.01em;
-
 }
 
 .tag{
+  color:#1f2937;
 
-  color:#334155;
+  background:#eef2f6;
 
-  background:#f1f5f9;
-
-  border:
-    1px solid #dce5ec;
-
+  border:1px solid #d9e0e8;
 }
 
 .branchTag{
+  color:#3730a3;
 
-  color:#1d4ed8;
+  background:#eef2ff;
 
-  background:#eff6ff;
-
-  border:
-    1px solid #cfe0ff;
-
+  border:1px solid #dcdfff;
 }
 
 .typeTag{
-
-  color:#0369a1;
+  color:#155e75;
 
   background:#ecfeff;
 
-  border:
-    1px solid #c7eef3;
-
+  border:1px solid #c8f1f5;
 }
-
 
 /* =========================================================
    ACTION BUTTONS
 ========================================================= */
 
 .actionBtn{
+  min-height:29px;
 
-  min-height:30px;
+  padding:5px 9px;
 
-  padding:5px 10px;
-
-  border:
-    1px solid #cadce7;
-
-  border-radius:8px;
+  border:1px solid #cbd5e1;
+  border-radius:7px;
 
   background:#ffffff;
 
-  color:#294254;
+  color:#111827;
 
   cursor:pointer;
 
   font-size:9px;
-
-  font-weight:900;
+  font-weight:850;
 
   transition:
-
-    transform .15s var(--ease),
-    background .15s ease,
-    border-color .15s ease,
-    box-shadow .15s ease;
-
+    transform .14s ease,
+    background .14s ease,
+    border-color .14s ease,
+    box-shadow .14s ease;
 }
 
 .actionBtn:hover{
-
   transform:translateY(-1px);
 
-  border-color:#8ebbd1;
+  border-color:#94a3b8;
 
-  background:#f6fbfe;
+  background:#f8fafc;
 
   box-shadow:
-    0 5px 12px rgba(15,23,42,.07);
-
+    0 4px 10px rgba(15,23,42,.07);
 }
 
 .actionBtn:active{
@@ -1830,227 +1191,170 @@ tbody tr:last-child td{
 }
 
 .actionBtn.danger{
-
   color:#b91c1c;
 
   border-color:#fecaca;
 
   background:#fffafa;
-
 }
 
 .actionBtn.danger:hover{
-
-  color:#ffffff;
+  color:#fff;
 
   border-color:#dc2626;
 
   background:#dc2626;
 
   box-shadow:
-    0 6px 14px rgba(220,38,38,.20);
-
+    0 6px 14px rgba(220,38,38,.22);
 }
 
-
-/* =========================================================
-   SI INPUT
-========================================================= */
-
 .siInput{
-
   width:105px;
 
-  min-height:30px;
+  min-height:29px;
 
   padding:5px 8px;
 
-  border:
-    1px solid #cadce7;
-
-  border-radius:8px;
+  border:1px solid #cbd5e1;
+  border-radius:7px;
 
   outline:none;
 
   background:#ffffff;
 
-  color:#173247;
+  color:#111827;
 
   font-size:11px;
 
   transition:
-
     border-color .15s ease,
     box-shadow .15s ease;
-
 }
 
 .siInput:focus{
-
-  border-color:#38aee2;
+  border-color:#2563eb;
 
   box-shadow:
-    0 0 0 3px rgba(56,189,248,.09);
-
+    0 0 0 3px rgba(37,99,235,.08);
 }
 
 .siInput:disabled{
   opacity:.6;
 }
 
-
 /* =========================================================
    EMPTY STATE
 ========================================================= */
 
 .empty{
-
-  padding:70px 20px;
+  padding:65px 20px;
 
   text-align:center;
 
-  color:#64748b;
+  color:#475569;
 
   background:
-
     radial-gradient(
       circle at center,
-      #f3faff,
+      rgba(248,250,252,.95),
       rgba(255,255,255,0)
     );
-
 }
 
 .emptyIcon{
-
-  width:58px;
-  height:58px;
+  width:55px;
+  height:55px;
 
   display:flex;
-
   align-items:center;
   justify-content:center;
 
-  margin:0 auto 13px;
+  margin:0 auto 12px;
 
-  border:
-    1px solid #d3e6f0;
+  border:1px solid #d9e1e9;
+  border-radius:16px;
 
-  border-radius:17px;
+  background:#eef2f6;
 
-  background:
-    linear-gradient(
-      135deg,
-      #effaff,
-      #f2f6ff
-    );
-
-  color:#5790aa;
+  color:#475569;
 
   font-size:23px;
-
 }
 
 .emptyTitle{
-
-  color:#243b4d;
+  color:#111827;
 
   font-size:13px;
-
-  font-weight:900;
-
+  font-weight:850;
 }
 
 .emptyText{
-
   margin-top:5px;
 
-  color:#7890a0;
+  color:#475569;
 
   font-size:10px;
-
 }
-
 
 /* =========================================================
    PAGINATION
 ========================================================= */
 
 .pagination{
-
   display:flex;
-
   align-items:center;
-
   justify-content:space-between;
 
-  min-height:60px;
+  min-height:58px;
 
   padding:10px 16px;
 
-  border-top:
-    1px solid #dce8ef;
+  border-top:1px solid #dce3eb;
 
-  background:#f7fbfd;
-
+  background:#f8fafc;
 }
 
 .pageInfo{
-
-  color:#506879;
+  color:#1f2937;
 
   font-size:10px;
-
 }
 
 .pageButtons{
-
   display:flex;
-
   gap:5px;
-
 }
 
 .pageBtn{
+  min-width:32px;
+  height:32px;
 
-  min-width:33px;
-  height:33px;
-
-  border:
-    1px solid #cbdde7;
-
-  border-radius:9px;
+  border:1px solid #cbd5e1;
+  border-radius:8px;
 
   background:#ffffff;
 
-  color:#294254;
+  color:#111827;
 
   cursor:pointer;
 
   font-size:11px;
-
-  font-weight:850;
+  font-weight:800;
 
   transition:
-
-    transform .15s var(--ease),
-    background .15s ease,
-    border-color .15s ease,
-    box-shadow .15s ease;
-
+    transform .14s ease,
+    background .14s ease,
+    border-color .14s ease,
+    box-shadow .14s ease;
 }
 
 .pageBtn:hover{
-
   transform:translateY(-1px);
 
-  border-color:#8ebbd1;
+  border-color:#94a3b8;
 
-  background:#f5fbfe;
-
-  box-shadow:
-    0 5px 12px rgba(15,23,42,.06);
-
+  background:#f8fafc;
 }
 
 .pageBtn:active{
@@ -2058,54 +1362,42 @@ tbody tr:last-child td{
 }
 
 .pageBtn.active{
-
-  color:#ffffff;
+  color:#fff;
 
   border-color:#2563eb;
 
   background:
-
     linear-gradient(
       135deg,
-      #0284c7,
-      #2563eb 55%,
+      #2563eb,
       #4f46e5
     );
 
   box-shadow:
-    0 6px 15px rgba(37,99,235,.22);
-
+    0 5px 13px rgba(37,99,235,.22);
 }
 
 .pageBtn:disabled{
-
   opacity:.4;
 
   cursor:not-allowed;
 
   transform:none;
-
 }
-
 
 /* =========================================================
    QUEUE PANEL
 ========================================================= */
 
 #queuePanel{
-
   position:fixed;
 
   right:20px;
   bottom:20px;
 
-  width:min(
-    410px,
-    calc(100vw - 40px)
-  );
+  width:min(410px,calc(100vw - 40px));
 
   display:flex;
-
   flex-direction:column;
 
   gap:9px;
@@ -2113,123 +1405,85 @@ tbody tr:last-child td{
   z-index:9999;
 
   pointer-events:none;
-
 }
 
 .queueCard{
-
   pointer-events:auto;
 
-  padding:14px;
+  padding:13px 14px;
 
-  border:
-    1px solid rgba(205,224,235,.95);
+  border:1px solid #d4dde6;
+  border-radius:15px;
 
-  border-radius:17px;
-
-  background:
-    rgba(255,255,255,.93);
+  background:#ffffff;
 
   box-shadow:
+    0 18px 50px rgba(0,0,0,.20),
+    0 5px 15px rgba(15,23,42,.08);
 
-    0 20px 55px rgba(15,23,42,.17),
+  backdrop-filter:blur(15px);
 
-    0 6px 18px rgba(15,23,42,.06);
-
-  backdrop-filter:
-    blur(18px);
-
-  animation:
-    queueIn .22s var(--ease);
-
+  animation:queueIn .2s ease;
 }
 
 @keyframes queueIn{
-
   from{
-
     opacity:0;
-
-    transform:
-      translateY(12px)
-      scale(.97);
-
+    transform:translateY(9px) scale(.98);
   }
 
   to{
-
     opacity:1;
-
-    transform:
-      translateY(0)
-      scale(1);
-
+    transform:translateY(0) scale(1);
   }
-
 }
 
 .queueHead{
-
   display:flex;
-
   align-items:center;
-
   justify-content:space-between;
-
 }
 
 .queueTitle{
-
-  color:#18384c;
+  color:#111827;
 
   font-size:12px;
-
-  font-weight:900;
-
+  font-weight:850;
 }
 
 .queueClose{
-
-  width:28px;
-  height:28px;
+  width:27px;
+  height:27px;
 
   border:0;
-
-  border-radius:8px;
+  border-radius:7px;
 
   background:transparent;
 
-  color:#64748b;
+  color:#475569;
 
   cursor:pointer;
 
   font-size:16px;
-
 }
 
 .queueClose:hover{
-
-  color:#102033;
-
-  background:#edf5f9;
-
+  color:#111827;
+  background:#f1f5f9;
 }
 
 .queueText{
-
   margin-top:4px;
 
-  color:#607889;
+  color:#475569;
 
   font-size:10px;
 
   word-break:break-word;
-
 }
 
 .progress{
-
-  height:7px;
+  height:6px;
 
   overflow:hidden;
 
@@ -2237,219 +1491,263 @@ tbody tr:last-child td{
 
   border-radius:999px;
 
-  background:#e3edf3;
-
+  background:#e2e8f0;
 }
 
 .progressBar{
-
   width:0%;
-
   height:100%;
 
   border-radius:999px;
 
   background:
-
     linear-gradient(
       90deg,
-      #38bdf8,
       #2563eb,
-      #6366f1
+      #4f46e5,
+      #7c3aed
     );
 
   box-shadow:
-    0 0 10px rgba(37,99,235,.25);
+    0 0 9px rgba(79,70,229,.25);
 
-  transition:
-    width .25s ease;
-
+  transition:width .25s ease;
 }
 
 .queueBottom{
-
   display:flex;
-
   justify-content:space-between;
 
   margin-top:7px;
 
-  color:#718897;
+  color:#475569;
 
   font-size:9px;
-
 }
-
-.queueCard .controlBtn{
-
-  min-height:35px;
-
-}
-
-
-/* =========================================================
-   MODAL BACKDROP
-========================================================= */
-
-.modalBackdrop{
-
-  position:fixed;
-
-  inset:0;
-
-  z-index:20000;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  padding:20px;
-
-  background:
-    rgba(9,30,44,.52);
-
-  backdrop-filter:
-    blur(10px);
-
-  animation:
-    modalFade .18s ease;
-
-}
-
-@keyframes modalFade{
-
-  from{
-    opacity:0;
-  }
-
-  to{
-    opacity:1;
-  }
-
-}
-
 
 /* =========================================================
    MODAL
 ========================================================= */
 
-.modalCard{
+.modalBackdrop{
+  position:fixed;
+  inset:0;
 
-  width:min(430px,100%);
+  z-index:20000;
 
-  padding:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-  border:
-    1px solid rgba(255,255,255,.95);
+  padding:20px;
 
-  border-radius:22px;
+  background:rgba(7,15,28,.62);
 
-  background:
-    rgba(255,255,255,.96);
+  backdrop-filter:blur(8px);
 
-  box-shadow:
-
-    0 35px 100px rgba(15,23,42,.24),
-
-    0 10px 28px rgba(15,23,42,.10);
-
-  animation:
-    modalUp .22s var(--ease);
-
+  animation:modalFade .16s ease;
 }
 
-@keyframes modalUp{
-
+@keyframes modalFade{
   from{
-
     opacity:0;
-
-    transform:
-      translateY(12px)
-      scale(.975);
-
   }
 
   to{
-
     opacity:1;
+  }
+}
 
-    transform:
-      translateY(0)
-      scale(1);
+.modalCard{
+  width:min(430px,100%);
 
+  padding:22px;
+
+  border:1px solid #d6dee7;
+  border-radius:19px;
+
+  background:#ffffff;
+
+  box-shadow:
+    0 30px 90px rgba(0,0,0,.30),
+    0 8px 25px rgba(0,0,0,.12);
+
+  animation:modalUp .2s ease;
+}
+
+@keyframes modalUp{
+  from{
+    opacity:0;
+    transform:translateY(9px) scale(.985);
   }
 
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
 }
 
 .modalTitle{
+  color:#111827;
 
-  color:#102033;
-
-  font-size:18px;
-
-  font-weight:900;
+  font-size:17px;
+  font-weight:850;
 
   letter-spacing:-.3px;
-
 }
 
 .modalSub{
+  margin-top:5px;
+  margin-bottom:17px;
 
-  margin-top:6px;
-
-  margin-bottom:18px;
-
-  color:#647b89;
+  color:#475569;
 
   font-size:11px;
 
   line-height:1.55;
-
 }
 
 .modalWarning{
+  margin-top:11px;
 
-  margin-top:12px;
+  padding:11px;
 
-  padding:12px;
+  border:1px solid #fed7aa;
+  border-radius:10px;
 
-  border:
-    1px solid #fed7aa;
-
-  border-radius:12px;
-
-  background:#fff8ef;
+  background:#fff7ed;
 
   color:#92400e;
 
   font-size:10px;
 
   line-height:1.55;
-
 }
 
 .modalActions{
-
   display:flex;
-
   justify-content:flex-end;
 
   gap:8px;
 
-  margin-top:18px;
+  margin-top:17px;
+}
+
+/* =========================================================
+   INLINE ADMIN FORCE LOGOUT
+========================================================= */
+
+.forceLogoutControl{
+
+  grid-column:1 / -1;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  min-width:0;
+
+  padding:8px;
+
+  border:1px solid #f1caca;
+  border-radius:14px;
+
+  background:
+    linear-gradient(135deg,#fffafa,#fff5f5);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 4px 12px rgba(220,38,38,.04);
 
 }
 
+.forceLogoutIcon{
+
+  width:32px;
+  height:32px;
+
+  flex:0 0 32px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:9px;
+
+  background:#fff0f0;
+  border:1px solid #fecaca;
+
+  font-size:14px;
+
+}
+
+.forceLogoutInput{
+
+  flex:1 1 auto;
+  min-width:150px;
+  height:39px;
+
+  padding:0 12px;
+
+  border:1px solid #e5caca;
+  border-radius:10px;
+
+  outline:none;
+
+  background:#ffffff;
+  color:#243447;
+
+  font-size:11px;
+  font-weight:650;
+
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease;
+
+}
+
+.forceLogoutInput::placeholder{
+  color:#a58a8a;
+}
+
+.forceLogoutInput:hover{
+  border-color:#e5aaaa;
+}
+
+.forceLogoutInput:focus{
+
+  border-color:#ef4444;
+
+  box-shadow:
+    0 0 0 3px rgba(239,68,68,.09);
+
+}
+
+.forceLogoutBtn{
+  flex:0 0 auto;
+  min-width:125px;
+}
+
+.forceLogoutStatus{
+
+  flex:0 1 260px;
+  min-width:0;
+
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+
+  color:#9f4a4a;
+  font-size:9px;
+  font-weight:750;
+
+}
 
 /* =========================================================
    GLOBAL STATUS
 ========================================================= */
 
 #globalStatus{
-
   position:fixed;
 
   left:50%;
@@ -2457,24 +1755,18 @@ tbody tr:last-child td{
 
   z-index:30000;
 
-  max-width:min(
-    700px,
-    90vw
-  );
+  max-width:min(700px,90vw);
 
-  padding:10px 15px;
+  padding:9px 14px;
 
-  border:
-    1px solid rgba(255,255,255,.25);
-
-  border-radius:12px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
 
   background:
-
     linear-gradient(
       135deg,
       #0f172a,
-      #1e3a50
+      #1e293b
     );
 
   color:#ffffff;
@@ -2484,31 +1776,23 @@ tbody tr:last-child td{
   font-size:10px;
 
   box-shadow:
-    0 15px 35px rgba(0,0,0,.22);
+    0 12px 30px rgba(0,0,0,.28);
 
   opacity:0;
-
   pointer-events:none;
 
-  transform:
-    translate(-50%,20px);
+  transform:translate(-50%,20px);
 
   transition:
-
-    opacity .22s ease,
-    transform .22s var(--ease);
-
+    opacity .2s ease,
+    transform .2s ease;
 }
 
 #globalStatus.show{
-
   opacity:1;
 
-  transform:
-    translate(-50%,0);
-
+  transform:translate(-50%,0);
 }
-
 
 /* =========================================================
    UTILITY
@@ -2518,63 +1802,6 @@ tbody tr:last-child td{
   display:none!important;
 }
 
-
-/* =========================================================
-   AUTOFILL
-========================================================= */
-
-input:-webkit-autofill{
-
-  -webkit-box-shadow:
-    0 0 0 1000px #f8fbfd inset;
-
-  -webkit-text-fill-color:#102033;
-
-}
-
-
-/* =========================================================
-   FOCUS ACCESSIBILITY
-========================================================= */
-
-button:focus-visible,
-select:focus-visible,
-input:focus-visible{
-
-  outline:
-    2px solid rgba(37,99,235,.42);
-
-  outline-offset:2px;
-
-}
-
-
-/* =========================================================
-   USER SELECTION
-========================================================= */
-
-button,
-.statIcon,
-.tag,
-.branchTag,
-.typeTag{
-
-  user-select:none;
-
-}
-
-
-/* =========================================================
-   TABLE MOBILE SCROLL
-========================================================= */
-
-.tableScroll{
-
-  -webkit-overflow-scrolling:touch;
-
-}
-
-
 /* =========================================================
    RESPONSIVE — 1250
 ========================================================= */
@@ -2582,7 +1809,6 @@ button,
 @media(max-width:1250px){
 
   .controls{
-
     grid-template-columns:
       1fr
       1fr
@@ -2591,11 +1817,9 @@ button,
       auto
       auto
       auto;
-
   }
 
 }
-
 
 /* =========================================================
    RESPONSIVE — 1050
@@ -2604,39 +1828,25 @@ button,
 @media(max-width:1050px){
 
   .app{
-
-    padding:
-      19px;
-
+    padding:19px;
   }
 
   .controls{
-
     grid-template-columns:
       1fr
       1fr;
-
   }
 
   .searchWrap{
-
-    grid-column:
-      1/-1;
-
+    grid-column:1/-1;
   }
 
   .cards{
-
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0,1fr)
-      );
-
+      repeat(2,minmax(0,1fr));
   }
 
 }
-
 
 /* =========================================================
    RESPONSIVE — 700
@@ -2645,192 +1855,129 @@ button,
 @media(max-width:700px){
 
   #loginScreen{
-
     padding:15px;
-
   }
 
   .loginCard{
-
-    padding:
-      30px 22px;
-
-    border-radius:23px;
-
+    padding:30px 22px;
+    border-radius:22px;
   }
 
   .loginTitle{
-
     font-size:24px;
-
   }
 
   .app{
-
     padding:12px;
-
   }
 
   .topbar{
-
     align-items:flex-start;
-
   }
 
   .brand{
-
     gap:10px;
-
   }
 
   .brandLogo{
+    width:42px;
+    height:42px;
 
-    width:43px;
-    height:43px;
+    border-radius:12px;
 
-    border-radius:13px;
-
+    font-size:18px;
   }
 
   .brandTitle{
-
     font-size:16px;
-
   }
 
   .brandSub{
-
     font-size:9px;
-
   }
 
   .userEmail{
-
     display:none;
-
   }
 
   .iconBtn{
+    width:36px;
+    height:36px;
 
-    width:37px;
-    height:37px;
-
-    border-radius:11px;
-
+    border-radius:10px;
   }
 
   .controls{
-
     grid-template-columns:1fr;
 
-    padding:10px;
+    padding:9px;
 
-    border-radius:16px;
-
+    border-radius:14px;
   }
 
   .searchWrap{
-
     grid-column:auto;
-
   }
 
   .controls .controlBtn{
-
     width:100%;
-
-    height:41px;
-
-  }
-
-  .select{
-
-    min-height:44px;
-
+    height:40px;
   }
 
   .cards{
-
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0,1fr)
-      );
+      repeat(2,minmax(0,1fr));
 
-    gap:9px;
-
+    gap:8px;
   }
 
   .statCard{
-
-    min-height:106px;
+    min-height:105px;
 
     padding:14px;
-
   }
 
   .statNumber{
-
     font-size:22px;
-
   }
 
   .statIcon{
-
-    width:30px;
-    height:30px;
-
+    width:29px;
+    height:29px;
   }
 
   .tableCard{
-
-    border-radius:16px;
-
+    border-radius:15px;
   }
 
   .tableHeader{
-
-    padding:
-      13px 14px;
-
+    padding:13px 14px;
   }
 
   .tableTitle{
-
     font-size:13px;
-
   }
 
   .tableSub{
-
     font-size:9px;
-
   }
 
   .tableActions{
-
     display:none;
-
   }
 
   .pagination{
-
     padding:10px;
-
   }
 
   #queuePanel{
-
     right:10px;
     bottom:10px;
 
-    width:
-      calc(100vw - 20px);
-
+    width:calc(100vw - 20px);
   }
 
 }
-
 
 /* =========================================================
    RESPONSIVE — 430
@@ -2839,133 +1986,144 @@ button,
 @media(max-width:430px){
 
   .cards{
-
-    grid-template-columns:
-      1fr 1fr;
-
+    grid-template-columns:1fr 1fr;
   }
 
   .statCard{
-
-    min-height:99px;
-
+    min-height:98px;
     padding:12px;
-
   }
 
   .statLabel{
-
     font-size:9px;
-
   }
 
   .statNumber{
-
     font-size:20px;
-
   }
 
   .statHint{
-
     font-size:8px;
-
   }
 
   .statIcon{
-
     width:27px;
     height:27px;
-
     font-size:12px;
-
   }
 
   .topbar{
-
     margin-bottom:13px;
-
   }
 
   .brandTitle{
-
     font-size:15px;
-
   }
 
   .brandSub{
-
     max-width:180px;
-
     line-height:1.25;
-
   }
 
   .empty{
-
-    padding:
-      55px 15px;
-
+    padding:55px 15px;
   }
 
   .pageInfo{
-
     font-size:9px;
-
   }
 
   .pageBtn{
-
     min-width:30px;
     height:30px;
-
-  }
-
-  .modalCard{
-
-    padding:20px;
-
-    border-radius:19px;
-
   }
 
 }
-
 
 /* =========================================================
-   EXTRA PREMIUM EFFECTS
+   EXTRA POLISH
 ========================================================= */
 
-/* soft glass highlight */
-
-.controls::before,
-.tableCard::before{
-
-  pointer-events:none;
-
+input:-webkit-autofill{
+  -webkit-box-shadow:0 0 0 1000px #f8fafc inset;
+  -webkit-text-fill-color:#111827;
 }
 
-
-/* smoother table hover */
-
-tbody tr{
-
-  transition:
-    background .16s ease,
-    transform .16s ease;
-
+button:focus-visible,
+select:focus-visible,
+input:focus-visible{
+  outline:2px solid rgba(37,99,235,.40);
+  outline-offset:2px;
 }
 
-
-/* premium select disabled */
-
-select:disabled{
-
-  opacity:.55;
-
-  cursor:not-allowed;
-
+button,
+.statIcon,
+.tag,
+.branchTag,
+.typeTag{
+  user-select:none;
 }
 
+tbody tr td:first-child{
+  position:relative;
+}
+
+tbody tr:hover td{
+  border-bottom-color:#dce4ec;
+}
+
+select{
+  cursor:pointer;
+}
+
+button:disabled{
+  filter:none;
+}
+
+.modalCard .select{
+  background:#f8fafc;
+}
+
+.queueCard .controlBtn{
+  min-height:34px;
+}
+
+.tableScroll{
+  -webkit-overflow-scrolling:touch;
+}
+
+/* =========================================================
+   INLINE FORCE LOGOUT — MOBILE
+========================================================= */
+
+@media(max-width:700px){
+
+  .forceLogoutControl{
+
+    display:grid;
+
+    grid-template-columns:32px minmax(0,1fr);
+
+    gap:7px;
+
+  }
+
+  .forceLogoutInput{
+    width:100%;
+  }
+
+  .forceLogoutBtn{
+    grid-column:1 / -1;
+    width:100%;
+  }
+
+  .forceLogoutStatus{
+    grid-column:1 / -1;
+    width:100%;
+    text-align:center;
+  }
+
+}
 
 /* =========================================================
    REDUCED MOTION
@@ -2976,18 +2134,90 @@ select:disabled{
   *,
   *::before,
   *::after{
-
     animation-duration:.01ms!important;
-
     animation-iteration-count:1!important;
-
     scroll-behavior:auto!important;
-
     transition-duration:.01ms!important;
-
   }
 
 }
+
+/* =========================================================
+   ACEBEDO OPTICAL — SKY BLUE BACKGROUND + DRIVE LOGO
+   OVERRIDES ONLY — NO JS / FUNCTION CHANGES
+========================================================= */
+
+body{
+  background:#87CEEB !important;
+}
+
+#loginScreen{
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.24), transparent 32%),
+    radial-gradient(circle at 80% 80%, rgba(37,99,235,.12), transparent 34%),
+    linear-gradient(135deg,#87CEEB 0%,#BFEFFF 100%) !important;
+}
+
+.logo,
+.brandLogo{
+  overflow:hidden;
+  background:#ffffff !important;
+  padding:0 !important;
+  border:1px solid rgba(255,255,255,.9);
+}
+
+.logo img,
+.brandLogo img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+  border-radius:inherit;
+}
+
+.brandTitle{
+  color:#111827 !important;
+}
+
+.brandSub{
+  color:#1f2937 !important;
+}
+
+.userEmail,
+.iconBtn{
+  color:#111827 !important;
+  background:rgba(255,255,255,.72) !important;
+  border-color:rgba(255,255,255,.85) !important;
+}
+
+.iconBtn:hover{
+  background:#ffffff !important;
+  border-color:#ffffff !important;
+}
+
+
+.brandLogo{
+  width:47px;
+  height:47px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  overflow:hidden;
+  background:#ffffff;
+  box-shadow:
+    0 9px 24px rgba(37,99,235,.18);
+}
+
+.brandLogo img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+  border-radius:inherit;
+}
+
+   
 
 </style>
 
@@ -3205,7 +2435,7 @@ select:disabled{
 
       <button
         class="controlBtn"
-        onclick="clearSearchField()"
+        onclick="clearReport()"
       >
         Clear
       </button>
@@ -3231,14 +2461,37 @@ select:disabled{
         ↓ Export
       </button>
 
-      <button
-  id="addUserBtn"
-  class="controlBtn primary"
-  onclick="openAddUserModal()"
-  style="display:none; display:flex; align-items:center; justify-content:center;"
->
-  ＋ Add User
-</button>
+      <div
+        id="forceLogoutControl"
+        class="forceLogoutControl"
+        style="display:none"
+      >
+
+        <span class="forceLogoutIcon">🔐</span>
+
+        <input
+          id="forceLogoutEmailInline"
+          class="forceLogoutInput"
+          type="email"
+          autocomplete="off"
+          placeholder="Enter user email to force logout"
+          onkeydown="if(event.key==='Enter')forceLogoutInline()"
+        >
+
+        <button
+          id="forceLogoutInlineBtn"
+          class="controlBtn danger forceLogoutBtn"
+          onclick="forceLogoutInline()"
+        >
+          🔴 Force Logout
+        </button>
+
+        <span
+          id="forceLogoutInlineStatus"
+          class="forceLogoutStatus"
+        ></span>
+
+      </div>
 
       <input
         id="importFile"
@@ -3488,95 +2741,6 @@ select:disabled{
 
 </section>
 
-<!-- =========================================================
-     ADD ALLOWED USER MODAL
-========================================================= -->
-
-<div
-  id="addUserModal"
-  class="modalBackdrop hidden"
->
-
-  <div class="modalCard">
-
-    <div class="modalTitle">
-      Add Allowed User
-    </div>
-
-    <div class="modalSub">
-      Add an email address and assign its allowed branch.
-    </div>
-
-    <div class="field">
-      <label>EMAIL ADDRESS</label>
-
-      <input
-        id="newUserEmail"
-        class="input"
-        type="email"
-        placeholder="user@gmail.com"
-        autocomplete="off"
-      >
-    </div>
-
-    <div class="field">
-      <label>ALLOWED BRANCH</label>
-
-      <select
-        id="newUserBranch"
-        class="select"
-      >
-        <option value="">SELECT BRANCH</option>
-        <option value="GAI">GAI</option>
-        <option value="CAS">CAS</option>
-        <option value="BAC">BAC</option>
-        <option value="BIN">BIN</option>
-        <option value="BIS">BIS</option>
-        <option value="CAD">CAD</option>
-        <option value="DGT">DGT</option>
-        <option value="KAB">KAB</option>
-        <option value="KAL">KAL</option>
-        <option value="PAS">PAS</option>
-        <option value="POT">POT</option>
-        <option value="SAN">SAN</option>
-        <option value="TAB">TAB</option>
-        <option value="TAN">TAN</option>
-        <option value="TIS">TIS</option>
-        <option value="TOL">TOL</option>
-      </select>
-    </div>
-
-    <div
-      id="addUserStatus"
-      class="loginStatus"
-      style="margin-top:6px"
-    ></div>
-
-    <div class="modalActions">
-
-      <button
-        type="button"
-        class="controlBtn"
-        onclick="closeAddUserModal()"
-      >
-        Cancel
-      </button>
-
-      <button
-        type="button"
-        id="saveAllowedUserBtn"
-        class="controlBtn primary"
-        onclick="saveAllowedUser()"
-      >
-        Add User
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-
 <div id="queuePanel"></div>
 
 <div id="globalStatus"></div>
@@ -3594,7 +2758,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycby6DBIupAt3GeIJyFelQ1RgWJ39hK3gBAwvd_jykgVL6y7azGYRMidMzM3v-hjdV2vh/exec";
+  "https://script.google.com/macros/s/AKfycbyP53U7W61jcdEzqbo8fOkGCG2hVXwXOpLSqxx2t7kFQpUTpTmxTmlulqzIgfhmHLU4/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -3818,13 +2982,9 @@ function loginApiGet(action, params = {}){
 
         cleanup();
 
-        forceLogout(
-          "Unable to connect to login server. You have been logged out."
-        );
-
         reject(
           new Error(
-            "FORCE_LOGOUT"
+            "Unable to connect to login server."
           )
         );
 
@@ -4203,41 +3363,6 @@ function stopSessionMonitor(){
 }
 
 /* =========================================================
-   FORCE LOGOUT
-   Used when the login server cannot be reached.
-   Does NOT depend on the server logout request.
-========================================================= */
-
-function forceLogout(message = ""){
-  stopSessionMonitor();
-  clearLoginSession();
-
-  document
-    .getElementById("dashboard")
-    .style.display = "none";
-
-  document
-    .getElementById("loginScreen")
-    .style.display = "flex";
-
-  document
-    .getElementById("emailStep")
-    .classList.remove("hidden");
-
-  document
-    .getElementById("otpStep")
-    .classList.add("hidden");
-
-  document
-    .getElementById("otp")
-    .value = "";
-
-  setLoginStatus(
-    message || "You have been logged out. Please log in again."
-  );
-}
-
-/* =========================================================
    LOGOUT
 ========================================================= */
 
@@ -4310,6 +3435,27 @@ function clearLoginSession(){
 
   currentAdmin = false;
 
+  const forceLogoutControl =
+    document.getElementById("forceLogoutControl");
+
+  if(forceLogoutControl){
+    forceLogoutControl.style.display = "none";
+  }
+
+  const forceLogoutInput =
+    document.getElementById("forceLogoutEmailInline");
+
+  const forceLogoutStatus =
+    document.getElementById("forceLogoutInlineStatus");
+
+  if(forceLogoutInput){
+    forceLogoutInput.value = "";
+  }
+
+  if(forceLogoutStatus){
+    forceLogoutStatus.textContent = "";
+  }
+
 }
 
 /* =========================================================
@@ -4331,176 +3477,19 @@ function showDashboard(){
     .textContent =
       currentEmail;
 
-  const addUserBtn =
-    document.getElementById("addUserBtn");
+  const forceLogoutControl =
+    document.getElementById("forceLogoutControl");
 
-  if(addUserBtn){
-    addUserBtn.style.display =
-      currentAdmin ? "inline-flex" : "none";
+  if(forceLogoutControl){
+
+    forceLogoutControl.style.display =
+      currentAdmin ? "flex" : "none";
+
   }
 
   resetDashboardDisplay();
 
   startSessionMonitor();
-
-}
-
-/* =========================================================
-   ADD ALLOWED USER — ADMIN ONLY
-========================================================= */
-
-function openAddUserModal(){
-
-  if(!currentAdmin){
-    showStatus("Administrator access required.");
-    return;
-  }
-
-  const modal =
-    document.getElementById("addUserModal");
-
-  if(!modal){
-    return;
-  }
-
-  document
-    .getElementById("newUserEmail")
-    .value = "";
-
-  document
-    .getElementById("newUserBranch")
-    .value = "";
-
-  document
-    .getElementById("addUserStatus")
-    .textContent = "";
-
-  document
-    .getElementById("saveAllowedUserBtn")
-    .disabled = false;
-
-  modal.classList.remove("hidden");
-
-  setTimeout(()=>{
-    document
-      .getElementById("newUserEmail")
-      .focus();
-  },50);
-
-}
-
-function closeAddUserModal(){
-
-  const modal =
-    document.getElementById("addUserModal");
-
-  if(modal){
-    modal.classList.add("hidden");
-  }
-
-}
-
-async function saveAllowedUser(){
-
-  if(!currentAdmin){
-    showStatus("Administrator access required.");
-    closeAddUserModal();
-    return;
-  }
-
-  if(!sessionId){
-    showStatus("Session expired. Please login again.");
-    closeAddUserModal();
-    return;
-  }
-
-  const email =
-    document
-      .getElementById("newUserEmail")
-      .value
-      .trim()
-      .toLowerCase();
-
-  const branch =
-    document
-      .getElementById("newUserBranch")
-      .value
-      .trim()
-      .toUpperCase();
-
-  const status =
-    document.getElementById("addUserStatus");
-
-  const button =
-    document.getElementById("saveAllowedUserBtn");
-
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-    status.textContent =
-      "Enter a valid email address.";
-    return;
-  }
-
-  if(!BRANCHES.includes(branch)){
-    status.textContent =
-      "Select a valid allowed branch.";
-    return;
-  }
-
-  button.disabled = true;
-  button.textContent = "Saving...";
-  status.textContent = "Adding user...";
-
-  try{
-
-    const data =
-      await loginApiGet(
-        "addAllowedUser",
-        {
-          sessionId:sessionId,
-          email:email,
-          branch:branch
-        }
-      );
-
-    if(!data || data.ok !== true){
-      throw new Error(
-        data?.error ||
-        "Unable to add user."
-      );
-    }
-
-    status.textContent =
-      "User added successfully.";
-
-    showStatus(
-      email +
-      " added to " +
-      branch +
-      "."
-    );
-
-    setTimeout(
-      closeAddUserModal,
-      700
-    );
-
-  }catch(error){
-
-    console.error(
-      "Add allowed user failed:",
-      error
-    );
-
-    status.textContent =
-      error?.message ||
-      "Unable to add user.";
-
-  }finally{
-
-    button.disabled = false;
-    button.textContent = "Add User";
-
-  }
 
 }
 
@@ -5228,21 +4217,426 @@ function silentlyClearReport(){
 }
 
 /* =========================================================
-   CLEAR SEARCH FIELD ONLY
+   INLINE ADMIN FORCE LOGOUT
+
+   Allows an authenticated administrator to enter
+   a user email directly on the dashboard and
+   invalidate that user's active scanner session.
 ========================================================= */
 
-function clearSearchField(){
-  const search =
-    document.getElementById("search");
+async function forceLogoutInline(){
 
-  if(!search){
+  if(!currentAdmin){
+
+    showStatus(
+      "Administrator access required."
+    );
+
+    return;
+
+  }
+
+  const input =
+    document.getElementById(
+      "forceLogoutEmailInline"
+    );
+
+  const button =
+    document.getElementById(
+      "forceLogoutInlineBtn"
+    );
+
+  const status =
+    document.getElementById(
+      "forceLogoutInlineStatus"
+    );
+
+  if(!input || !button || !status){
     return;
   }
 
-  search.value = "";
-  currentSearch = "";
-  currentPage = 1;
-  search.focus();
+  const email =
+    input.value
+      .trim()
+      .toLowerCase();
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+
+    status.textContent =
+      "Enter a valid email.";
+
+    input.focus();
+
+    return;
+
+  }
+
+  if(email === currentEmail.toLowerCase()){
+
+    status.textContent =
+      "Use Logout if you want to log out yourself.";
+
+    return;
+
+  }
+
+  button.disabled = true;
+  button.textContent =
+    "Logging out...";
+
+  status.textContent =
+    "Checking...";
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "forceLogoutUser",
+        {
+          sessionId:sessionId,
+          email:email
+        }
+      );
+
+    if(!data || data.ok !== true){
+
+      throw new Error(
+        data && data.error
+          ? data.error
+          : "Unable to force logout user."
+      );
+
+    }
+
+    if(data.found){
+
+      status.textContent =
+        "✓ " + email + " logged out.";
+
+      showStatus(
+        "User session logged out."
+      );
+
+    }else{
+
+      status.textContent =
+        "No active session found.";
+
+      showStatus(
+        "No active session found for " +
+        email + "."
+      );
+
+    }
+
+    input.value = "";
+
+  }catch(error){
+
+    console.error(error);
+
+    status.textContent =
+      error && error.message
+        ? error.message
+        : "Unable to force logout user.";
+
+    if(
+      error &&
+      error.message === "SESSION_EXPIRED"
+    ){
+
+      clearLoginSession();
+      stopSessionMonitor();
+
+      document
+        .getElementById("dashboard")
+        .style.display = "none";
+
+      document
+        .getElementById("loginScreen")
+        .style.display = "flex";
+
+      setLoginStatus(
+        "Your administrator session has expired."
+      );
+
+    }
+
+  }finally{
+
+    if(document.body.contains(button)){
+
+      button.disabled = false;
+      button.textContent =
+        "🔴 Force Logout";
+
+    }
+
+  }
+
+}
+
+/* =========================================================
+   ADMIN SESSION CONTROL
+
+   Allows an authenticated administrator to force
+   logout another user's active session.
+========================================================= */
+
+function openSessionControl(){
+
+  if(!currentAdmin){
+
+    showStatus(
+      "Administrator access required."
+    );
+
+    return;
+
+  }
+
+  const modal =
+    document.createElement("div");
+
+  modal.className =
+    "modalBackdrop";
+
+  modal.innerHTML = `
+
+    <div class="modalCard">
+
+      <div class="modalTitle">
+        🔐 Session Control
+      </div>
+
+      <div class="modalSub">
+        Force another user's active scanner session
+        to log out immediately. The user will be returned
+        to the login screen on their next session check.
+      </div>
+
+      <div class="field">
+
+        <label>USER EMAIL</label>
+
+        <input
+          id="forceLogoutEmail"
+          class="input"
+          type="email"
+          autocomplete="off"
+          placeholder="user@example.com"
+          onkeydown="if(event.key==='Enter')forceLogoutFromModal()"
+        >
+
+      </div>
+
+      <div
+        id="forceLogoutStatus"
+        class="loginStatus"
+      ></div>
+
+      <div class="modalWarning">
+        ⚠️ This does not delete the user account.
+        It only invalidates the user's current login session.
+      </div>
+
+      <div class="modalActions">
+
+        <button
+          class="controlBtn"
+          onclick="this.closest('.modalBackdrop').remove()"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="forceLogoutButton"
+          class="controlBtn danger"
+          onclick="forceLogoutFromModal()"
+        >
+          🔴 Force Logout
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+  modal.addEventListener(
+    "click",
+    event=>{
+
+      if(event.target === modal){
+        modal.remove();
+      }
+
+    }
+  );
+
+  document.body.appendChild(modal);
+
+  document
+    .getElementById("forceLogoutEmail")
+    .focus();
+
+}
+
+async function forceLogoutFromModal(){
+
+  if(!currentAdmin){
+
+    showStatus(
+      "Administrator access required."
+    );
+
+    return;
+
+  }
+
+  const input =
+    document.getElementById(
+      "forceLogoutEmail"
+    );
+
+  const status =
+    document.getElementById(
+      "forceLogoutStatus"
+    );
+
+  const button =
+    document.getElementById(
+      "forceLogoutButton"
+    );
+
+  if(!input || !status || !button){
+    return;
+  }
+
+  const email =
+    input.value
+      .trim()
+      .toLowerCase();
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+
+    status.textContent =
+      "Enter a valid user email address.";
+
+    return;
+
+  }
+
+  button.disabled = true;
+  button.textContent =
+    "Logging out...";
+
+  status.textContent =
+    "Checking administrator session...";
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "forceLogoutUser",
+        {
+          sessionId:sessionId,
+          email:email
+        }
+      );
+
+    if(!data || data.ok !== true){
+
+      throw new Error(
+        data && data.error
+          ? data.error
+          : "Unable to force logout user."
+      );
+
+    }
+
+    status.textContent =
+      data.found
+        ? "✓ " + email + " has been logged out."
+        : "No active session found for " + email + ".";
+
+    showStatus(
+      data.found
+        ? "User session logged out."
+        : "No active session found."
+    );
+
+    if(data.found){
+
+      setTimeout(
+        ()=>{
+
+          const modal =
+            document.querySelector(
+              ".modalBackdrop"
+            );
+
+          if(modal){
+            modal.remove();
+          }
+
+        },
+        1200
+      );
+
+    }
+
+  }catch(error){
+
+    console.error(error);
+
+    status.textContent =
+      error.message ||
+      "Unable to force logout user.";
+
+    if(
+      error &&
+      error.message === "SESSION_EXPIRED"
+    ){
+
+      clearLoginSession();
+      stopSessionMonitor();
+
+      const modal =
+        document.querySelector(
+          ".modalBackdrop"
+        );
+
+      if(modal){
+        modal.remove();
+      }
+
+      document
+        .getElementById("dashboard")
+        .style.display = "none";
+
+      document
+        .getElementById("loginScreen")
+        .style.display = "flex";
+
+      setLoginStatus(
+        "Your administrator session has expired."
+      );
+
+    }
+
+  }finally{
+
+    if(document.body.contains(button)){
+
+      button.disabled = false;
+      button.textContent =
+        "🔴 Force Logout";
+
+    }
+
+  }
+
 }
 
 /* =========================================================
@@ -7477,14 +6871,7 @@ async function getExistingImportTags(
 }
 
 /* =========================================================
-   FAST IMPORT — REPLACE STOCKS COMPLETELY
-
-   IMPORTANT:
-   1. Selected branch stocks are DELETED FIRST.
-   2. Uploaded file is then inserted as the new stock list.
-   3. NO existing-tag checking.
-   4. NO PATCH / individual updates.
-   5. Much faster for large imports.
+   FAST IMPORT
 ========================================================= */
 
 async function importDirect(
@@ -7498,10 +6885,6 @@ async function importDirect(
       branch,
       "stocks"
     );
-
-  /* =======================================================
-     NORMALIZE FILE
-  ======================================================= */
 
   let mappedRows =
     rows
@@ -7523,10 +6906,6 @@ async function importDirect(
 
   }
 
-  /* =======================================================
-     FORCE SELECTED BRANCH
-  ======================================================= */
-
   mappedRows.forEach(
     row=>{
 
@@ -7535,10 +6914,6 @@ async function importDirect(
 
     }
   );
-
-  /* =======================================================
-     REMOVE DUPLICATE NTAGN
-  ======================================================= */
 
   const unique =
     new Map();
@@ -7568,17 +6943,13 @@ async function importDirect(
       unique.values()
     );
 
-  if(!mappedRows.length){
-
-    throw new Error(
-      "No valid stock records found after processing."
+  const uploadedTags =
+    mappedRows.map(
+      row =>
+        String(
+          row["NTAGN"] || ""
+        ).trim()
     );
-
-  }
-
-  /* =======================================================
-     DELETE OLD STOCKS FIRST
-  ======================================================= */
 
   updateQueue(
     "IMPORT",
@@ -7587,68 +6958,59 @@ async function importDirect(
       1,
       mappedRows.length
     ),
-    "Deleting old " +
-    branch +
-    " stocks..."
+    "Checking existing uploaded tags..."
   );
 
-  const deleteParams =
-    new URLSearchParams();
+  const existingTags =
+    await getExistingImportTags(
+      table,
+      new Set(
+        uploadedTags
+      )
+    );
 
-  /*
-   * The table is already branch-specific.
-   * NTAGN not null is used so PostgREST
-   * accepts the DELETE filter.
-   */
+  const newRows = [];
 
-  deleteParams.set(
-    "NTAGN",
-    "not.is.null"
-  );
+  const existingRowsToUpdate = [];
 
-  await supabaseRequest(
-    table +
-    "?" +
-    deleteParams.toString(),
-    {
-      method:"DELETE",
+  mappedRows.forEach(
+    row=>{
 
-      /*
-       * Do NOT return deleted rows.
-       * Returning them makes the delete slower.
-       */
+      const tag =
+        String(
+          row["NTAGN"] || ""
+        ).trim();
 
-      prefer:
-        "return=minimal"
+      if(
+        existingTags.has(tag)
+      ){
+
+        existingRowsToUpdate.push(
+          row
+        );
+
+      }else{
+
+        newRows.push(
+          row
+        );
+
+      }
+
     }
   );
 
-  updateQueue(
-    "IMPORT",
-    0,
-    Math.max(
-      1,
-      mappedRows.length
-    ),
-    "Old stocks deleted. Importing new stocks..."
-  );
-
-  await yieldToBrowser();
-
-  /* =======================================================
-     INSERT NEW STOCKS IN BULK CHUNKS
-  ======================================================= */
-
   let inserted = 0;
+  let updated = 0;
 
   for(
     let i=0;
-    i<mappedRows.length;
+    i<newRows.length;
     i+=IMPORT_CHUNK_SIZE
   ){
 
     const chunk =
-      mappedRows.slice(
+      newRows.slice(
         i,
         i + IMPORT_CHUNK_SIZE
       );
@@ -7659,11 +7021,6 @@ async function importDirect(
         method:"POST",
 
         body:chunk,
-
-        /*
-         * Do not return inserted rows.
-         * This significantly reduces response data.
-         */
 
         prefer:
           "return=minimal"
@@ -7676,21 +7033,144 @@ async function importDirect(
     updateQueue(
       "IMPORT",
       inserted,
-      mappedRows.length,
-      "Importing " +
+      Math.max(
+        1,
+        newRows.length +
+        existingRowsToUpdate.length
+      ),
+      "Inserted " +
       inserted +
-      "/" +
-      mappedRows.length +
-      " stocks..."
+      " new records..."
     );
 
     await yieldToBrowser();
 
   }
 
-  /* =======================================================
-     COMPLETE
-  ======================================================= */
+  let updateIndex = 0;
+
+  async function updateWorker(){
+
+    while(true){
+
+      const index =
+        updateIndex++;
+
+      if(
+        index >=
+        existingRowsToUpdate.length
+      ){
+
+        return;
+
+      }
+
+      const row =
+        existingRowsToUpdate[
+          index
+        ];
+
+      const tag =
+        String(
+          row["NTAGN"] || ""
+        ).trim();
+
+      const body = {};
+
+      DB_COLUMNS.forEach(
+        column=>{
+
+          if(
+            column === "NTAGN"
+          ){
+
+            return;
+
+          }
+
+          if(
+            row[column] !== undefined
+          ){
+
+            body[column] =
+              row[column];
+
+          }
+
+        }
+      );
+
+      const params =
+        new URLSearchParams();
+
+      params.set(
+        "BR",
+        "eq." + branch
+      );
+
+      params.set(
+        "NTAGN",
+        "eq." + tag
+      );
+
+      await supabaseRequest(
+        table +
+        "?" +
+        params.toString(),
+        {
+          method:"PATCH",
+
+          body:body,
+
+          prefer:
+            "return=minimal"
+        }
+      );
+
+      updated++;
+
+      updateQueue(
+        "IMPORT",
+        newRows.length +
+        updated,
+        Math.max(
+          1,
+          newRows.length +
+          existingRowsToUpdate.length
+        ),
+        "Updating " +
+        updated +
+        "/" +
+        existingRowsToUpdate.length
+      );
+
+    }
+
+  }
+
+  const workers = [];
+
+  const workerCount =
+    Math.min(
+      IMPORT_CONCURRENCY,
+      existingRowsToUpdate.length
+    );
+
+  for(
+    let i=0;
+    i<workerCount;
+    i++
+  ){
+
+    workers.push(
+      updateWorker()
+    );
+
+  }
+
+  await Promise.all(
+    workers
+  );
 
   updateQueue(
     "IMPORT",
@@ -7698,13 +7178,17 @@ async function importDirect(
     mappedRows.length,
     "Complete • " +
     inserted +
-    " stocks imported"
+    " new • " +
+    updated +
+    " updated"
   );
 
   showStatus(
     "Import completed: " +
     inserted +
-    " stocks imported. Old stocks were replaced."
+    " new, " +
+    updated +
+    " updated."
   );
 
   setTimeout(
@@ -7715,6 +7199,7 @@ async function importDirect(
   );
 
 }
+
 /* =========================================================
    BROWSER YIELD
 ========================================================= */

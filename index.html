@@ -5812,97 +5812,101 @@ function clearReport(){
       modal.remove();
     };
 
-  modal.querySelector(
-    "[data-clear]"
-  ).onclick =
-    async ()=>{
+ modal.querySelector(
+  "[data-clear]"
+).onclick =
+  async ()=>{
 
-      const branch =
-        modal.querySelector(
-          "#clearBranch"
-        ).value;
+    const branch =
+      modal.querySelector(
+        "#clearBranch"
+      ).value;
 
-      const report =
-        modal.querySelector(
-          "#clearReportType"
-        ).value;
+    const report =
+      modal.querySelector(
+        "#clearReportType"
+      ).value;
 
-      const button =
-        modal.querySelector(
-          "[data-clear]"
+    const password = prompt(
+      "Enter password to permanently delete this report:"
+    );
+
+    if(password !== "12345"){
+
+      alert(
+        "❌ Incorrect password. Nothing was deleted."
+      );
+
+      modal.remove();
+
+      return;
+    }
+
+    const button =
+      modal.querySelector(
+        "[data-clear]"
+      );
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Deleting...";
+
+    try{
+
+      const deleted =
+        await deleteSelectedReport(
+          branch,
+          report
         );
+
+      modal.remove();
+
+      document
+        .getElementById("branch")
+        .value =
+          branch;
+
+      document
+        .getElementById("sheet")
+        .value =
+          report;
+
+      updateReportTitle();
+
+      silentlyClearReport();
+
+      showStatus(
+        reportLabelFor(report) +
+        " deleted: " +
+        formatNumber(deleted) +
+        " record(s)."
+      );
+
+    }catch(error){
+
+      console.error(
+        "Clear Report failed:",
+        error
+      );
 
       button.disabled =
-        true;
+        false;
 
       button.textContent =
-        "Deleting...";
+        "Delete Report";
 
-      try{
+      showStatus(
+        error?.message ||
+        "Unable to delete report."
+      );
 
-        const password = prompt(
-  "Enter password to permanently delete this report:"
-);
+    }
 
-if (password !== "12345") {
-  alert("❌ Incorrect password. Nothing was deleted.");
-  return;
-   modal.remove();
-}
-
-const deleted =
-  await deleteSelectedReport(
-    branch,
-    report
-  );
-
-        modal.remove();
-
-        document
-          .getElementById("branch")
-          .value =
-            branch;
-
-        document
-          .getElementById("sheet")
-          .value =
-            report;
-
-        updateReportTitle();
-
-        silentlyClearReport();
-
-        showStatus(
-          reportLabelFor(report) +
-          " deleted: " +
-          formatNumber(deleted) +
-          " record(s)."
-        );
-
-      }catch(error){
-
-        console.error(
-          "Clear Report failed:",
-          error
-        );
-
-        button.disabled =
-          false;
-
-        button.textContent =
-          "Delete Report";
-
-        showStatus(
-          error?.message ||
-          "Unable to delete report."
-        );
-
-      }
-
-    };
+  };
 
 }
-
 /* =========================================================
    DELETE SELECTED REPORT FROM SUPABASE
 

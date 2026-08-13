@@ -8286,8 +8286,13 @@ async function startExport(){
 /* =========================================================
    AUDIT EXPORT
 
-   AUDITED =
-     Existing audit records
+   IMPORTANT:
+   Matching is based on BOTH:
+
+     BRANCH + NTAGN
+
+   If the same branch + NTAGN exists in SOLD,
+   that AUDIT record is NOT exported.
 
    MISSING =
      STOCKS - (SOLD + AUDIT)
@@ -8299,97 +8304,241 @@ async function startExport(){
 
 
 /* =========================================================
-   GET AUDITED TAGS
+   CREATE SOLD KEYS
+   BRANCH + NTAGN
 ========================================================= */
 
-const auditedTags =
+const soldKeys =
   new Set();
 
-audit.forEach(
+sold.forEach(
   row=>{
+
+    const branchValue =
+      String(
+        row?.BR ??
+        row?.branch ??
+        ""
+      ).trim().toUpperCase();
+
     const tag =
       String(
         row?.NTAGN ?? ""
-      ).trim();
+      ).trim().toUpperCase();
 
-    if(tag){
-      auditedTags.add(tag);
+    if(
+      branchValue &&
+      tag
+    ){
+
+      soldKeys.add(
+        branchValue +
+        "|" +
+        tag
+      );
+
     }
+
   }
 );
 
 
 /* =========================================================
-   EXISTING AUDIT RECORDS
+   AUDITED RECORDS
+
+   DO NOT INCLUDE AUDIT RECORDS WHERE
+   SAME BRANCH + SAME NTAGN EXISTS IN SOLD
 ========================================================= */
 
 const auditedExport =
-  audit.map(
-    row=>({
-      ...row,
-      STATUS:"AUDITED"
-    })
-  );
+  audit
+    .filter(
+      row=>{
+
+        const branchValue =
+          String(
+            row?.BR ??
+            row?.branch ??
+            b ??
+            ""
+          ).trim().toUpperCase();
+
+        const tag =
+          String(
+            row?.NTAGN ?? ""
+          ).trim().toUpperCase();
+
+        if(!tag){
+          return false;
+        }
+
+        const key =
+          branchValue +
+          "|" +
+          tag;
+
+        /*
+         * SAME BRANCH + SAME TAG
+         * EXISTS IN SOLD
+         *
+         * DO NOT EXPORT AUDIT
+         */
+        if(
+          soldKeys.has(key)
+        ){
+          return false;
+        }
+
+        return true;
+
+      }
+    )
+    .map(
+      row=>({
+
+        ...row,
+
+        STATUS:
+          "AUDITED"
+
+      })
+    );
+
+
+/* =========================================================
+   GET AUDITED KEYS
+
+   Also use BOTH BRANCH + NTAGN
+========================================================= */
+
+const auditedKeys =
+  new Set();
+
+auditedExport.forEach(
+  row=>{
+
+    const branchValue =
+      String(
+        row?.BR ??
+        row?.branch ??
+        b ??
+        ""
+      ).trim().toUpperCase();
+
+    const tag =
+      String(
+        row?.NTAGN ?? ""
+      ).trim().toUpperCase();
+
+    if(
+      branchValue &&
+      tag
+    ){
+
+      auditedKeys.add(
+        branchValue +
+        "|" +
+        tag
+      );
+
+    }
+
+  }
+);
 
 
 /* =========================================================
    FIND MISSING STOCKS
 
    MISSING =
-   STOCKS - (SOLD + AUDIT)
+   STOCKS - (SOLD + AUDITED)
+
+   ALSO MATCH BY:
+   BRANCH + NTAGN
 ========================================================= */
 
 const missingExport =
   stock
     .filter(
       row=>{
+
+        const branchValue =
+          String(
+            row?.BR ??
+            row?.branch ??
+            b ??
+            ""
+          ).trim().toUpperCase();
+
         const tag =
           String(
             row?.NTAGN ?? ""
-          ).trim();
+          ).trim().toUpperCase();
 
         if(!tag){
           return false;
         }
 
+        const key =
+          branchValue +
+          "|" +
+          tag;
+
+
         /*
-         * Already SOLD
-         * → NOT MISSING
+         * SAME BRANCH + SAME TAG
+         * EXISTS IN SOLD
+         *
+         * NOT MISSING
          */
         if(
-          soldTags.has(tag)
+          soldKeys.has(key)
         ){
           return false;
         }
 
+
         /*
-         * Already AUDITED
-         * → NOT MISSING
+         * SAME BRANCH + SAME TAG
+         * EXISTS IN AUDIT
+         *
+         * NOT MISSING
          */
         if(
-          auditedTags.has(tag)
+          auditedKeys.has(key)
         ){
           return false;
         }
 
+
         /*
-         * In STOCKS but neither
-         * SOLD nor AUDITED
-         * → MISSING
+         * STOCK EXISTS BUT IT IS
+         * NOT SOLD AND NOT AUDITED
+         *
+         * THEREFORE MISSING
          */
         return true;
+
       }
     )
     .map(
       row=>({
+
         ...row,
-        STATUS:"MISSING"
+
+        STATUS:
+          "MISSING"
+
       })
     );
 
 
 /* =========================================================
-   COMBINE AUDITED + MISSING
+   COMBINE
+
+   AUDITED
+   +
+   MISSING
 ========================================================= */
 
 const auditExport =

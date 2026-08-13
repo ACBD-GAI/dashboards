@@ -3240,15 +3240,6 @@ select:disabled{
   ＋ Add User
 </button>
 
-      <button
-        id="forceLogoutBtn"
-        class="controlBtn danger"
-        onclick="openForceLogoutModal()"
-        style="display:none; align-items:center; justify-content:center;"
-      >
-        ⛔ Force Logout
-      </button>
-
       <input
         id="importFile"
         type="file"
@@ -3586,56 +3577,6 @@ select:disabled{
 
 </div>
 
-<!-- =========================================================
-     FORCE LOGOUT MODAL — ADDED ONLY
-========================================================= -->
-
-<div
-  id="forceLogoutModal"
-  class="modalBackdrop hidden"
->
-
-  <div class="modalCard" style="width:min(560px,100%);">
-
-    <div class="modalTitle">Active Logged-In Users</div>
-
-    <div class="modalSub">
-      Select a user currently logged in to the inventory system and force that session to end.
-    </div>
-
-    <div
-      id="forceLogoutStatus"
-      class="loginStatus"
-      style="margin:0 0 10px;"
-    ></div>
-
-    <div
-      id="activeScannerUsersList"
-      style="max-height:360px; overflow:auto;"
-    ></div>
-
-    <div class="modalActions">
-      <button
-        type="button"
-        class="controlBtn"
-        onclick="loadActiveScannerUsers()"
-      >
-        ↻ Refresh
-      </button>
-
-      <button
-        type="button"
-        class="controlBtn"
-        onclick="closeForceLogoutModal()"
-      >
-        Close
-      </button>
-    </div>
-
-  </div>
-
-</div>
-
 <div id="queuePanel"></div>
 
 <div id="globalStatus"></div>
@@ -3653,7 +3594,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbx6O9E7hNkmPT-MqfGxrkbyx5mUapxNssIFzFu3vo5gxWFXKC-lH4vM-o5B3fQPnXfK/exec";
+  "https://script.google.com/macros/s/AKfycbzya_exDPmd5iRGSp-MqGh2eAdemg93_LHrZuFO6JRcTHjAbopyebEcNTbd5UhYDsTA/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -4262,228 +4203,6 @@ function stopSessionMonitor(){
 }
 
 /* =========================================================
-   ADMIN FORCE LOGOUT — ADDED ONLY
-========================================================= */
-
-function openForceLogoutModal(){
-
-  if(!currentAdmin){
-    showStatus('Administrator access required.');
-    return;
-  }
-
-  const modal =
-    document.getElementById('forceLogoutModal');
-
-  if(!modal){
-    return;
-  }
-
-  modal.classList.remove('hidden');
-
-  loadActiveScannerUsers();
-}
-
-function closeForceLogoutModal(){
-
-  const modal =
-    document.getElementById('forceLogoutModal');
-
-  if(modal){
-    modal.classList.add('hidden');
-  }
-}
-
-async function loadActiveScannerUsers(){
-
-  const list =
-    document.getElementById('activeScannerUsersList');
-
-  const status =
-    document.getElementById('forceLogoutStatus');
-
-  if(!list || !status){
-    return;
-  }
-
-  if(!currentAdmin || !sessionId){
-    status.textContent =
-      'Administrator session expired. Please log in again.';
-    list.innerHTML = '';
-    return;
-  }
-
-  status.textContent = 'Loading active scanner users...';
-  list.innerHTML = '';
-
-  try{
-
-    const data =
-      await loginApiGet(
-        'getActiveScannerUsers',
-        {
-          sessionId:sessionId
-        }
-      );
-
-    if(!data || data.ok !== true){
-      throw new Error(
-        data && data.error
-          ? data.error
-          : 'Unable to load active users.'
-      );
-    }
-
-    const users =
-      Array.isArray(data.users)
-        ? data.users
-        : [];
-
-    if(!users.length){
-
-      status.textContent = '';
-
-      list.innerHTML = `
-        <div class="empty" style="padding:35px 15px; border:1px solid #e5edf3; border-radius:14px;">
-          <div class="emptyIcon">✓</div>
-          <div class="emptyTitle">No other users are currently logged in.</div>
-          <div class="emptyText">Only active Scanner sessions are shown here.</div>
-        </div>
-      `;
-
-      return;
-    }
-
-    status.textContent =
-      users.length +
-      ' active scanner user' +
-      (users.length === 1 ? '' : 's') +
-      '.';
-
-    list.innerHTML = users.map(function(user){
-
-      const safeEmail =
-        escapeForceLogoutHtml_(user.email || '');
-
-      const safeBranch =
-        escapeForceLogoutHtml_(user.branch || '');
-
-      const safeSessionId =
-        escapeForceLogoutHtml_(user.sessionId || '');
-
-      return `
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 14px; margin-bottom:8px; border:1px solid #dbe8ef; border-radius:13px; background:#fff; box-shadow:0 3px 10px rgba(15,23,42,.04);">
-          <div style="min-width:0;">
-            <div style="font-size:12px; font-weight:900; color:#102033; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-              🟢 ${safeEmail}
-            </div>
-            <div style="margin-top:4px; font-size:10px; color:#647b89;">
-              Branch: <strong>${safeBranch || '—'}</strong>
-            </div>
-          </div>
-          <button
-            type="button"
-            class="controlBtn danger"
-            onclick="forceLogoutScannerUser('${safeSessionId}')"
-          >
-            Force Logout
-          </button>
-        </div>
-      `;
-
-    }).join('');
-
-  }catch(error){
-
-    console.error(error);
-
-    if(
-      error &&
-      error.message === 'SESSION_EXPIRED'
-    ){
-      closeForceLogoutModal();
-      clearLoginSession();
-      return;
-    }
-
-    status.textContent =
-      error && error.message
-        ? error.message
-        : 'Unable to load active users.';
-
-    list.innerHTML = '';
-  }
-}
-
-async function forceLogoutScannerUser(targetSessionId){
-
-  if(!currentAdmin || !sessionId){
-    showStatus('Administrator session expired.');
-    return;
-  }
-
-  if(!targetSessionId){
-    return;
-  }
-
-  const confirmed =
-    window.confirm(
-      'Force logout this Scanner user?\n\nThe selected user will be logged out from the inventory system.'
-    );
-
-  if(!confirmed){
-    return;
-  }
-
-  try{
-
-    const data =
-      await loginApiGet(
-        'forceLogoutScannerUser',
-        {
-          sessionId:sessionId,
-          targetSessionId:targetSessionId
-        }
-      );
-
-    if(!data || data.ok !== true){
-      throw new Error(
-        data && data.error
-          ? data.error
-          : 'Unable to force logout user.'
-      );
-    }
-
-    showStatus(
-      (data.email || 'User') +
-      ' has been forced to log out.'
-    );
-
-    await loadActiveScannerUsers();
-
-  }catch(error){
-
-    console.error(error);
-
-    showStatus(
-      error && error.message
-        ? error.message
-        : 'Unable to force logout user.'
-    );
-  }
-}
-
-function escapeForceLogoutHtml_(value){
-  return String(value || '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
-}
-
-
-/* =========================================================
    FORCE LOGOUT
    Used when the login server cannot be reached.
    Does NOT depend on the server logout request.
@@ -4617,14 +4336,6 @@ function showDashboard(){
 
   if(addUserBtn){
     addUserBtn.style.display =
-      currentAdmin ? "inline-flex" : "none";
-  }
-
-  const forceLogoutBtn =
-    document.getElementById("forceLogoutBtn");
-
-  if(forceLogoutBtn){
-    forceLogoutBtn.style.display =
       currentAdmin ? "inline-flex" : "none";
   }
 

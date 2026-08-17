@@ -16,7 +16,7 @@
 
 /* =========================================================
    ACEBEDO OPTICAL
-   PREMIUM SKY / GLASS DASHBOARD
+   PREMIUM SKY / GLASS ADMIN
    CSS REPLACEMENT ONLY
    NO HTML / JS CHANGES REQUIRED
 ========================================================= */
@@ -608,7 +608,7 @@ button{
 
 
 /* =========================================================
-   DASHBOARD
+   ADMIN
 ========================================================= */
 
 #dashboard{
@@ -3139,7 +3139,7 @@ select:disabled{
 
 <style>
 
-/* ================= PRIVATE DASHBOARD CHAT ================= */
+/* ================= PRIVATE ADMIN CHAT ================= */
 .ao-chat-fab{position:fixed;right:22px;bottom:22px;width:58px;height:58px;border:0;border-radius:50%;background:#111827;color:#fff;font-size:25px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:99990;display:flex;align-items:center;justify-content:center}
 .ao-chat-fab:hover{transform:translateY(-2px)}
 .ao-chat-badge{position:absolute;right:-2px;top:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:20px;background:#ef4444;color:#fff;font:bold 11px Arial;display:none;align-items:center;justify-content:center}
@@ -3253,7 +3253,7 @@ select:disabled{
 </section>
 
 <!-- =========================================================
-     DASHBOARD
+     ADMIN
 ========================================================= -->
 
 <section id="dashboard">
@@ -3833,7 +3833,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbzZ6vx_lwTv97rmxl_DsaJjKE94whUBiniLjl7k51okoAlxypSchH6LXD8xHzGTlPA8/exec";
+  "https://script.google.com/macros/s/AKfycbxv4svE1NPXPNGCDVwCJFIW56kVGd8xSeIBZi_LhWDu-f-Nql3KNhedJREfjwOMSaKq/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -4552,7 +4552,7 @@ function clearLoginSession(){
 }
 
 /* =========================================================
-   SHOW DASHBOARD
+   SHOW ADMIN
 ========================================================= */
 
 function showDashboard(){
@@ -5664,7 +5664,7 @@ function reportChanged(){
 }
 
 /* =========================================================
-   RESET DASHBOARD
+   RESET ADMIN
 ========================================================= */
 
 function resetDashboardDisplay(){
@@ -9391,7 +9391,7 @@ function escapeHtmlAttribute(
 })();
 
 
-/* ================= PRIVATE CHAT: DASHBOARD <-> SELECTED SCANNER ================= */
+/* ================= PRIVATE CHAT: ADMIN <-> SELECTED BRANCH ================= */
 let aoChatOpen=false;
 let aoChatSending=false;
 let aoChatTimer=null;
@@ -9529,7 +9529,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 
 
-<!-- PRIVATE DASHBOARD CHAT -->
+<!-- PRIVATE ADMIN CHAT -->
 <button id="aoChatFab" class="ao-chat-fab" type="button" onclick="aoChatToggle()" aria-label="Open chat">💬<span id="aoChatBadge" class="ao-chat-badge">NEW</span></button>
 <div id="aoChatPanel" class="ao-chat-panel" aria-hidden="true">
   <div class="ao-chat-head">

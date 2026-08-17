@@ -3833,7 +3833,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbxv4svE1NPXPNGCDVwCJFIW56kVGd8xSeIBZi_LhWDu-f-Nql3KNhedJREfjwOMSaKq/exec";
+  "https://script.google.com/macros/s/AKfycbzZ6vx_lwTv97rmxl_DsaJjKE94whUBiniLjl7k51okoAlxypSchH6LXD8xHzGTlPA8/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -9392,162 +9392,51 @@ function escapeHtmlAttribute(
 
 
 /* ================= PRIVATE CHAT: ADMIN <-> SELECTED BRANCH ================= */
-let aoChatOpen=false;
-let aoChatSending=false;
-let aoChatTimer=null;
-let aoChatLastSeen=0;
-
-function aoChatBranch(){const el=document.getElementById("branch");return el?String(el.value||"").trim().toUpperCase():"";}
-function aoChatRecipient(){const el=document.getElementById("aoChatRecipient");return el?String(el.value||"").trim().toLowerCase():"";}
+let aoChatOpen=false, aoChatSending=false, aoChatTimer=null, aoChatUnreadTotal=0;
+function aoChatBranch(){const e=document.getElementById("branch");return e?String(e.value||"").trim().toUpperCase():"";}
+function aoChatRecipient(){const e=document.getElementById("aoChatRecipient");return e?String(e.value||"").trim().toLowerCase():"";}
 function aoChatEsc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function aoChatTime(v){const d=new Date(v);return Number.isNaN(d.getTime())?"":d.toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});}
 function aoChatStatus(t){const e=document.getElementById("aoChatStatus");if(e)e.textContent=t||"";}
-
+function aoChatKey(email){return "aoChatRead:ADMIN:"+aoChatBranch()+":"+String(email||"").toLowerCase();}
+function aoChatRead(email){return Number(localStorage.getItem(aoChatKey(email))||0);}
+function aoChatMark(email,ts){if(ts)localStorage.setItem(aoChatKey(email),String(ts));}
+function aoChatBadge(n){aoChatUnreadTotal=Math.max(0,Number(n)||0);const b=document.getElementById("aoChatBadge");if(b){b.textContent=aoChatUnreadTotal>99?"99+":String(aoChatUnreadTotal);b.style.display=aoChatUnreadTotal?"flex":"none";}}
 async function aoChatLoadRecipients(){
-  if(!sessionId||!currentEmail)return;
-  const select=document.getElementById("aoChatRecipient");if(!select)return;
-  const branch=aoChatBranch();
-  if(!branch||branch==="ALL"){
-    select.innerHTML='<option value="">Select a specific branch first</option>';
-    select.disabled=true;
-    return;
-  }
-  const old=String(select.value||"").toLowerCase();
-  select.disabled=true;
-  select.innerHTML='<option value="">Loading scanner users...</option>';
-  try{
-    const emails=new Set();
-    try{
-      const data=await loginApiGet("getActiveSessions",{sessionId:sessionId});
-      if(data&&data.ok===true&&Array.isArray(data.users)){
-        data.users.forEach(u=>{
-          const e=String(u?.email||"").trim().toLowerCase();
-          const b=String(u?.branch||"").trim().toUpperCase();
-          if(e&&b===branch&&e!==String(currentEmail||"").trim().toLowerCase())emails.add(e);
-        });
-      }
-    }catch(e){console.warn("Active scanner users unavailable:",e);}
-    try{
-      const rows=await supabaseRequest("chat_messages?select=scanner_email&branch=eq."+encodeURIComponent(branch)+"&limit=1000");
-      if(Array.isArray(rows))rows.forEach(r=>{const e=String(r?.scanner_email||"").trim().toLowerCase();if(e)emails.add(e);});
-    }catch(e){console.warn("Previous chat contacts unavailable:",e);}
-    const list=Array.from(emails).sort();
-    if(!list.length){
-      select.innerHTML='<option value="">No scanner users found</option>';
-      select.disabled=true;
-      aoChatLoad();
-      return;
-    }
-    select.innerHTML='<option value="">Select a scanner email...</option>'+list.map(e=>'<option value="'+aoChatEsc(e)+'">'+aoChatEsc(e)+'</option>').join("");
-    if(old&&list.includes(old))select.value=old;
-    select.disabled=false;
-    aoChatLoad();
-  }catch(e){
-    console.warn("Chat recipient load failed:",e);
-    select.innerHTML='<option value="">Unable to load scanner users</option>';
-    select.disabled=true;
-  }
+ if(!sessionId||!currentEmail)return;const select=document.getElementById("aoChatRecipient");if(!select)return;const branch=aoChatBranch();
+ if(!branch||branch==="ALL"){select.innerHTML='<option value="">Select a specific branch first</option>';select.disabled=true;aoChatBadge(0);return;}
+ const old=String(select.value||"").toLowerCase();select.disabled=true;select.innerHTML='<option value="">Loading branch users...</option>';
+ try{
+  const emails=new Set();
+  try{const data=await loginApiGet("getActiveSessions",{sessionId:sessionId});if(data&&data.ok===true&&Array.isArray(data.users))data.users.forEach(u=>{const e=String(u?.email||"").trim().toLowerCase(),b=String(u?.branch||"").trim().toUpperCase();if(e&&b===branch&&e!==String(currentEmail||"").trim().toLowerCase())emails.add(e);});}catch(e){console.warn("Active branch users unavailable:",e);}
+  try{const rows=await supabaseRequest("chat_messages?select=scanner_email&branch=eq."+encodeURIComponent(branch)+"&limit=1000");if(Array.isArray(rows))rows.forEach(r=>{const e=String(r?.scanner_email||"").trim().toLowerCase();if(e)emails.add(e);});}catch(e){console.warn("Previous chat contacts unavailable:",e);}
+  const list=Array.from(emails).sort();if(!list.length){select.innerHTML='<option value="">No branch users found</option>';select.disabled=true;aoChatBadge(0);return;}
+  const unread={};
+  try{const rows=await supabaseRequest("chat_messages?select=scanner_email,sender_type,created_at&branch=eq."+encodeURIComponent(branch)+"&order=created_at.asc&limit=5000");if(Array.isArray(rows))rows.forEach(r=>{if(r.sender_type!=="SCANNER")return;const e=String(r.scanner_email||"").trim().toLowerCase(),ts=new Date(r.created_at).getTime();if(e&&list.includes(e)&&ts>aoChatRead(e))unread[e]=(unread[e]||0)+1;});}catch(e){console.warn("Unread count load failed:",e);}
+  aoChatBadge(Object.values(unread).reduce((a,b)=>a+b,0));
+  select.innerHTML='<option value="">Select a branch user...</option>'+list.map(e=>{const n=unread[e]||0;return '<option value="'+aoChatEsc(e)+'">'+aoChatEsc(e)+(n?'  •  '+n+' UNREAD':'')+'</option>';}).join("");
+  if(old&&list.includes(old))select.value=old;select.disabled=false;
+  if(aoChatRecipient())await aoChatLoad();
+ }catch(e){console.warn("Chat recipient load failed:",e);select.innerHTML='<option value="">Unable to load branch users</option>';select.disabled=true;}
 }
-
 async function aoChatLoad(){
-  if(!sessionId||!currentEmail)return;
-  const branch=aoChatBranch(),recipient=aoChatRecipient(),box=document.getElementById("aoChatMessages");if(!box)return;
-  if(!branch||branch==="ALL"){box.innerHTML='<div class="ao-chat-empty">Select a specific branch and scanner email to open a private conversation.</div>';return;}
-  if(!recipient){box.innerHTML='<div class="ao-chat-empty">Select a scanner email above to view that private conversation.</div>';const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · Select scanner";return;}
-  try{
-    const rows=await supabaseRequest("chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at&branch=eq."+encodeURIComponent(branch)+"&scanner_email=eq."+encodeURIComponent(recipient)+"&order=created_at.asc&limit=300");
-    const old=box.scrollTop,bottom=(box.scrollHeight-box.clientHeight-old)<60;
-    if(!Array.isArray(rows)||!rows.length){
-      box.innerHTML='<div class="ao-chat-empty">No messages with '+aoChatEsc(recipient)+' yet.</div>';
-    }else{
-      box.innerHTML=rows.map(r=>{
-        const mine=String(r.sender_email||"").toLowerCase()===String(currentEmail||"").toLowerCase();
-        return '<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(r.sender_type||"")+' · '+aoChatEsc(r.sender_email||"")+'</div><div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div><div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';
-      }).join("");
-      if(aoChatOpen&&bottom)box.scrollTop=box.scrollHeight;
-      const newest=rows[rows.length-1];
-      if(newest&&newest.id&&aoChatLastSeen&&Number(newest.id)>Number(aoChatLastSeen)&&!aoChatOpen){const b=document.getElementById("aoChatBadge");if(b)b.style.display="flex";}
-      if(newest&&newest.id)aoChatLastSeen=Number(newest.id);
-    }
-    const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · "+recipient;
-  }catch(e){aoChatStatus(e?.message||"Chat temporarily unavailable.");console.warn("Dashboard chat load failed:",e);}
+ if(!sessionId||!currentEmail)return;const branch=aoChatBranch(),recipient=aoChatRecipient(),box=document.getElementById("aoChatMessages");if(!box)return;
+ if(!branch||branch==="ALL"){box.innerHTML='<div class="ao-chat-empty">Select a specific branch and branch user to open a private conversation.</div>';return;}
+ if(!recipient){box.innerHTML='<div class="ao-chat-empty">Select a branch user above to view that private conversation.</div>';const s=document.getElementById("aoChatSub");if(s)s.textContent=branch+" · Select branch user";return;}
+ try{
+  const rows=await supabaseRequest("chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at&branch=eq."+encodeURIComponent(branch)+"&scanner_email=eq."+encodeURIComponent(recipient)+"&order=created_at.asc&limit=500"),list=Array.isArray(rows)?rows:[],read=aoChatRead(recipient),incoming=list.filter(r=>r.sender_type==="SCANNER"),unread=incoming.filter(r=>new Date(r.created_at).getTime()>read);
+  const boxOld=box.scrollTop,bottom=(box.scrollHeight-box.clientHeight-boxOld)<60;
+  if(!list.length)box.innerHTML='<div class="ao-chat-empty">No messages with '+aoChatEsc(recipient)+' yet.</div>';else{const firstUnread=unread.length?unread[0].id:null;box.innerHTML=list.map(r=>{const mine=String(r.sender_email||"").toLowerCase()===String(currentEmail||"").toLowerCase(),label=r.sender_type==="SCANNER"?"BRANCH":(r.sender_type==="DASHBOARD"?"ADMIN":r.sender_type||""),sep=firstUnread!==null&&r.id===firstUnread?'<div class="ao-chat-unread-divider">'+unread.length+' UNREAD MESSAGE'+(unread.length===1?'':'S')+' FROM '+aoChatEsc(recipient)+'</div>':'';return sep+'<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(label)+' · '+aoChatEsc(r.sender_email||"")+'</div><div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div><div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';}).join("");if(aoChatOpen&&bottom)box.scrollTop=box.scrollHeight;}
+  if(aoChatOpen){const last=incoming.length?new Date(incoming[incoming.length-1].created_at).getTime():0;if(last)aoChatMark(recipient,last);await aoChatLoadRecipients();}
+  const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · "+recipient;
+ }catch(e){aoChatStatus(e?.message||"Chat temporarily unavailable.");console.warn("Dashboard chat load failed:",e);}
 }
-
-function aoChatToggle(){
-  aoChatOpen=!aoChatOpen;
-  const p=document.getElementById("aoChatPanel");if(!p)return;
-  p.classList.toggle("open",aoChatOpen);p.setAttribute("aria-hidden",String(!aoChatOpen));
-  const b=document.getElementById("aoChatBadge");if(aoChatOpen&&b)b.style.display="none";
-  if(aoChatOpen){aoChatLoadRecipients();aoChatLoad();setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);}
-}
-
-async function aoChatSend(){
-  if(aoChatSending)return;
-  const input=document.getElementById("aoChatInput"),text=String(input?.value||"").trim(),branch=aoChatBranch(),recipient=aoChatRecipient();
-  if(!text||!sessionId||!currentEmail){aoChatStatus("Please log in first.");return;}
-  if(!branch||branch==="ALL"){aoChatStatus("Select a specific branch first.");return;}
-  if(!recipient){aoChatStatus("Select a scanner email first.");return;}
-  aoChatSending=true;
-  const btn=document.getElementById("aoChatSend");if(btn)btn.disabled=true;
-  aoChatStatus("Sending...");
-  try{
-    /* IMPORTANT: supabaseRequest() JSON-stringifies body itself. */
-    await supabaseRequest("chat_messages",{
-      method:"POST",
-      prefer:"return=minimal",
-      body:{
-        branch:branch,
-        scanner_email:recipient,
-        sender_email:String(currentEmail).trim().toLowerCase(),
-        sender_type:"DASHBOARD",
-        message:text
-      }
-    });
-    input.value="";
-    aoChatStatus("");
-    await aoChatLoad();
-  }catch(e){
-    console.error("Dashboard chat send failed:",e);
-    aoChatStatus(e?.message||"Message could not be sent.");
-  }finally{
-    aoChatSending=false;
-    if(btn)btn.disabled=false;
-  }
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  const input=document.getElementById("aoChatInput");
-  if(input)input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();aoChatSend();}});
-  const recipient=document.getElementById("aoChatRecipient");
-  if(recipient)recipient.addEventListener("change",()=>{aoChatLastSeen=0;aoChatLoad();});
-  const branch=document.getElementById("branch");
-  if(branch)branch.addEventListener("change",()=>{aoChatLastSeen=0;setTimeout(aoChatLoadRecipients,100);});
-  setTimeout(()=>{if(sessionId&&currentEmail)aoChatLoadRecipients();},1500);
-  if(!aoChatTimer)aoChatTimer=setInterval(()=>{if(sessionId&&currentEmail){if(aoChatRecipient())aoChatLoad();}},3000);
-});
-
+function aoChatToggle(){aoChatOpen=!aoChatOpen;const p=document.getElementById("aoChatPanel");if(!p)return;p.classList.toggle("open",aoChatOpen);p.setAttribute("aria-hidden",String(!aoChatOpen));if(aoChatOpen){aoChatLoadRecipients();aoChatLoad();setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);}}
+async function aoChatSend(){if(aoChatSending)return;const input=document.getElementById("aoChatInput"),text=String(input?.value||"").trim(),branch=aoChatBranch(),recipient=aoChatRecipient();if(!text||!sessionId||!currentEmail){aoChatStatus("Please log in first.");return;}if(!branch||branch==="ALL"){aoChatStatus("Select a specific branch first.");return;}if(!recipient){aoChatStatus("Select a branch user first.");return;}aoChatSending=true;const btn=document.getElementById("aoChatSend");if(btn)btn.disabled=true;aoChatStatus("Sending...");try{await supabaseRequest("chat_messages",{method:"POST",prefer:"return=minimal",body:{branch:branch,scanner_email:recipient,sender_email:String(currentEmail).trim().toLowerCase(),sender_type:"DASHBOARD",message:text}});input.value="";aoChatStatus("");await aoChatLoad();}catch(e){console.error("Dashboard chat send failed:",e);aoChatStatus(e?.message||"Message could not be sent.");}finally{aoChatSending=false;if(btn)btn.disabled=false;}}
+document.addEventListener("DOMContentLoaded",()=>{const input=document.getElementById("aoChatInput");if(input)input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();aoChatSend();}});const recipient=document.getElementById("aoChatRecipient");if(recipient)recipient.addEventListener("change",()=>aoChatLoad());const branch=document.getElementById("branch");if(branch)branch.addEventListener("change",()=>setTimeout(aoChatLoadRecipients,100));setTimeout(()=>{if(sessionId&&currentEmail)aoChatLoadRecipients();},1500);if(!aoChatTimer)aoChatTimer=setInterval(()=>{if(sessionId&&currentEmail)aoChatLoadRecipients();},5000);});
 </script>
-
-
 <!-- PRIVATE ADMIN CHAT -->
-<button id="aoChatFab" class="ao-chat-fab" type="button" onclick="aoChatToggle()" aria-label="Open chat">💬<span id="aoChatBadge" class="ao-chat-badge">NEW</span></button>
-<div id="aoChatPanel" class="ao-chat-panel" aria-hidden="true">
-  <div class="ao-chat-head">
-    <div><div class="ao-chat-title">Scanner Chat</div><div id="aoChatSub" class="ao-chat-sub">Select a scanner</div></div>
-    <button class="ao-chat-close" type="button" onclick="aoChatToggle()">✕</button>
-  </div>
-  <div class="ao-chat-recipient">
-    <select id="aoChatRecipient" class="ao-chat-select" disabled>
-      <option value="">Select a branch first</option>
-    </select>
-  </div>
-  <div id="aoChatMessages" class="ao-chat-messages"><div class="ao-chat-empty">Select a branch and scanner email to open a private conversation.</div></div>
-  <div class="ao-chat-compose">
-    <input id="aoChatInput" class="ao-chat-input" maxlength="500" autocomplete="off" placeholder="Message selected scanner...">
-    <button id="aoChatSend" class="ao-chat-send" type="button" onclick="aoChatSend()">➤</button>
-  </div>
-  <div id="aoChatStatus" class="ao-chat-status"></div>
-</div>
-
+<button id="aoChatFab" class="ao-chat-fab" type="button" onclick="aoChatToggle()" aria-label="Open chat">💬<span id="aoChatBadge" class="ao-chat-badge" style="display:none">0</span></button>
+<div id="aoChatPanel" class="ao-chat-panel" aria-hidden="true"><div class="ao-chat-head"><div><div class="ao-chat-title">Branch Chat</div><div id="aoChatSub" class="ao-chat-sub">Select a branch user</div></div><button class="ao-chat-close" type="button" onclick="aoChatToggle()">✕</button></div><div class="ao-chat-recipient"><select id="aoChatRecipient" class="ao-chat-select" disabled><option value="">Select a branch first</option></select></div><div id="aoChatMessages" class="ao-chat-messages"><div class="ao-chat-empty">Select a branch and branch user to open a private conversation.</div></div><div class="ao-chat-compose"><input id="aoChatInput" class="ao-chat-input" maxlength="500" autocomplete="off" placeholder="Message selected branch user..."><button id="aoChatSend" class="ao-chat-send" type="button" onclick="aoChatSend()">➤</button></div><div id="aoChatStatus" class="ao-chat-status"></div></div>
 </body>
 </html>

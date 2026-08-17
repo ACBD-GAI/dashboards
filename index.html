@@ -9855,7 +9855,13 @@ function aoChatToggle(){
 
   if(aoChatOpen){
     aoChatLoadUnread();
-    aoChatLoadRecipients();
+    /* Load the recipient list ONCE when the chat is opened.
+       Do not reload it on every message poll, otherwise the
+       select resets and the user cannot type/chat reliably. */
+    if(!document.getElementById("aoChatRecipient")?.options.length ||
+       document.getElementById("aoChatRecipient")?.disabled){
+      aoChatLoadRecipients();
+    }
     aoChatLoad();
     setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);
   }
@@ -9946,9 +9952,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(!aoChatTimer){
     aoChatTimer=setInterval(()=>{
       if(sessionId&&currentEmail){
+        /* Poll unread notifications every 5 seconds.
+           NEVER rebuild the email dropdown here. */
         aoChatLoadUnread();
         if(aoChatOpen){
-          aoChatLoadRecipients();
           aoChatLoad();
         }
       }

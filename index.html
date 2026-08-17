@@ -9588,31 +9588,70 @@ function aoChatRenderNotifications(){
 async function aoChatOpenNotification(branch,email){
   const branchSelect=document.getElementById("branch");
   const targetBranch=String(branch||"").toUpperCase();
-  const targetEmail=String(email||"").toLowerCase();
-
-  if(branchSelect && targetBranch){
-    const option=Array.from(branchSelect.options).find(o=>
-      String(o.value||"").trim().toUpperCase()===targetBranch
-    );
-    if(option){
-      if(String(branchSelect.value||"").toUpperCase()!==targetBranch){
-        branchSelect.value=option.value;
-        branchSelect.dispatchEvent(new Event("change",{bubbles:true}));
-      }
-    }
-  }
+  const targetEmail=String(email||"").trim().toLowerCase();
 
   aoChatOpen=true;
+
   const panel=document.getElementById("aoChatPanel");
   if(panel){
     panel.classList.add("open");
     panel.setAttribute("aria-hidden","false");
   }
 
-  const select=document.getElementById("aoChatRecipient");
-  if(select){
-    await aoChatLoadRecipients(targetEmail);
+  /*
+   * IMPORTANT:
+   * Do not dispatch the normal branch "change" event here.
+   * That event rebuilds the recipient dropdown and was causing the
+   * notification click to reload the email list.
+   */
+  const currentBranch=String(branchSelect?.value||"").trim().toUpperCase();
+
+  if(branchSelect && targetBranch && currentBranch!==targetBranch){
+    const option=Array.from(branchSelect.options).find(o=>
+      String(o.value||"").trim().toUpperCase()===targetBranch
+    );
+
+    if(option){
+      branchSelect.value=option.value;
+
+      /*
+       * Load recipients exactly once for the target branch.
+       * Do not trigger the dashboard's normal branch change handler.
+       */
+      await aoChatLoadRecipients(targetEmail);
+    }
+  }else{
+    /*
+     * Same branch: keep the existing dropdown and simply select
+     * the email from the notification. No recipient reload.
+     */
+    const select=document.getElementById("aoChatRecipient");
+
+    if(select){
+      const wanted=Array.from(select.options).find(o=>
+        String(o.value||"").trim().toLowerCase()===targetEmail
+      );
+
+      if(wanted){
+        select.value=wanted.value;
+      }else if(targetEmail){
+        /*
+         * If this email is not currently in the list, load the list
+         * once and restore the exact target email.
+         */
+        await aoChatLoadRecipients(targetEmail);
+      }
+    }
   }
+
+  const select=document.getElementById("aoChatRecipient");
+  if(select && targetEmail){
+    const wanted=Array.from(select.options).find(o=>
+      String(o.value||"").trim().toLowerCase()===targetEmail
+    );
+    if(wanted)select.value=wanted.value;
+  }
+
   await aoChatLoad();
   setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);
 }
@@ -9935,6 +9974,11 @@ document.addEventListener("DOMContentLoaded",()=>{
   const branch=document.getElementById("branch");
   if(branch){
     branch.addEventListener("change",()=>{
+      /*
+       * A real manual branch change should reload the recipient list.
+       * Notification clicks do NOT dispatch this event, so clicking
+       * an unread notification will not cause a second reload.
+       */
       setTimeout(()=>{
         aoChatLoadRecipients();
         aoChatLoadUnread();

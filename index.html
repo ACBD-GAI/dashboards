@@ -3809,7 +3809,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbyfuDoH3SWU0yy_OodkQ72JfwJSXHCFZwqTze0LJFwxHfPaT3DebsSZRq_0vM3NvLme/exec";
+  "https://script.google.com/macros/s/AKfycbxv4svE1NPXPNGCDVwCJFIW56kVGd8xSeIBZi_LhWDu-f-Nql3KNhedJREfjwOMSaKq/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -4624,7 +4624,7 @@ async function loadActiveUsers(){
 
   if(status){
     status.textContent =
-      "Checking active scanner sessions...";
+      "Checking logged-in scanner sessions...";
   }
 
   list.innerHTML = `
@@ -4634,7 +4634,7 @@ async function loadActiveUsers(){
       color:#64748b;
       font-size:12px;
     ">
-      Loading active users...
+      Loading logged-in scanner users...
     </div>
   `;
 
@@ -4662,7 +4662,7 @@ async function loadActiveUsers(){
       status.textContent =
         users.length +
         (users.length === 1 ? " user" : " users") +
-        " currently active.";
+        " currently logged in.";
     }
 
     if(!users.length){
@@ -4673,7 +4673,7 @@ async function loadActiveUsers(){
           color:#64748b;
           font-size:12px;
         ">
-          No active scanner users.
+          No scanner users are currently logged in.
         </div>
       `;
       return;
@@ -4723,8 +4723,8 @@ async function loadActiveUsers(){
                 height:8px;
                 flex:none;
                 border-radius:50%;
-                background:#16a34a;
-                box-shadow:0 0 0 4px #ecfdf3;
+                background:${user.online ? "#16a34a" : "#94a3b8"};
+                box-shadow:0 0 0 4px ${user.online ? "#ecfdf3" : "#f1f5f9"};
               "></span>
 
               <span style="
@@ -4773,9 +4773,10 @@ async function loadActiveUsers(){
               margin-left:16px;
               margin-top:4px;
               font-size:9px;
-              color:#64748b;
+              color:${user.online ? "#15803d" : "#64748b"};
+              font-weight:${user.online ? "800" : "700"};
             ">
-              Scanner session active
+              ${user.online ? "ACTIVE NOW" : "INACTIVE — STILL LOGGED IN"}
             </div>
 
           </div>
@@ -5850,7 +5851,7 @@ function clearReport(){
 
       <div class="modalSub">
         Select exactly what you want to permanently
-        delete.
+        delete from Supabase.
       </div>
 
       <div class="field">
@@ -5932,7 +5933,7 @@ function clearReport(){
 
         <strong>⚠ PERMANENT ACTION:</strong>
         This will permanently delete the selected
-        report records.
+        report records from Supabase.
 
         <br><br>
 

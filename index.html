@@ -3130,6 +3130,56 @@ select:disabled{
 
 }
 
+
+/* =========================================================
+   ACEBEDO CHAT BOX — ADDITIVE ONLY
+   ========================================================= */
+.ao-chat-fab{
+  position:fixed;right:22px;bottom:22px;z-index:12000;
+  width:58px;height:58px;border:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0284c7,#2563eb,#4f46e5);
+  color:#fff;font-size:25px;cursor:pointer;
+  box-shadow:0 12px 30px rgba(37,99,235,.30);
+}
+.ao-chat-fab:hover{transform:translateY(-2px);}
+.ao-chat-badge{
+  position:absolute;right:-2px;top:-2px;min-width:19px;height:19px;padding:0 5px;
+  display:none;align-items:center;justify-content:center;border-radius:999px;
+  background:#ef4444;color:#fff;font-size:10px;font-weight:900;border:2px solid #fff;
+}
+.ao-chat-panel{
+  position:fixed;right:22px;bottom:92px;z-index:12000;width:min(390px,calc(100vw - 28px));
+  height:min(570px,calc(100vh - 125px));display:none;flex-direction:column;
+  overflow:hidden;border:1px solid rgba(148,163,184,.25);border-radius:22px;
+  background:rgba(255,255,255,.97);box-shadow:0 25px 70px rgba(15,23,42,.22);
+  backdrop-filter:blur(18px);
+}
+.ao-chat-panel.open{display:flex;}
+.ao-chat-head{
+  min-height:67px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  color:#fff;background:linear-gradient(135deg,#0284c7,#2563eb,#4f46e5);
+}
+.ao-chat-title{font-size:15px;font-weight:900;line-height:1.2;}
+.ao-chat-sub{margin-top:3px;font-size:10px;font-weight:700;opacity:.82;}
+.ao-chat-close{width:34px!important;min-width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:10px!important;background:rgba(255,255,255,.16)!important;color:#fff!important;font-size:18px!important;}
+.ao-chat-messages{flex:1;overflow-y:auto;padding:14px;background:linear-gradient(180deg,#f8fbff,#eef7ff);}
+.ao-chat-empty{text-align:center;color:#7b8da3;font-size:12px;padding:45px 20px;}
+.ao-chat-row{display:flex;margin:0 0 10px;}
+.ao-chat-row.mine{justify-content:flex-end;}
+.ao-chat-bubble{max-width:82%;padding:9px 11px;border-radius:15px 15px 15px 5px;background:#fff;border:1px solid #dbe7f1;box-shadow:0 4px 12px rgba(15,23,42,.06);}
+.ao-chat-row.mine .ao-chat-bubble{border-radius:15px 15px 5px 15px;background:#2563eb;border-color:#2563eb;color:#fff;}
+.ao-chat-name{font-size:9px;font-weight:900;color:#2563eb;margin-bottom:3px;word-break:break-all;}
+.ao-chat-row.mine .ao-chat-name{color:rgba(255,255,255,.78);}
+.ao-chat-text{font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;}
+.ao-chat-time{margin-top:4px;font-size:8px;color:#8a9aae;}
+.ao-chat-row.mine .ao-chat-time{color:rgba(255,255,255,.70);}
+.ao-chat-compose{display:flex;gap:8px;padding:10px;border-top:1px solid #e2eaf2;background:#fff;}
+.ao-chat-input{flex:1!important;width:auto!important;min-height:43px!important;margin:0!important;padding:10px 12px!important;border:1px solid #cbdde9!important;border-radius:13px!important;outline:none!important;background:#f8fbfe!important;font-size:12px!important;box-shadow:none!important;}
+.ao-chat-send{width:46px!important;min-width:46px!important;height:43px!important;min-height:43px!important;padding:0!important;border:0!important;border-radius:13px!important;color:#fff!important;background:linear-gradient(135deg,#0284c7,#2563eb)!important;font-size:17px!important;}
+.ao-chat-status{min-height:15px;padding:0 12px 7px;color:#8a9aae;background:#fff;font-size:9px;}
+@media(max-width:600px){.ao-chat-fab{right:14px;bottom:14px}.ao-chat-panel{right:14px;bottom:82px;height:min(560px,calc(100vh - 105px));}}
+
 </style>
 
 
@@ -3809,7 +3859,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbxM4XSwR7400zn7cEGpipwqMa7pajdHpFytr7reXEzddVB91kUp1xtCPWdpKm6yqJ32/exec";
+  "https://script.google.com/macros/s/AKfycbxboQJzXyGtgCwTvNKhVMm-FHi74OXlqa4r2LpW1Y7JzD3VBS9Ycynah627diWAXAw/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -9367,5 +9417,79 @@ function escapeHtmlAttribute(
 })();
 </script>
 
+
+<!-- =========================================================
+     ACEBEDO CHAT BOX — ADDITIVE ONLY
+     ========================================================= -->
+<button id="aoChatFab" class="ao-chat-fab" type="button" aria-label="Open chat" onclick="aoChatToggle()">💬<span id="aoChatBadge" class="ao-chat-badge">0</span></button>
+<div id="aoChatPanel" class="ao-chat-panel" aria-hidden="true">
+  <div class="ao-chat-head">
+    <div><div class="ao-chat-title">💬 Branch Chat</div><div id="aoChatSub" class="ao-chat-sub">Communication</div></div>
+    <button class="ao-chat-close" type="button" onclick="aoChatToggle()" aria-label="Close chat">✕</button>
+  </div>
+  <div id="aoChatMessages" class="ao-chat-messages"><div class="ao-chat-empty">No messages yet.</div></div>
+  <div class="ao-chat-compose">
+    <input id="aoChatInput" class="ao-chat-input" maxlength="500" autocomplete="off" placeholder="Type a message...">
+    <button id="aoChatSend" class="ao-chat-send" type="button" onclick="aoChatSend()">➤</button>
+  </div>
+  <div id="aoChatStatus" class="ao-chat-status"></div>
+</div>
+
+<script>
+
+/* =========================================================
+   ACEBEDO CHAT BOX — ADDITIVE ONLY
+   Uses the existing Supabase connection/session.
+   Does not touch dashboard functions.
+   ========================================================= */
+let aoChatOpen=false;
+let aoChatTimer=null;
+let aoChatLastSeen=0;
+let aoChatSending=false;
+function aoChatBranch(){
+  const el=document.getElementById("branch");
+  const v=el?String(el.value||"").trim().toUpperCase():"";
+  return v;
+}
+function aoChatEsc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+function aoChatTime(v){const d=new Date(v);if(Number.isNaN(d.getTime()))return "";return d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});}
+async function aoChatLoad(){
+  if(!sessionId||!currentEmail)return;
+  const branch=aoChatBranch();
+  try{
+    const filter=branch&&branch!=="ALL"?"&branch=eq."+encodeURIComponent(branch):"";
+    const rows=await supabaseRequest("chat_messages?select=id,branch,sender_email,sender_type,message,created_at"+filter+"&order=created_at.asc&limit=300");
+    const box=document.getElementById("aoChatMessages");if(!box)return;
+    if(!Array.isArray(rows)||!rows.length){box.innerHTML='<div class="ao-chat-empty">No messages yet. Start the conversation.</div>';return;}
+    const atBottom=(box.scrollHeight-box.clientHeight-box.scrollTop)<60;
+    box.innerHTML=rows.map(r=>{
+      const mine=String(r.sender_email||"").toLowerCase()===String(currentEmail||"").toLowerCase();
+      const branchLabel=branch==="ALL"?' · '+aoChatEsc(r.branch):'';
+      return '<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(r.sender_email)+branchLabel+(r.sender_type?' · '+aoChatEsc(r.sender_type):'')+'</div><div class="ao-chat-text">'+aoChatEsc(r.message)+'</div><div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';
+    }).join("");
+    if(aoChatOpen&&atBottom)box.scrollTop=box.scrollHeight;
+    const newest=rows[rows.length-1];
+    if(newest&&newest.id&&aoChatLastSeen&&Number(newest.id)>Number(aoChatLastSeen)&&!aoChatOpen){const b=document.getElementById("aoChatBadge");if(b){b.textContent="NEW";b.style.display="flex";}}
+    if(newest&&newest.id)aoChatLastSeen=Number(newest.id);
+    const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch&&branch!=="ALL"?branch+" BRANCH":"ALL BRANCHES";
+  }catch(err){const s=document.getElementById("aoChatStatus");if(s)s.textContent="Chat temporarily unavailable.";console.warn("Chat load failed:",err);}
+}
+function aoChatToggle(){aoChatOpen=!aoChatOpen;const p=document.getElementById("aoChatPanel");if(!p)return;p.classList.toggle("open",aoChatOpen);p.setAttribute("aria-hidden",String(!aoChatOpen));const b=document.getElementById("aoChatBadge");if(aoChatOpen&&b)b.style.display="none";if(aoChatOpen){aoChatLoad();setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);}}
+async function aoChatSend(){
+  if(aoChatSending)return;const input=document.getElementById("aoChatInput");const text=String(input?.value||"").trim();const branch=aoChatBranch();
+  if(!text||!sessionId||!currentEmail||!branch||branch==="ALL"){const s=document.getElementById("aoChatStatus");if(s)s.textContent=branch==="ALL"?"Select a branch before sending.":"Please log in first.";return;}
+  aoChatSending=true;const btn=document.getElementById("aoChatSend"),status=document.getElementById("aoChatStatus");if(btn)btn.disabled=true;if(status)status.textContent="Sending...";
+  try{await supabaseRequest("chat_messages",{method:"POST",prefer:"return=minimal",body:JSON.stringify({branch:branch,sender_email:String(currentEmail).toLowerCase(),sender_type:"DASHBOARD",message:text})});input.value="";if(status)status.textContent="";await aoChatLoad();}
+  catch(err){if(status)status.textContent="Message could not be sent.";console.warn("Chat send failed:",err);}
+  finally{aoChatSending=false;if(btn)btn.disabled=false;}
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  const input=document.getElementById("aoChatInput");if(input)input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();aoChatSend();}});
+  const branch=document.getElementById("branch");if(branch)branch.addEventListener("change",()=>{aoChatLastSeen=0;aoChatLoad();});
+  setTimeout(()=>{if(sessionId&&currentEmail)aoChatLoad();},1200);
+  if(!aoChatTimer)aoChatTimer=setInterval(()=>{if(sessionId&&currentEmail)aoChatLoad();},3000);
+});
+
+</script>
 </body>
 </html>

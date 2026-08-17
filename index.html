@@ -3809,7 +3809,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbwlLnrZcHXWnxG80EUAZhC3Gmzpba4ttqhFeP5p19m_NDjOgh0tJYKzzigsPbX5xb69/exec";
+  "https://script.google.com/macros/s/AKfycbxM4XSwR7400zn7cEGpipwqMa7pajdHpFytr7reXEzddVB91kUp1xtCPWdpKm6yqJ32/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -9364,51 +9364,6 @@ function escapeHtmlAttribute(
 
   }
 
-})();
-</script>
-
-
-
-<!-- =========================================================
-     DASHBOARD <-> SCANNER CHAT — ADDITIVE FEATURE ONLY
-========================================================= -->
-<style>
-#dashboardChatButton{position:fixed;right:20px;bottom:20px;z-index:99990;width:54px;height:54px;border:0;border-radius:50%;background:#2563eb;color:#fff;font-size:22px;box-shadow:0 12px 30px rgba(37,99,235,.28);cursor:pointer}
-#dashboardChatPanel{position:fixed;right:20px;bottom:88px;z-index:99991;width:min(430px,calc(100vw - 40px));height:560px;background:#fff;border:1px solid #d7e5ef;border-radius:18px;box-shadow:0 24px 70px rgba(15,23,42,.20);display:none;overflow:hidden}
-#dashboardChatPanel.open{display:flex;flex-direction:column}
-.dbChatHead{padding:13px 15px;background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;display:flex;align-items:center;justify-content:space-between;font-weight:900}
-.dbChatClose{border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:9px;width:30px;height:30px;cursor:pointer}
-.dbChatTarget{padding:10px;border-bottom:1px solid #e1eaf0;background:#f8fbff;display:flex;gap:7px}
-#dashboardChatEmail{flex:1;min-width:0;border:1px solid #cbdde9;border-radius:10px;padding:9px;font:inherit;font-size:12px;outline:none}
-#dashboardChatOpen{border:0;border-radius:10px;background:#0f766e;color:#fff;font-weight:900;padding:0 12px;cursor:pointer}
-#dashboardChatMessages{flex:1;overflow:auto;padding:12px;background:#f7fbfe}
-.dbChatMsg{max-width:82%;padding:9px 11px;border-radius:13px;margin:7px 0;font-size:12px;line-height:1.35;word-break:break-word}
-.dbChatMine{margin-left:auto;background:#2563eb;color:#fff;border-bottom-right-radius:4px}
-.dbChatOther{margin-right:auto;background:#fff;color:#102033;border:1px solid #e1eaf0;border-bottom-left-radius:4px}
-.dbChatTime{font-size:9px;opacity:.65;margin-top:4px}
-.dbChatComposer{display:flex;gap:7px;padding:10px;border-top:1px solid #e1eaf0;background:#fff}
-#dashboardChatInput{flex:1;min-width:0;resize:none;border:1px solid #cbdde9;border-radius:11px;padding:9px 10px;outline:none;font:inherit;font-size:12px}
-#dashboardChatSend{border:0;border-radius:11px;background:#2563eb;color:#fff;padding:0 14px;font-weight:900;cursor:pointer}
-#dashboardChatSend:disabled{opacity:.55;cursor:not-allowed}
-</style>
-<button id="dashboardChatButton" type="button" aria-label="Scanner Messages">💬</button>
-<div id="dashboardChatPanel">
-  <div class="dbChatHead"><span>💬 Scanner Messages</span><button class="dbChatClose" id="dashboardChatClose">×</button></div>
-  <div class="dbChatTarget"><input id="dashboardChatEmail" placeholder="Scanner Gmail address" autocomplete="off"><button id="dashboardChatOpen" type="button">Open</button></div>
-  <div id="dashboardChatMessages"><div style="text-align:center;color:#64748b;font-size:11px;padding:30px 10px">Enter a scanner Gmail and press Open.</div></div>
-  <div class="dbChatComposer"><textarea id="dashboardChatInput" rows="2" maxlength="1000" placeholder="Type a reply..."></textarea><button id="dashboardChatSend" type="button">Send</button></div>
-</div>
-<script>
-(function(){
-  const btn=document.getElementById('dashboardChatButton'),panel=document.getElementById('dashboardChatPanel'),close=document.getElementById('dashboardChatClose'),emailInput=document.getElementById('dashboardChatEmail'),openBtn=document.getElementById('dashboardChatOpen'),list=document.getElementById('dashboardChatMessages'),input=document.getElementById('dashboardChatInput'),send=document.getElementById('dashboardChatSend');
-  if(!btn||!panel)return;
-  let target=''; let busy=false; let lastIds=new Set();
-  function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-  function fmt(v){try{return new Date(v).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
-  function render(msgs){if(!msgs.length){list.innerHTML='<div style="text-align:center;color:#64748b;font-size:11px;padding:30px 10px">No messages yet.</div>';return} list.innerHTML=msgs.map(m=>{const mine=String(m.sender_type)==='dashboard';return '<div class="dbChatMsg '+(mine?'dbChatMine':'dbChatOther')+'"><div>'+esc(m.message)+'</div><div class="dbChatTime">'+(mine?'You':'Scanner')+' · '+fmt(m.created_at)+'</div></div>'}).join('');list.scrollTop=list.scrollHeight}
-  async function poll(){if(!target||typeof loginApiGet!=='function')return;try{const d=await loginApiGet('chatGetDashboard',{sessionId:sessionId,email:target});if(!d||d.ok!==true)return;const msgs=Array.isArray(d.messages)?d.messages:[];lastIds=new Set(msgs.map(x=>String(x.id)));render(msgs)}catch(e){console.warn('Dashboard chat receive failed',e)}}
-  async function sendMsg(){const text=input.value.trim();if(!target||!text||busy)return;if(!sessionId){showStatus&&showStatus('Session expired. Please login again.');return}busy=true;send.disabled=true;list.insertAdjacentHTML('beforeend','<div class="dbChatMsg dbChatMine"><div>'+esc(text)+'</div><div class="dbChatTime">You · sending…</div></div>');list.scrollTop=list.scrollHeight;input.value='';try{const d=await loginApiGet('chatSendDashboard',{sessionId:sessionId,recipientEmail:target,message:text});if(!d||d.ok!==true)throw new Error(d&&d.error||'Unable to send message.');await poll()}catch(e){alert(e.message||'Unable to send message.')}finally{busy=false;send.disabled=false;input.focus()}}
-  btn.addEventListener('click',()=>{panel.classList.toggle('open');if(panel.classList.contains('open'))emailInput.focus()});close.addEventListener('click',()=>panel.classList.remove('open'));openBtn.addEventListener('click',()=>{target=emailInput.value.trim().toLowerCase();lastIds=new Set();poll();input.focus()});emailInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();openBtn.click()}});send.addEventListener('click',sendMsg);input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});setInterval(poll,1500);
 })();
 </script>
 

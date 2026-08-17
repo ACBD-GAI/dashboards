@@ -3138,35 +3138,28 @@ select:disabled{
 
 
 <style>
-/* ================= PRIVATE CHAT — ADDITIVE ONLY ================= */
-.ao-chat-fab{position:fixed;right:22px;bottom:22px;z-index:99990;width:56px;height:56px;border:0;border-radius:18px;background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 12px 30px rgba(37,99,235,.28);display:flex;align-items:center;justify-content:center;transition:.2s;}
-.ao-chat-fab:hover{transform:translateY(-2px);}
-.ao-chat-badge{position:absolute;right:-3px;top:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#ef4444;color:#fff;font-size:8px;font-weight:900;display:none;align-items:center;justify-content:center;}
-.ao-chat-panel{position:fixed;right:22px;bottom:90px;z-index:99991;width:360px;height:540px;background:#fff;border:1px solid #dbe7f1;border-radius:20px;box-shadow:0 22px 60px rgba(15,23,42,.22);overflow:hidden;display:none;flex-direction:column;}
-.ao-chat-panel.open{display:flex;}
-.ao-chat-head{display:flex;align-items:flex-start;gap:10px;padding:13px 14px;background:linear-gradient(135deg,#0f4c81,#2563eb);color:#fff;}
-.ao-chat-title{font-size:15px;font-weight:900;line-height:1.2;}
-.ao-chat-sub{margin-top:3px;font-size:10px;font-weight:700;opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:270px;}
-.ao-chat-recipient{margin-top:7px;width:100%;height:34px;border:0;border-radius:9px;padding:0 9px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:800;outline:none;}
-.ao-chat-recipient option{color:#102033;background:#fff;}
-.ao-chat-close{width:34px!important;min-width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:10px!important;background:rgba(255,255,255,.16)!important;color:#fff!important;font-size:18px!important;}
-.ao-chat-messages{flex:1;overflow-y:auto;padding:14px;background:linear-gradient(180deg,#f8fbff,#eef7ff);}
-.ao-chat-empty{text-align:center;color:#7b8da3;font-size:12px;padding:45px 20px;}
-.ao-chat-row{display:flex;margin:0 0 10px;}
-.ao-chat-row.mine{justify-content:flex-end;}
-.ao-chat-bubble{max-width:82%;padding:9px 11px;border-radius:15px 15px 15px 5px;background:#fff;border:1px solid #dbe7f1;box-shadow:0 4px 12px rgba(15,23,42,.06);}
-.ao-chat-row.mine .ao-chat-bubble{border-radius:15px 15px 5px 15px;background:#2563eb;border-color:#2563eb;color:#fff;}
-.ao-chat-name{font-size:9px;font-weight:900;color:#2563eb;margin-bottom:3px;word-break:break-all;}
-.ao-chat-row.mine .ao-chat-name{color:rgba(255,255,255,.78);}
-.ao-chat-text{font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;}
-.ao-chat-time{margin-top:4px;font-size:8px;color:#8a9aae;}
-.ao-chat-row.mine .ao-chat-time{color:rgba(255,255,255,.70);}
-.ao-chat-compose{display:flex;gap:8px;padding:10px;border-top:1px solid #e2eaf2;background:#fff;}
-.ao-chat-input{flex:1!important;width:auto!important;min-height:43px!important;margin:0!important;padding:10px 12px!important;border:1px solid #cbdde9!important;border-radius:13px!important;outline:none!important;background:#f8fbfe!important;font-size:12px!important;box-shadow:none!important;}
-.ao-chat-send{width:46px!important;min-width:46px!important;height:43px!important;min-height:43px!important;padding:0!important;border:0!important;border-radius:13px!important;color:#fff!important;background:linear-gradient(135deg,#0284c7,#2563eb)!important;font-size:17px!important;}
-.ao-chat-status{min-height:15px;padding:0 12px 7px;color:#8a9aae;background:#fff;font-size:9px;}
-@media(max-width:600px){.ao-chat-fab{right:14px;bottom:14px}.ao-chat-panel{right:14px;bottom:82px;width:calc(100vw - 28px);height:min(560px,calc(100vh - 105px));}}
-/* =============================================================== */
+
+/* ================= PRIVATE DASHBOARD CHAT ================= */
+.ao-chat-fab{position:fixed;right:22px;bottom:22px;width:58px;height:58px;border:0;border-radius:50%;background:#111827;color:#fff;font-size:25px;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:99990;display:flex;align-items:center;justify-content:center}
+.ao-chat-fab:hover{transform:translateY(-2px)}
+.ao-chat-badge{position:absolute;right:-2px;top:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:20px;background:#ef4444;color:#fff;font:bold 11px Arial;display:none;align-items:center;justify-content:center}
+.ao-chat-panel{position:fixed;right:22px;bottom:92px;width:min(390px,calc(100vw - 30px));height:min(570px,calc(100vh - 125px));background:#fff;border:1px solid #e5e7eb;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);z-index:99989;display:none;overflow:hidden}
+.ao-chat-panel.open{display:flex;flex-direction:column}
+.ao-chat-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#111827;color:#fff}
+.ao-chat-title{font-weight:800;font-size:15px}.ao-chat-sub{font-size:11px;opacity:.75;margin-top:2px}
+.ao-chat-close{border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+.ao-chat-recipient{padding:10px;border-bottom:1px solid #e5e7eb;background:#f9fafb}
+.ao-chat-select{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-size:13px;outline:none}
+.ao-chat-messages{flex:1;overflow-y:auto;padding:14px;background:#f3f4f6}
+.ao-chat-row{display:flex;justify-content:flex-start;margin:7px 0}.ao-chat-row.mine{justify-content:flex-end}
+.ao-chat-bubble{max-width:82%;padding:9px 11px;border-radius:14px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.07);word-break:break-word}
+.ao-chat-row.mine .ao-chat-bubble{background:#111827;color:#fff}
+.ao-chat-name{font-size:10px;font-weight:700;opacity:.65;margin-bottom:4px}.ao-chat-text{font-size:13px;line-height:1.4;white-space:pre-wrap}.ao-chat-time{font-size:9px;opacity:.55;margin-top:5px}
+.ao-chat-empty{text-align:center;color:#6b7280;font-size:12px;padding:35px 15px}
+.ao-chat-compose{display:flex;gap:8px;padding:10px;border-top:1px solid #e5e7eb;background:#fff}.ao-chat-input{flex:1;min-width:0;padding:10px 12px;border:1px solid #d1d5db;border-radius:12px;outline:none;font-size:13px}.ao-chat-send{width:42px;border:0;border-radius:12px;background:#111827;color:#fff;font-size:18px;cursor:pointer}.ao-chat-send:disabled{opacity:.5;cursor:not-allowed}
+.ao-chat-status{min-height:17px;padding:0 11px 8px;color:#dc2626;font-size:10px;background:#fff}
+@media(max-width:600px){.ao-chat-fab{right:15px;bottom:15px}.ao-chat-panel{right:15px;bottom:82px;width:calc(100vw - 30px);height:calc(100vh - 105px)}}
+
 </style>
 </head>
 
@@ -3840,7 +3833,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbxboQJzXyGtgCwTvNKhVMm-FHi74OXlqa4r2LpW1Y7JzD3VBS9Ycynah627diWAXAw/exec";
+  "https://script.google.com/macros/s/AKfycbzZ6vx_lwTv97rmxl_DsaJjKE94whUBiniLjl7k51okoAlxypSchH6LXD8xHzGTlPA8/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -9397,81 +9390,156 @@ function escapeHtmlAttribute(
 
 })();
 
-/* ================= PRIVATE CHAT — DASHBOARD SIDE ================= */
-let aoChatOpen=false, aoChatTimer=null, aoChatLastSeen=0, aoChatSending=false;
+
+/* ================= PRIVATE CHAT: DASHBOARD <-> SELECTED SCANNER ================= */
+let aoChatOpen=false;
+let aoChatSending=false;
+let aoChatTimer=null;
+let aoChatLastSeen=0;
+
 function aoChatBranch(){const el=document.getElementById("branch");return el?String(el.value||"").trim().toUpperCase():"";}
 function aoChatRecipient(){const el=document.getElementById("aoChatRecipient");return el?String(el.value||"").trim().toLowerCase():"";}
 function aoChatEsc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function aoChatTime(v){const d=new Date(v);return Number.isNaN(d.getTime())?"":d.toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});}
 function aoChatStatus(t){const e=document.getElementById("aoChatStatus");if(e)e.textContent=t||"";}
+
 async function aoChatLoadRecipients(){
   if(!sessionId||!currentEmail)return;
   const select=document.getElementById("aoChatRecipient");if(!select)return;
   const branch=aoChatBranch();
-  if(!branch||branch==="ALL"){select.innerHTML='<option value="">Select a branch first</option>';select.disabled=true;return;}
-  const old=String(select.value||"").toLowerCase();select.disabled=true;select.innerHTML='<option value="">Loading scanner users...</option>';
+  if(!branch||branch==="ALL"){
+    select.innerHTML='<option value="">Select a specific branch first</option>';
+    select.disabled=true;
+    return;
+  }
+  const old=String(select.value||"").toLowerCase();
+  select.disabled=true;
+  select.innerHTML='<option value="">Loading scanner users...</option>';
   try{
     const emails=new Set();
-    try{const data=await loginApiGet("getActiveSessions",{sessionId:sessionId});if(data&&data.ok===true&&Array.isArray(data.users))data.users.forEach(u=>{const e=String(u?.email||"").trim().toLowerCase(),b=String(u?.branch||"").trim().toUpperCase();if(e&&b===branch&&e!==String(currentEmail||"").toLowerCase())emails.add(e);});}catch(e){console.warn("Active chat users unavailable:",e);}
-    try{const rows=await supabaseRequest("chat_messages?select=scanner_email&branch=eq."+encodeURIComponent(branch)+"&limit=1000");if(Array.isArray(rows))rows.forEach(r=>{const e=String(r?.scanner_email||"").trim().toLowerCase();if(e)emails.add(e);});}catch(e){console.warn("Previous chat contacts unavailable:",e);}
+    try{
+      const data=await loginApiGet("getActiveSessions",{sessionId:sessionId});
+      if(data&&data.ok===true&&Array.isArray(data.users)){
+        data.users.forEach(u=>{
+          const e=String(u?.email||"").trim().toLowerCase();
+          const b=String(u?.branch||"").trim().toUpperCase();
+          if(e&&b===branch&&e!==String(currentEmail||"").trim().toLowerCase())emails.add(e);
+        });
+      }
+    }catch(e){console.warn("Active scanner users unavailable:",e);}
+    try{
+      const rows=await supabaseRequest("chat_messages?select=scanner_email&branch=eq."+encodeURIComponent(branch)+"&limit=1000");
+      if(Array.isArray(rows))rows.forEach(r=>{const e=String(r?.scanner_email||"").trim().toLowerCase();if(e)emails.add(e);});
+    }catch(e){console.warn("Previous chat contacts unavailable:",e);}
     const list=Array.from(emails).sort();
-    if(!list.length){select.innerHTML='<option value="">No scanner users found</option>';select.disabled=true;aoChatLoad();return;}
+    if(!list.length){
+      select.innerHTML='<option value="">No scanner users found</option>';
+      select.disabled=true;
+      aoChatLoad();
+      return;
+    }
     select.innerHTML='<option value="">Select a scanner email...</option>'+list.map(e=>'<option value="'+aoChatEsc(e)+'">'+aoChatEsc(e)+'</option>').join("");
     if(old&&list.includes(old))select.value=old;
-    select.disabled=false;aoChatLoad();
-  }catch(e){console.warn("Chat recipient load failed:",e);select.innerHTML='<option value="">Unable to load scanner users</option>';select.disabled=true;}
+    select.disabled=false;
+    aoChatLoad();
+  }catch(e){
+    console.warn("Chat recipient load failed:",e);
+    select.innerHTML='<option value="">Unable to load scanner users</option>';
+    select.disabled=true;
+  }
 }
+
 async function aoChatLoad(){
   if(!sessionId||!currentEmail)return;
   const branch=aoChatBranch(),recipient=aoChatRecipient(),box=document.getElementById("aoChatMessages");if(!box)return;
-  if(!branch||branch==="ALL"){box.innerHTML='<div class="ao-chat-empty">Select a branch and scanner email to open a private conversation.</div>';return;}
+  if(!branch||branch==="ALL"){box.innerHTML='<div class="ao-chat-empty">Select a specific branch and scanner email to open a private conversation.</div>';return;}
   if(!recipient){box.innerHTML='<div class="ao-chat-empty">Select a scanner email above to view that private conversation.</div>';const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · Select scanner";return;}
   try{
     const rows=await supabaseRequest("chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at&branch=eq."+encodeURIComponent(branch)+"&scanner_email=eq."+encodeURIComponent(recipient)+"&order=created_at.asc&limit=300");
     const old=box.scrollTop,bottom=(box.scrollHeight-box.clientHeight-old)<60;
-    if(!Array.isArray(rows)||!rows.length){box.innerHTML='<div class="ao-chat-empty">No messages with '+aoChatEsc(recipient)+' yet.</div>';}else{
-      box.innerHTML=rows.map(r=>{const mine=String(r.sender_email||"").toLowerCase()===String(currentEmail||"").toLowerCase();return '<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(r.sender_type||"")+" · "+aoChatEsc(r.sender_email||"")+'</div><div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div><div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';}).join("");
+    if(!Array.isArray(rows)||!rows.length){
+      box.innerHTML='<div class="ao-chat-empty">No messages with '+aoChatEsc(recipient)+' yet.</div>';
+    }else{
+      box.innerHTML=rows.map(r=>{
+        const mine=String(r.sender_email||"").toLowerCase()===String(currentEmail||"").toLowerCase();
+        return '<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(r.sender_type||"")+' · '+aoChatEsc(r.sender_email||"")+'</div><div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div><div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';
+      }).join("");
       if(aoChatOpen&&bottom)box.scrollTop=box.scrollHeight;
-      const newest=rows[rows.length-1];if(newest&&newest.id&&aoChatLastSeen&&Number(newest.id)>Number(aoChatLastSeen)&&!aoChatOpen){const b=document.getElementById("aoChatBadge");if(b){b.textContent="NEW";b.style.display="flex";}}if(newest&&newest.id)aoChatLastSeen=Number(newest.id);
+      const newest=rows[rows.length-1];
+      if(newest&&newest.id&&aoChatLastSeen&&Number(newest.id)>Number(aoChatLastSeen)&&!aoChatOpen){const b=document.getElementById("aoChatBadge");if(b)b.style.display="flex";}
+      if(newest&&newest.id)aoChatLastSeen=Number(newest.id);
     }
     const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · "+recipient;
-  }catch(e){aoChatStatus("Chat temporarily unavailable.");console.warn("Chat load failed:",e);}
+  }catch(e){aoChatStatus(e?.message||"Chat temporarily unavailable.");console.warn("Dashboard chat load failed:",e);}
 }
-function aoChatToggle(){aoChatOpen=!aoChatOpen;const p=document.getElementById("aoChatPanel");if(!p)return;p.classList.toggle("open",aoChatOpen);p.setAttribute("aria-hidden",String(!aoChatOpen));const b=document.getElementById("aoChatBadge");if(aoChatOpen&&b)b.style.display="none";if(aoChatOpen){aoChatLoadRecipients();aoChatLoad();setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);}}
+
+function aoChatToggle(){
+  aoChatOpen=!aoChatOpen;
+  const p=document.getElementById("aoChatPanel");if(!p)return;
+  p.classList.toggle("open",aoChatOpen);p.setAttribute("aria-hidden",String(!aoChatOpen));
+  const b=document.getElementById("aoChatBadge");if(aoChatOpen&&b)b.style.display="none";
+  if(aoChatOpen){aoChatLoadRecipients();aoChatLoad();setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);}
+}
+
 async function aoChatSend(){
   if(aoChatSending)return;
   const input=document.getElementById("aoChatInput"),text=String(input?.value||"").trim(),branch=aoChatBranch(),recipient=aoChatRecipient();
   if(!text||!sessionId||!currentEmail){aoChatStatus("Please log in first.");return;}
-  if(!branch||branch==="ALL"){aoChatStatus("Select a branch first.");return;}
+  if(!branch||branch==="ALL"){aoChatStatus("Select a specific branch first.");return;}
   if(!recipient){aoChatStatus("Select a scanner email first.");return;}
-  aoChatSending=true;const btn=document.getElementById("aoChatSend");if(btn)btn.disabled=true;aoChatStatus("Sending...");
-  try{await supabaseRequest("chat_messages",{method:"POST",prefer:"return=minimal",body:JSON.stringify({branch:branch,scanner_email:recipient,sender_email:String(currentEmail).toLowerCase(),sender_type:"DASHBOARD",message:text})});input.value="";aoChatStatus("");await aoChatLoad();}
-  catch(e){aoChatStatus("Message could not be sent.");console.warn("Chat send failed:",e);}
-  finally{aoChatSending=false;if(btn)btn.disabled=false;}
+  aoChatSending=true;
+  const btn=document.getElementById("aoChatSend");if(btn)btn.disabled=true;
+  aoChatStatus("Sending...");
+  try{
+    /* IMPORTANT: supabaseRequest() JSON-stringifies body itself. */
+    await supabaseRequest("chat_messages",{
+      method:"POST",
+      prefer:"return=minimal",
+      body:{
+        branch:branch,
+        scanner_email:recipient,
+        sender_email:String(currentEmail).trim().toLowerCase(),
+        sender_type:"DASHBOARD",
+        message:text
+      }
+    });
+    input.value="";
+    aoChatStatus("");
+    await aoChatLoad();
+  }catch(e){
+    console.error("Dashboard chat send failed:",e);
+    aoChatStatus(e?.message||"Message could not be sent.");
+  }finally{
+    aoChatSending=false;
+    if(btn)btn.disabled=false;
+  }
 }
+
 document.addEventListener("DOMContentLoaded",()=>{
-  const input=document.getElementById("aoChatInput");if(input)input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();aoChatSend();}});
-  const recipient=document.getElementById("aoChatRecipient");if(recipient)recipient.addEventListener("change",()=>{aoChatLastSeen=0;aoChatLoad();});
-  const branch=document.getElementById("branch");if(branch)branch.addEventListener("change",()=>{aoChatLastSeen=0;aoChatLoadRecipients();});
-  setTimeout(()=>{if(sessionId&&currentEmail)aoChatLoadRecipients();},1200);
-  if(!aoChatTimer)aoChatTimer=setInterval(()=>{if(sessionId&&currentEmail)aoChatLoad();},3000);
+  const input=document.getElementById("aoChatInput");
+  if(input)input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();aoChatSend();}});
+  const recipient=document.getElementById("aoChatRecipient");
+  if(recipient)recipient.addEventListener("change",()=>{aoChatLastSeen=0;aoChatLoad();});
+  const branch=document.getElementById("branch");
+  if(branch)branch.addEventListener("change",()=>{aoChatLastSeen=0;setTimeout(aoChatLoadRecipients,100);});
+  setTimeout(()=>{if(sessionId&&currentEmail)aoChatLoadRecipients();},1500);
+  if(!aoChatTimer)aoChatTimer=setInterval(()=>{if(sessionId&&currentEmail){if(aoChatRecipient())aoChatLoad();}},3000);
 });
 
 </script>
 
 
-<!-- PRIVATE DASHBOARD ↔ SCANNER CHAT -->
-<button id="aoChatFab" class="ao-chat-fab" type="button" aria-label="Open chat" onclick="aoChatToggle()">💬<span id="aoChatBadge" class="ao-chat-badge">NEW</span></button>
+<!-- PRIVATE DASHBOARD CHAT -->
+<button id="aoChatFab" class="ao-chat-fab" type="button" onclick="aoChatToggle()" aria-label="Open chat">💬<span id="aoChatBadge" class="ao-chat-badge">NEW</span></button>
 <div id="aoChatPanel" class="ao-chat-panel" aria-hidden="true">
   <div class="ao-chat-head">
-    <div style="min-width:0;flex:1;">
-      <div class="ao-chat-title">💬 Scanner Chat</div>
-      <div id="aoChatSub" class="ao-chat-sub">Select a scanner email</div>
-      <select id="aoChatRecipient" class="ao-chat-recipient">
-        <option value="">Select a scanner email...</option>
-      </select>
-    </div>
-    <button class="ao-chat-close" type="button" onclick="aoChatToggle()" aria-label="Close chat">✕</button>
+    <div><div class="ao-chat-title">Scanner Chat</div><div id="aoChatSub" class="ao-chat-sub">Select a scanner</div></div>
+    <button class="ao-chat-close" type="button" onclick="aoChatToggle()">✕</button>
+  </div>
+  <div class="ao-chat-recipient">
+    <select id="aoChatRecipient" class="ao-chat-select" disabled>
+      <option value="">Select a branch first</option>
+    </select>
   </div>
   <div id="aoChatMessages" class="ao-chat-messages"><div class="ao-chat-empty">Select a branch and scanner email to open a private conversation.</div></div>
   <div class="ao-chat-compose">

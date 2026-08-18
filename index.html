@@ -6287,9 +6287,30 @@ function updateUnconfirmedCounterDisplay(){
 
   const el = document.getElementById("unconfirmedTotal");
 
-  if(el){
-    el.textContent = formatNumber(unconfirmedOverallTotal);
+  if(!el){
+    return;
   }
+
+  const selectedBranch =
+    String(document.getElementById("branch")?.value || "")
+      .trim()
+      .toUpperCase();
+
+  // When a specific branch is selected, show the number of DISTINCT
+  // unconfirmed SI NO. for that branch. When ALL is selected, show the
+  // sum of distinct SI NO. counts across all branches.
+  if(
+    selectedBranch &&
+    selectedBranch !== "ALL" &&
+    Object.prototype.hasOwnProperty.call(unconfirmedBranchCounts, selectedBranch)
+  ){
+    el.textContent = formatNumber(
+      Number(unconfirmedBranchCounts[selectedBranch] || 0)
+    );
+    return;
+  }
+
+  el.textContent = formatNumber(unconfirmedOverallTotal);
 
 }
 
@@ -6336,10 +6357,17 @@ async function openUnconfirmedBranchPopup(){
       return;
     }
 
-    const branches = BRANCHES.map(branch=>({
-      branch,
-      count: Number(data.branches[branch] || 0)
-    }));
+    const branches = BRANCHES
+      .map(branch=>({
+        branch,
+        count: Number(data.branches[branch] || 0)
+      }))
+      .filter(item=>item.count > 0);
+
+    if(!branches.length){
+      list.innerHTML = `<div class="unconfirmedBranchEmpty">No unconfirmed SI NO. found.</div>`;
+      return;
+    }
 
     list.innerHTML = branches.map(item=>`
       <button
@@ -6446,7 +6474,9 @@ function goToUnconfirmedBranch(branch){
 function goToUnconfirmedSI(branch, si){
 
   branch = String(branch || "").trim().toUpperCase();
-  si = String(si || "").trim();
+  si = String(si || "")
+    .replace(/\s+/g," ")
+    .trim();
 
   if(!branch || !BRANCHES.includes(branch) || !si){
     return;

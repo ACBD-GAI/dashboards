@@ -1998,6 +1998,40 @@ tbody tr:last-child td{
    SI INPUT
 ========================================================= */
 
+.soldPriceInput{
+  width:115px;
+  min-height:30px;
+  padding:5px 8px;
+  border:1px solid #cadce7;
+  border-radius:8px;
+  outline:none;
+  background:#ffffff;
+  color:#173247;
+  font-size:11px;
+  font-weight:800;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.soldPriceInput:focus{
+  border-color:#38aee2;
+  box-shadow:0 0 0 3px rgba(56,189,248,.09);
+}
+.soldPriceInput:disabled{ opacity:.6; }
+
+.soldAmount{
+  margin-top:5px;
+  color:#0284c7;
+  font-size:12px;
+  line-height:1.1;
+  font-weight:900;
+}
+
+.soldCounterRow{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
 .siInput{
 
   width:105px;
@@ -3559,16 +3593,24 @@ select:disabled{
           </span>
 
           <span class="statIcon">
-            $
+            ₱
           </span>
 
         </div>
 
-        <div
-          id="soldTotal"
-          class="statNumber"
-        >
-          —
+        <div class="soldCounterRow">
+          <div
+            id="soldTotal"
+            class="statNumber"
+          >
+            —
+          </div>
+          <div
+            id="soldAmount"
+            class="soldAmount"
+          >
+            ₱0.00
+          </div>
         </div>
 
         <div class="statHint">
@@ -3681,6 +3723,7 @@ select:disabled{
               <th>LENS TYPE</th>
               <th>DESCRIPTION</th>
               <th>TAG</th>
+              <th class="soldOnlyColumn" id="sellingPriceHeader" style="display:none;">SELLING PRICE</th>
               <th>SI NO.</th>
               <th>DATE</th>
               <th>ACTIONS</th>
@@ -5716,6 +5759,9 @@ function mapRow(
     si:
       row["SI NO."] || "",
 
+    sellingPrice:
+      row["SELLINGPRICE"] ?? "",
+
     date:
       row["DATE AND TIME"] ||
       row["DELIVERYDATE"] ||
@@ -5734,11 +5780,32 @@ function mapRow(
    BRANCH CHANGE
 ========================================================= */
 
+function updateSoldOnlyColumns(){
+
+  const report =
+    document
+      .getElementById("sheet")
+      ?.value;
+
+  const header =
+    document
+      .getElementById("sellingPriceHeader");
+
+  if(header){
+    header.style.display =
+      report === "sold"
+        ? ""
+        : "none";
+  }
+
+}
+
 function branchChanged(){
 
   currentPage = 1;
 
   updateReportTitle();
+  updateSoldOnlyColumns();
 
   silentlyClearReport();
 
@@ -5753,6 +5820,7 @@ function reportChanged(){
   currentPage = 1;
 
   updateReportTitle();
+  updateSoldOnlyColumns();
 
   silentlyClearReport();
 
@@ -6661,6 +6729,7 @@ async function updateStatsDirect(
 
   let available = 0;
   let sold = 0;
+  let soldAmount = 0;
   let audit = 0;
 
   await Promise.all(
@@ -6682,7 +6751,7 @@ async function updateStatsDirect(
               b,
               "sold"
             ),
-            "NTAGN"
+            "NTAGN,SELLINGPRICE"
           );
 
         const auditPromise =
@@ -6748,6 +6817,25 @@ async function updateStatsDirect(
         sold +=
           soldRows.length;
 
+        soldRows.forEach(
+          row=>{
+            const value =
+              String(
+                row?.SELLINGPRICE ?? ""
+              )
+                .replace(/,/g,"")
+                .replace(/₱/g,"")
+                .trim();
+
+            const amount =
+              Number(value);
+
+            if(Number.isFinite(amount)){
+              soldAmount += amount;
+            }
+          }
+        );
+
         audit +=
           auditRows.length;
 
@@ -6781,6 +6869,19 @@ async function updateStatsDirect(
       formatNumber(
         sold
       );
+
+  const soldAmountEl =
+    document
+      .getElementById(
+        "soldAmount"
+      );
+
+  if(soldAmountEl){
+    soldAmountEl.textContent =
+      formatPeso(
+        soldAmount
+      );
+  }
 
   document
     .getElementById(
@@ -7003,6 +7104,12 @@ function renderTable(
           row.si
         );
 
+      const sellingPrice =
+        row.sellingPrice === null ||
+        row.sellingPrice === undefined
+          ? ""
+          : String(row.sellingPrice);
+
       const date =
         escapeHtml(
           row.date
@@ -7077,13 +7184,27 @@ function renderTable(
 
         </td>
 
-        <td>
+        ${
+          canEdit
+            ? `
+              <td>
+                <input
+                  class="soldPriceInput"
+                  inputmode="decimal"
+                  value="${escapeHtmlAttribute(sellingPrice)}"
+                  data-tag="${escapeHtmlAttribute(row.tag)}"
+                  data-branch="${escapeHtmlAttribute(row.branch)}"
+                  onchange="saveSoldSellingPrice(this)"
+                >
+              </td>
+            `
+            : ""
+        }
 
+        <td>
           ${
             canEdit
-
               ? `
-
                 <input
                   class="siInput"
                   value="${escapeHtmlAttribute(row.si)}"
@@ -7091,13 +7212,9 @@ function renderTable(
                   data-branch="${escapeHtmlAttribute(row.branch)}"
                   onchange="saveSoldSI(this)"
                 >
-
               `
-
               : escapeHtml(row.si) || "—"
-
           }
-
         </td>
 
         <td>
@@ -7262,6 +7379,121 @@ function nextPage(){
   currentPage++;
 
   renderCurrentPage();
+
+}
+
+/* =========================================================
+   SAVE SI — SOLD ONLY
+========================================================= */
+
+async function saveSoldSellingPrice(
+  input
+){
+
+  const branch =
+    String(input.dataset.branch || "").trim();
+
+  const tag =
+    String(input.dataset.tag || "").trim();
+
+  const rawValue =
+    String(input.value || "").trim();
+
+  if(!branch){
+    showStatus("Missing branch.");
+    return;
+  }
+
+  if(!tag){
+    showStatus("Missing NTAGN.");
+    return;
+  }
+
+  const cleanValue =
+    rawValue.replace(/,/g,"").replace(/₱/g,"").trim();
+
+  if(
+    cleanValue !== "" &&
+    !/^\d+(\.\d{1,2})?$/.test(cleanValue)
+  ){
+    showStatus("Enter a valid selling price.");
+    return;
+  }
+
+  const sellingPrice =
+    cleanValue === "" ? null : Number(cleanValue);
+
+  const row =
+    currentRows.find(
+      r =>
+        String(r.branch).trim() === branch &&
+        String(r.tag).trim() === tag
+    );
+
+  const oldValue =
+    row ? String(row.sellingPrice ?? "") : "";
+
+  input.disabled = true;
+
+  try{
+
+    const table = tableName(branch,"sold");
+    const params = new URLSearchParams();
+
+    params.set("NTAGN","eq." + tag);
+
+    await supabaseRequest(
+      table + "?" + params.toString(),
+      {
+        method:"PATCH",
+        body:{
+          "SELLINGPRICE":sellingPrice
+        },
+        prefer:"return=minimal"
+      }
+    );
+
+    if(row){
+      row.sellingPrice = sellingPrice;
+    }
+
+    input.value =
+      sellingPrice === null ? "" : sellingPrice;
+
+    showStatus("Selling price saved.");
+
+    const selectedBranch =
+      document.getElementById("branch").value;
+
+    updateStatsDirect(
+      selectedBranch,
+      searchGeneration
+    ).catch(error=>{
+      console.error(
+        "Selling price statistics refresh failed:",
+        error
+      );
+    });
+
+  }catch(error){
+
+    console.error(
+      "Sold selling price update failed:",
+      error
+    );
+
+    input.value = oldValue;
+
+    showStatus(
+      error?.message ||
+      "Unable to save selling price."
+    );
+
+  }finally{
+
+    input.disabled = false;
+
+  }
 
 }
 

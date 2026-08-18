@@ -1047,6 +1047,75 @@ button{
 
 
 /* =========================================================
+   SOLD OUT FILTERS
+========================================================= */
+
+#soldFilters{
+  display:none;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-top:10px;
+  padding:10px 12px;
+  border:1px solid #cfe3ee;
+  border-radius:13px;
+  background:linear-gradient(180deg,#ffffff,#f6fbfe);
+  box-shadow:0 4px 12px rgba(15,23,42,.04);
+}
+
+#soldFilters.show{
+  display:flex;
+}
+
+.soldFilterLabel{
+  font-size:10px;
+  font-weight:900;
+  color:#426174;
+  letter-spacing:.06em;
+}
+
+.soldFilterInput,
+.soldFilterSelect{
+  min-height:38px;
+  padding:0 10px;
+  border:1px solid #c9dce8;
+  border-radius:10px;
+  background:#fff;
+  color:#173247;
+  outline:none;
+  font-size:11px;
+  font-weight:700;
+}
+
+.soldFilterInput:focus,
+.soldFilterSelect:focus{
+  border-color:#38aee2;
+  box-shadow:0 0 0 3px rgba(56,189,248,.10);
+}
+
+.soldMarkBtn{
+  min-height:34px;
+  padding:0 10px;
+  border:1px solid #bfdbfe;
+  border-radius:9px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  cursor:pointer;
+  font-size:10px;
+  font-weight:900;
+}
+
+.soldMarkBtn.marked{
+  border-color:#bbf7d0;
+  background:#f0fdf4;
+  color:#15803d;
+}
+
+.soldMarkBtn:hover{
+  transform:translateY(-1px);
+}
+
+/* =========================================================
    SEARCH
 ========================================================= */
 
@@ -3553,6 +3622,24 @@ select:disabled{
 
     </div>
 
+    <div id="soldFilters" aria-label="Sold Out filters">
+      <span class="soldFilterLabel">SOLD OUT FILTER:</span>
+
+      <span class="soldFilterLabel">FROM</span>
+      <input id="soldDateFrom" class="soldFilterInput" type="date" onchange="applySoldFilters()">
+
+      <span class="soldFilterLabel">TO</span>
+      <input id="soldDateTo" class="soldFilterInput" type="date" onchange="applySoldFilters()">
+
+      <select id="soldMarkFilter" class="soldFilterSelect" onchange="applySoldFilters()">
+        <option value="ALL">ALL MARK STATUS</option>
+        <option value="MARKED">MARKED</option>
+        <option value="UNMARKED">UNMARKED</option>
+      </select>
+
+      <button type="button" class="controlBtn" onclick="clearSoldFilters()">Clear Filters</button>
+    </div>
+
     <div id="loadingLine" class="loadingLine hidden"></div>
 
     <div class="cards">
@@ -5762,6 +5849,9 @@ function mapRow(
     sellingPrice:
       row["SELLINGPRICE"] ?? "",
 
+    marked:
+      String(row["STATUS"] ?? "").trim().toUpperCase() === "MARKED",
+
     date:
       row["DATE AND TIME"] ||
       row["DELIVERYDATE"] ||
@@ -5791,12 +5881,106 @@ function updateSoldOnlyColumns(){
     document
       .getElementById("sellingPriceHeader");
 
+  const filters =
+    document
+      .getElementById("soldFilters");
+
   if(header){
     header.style.display =
       report === "sold"
         ? ""
         : "none";
   }
+
+  if(filters){
+    filters.classList.toggle(
+      "show",
+      report === "sold"
+    );
+  }
+
+}
+
+function clearSoldFilters(){
+
+  const from = document.getElementById("soldDateFrom");
+  const to = document.getElementById("soldDateTo");
+  const mark = document.getElementById("soldMarkFilter");
+
+  if(from) from.value = "";
+  if(to) to.value = "";
+  if(mark) mark.value = "ALL";
+
+  applySoldFilters();
+}
+
+function soldDateKey(value){
+
+  const d = new Date(value);
+
+  if(!Number.isFinite(d.getTime())) return "";
+
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+
+  return y + "-" + m + "-" + day;
+
+}
+
+function getVisibleRows(){
+
+  const report =
+    document
+      .getElementById("sheet")
+      ?.value;
+
+  if(report !== "sold") return currentRows;
+
+  const from =
+    document.getElementById("soldDateFrom")?.value || "";
+  const to =
+    document.getElementById("soldDateTo")?.value || "";
+  const markFilter =
+    document.getElementById("soldMarkFilter")?.value || "ALL";
+
+  return currentRows.filter(row=>{
+
+    const key = soldDateKey(row.date);
+
+    if(from && (!key || key < from)) return false;
+    if(to && (!key || key > to)) return false;
+
+    if(markFilter === "MARKED" && !row.marked) return false;
+    if(markFilter === "UNMARKED" && row.marked) return false;
+
+    return true;
+
+  });
+
+}
+
+function applySoldFilters(){
+
+  if(document.getElementById("sheet")?.value !== "sold"){
+    totalRows = currentRows.length;
+    currentPage = 1;
+    renderCurrentPage();
+    return;
+  }
+
+  const visible = getVisibleRows();
+
+  totalRows = visible.length;
+
+  const totalPages =
+    Math.max(1, Math.ceil(totalRows / ROWS_PER_PAGE));
+
+  if(currentPage > totalPages){
+    currentPage = totalPages;
+  }
+
+  renderCurrentPage();
 
 }
 
@@ -5839,6 +6023,8 @@ function resetDashboardDisplay(){
   currentPage = 1;
 
   currentSearch = "";
+
+  clearSoldFilters();
 
   document
     .getElementById("search")
@@ -6654,12 +6840,9 @@ async function refreshDashboard(){
     currentRows =
       combined;
 
-    totalRows =
-      combined.length;
-
     currentPage = 1;
 
-    renderCurrentPage();
+    applySoldFilters();
 
     /*
      * Statistics are loaded separately.
@@ -6982,8 +7165,14 @@ function renderCurrentPage(){
     (currentPage - 1) *
     ROWS_PER_PAGE;
 
+  const visibleRows =
+    getVisibleRows();
+
+  totalRows =
+    visibleRows.length;
+
   const rows =
-    currentRows.slice(
+    visibleRows.slice(
       start,
       start + ROWS_PER_PAGE
     );
@@ -7142,6 +7331,17 @@ function renderTable(
 
           <button
             type="button"
+            class="soldMarkBtn ${row.marked ? "marked" : ""}"
+            data-sold-mark="1"
+            data-branch="${escapeHtmlAttribute(row.branch)}"
+            data-tag="${escapeHtmlAttribute(row.tag)}"
+            data-marked="${row.marked ? "1" : "0"}"
+          >
+            ${row.marked ? "✓ Marked" : "Mark"}
+          </button>
+
+          <button
+            type="button"
             class="actionBtn danger"
             data-sold-delete="1"
             data-branch="${escapeHtmlAttribute(row.branch)}"
@@ -7242,6 +7442,27 @@ function renderTable(
    */
 
   if(canEdit){
+
+    body
+      .querySelectorAll(
+        "[data-sold-mark]"
+      )
+      .forEach(
+        button=>{
+
+          button.addEventListener(
+            "click",
+            ()=>{
+
+              saveSoldMark(
+                button
+              );
+
+            }
+          );
+
+        }
+      );
 
     body
       .querySelectorAll(
@@ -7495,6 +7716,74 @@ async function saveSoldSellingPrice(
 
   }
 
+}
+
+/* =========================================================
+   MARK / UNMARK SOLD SI — SOLD ONLY
+========================================================= */
+
+async function saveSoldMark(button){
+
+  const branch =
+    String(button.dataset.branch || "").trim();
+  const tag =
+    String(button.dataset.tag || "").trim();
+  const currentlyMarked =
+    button.dataset.marked === "1";
+
+  if(!branch || !tag){
+    showStatus("Missing branch or NTAGN.");
+    return;
+  }
+
+  button.disabled = true;
+
+  try{
+
+    const table = tableName(branch,"sold");
+    const params = new URLSearchParams();
+    params.set("NTAGN","eq." + tag);
+
+    await supabaseRequest(
+      table + "?" + params.toString(),
+      {
+        method:"PATCH",
+        body:{
+          STATUS: currentlyMarked ? "" : "MARKED"
+        },
+        prefer:"return=minimal"
+      }
+    );
+
+    const row = currentRows.find(r=>
+      String(r.branch).trim() === branch &&
+      String(r.tag).trim() === tag
+    );
+
+    if(row){
+      row.marked = !currentlyMarked;
+      if(row.raw) row.raw.STATUS = row.marked ? "MARKED" : "";
+    }
+
+    showStatus(
+      currentlyMarked
+        ? "SI No. unmarked."
+        : "SI No. marked."
+    );
+
+    applySoldFilters();
+
+  }catch(error){
+
+    console.error("Sold mark update failed:",error);
+    showStatus(
+      error?.message ||
+      "Unable to update mark status."
+    );
+
+  }finally{
+    button.disabled = false;
+  }
 }
 
 /* =========================================================

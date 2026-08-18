@@ -3410,9 +3410,28 @@ select:disabled{
    BRANCH USERS / ALLOWED USERS ADMIN
 ========================================================= */
 .allowedUsersModal{
-  width:min(760px,96vw);
+  width:min(920px,96vw);
+  max-height:88vh;
   padding:0;
   overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.allowedUsersModal .allowedUsersList{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:none;
+}
+
+.allowedUsersModal .modalActions{
+  flex:0 0 auto;
+  margin-top:0;
+  padding:14px 18px;
+  border-top:1px solid #e5edf3;
+  background:#fff;
+  position:relative;
+  z-index:3;
 }
 
 .allowedUsersHead{
@@ -3485,7 +3504,7 @@ select:disabled{
 }
 
 .allowedUsersList{
-  max-height:470px;
+  height:min(58vh,560px);
   overflow:auto;
   background:#fff;
 }
@@ -3598,6 +3617,17 @@ select:disabled{
   }
   .allowedUsersBranchFilter{
     width:100%;
+  }
+  .allowedUsersModal{
+    width:96vw;
+    max-height:92vh;
+  }
+  .allowedUsersList{
+    height:52vh;
+  }
+  .allowedUsersModal .modalActions{
+    position:sticky;
+    bottom:0;
   }
 }
 
@@ -3961,15 +3991,6 @@ select:disabled{
       >
         ↓ Export
       </button>
-
-      <button
-  id="addUserBtn"
-  class="controlBtn primary"
-  onclick="openAddUserModal()"
-  style="display:none; display:flex; align-items:center; justify-content:center;"
->
-  ＋ Add User
-</button>
 
       <button
         id="activeUsersBtn"
@@ -4496,7 +4517,9 @@ select:disabled{
       <input
         id="allowedUsersSearch"
         class="allowedUsersSearch"
-        type="search"
+        type="text"
+        inputmode="email"
+        spellcheck="false"
         placeholder="Search email..."
         autocomplete="off"
         oninput="filterAllowedUsers()"
@@ -5390,14 +5413,6 @@ function showDashboard(){
     .textContent =
       currentEmail;
 
-  const addUserBtn =
-    document.getElementById("addUserBtn");
-
-  if(addUserBtn){
-    addUserBtn.style.display =
-      currentAdmin ? "inline-flex" : "none";
-  }
-
   const activeUsersBtn =
     document.getElementById("activeUsersBtn");
 
@@ -5775,6 +5790,15 @@ function openAddUserModal(){
     showStatus("Administrator access required.");
     return;
   }
+
+  // Close Branch Users before opening Add User.
+  const branchUsersModal =
+    document.getElementById("allowedUsersModal");
+
+  if(branchUsersModal){
+    branchUsersModal.classList.add("hidden");
+  }
+
 
   const modal =
     document.getElementById("addUserModal");
@@ -11127,7 +11151,7 @@ function filterAllowedUsers(){
 
   const search=
     String(document.getElementById("allowedUsersSearch")?.value || "")
-      .trim().toLowerCase();
+      .toLowerCase();
 
   if(!body)return;
 

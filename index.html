@@ -2249,6 +2249,73 @@ tbody tr:last-child td{
 }
 
 /* =========================================================
+   UNCONFIRMED SI NO. POPUP
+========================================================= */
+
+.unconfirmedSIPopup{
+  width:min(430px,100%);
+  padding:0;
+  overflow:hidden;
+}
+
+.unconfirmedSIRow{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:13px 12px;
+  margin:2px 0;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:#fff;
+  cursor:pointer;
+  text-align:left;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease;
+}
+
+.unconfirmedSIRow:hover{
+  background:#f5faff;
+  border-color:#cfe4f2;
+  transform:translateX(2px);
+}
+
+.unconfirmedSIName{
+  color:#24465b;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.03em;
+}
+
+.unconfirmedSICount{
+  min-width:38px;
+  padding:6px 9px;
+  border-radius:9px;
+  background:#eef7ff;
+  border:1px solid #c9e2f4;
+  color:#0369a1;
+  font-size:12px;
+  font-weight:900;
+  text-align:center;
+}
+
+.unconfirmedBackBtn{
+  border:1px solid #d7e5ef;
+  background:#fff;
+  color:#36566a;
+  border-radius:9px;
+  padding:6px 9px;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.unconfirmedBackBtn:hover{
+  background:#f5faff;
+  border-color:#b9d7e8;
+}
+
+/* =========================================================
    EMPTY STATE
 ========================================================= */
 
@@ -4301,9 +4368,11 @@ let sessionMonitorTimer = null;
 ========================================================= */
 
 let unconfirmedBranchCounts = {};
+let unconfirmedBranchSICounts = {};
 let unconfirmedOverallTotal = 0;
 let unconfirmedOverviewLoadedAt = 0;
 let unconfirmedOverviewPromise = null;
+let unconfirmedSelectedSI = "";
 
 /* =========================================================
    LOGIN API
@@ -6104,6 +6173,13 @@ function getVisibleRows(){
     if(markFilter === "MARKED" && !row.marked) return false;
     if(markFilter === "UNMARKED" && row.marked) return false;
 
+    if(
+      unconfirmedSelectedSI &&
+      String(row.si ?? "").trim() !== unconfirmedSelectedSI
+    ){
+      return false;
+    }
+
     return true;
 
   });
@@ -6122,7 +6198,8 @@ async function loadUnconfirmedOverview(force = false){
     updateUnconfirmedCounterDisplay();
     return {
       total: unconfirmedOverallTotal,
-      branches: { ...unconfirmedBranchCounts }
+      branches: { ...unconfirmedBranchCounts },
+      branchSIs: JSON.parse(JSON.stringify(unconfirmedBranchSICounts))
     };
   }
 
@@ -6133,6 +6210,7 @@ async function loadUnconfirmedOverview(force = false){
   unconfirmedOverviewPromise = (async ()=>{
 
     const counts = {};
+    const siCounts = {};
 
     await Promise.all(
       BRANCHES.map(async branch=>{
@@ -6140,12 +6218,35 @@ async function loadUnconfirmedOverview(force = false){
         try{
           const rows = await fetchAllRowsForStats(
             tableName(branch, "sold"),
-            "STATUS"
+            'STATUS,"SI NO."'
           );
 
-          counts[branch] = rows.filter(row=>
-            String(row?.STATUS ?? "").trim().toUpperCase() !== "MARKED"
-          ).length;
+          const branchMap = {};
+
+          rows.forEach(row=>{
+            const status =
+              String(row?.STATUS ?? "")
+                .trim()
+                .toUpperCase();
+
+            if(status === "MARKED"){
+              return;
+            }
+
+            const si =
+              String(row?.["SI NO."] ?? "")
+                .trim();
+
+            if(!si){
+              return;
+            }
+
+            branchMap[si] =
+              Number(branchMap[si] || 0) + 1;
+          });
+
+          siCounts[branch] = branchMap;
+          counts[branch] = Object.keys(branchMap).length;
 
         }catch(error){
           console.error(
@@ -6153,12 +6254,14 @@ async function loadUnconfirmedOverview(force = false){
             error
           );
           counts[branch] = 0;
+          siCounts[branch] = {};
         }
 
       })
     );
 
     unconfirmedBranchCounts = counts;
+    unconfirmedBranchSICounts = siCounts;
     unconfirmedOverallTotal = BRANCHES.reduce(
       (sum, branch)=>sum + Number(counts[branch] || 0),
       0
@@ -6169,7 +6272,8 @@ async function loadUnconfirmedOverview(force = false){
 
     return {
       total: unconfirmedOverallTotal,
-      branches: { ...unconfirmedBranchCounts }
+      branches: { ...unconfirmedBranchCounts },
+      branchSIs: JSON.parse(JSON.stringify(unconfirmedBranchSICounts))
     };
 
   })().finally(()=>{
@@ -6200,10 +6304,13 @@ async function openUnconfirmedBranchPopup(){
   backdrop.id = "unconfirmedBranchPopup";
   backdrop.className = "modalBackdrop";
   backdrop.innerHTML = `
-    <div class="modalCard unconfirmedBranchModal" role="dialog" aria-modal="true" aria-label="Unconfirmed items by branch">
+    <div class="modalCard unconfirmedBranchModal" role="dialog" aria-modal="true" aria-label="Unconfirmed SI numbers by branch">
       <div class="unconfirmedBranchHead">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div class="unconfirmedBranchTitle">UNCONFIRMED</div>
+          <div>
+            <div class="unconfirmedBranchTitle">UNCONFIRMED BY BRANCH</div>
+            <div style="margin-top:4px;color:#64748b;font-size:10px;font-weight:700;">Count = different SI NO.</div>
+          </div>
           <button type="button" class="unconfirmedBranchClose" aria-label="Close" onclick="closeUnconfirmedBranchPopup()">✕</button>
         </div>
       </div>
@@ -6238,7 +6345,7 @@ async function openUnconfirmedBranchPopup(){
       <button
         type="button"
         class="unconfirmedBranchRow"
-        onclick="goToUnconfirmedBranch('${item.branch}')"
+        onclick="openUnconfirmedSIPopup('${item.branch}')"
       >
         <span class="unconfirmedBranchName">${escapeHtml(item.branch)}</span>
         <span class="unconfirmedBranchCount">${formatNumber(item.count)}</span>
@@ -6261,11 +6368,87 @@ function closeUnconfirmedBranchPopup(){
   }
 }
 
+function openUnconfirmedSIPopup(branch){
+
+  branch = String(branch || "").trim().toUpperCase();
+
+  if(!branch || !BRANCHES.includes(branch)){
+    return;
+  }
+
+  const existing = document.getElementById("unconfirmedBranchPopup");
+  if(existing){
+    existing.remove();
+  }
+
+  const backdrop = document.createElement("div");
+  backdrop.id = "unconfirmedBranchPopup";
+  backdrop.className = "modalBackdrop";
+
+  const siMap =
+    unconfirmedBranchSICounts[branch] || {};
+
+  const items = Object.keys(siMap).sort((a,b)=>
+    a.localeCompare(b, undefined, {numeric:true, sensitivity:"base"})
+  );
+
+  backdrop.innerHTML = `
+    <div class="modalCard unconfirmedSIPopup" role="dialog" aria-modal="true" aria-label="Unconfirmed SI numbers for ${escapeHtml(branch)}">
+      <div class="unconfirmedBranchHead">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div>
+            <div class="unconfirmedBranchTitle">${escapeHtml(branch)} — SI NO.</div>
+            <div style="margin-top:4px;color:#64748b;font-size:10px;font-weight:700;">Click an SI NO. to filter only that SI NO.</div>
+          </div>
+          <button type="button" class="unconfirmedBranchClose" aria-label="Close" onclick="closeUnconfirmedBranchPopup()">✕</button>
+        </div>
+      </div>
+      <div class="unconfirmedBranchList">
+        <div style="padding:8px 10px 4px;">
+          <button type="button" class="unconfirmedBackBtn" onclick="openUnconfirmedBranchPopup()">← Back to branches</button>
+        </div>
+        ${items.length ? items.map(si=>`
+          <button
+            type="button"
+            class="unconfirmedSIRow"
+            onclick="goToUnconfirmedSI('${escapeHtml(branch)}', '${escapeHtml(si).replace(/'/g, "&#39;")}')"
+          >
+            <span class="unconfirmedSIName">SI NO. ${escapeHtml(si)}</span>
+            <span class="unconfirmedSICount">${formatNumber(siMap[si])}</span>
+          </button>
+        `).join("") : `
+          <div class="unconfirmedBranchEmpty">No unconfirmed SI NO. found for ${escapeHtml(branch)}.</div>
+        `}
+      </div>
+    </div>
+  `;
+
+  backdrop.addEventListener("click", event=>{
+    if(event.target === backdrop){
+      closeUnconfirmedBranchPopup();
+    }
+  });
+
+  document.body.appendChild(backdrop);
+}
+
 function goToUnconfirmedBranch(branch){
 
   branch = String(branch || "").trim().toUpperCase();
 
   if(!branch || !BRANCHES.includes(branch)){
+    return;
+  }
+
+  openUnconfirmedSIPopup(branch);
+}
+
+function goToUnconfirmedSI(branch, si){
+
+  branch = String(branch || "").trim().toUpperCase();
+  si = String(si || "").trim();
+
+  if(!branch || !BRANCHES.includes(branch) || !si){
     return;
   }
 
@@ -6285,6 +6468,7 @@ function goToUnconfirmedBranch(branch){
   if(toEl) toEl.value = "";
   if(markEl) markEl.value = "UNMARKED";
 
+  unconfirmedSelectedSI = si;
   currentSearch = "";
   currentPage = 1;
   updateReportTitle();
@@ -6383,6 +6567,7 @@ function applySoldFilters(){
 
 function branchChanged(){
 
+  unconfirmedSelectedSI = "";
   currentPage = 1;
 
   updateReportTitle();
@@ -6487,7 +6672,9 @@ function resetDashboardDisplay(){
   }
   unconfirmedOverviewLoadedAt = 0;
   unconfirmedBranchCounts = {};
+  unconfirmedBranchSICounts = {};
   unconfirmedOverallTotal = 0;
+  unconfirmedSelectedSI = "";
 
   updateReportTitle();
 
@@ -6597,6 +6784,7 @@ function clearSearchField(){
 
   search.value = "";
   currentSearch = "";
+  unconfirmedSelectedSI = "";
   currentPage = 1;
   search.focus();
 }
@@ -7004,6 +7192,13 @@ async function deleteSelectedReport(
 ========================================================= */
 
 function runSearch(){
+
+  const searchValue =
+    cleanSearch(document.getElementById("search")?.value || "");
+
+  if(searchValue){
+    unconfirmedSelectedSI = "";
+  }
 
   currentPage = 1;
 

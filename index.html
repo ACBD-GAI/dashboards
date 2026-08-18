@@ -1548,7 +1548,7 @@ button{
   display:grid;
 
   grid-template-columns:
-    repeat(4,minmax(0,1fr));
+    repeat(5,minmax(0,1fr));
 
   gap:13px;
 
@@ -3702,6 +3702,33 @@ select:disabled{
 
         <div class="statHint">
           Recorded sales
+        </div>
+
+      </div>
+
+      <div class="statCard">
+
+        <div class="statTop">
+
+          <span class="statLabel">
+            UNCONFIRMED
+          </span>
+
+          <span class="statIcon">
+            !
+          </span>
+
+        </div>
+
+        <div
+          id="unconfirmedTotal"
+          class="statNumber"
+        >
+          —
+        </div>
+
+        <div class="statHint">
+          Sold items not yet marked
         </div>
 
       </div>
@@ -5976,6 +6003,8 @@ function updateSoldFilteredCounters(){
 
   let soldCount = visible.length;
   let soldAmount = 0;
+  let unconfirmedCount =
+    visible.filter(row => !row.marked).length;
 
   visible.forEach(row=>{
 
@@ -6009,6 +6038,14 @@ function updateSoldFilteredCounters(){
       formatPeso(soldAmount);
   }
 
+  const unconfirmedEl =
+    document.getElementById("unconfirmedTotal");
+
+  if(unconfirmedEl){
+    unconfirmedEl.textContent =
+      formatNumber(unconfirmedCount);
+  }
+
 }
 
 function applySoldFilters(){
@@ -6017,6 +6054,8 @@ function applySoldFilters(){
     totalRows = currentRows.length;
     currentPage = 1;
     renderCurrentPage();
+    const unconfirmedEl = document.getElementById("unconfirmedTotal");
+    if(unconfirmedEl) unconfirmedEl.textContent = "—";
     return;
   }
 
@@ -6140,6 +6179,12 @@ function resetDashboardDisplay(){
     .textContent =
       "—";
 
+  const unconfirmedReset =
+    document.getElementById("unconfirmedTotal");
+  if(unconfirmedReset){
+    unconfirmedReset.textContent = "—";
+  }
+
   updateReportTitle();
 
   updatePagination();
@@ -6215,6 +6260,12 @@ function silentlyClearReport(){
     .getElementById("showingTotal")
     .textContent =
       "—";
+
+  const unconfirmedReset =
+    document.getElementById("unconfirmedTotal");
+  if(unconfirmedReset){
+    unconfirmedReset.textContent = "—";
+  }
 
   document
     .getElementById("pageInfo")
@@ -6970,6 +7021,7 @@ async function updateStatsDirect(
   let available = 0;
   let sold = 0;
   let soldAmount = 0;
+  let unconfirmed = 0;
   let audit = 0;
 
   await Promise.all(
@@ -7106,6 +7158,9 @@ async function updateStatsDirect(
     sold =
       visibleSoldRows.length;
 
+    unconfirmed =
+      visibleSoldRows.filter(row => !row.marked).length;
+
     soldAmount = 0;
 
     visibleSoldRows.forEach(row=>{
@@ -7156,6 +7211,18 @@ async function updateStatsDirect(
       formatPeso(
         soldAmount
       );
+  }
+
+  const unconfirmedEl =
+    document.getElementById(
+      "unconfirmedTotal"
+    );
+
+  if(unconfirmedEl){
+    unconfirmedEl.textContent =
+      document.getElementById("sheet")?.value === "sold"
+        ? formatNumber(unconfirmed)
+        : "—";
   }
 
   document

@@ -3405,6 +3405,202 @@ select:disabled{
 
 }
 
+
+/* =========================================================
+   BRANCH USERS / ALLOWED USERS ADMIN
+========================================================= */
+.allowedUsersModal{
+  width:min(760px,96vw);
+  padding:0;
+  overflow:hidden;
+}
+
+.allowedUsersHead{
+  padding:20px 22px 15px;
+  border-bottom:1px solid #e5edf3;
+  background:linear-gradient(135deg,#f8fcff,#f5f3ff);
+}
+
+.allowedUsersHeadRow{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.allowedUsersTitle{
+  color:#102033;
+  font-size:18px;
+  font-weight:900;
+}
+
+.allowedUsersSub{
+  margin-top:5px;
+  color:#647b89;
+  font-size:11px;
+  line-height:1.5;
+}
+
+.allowedUsersToolbar{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+  padding:14px 18px;
+  border-bottom:1px solid #e5edf3;
+  background:#fbfdff;
+}
+
+.allowedUsersSearch{
+  flex:1 1 240px;
+  min-height:40px;
+  padding:0 12px;
+  border:1px solid #c9dce8;
+  border-radius:11px;
+  outline:none;
+  background:#fff;
+  color:#173247;
+  font-size:11px;
+  font-weight:700;
+}
+
+.allowedUsersSearch:focus{
+  border-color:#38aee2;
+  box-shadow:0 0 0 4px rgba(56,189,248,.10);
+}
+
+.allowedUsersBranchFilter{
+  width:170px;
+  min-height:40px;
+}
+
+.allowedUsersCount{
+  padding:8px 10px;
+  border-radius:9px;
+  background:#eef7ff;
+  border:1px solid #c9e2f4;
+  color:#0369a1;
+  font-size:10px;
+  font-weight:900;
+}
+
+.allowedUsersList{
+  max-height:470px;
+  overflow:auto;
+  background:#fff;
+}
+
+.allowedUsersTable{
+  width:100%;
+  min-width:560px;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+.allowedUsersTable th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:11px 13px;
+  text-align:left;
+  color:#315267;
+  background:linear-gradient(180deg,#f0f8fc,#e8f2f7);
+  border-bottom:1px solid #cfdfe8;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.allowedUsersTable td{
+  padding:11px 13px;
+  color:#203443;
+  background:#fff;
+  border-bottom:1px solid #e7eef3;
+  font-size:11px;
+  white-space:nowrap;
+  vertical-align:middle;
+}
+
+.allowedUsersTable tr:hover td{
+  background:#f5faff;
+}
+
+.allowedUserBranchTag{
+  display:inline-flex;
+  align-items:center;
+  min-height:25px;
+  padding:4px 9px;
+  border-radius:8px;
+  color:#1d4ed8;
+  background:#eff6ff;
+  border:1px solid #cfe0ff;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+
+.allowedUserEmail{
+  font-weight:800;
+  color:#18384c;
+}
+
+.allowedUserActions{
+  display:flex;
+  gap:6px;
+  justify-content:flex-end;
+}
+
+.allowedUserEditBtn{
+  color:#0369a1;
+  border-color:#bae6fd;
+  background:#f0f9ff;
+}
+
+.allowedUserDeleteBtn{
+  color:#b91c1c;
+  border-color:#fecaca;
+  background:#fff1f2;
+}
+
+.allowedUserDeleteBtn:hover{
+  color:#fff;
+  border-color:#dc2626;
+  background:#dc2626;
+}
+
+.allowedUsersEmpty{
+  padding:42px 18px;
+  text-align:center;
+  color:#64748b;
+  font-size:11px;
+}
+
+.allowedUserFormGrid{
+  display:grid;
+  grid-template-columns:1fr 190px;
+  gap:12px;
+}
+
+.allowedUserEditStatus{
+  min-height:18px;
+  margin-top:7px;
+  color:#64748b;
+  font-size:10px;
+  font-weight:700;
+}
+
+@media(max-width:650px){
+  .allowedUserFormGrid{
+    grid-template-columns:1fr;
+  }
+  .allowedUsersToolbar{
+    align-items:stretch;
+  }
+  .allowedUsersBranchFilter{
+    width:100%;
+  }
+}
+
 </style>
 
 
@@ -3782,6 +3978,15 @@ select:disabled{
         style="display:none; align-items:center; justify-content:center;"
       >
         👥 Active Users
+      </button>
+
+      <button
+        id="allowedUsersBtn"
+        class="controlBtn"
+        onclick="openAllowedUsersModal()"
+        style="display:none; align-items:center; justify-content:center;"
+      >
+        👥 Branch Users
       </button>
 
       <input
@@ -4246,6 +4451,177 @@ select:disabled{
 
   </div>
 
+</div>
+
+
+<!-- =========================================================
+     BRANCH USERS / ALLOWED USERS MODAL
+========================================================= -->
+<div
+  id="allowedUsersModal"
+  class="modalBackdrop hidden"
+>
+  <div class="modalCard allowedUsersModal">
+
+    <div class="allowedUsersHead">
+      <div class="allowedUsersHeadRow">
+        <div>
+          <div class="allowedUsersTitle">
+            Branch Users
+          </div>
+          <div class="allowedUsersSub">
+            View, edit, and delete authorized branch email accounts.
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="controlBtn"
+          onclick="closeAllowedUsersModal()"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <div class="allowedUsersToolbar">
+      <select
+        id="allowedUsersBranchFilter"
+        class="select allowedUsersBranchFilter"
+        onchange="filterAllowedUsers()"
+      >
+        <option value="ALL">ALL BRANCHES</option>
+      </select>
+
+      <input
+        id="allowedUsersSearch"
+        class="allowedUsersSearch"
+        type="search"
+        placeholder="Search email..."
+        autocomplete="off"
+        oninput="filterAllowedUsers()"
+      >
+
+      <span
+        id="allowedUsersCount"
+        class="allowedUsersCount"
+      >
+        0 USERS
+      </span>
+
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="loadAllowedUsers()"
+      >
+        ↻ Refresh
+      </button>
+    </div>
+
+    <div
+      id="allowedUsersStatus"
+      class="loginStatus"
+      style="margin:0 18px 8px;"
+    ></div>
+
+    <div class="allowedUsersList">
+      <table class="allowedUsersTable">
+        <thead>
+          <tr>
+            <th>BRANCH</th>
+            <th>USER EMAIL</th>
+            <th style="text-align:right;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="allowedUsersTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="modalActions">
+      <button
+        type="button"
+        class="controlBtn primary"
+        onclick="openAddUserModal()"
+      >
+        ＋ Add User
+      </button>
+
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="closeAllowedUsersModal()"
+      >
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =========================================================
+     EDIT BRANCH USER MODAL
+========================================================= -->
+<div
+  id="editAllowedUserModal"
+  class="modalBackdrop hidden"
+>
+  <div class="modalCard">
+
+    <div class="modalTitle">
+      Edit Branch User
+    </div>
+
+    <div class="modalSub">
+      Change the user's email address or assigned branch.
+    </div>
+
+    <div class="allowedUserFormGrid">
+
+      <div class="field">
+        <label>USER EMAIL</label>
+        <input
+          id="editAllowedUserEmail"
+          class="input"
+          type="email"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="field">
+        <label>BRANCH</label>
+        <select
+          id="editAllowedUserBranch"
+          class="select"
+        ></select>
+      </div>
+
+    </div>
+
+    <div
+      id="editAllowedUserStatus"
+      class="allowedUserEditStatus"
+    ></div>
+
+    <div class="modalActions">
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="closeEditAllowedUserModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        id="saveEditedAllowedUserBtn"
+        class="controlBtn primary"
+        onclick="saveEditedAllowedUser()"
+      >
+        Save Changes
+      </button>
+    </div>
+
+  </div>
 </div>
 
 <div id="queuePanel"></div>
@@ -5027,6 +5403,14 @@ function showDashboard(){
 
   if(activeUsersBtn){
     activeUsersBtn.style.display =
+      currentAdmin ? "inline-flex" : "none";
+  }
+
+  const allowedUsersBtn =
+    document.getElementById("allowedUsersBtn");
+
+  if(allowedUsersBtn){
+    allowedUsersBtn.style.display =
       currentAdmin ? "inline-flex" : "none";
   }
 
@@ -10618,6 +11002,400 @@ function formatPeso(
     );
 
 }
+
+
+/* =========================================================
+   BRANCH USERS / ALLOWED USERS — ADMIN ONLY
+========================================================= */
+
+let allowedUsersRows = [];
+let editingAllowedUserId = "";
+
+function allowedUserBranchOptions(selected=""){
+  return BRANCHES.map(branch =>
+    `<option value="${escapeHtml(branch)}" ${
+      String(branch).toUpperCase() === String(selected).toUpperCase()
+        ? "selected"
+        : ""
+    }>${escapeHtml(branch)}</option>`
+  ).join("");
+}
+
+function openAllowedUsersModal(){
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  const modal=document.getElementById("allowedUsersModal");
+  if(!modal)return;
+
+  const filter=document.getElementById("allowedUsersBranchFilter");
+  if(filter && filter.options.length===1){
+    filter.innerHTML =
+      '<option value="ALL">ALL BRANCHES</option>'+
+      BRANCHES.map(b =>
+        `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`
+      ).join("");
+  }
+
+  const search=document.getElementById("allowedUsersSearch");
+  if(search)search.value="";
+
+  modal.classList.remove("hidden");
+  loadAllowedUsers();
+}
+
+function closeAllowedUsersModal(){
+  const modal=document.getElementById("allowedUsersModal");
+  if(modal)modal.classList.add("hidden");
+}
+
+async function loadAllowedUsers(){
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  if(!sessionId){
+    showStatus("Session expired. Please login again.");
+    return;
+  }
+
+  const body=document.getElementById("allowedUsersTableBody");
+  const status=document.getElementById("allowedUsersStatus");
+
+  if(body){
+    body.innerHTML=`
+      <tr>
+        <td colspan="3" class="allowedUsersEmpty">
+          Loading branch users...
+        </td>
+      </tr>`;
+  }
+
+  if(status)status.textContent="Loading authorized branch users...";
+
+  try{
+    const data=await loginApiGet(
+      "getAllowedUsers",
+      {sessionId:sessionId}
+    );
+
+    if(!data || data.ok!==true){
+      throw new Error(
+        data?.error || "Unable to load branch users."
+      );
+    }
+
+    allowedUsersRows=Array.isArray(data.users)
+      ? data.users
+      : [];
+
+    filterAllowedUsers();
+
+    if(status){
+      status.textContent =
+        allowedUsersRows.length +
+        (allowedUsersRows.length===1 ? " user" : " users") +
+        " found.";
+    }
+
+  }catch(error){
+    console.error("Allowed users error:",error);
+
+    if(status){
+      status.textContent="";
+    }
+
+    if(body){
+      body.innerHTML=`
+        <tr>
+          <td colspan="3" class="allowedUsersEmpty" style="color:#dc2626;">
+            ${escapeHtml(error?.message || String(error))}
+          </td>
+        </tr>`;
+    }
+  }
+}
+
+function filterAllowedUsers(){
+  const body=document.getElementById("allowedUsersTableBody");
+  const branchFilter=
+    String(document.getElementById("allowedUsersBranchFilter")?.value || "ALL")
+      .trim().toUpperCase();
+
+  const search=
+    String(document.getElementById("allowedUsersSearch")?.value || "")
+      .trim().toLowerCase();
+
+  if(!body)return;
+
+  const rows=allowedUsersRows.filter(user=>{
+    const branch=
+      String(user.branch||"").trim().toUpperCase();
+
+    const email=
+      String(user.email||"").trim().toLowerCase();
+
+    if(branchFilter!=="ALL" && branch!==branchFilter)return false;
+    if(search && !email.includes(search))return false;
+
+    return true;
+  });
+
+  const count=document.getElementById("allowedUsersCount");
+  if(count){
+    count.textContent =
+      rows.length +
+      (rows.length===1 ? " USER" : " USERS");
+  }
+
+  if(!rows.length){
+    body.innerHTML=`
+      <tr>
+        <td colspan="3" class="allowedUsersEmpty">
+          No branch users found.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  body.innerHTML=rows.map(user=>{
+    const id=String(user.id||"");
+    const branch=String(user.branch||"").trim().toUpperCase();
+    const email=String(user.email||"").trim().toLowerCase();
+
+    return `
+      <tr>
+        <td>
+          <span class="allowedUserBranchTag">
+            ${escapeHtml(branch)}
+          </span>
+        </td>
+
+        <td class="allowedUserEmail">
+          ${escapeHtml(email)}
+        </td>
+
+        <td>
+          <div class="allowedUserActions">
+
+            <button
+              type="button"
+              class="actionBtn allowedUserEditBtn"
+              onclick="openEditAllowedUserModal('${escapeHtmlAttribute(id)}')"
+            >
+              ✎ Edit
+            </button>
+
+            <button
+              type="button"
+              class="actionBtn allowedUserDeleteBtn"
+              onclick="deleteAllowedUser('${escapeHtmlAttribute(id)}')"
+            >
+              ✕ Delete
+            </button>
+
+          </div>
+        </td>
+      </tr>`;
+  }).join("");
+}
+
+function openEditAllowedUserModal(id){
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  const user=allowedUsersRows.find(
+    x=>String(x.id)===String(id)
+  );
+
+  if(!user){
+    showStatus("User record was not found.");
+    return;
+  }
+
+  editingAllowedUserId=String(user.id||"");
+
+  const email=document.getElementById("editAllowedUserEmail");
+  const branch=document.getElementById("editAllowedUserBranch");
+  const status=document.getElementById("editAllowedUserStatus");
+  const modal=document.getElementById("editAllowedUserModal");
+  const button=document.getElementById("saveEditedAllowedUserBtn");
+
+  if(email)email.value=String(user.email||"");
+  if(branch){
+    branch.innerHTML=allowedUserBranchOptions(
+      String(user.branch||"")
+    );
+  }
+  if(status)status.textContent="";
+  if(button){
+    button.disabled=false;
+    button.textContent="Save Changes";
+  }
+
+  if(modal)modal.classList.remove("hidden");
+
+  setTimeout(()=>email?.focus(),50);
+}
+
+function closeEditAllowedUserModal(){
+  const modal=document.getElementById("editAllowedUserModal");
+  if(modal)modal.classList.add("hidden");
+  editingAllowedUserId="";
+}
+
+async function saveEditedAllowedUser(){
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  if(!sessionId){
+    showStatus("Session expired. Please login again.");
+    return;
+  }
+
+  const id=String(editingAllowedUserId||"").trim();
+  const email=
+    String(document.getElementById("editAllowedUserEmail")?.value||"")
+      .trim().toLowerCase();
+  const branch=
+    String(document.getElementById("editAllowedUserBranch")?.value||"")
+      .trim().toUpperCase();
+
+  const status=document.getElementById("editAllowedUserStatus");
+  const button=document.getElementById("saveEditedAllowedUserBtn");
+
+  if(!id){
+    if(status)status.textContent="User record is missing.";
+    return;
+  }
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    if(status)status.textContent="Enter a valid email address.";
+    return;
+  }
+
+  if(!BRANCHES.includes(branch)){
+    if(status)status.textContent="Select a valid branch.";
+    return;
+  }
+
+  if(button){
+    button.disabled=true;
+    button.textContent="Saving...";
+  }
+  if(status)status.textContent="Saving changes...";
+
+  try{
+    const data=await loginApiGet(
+      "editAllowedUser",
+      {
+        sessionId:sessionId,
+        id:id,
+        email:email,
+        branch:branch
+      }
+    );
+
+    if(!data || data.ok!==true){
+      throw new Error(
+        data?.error || "Unable to update user."
+      );
+    }
+
+    if(status)status.textContent="User updated successfully.";
+
+    showStatus(
+      email + " is now assigned to " + branch + "."
+    );
+
+    setTimeout(async()=>{
+      closeEditAllowedUserModal();
+      await loadAllowedUsers();
+    },400);
+
+  }catch(error){
+    console.error("Edit allowed user failed:",error);
+
+    if(status){
+      status.textContent=
+        error?.message || "Unable to update user.";
+    }
+  }finally{
+    if(button){
+      button.disabled=false;
+      button.textContent="Save Changes";
+    }
+  }
+}
+
+async function deleteAllowedUser(id){
+  if(!currentAdmin){
+    showStatus("Administrator access required.");
+    return;
+  }
+
+  if(!sessionId){
+    showStatus("Session expired. Please login again.");
+    return;
+  }
+
+  const user=allowedUsersRows.find(
+    x=>String(x.id)===String(id)
+  );
+
+  if(!user){
+    showStatus("User record was not found.");
+    return;
+  }
+
+  const email=
+    String(user.email||"").trim().toLowerCase();
+  const branch=
+    String(user.branch||"").trim().toUpperCase();
+
+  const confirmed=window.confirm(
+    "Delete " + email + " from " + branch + "?\n\n" +
+    "This removes the branch user from the allowed user list."
+  );
+
+  if(!confirmed)return;
+
+  try{
+    const data=await loginApiGet(
+      "deleteAllowedUser",
+      {
+        sessionId:sessionId,
+        id:String(id)
+      }
+    );
+
+    if(!data || data.ok!==true){
+      throw new Error(
+        data?.error || "Unable to delete user."
+      );
+    }
+
+    showStatus(
+      email + " was removed from " + branch + "."
+    );
+
+    await loadAllowedUsers();
+
+  }catch(error){
+    console.error("Delete allowed user failed:",error);
+    showStatus(
+      error?.message || "Unable to delete user."
+    );
+  }
+}
+
 
 /* =========================================================
    ESCAPE HTML

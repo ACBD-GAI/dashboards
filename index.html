@@ -5960,6 +5960,57 @@ function getVisibleRows(){
 
 }
 
+function updateSoldFilteredCounters(){
+
+  /*
+   * SOLD OUT counters must follow the SAME rows currently
+   * visible after date / marked / unmarked filtering.
+   *
+   * This does NOT change AVAILABLE or AUDITED totals.
+   */
+  if(document.getElementById("sheet")?.value !== "sold"){
+    return;
+  }
+
+  const visible = getVisibleRows();
+
+  let soldCount = visible.length;
+  let soldAmount = 0;
+
+  visible.forEach(row=>{
+
+    const value =
+      String(row?.sellingPrice ?? "")
+        .replace(/,/g,"")
+        .replace(/₱/g,"")
+        .trim();
+
+    const amount = Number(value);
+
+    if(Number.isFinite(amount)){
+      soldAmount += amount;
+    }
+
+  });
+
+  const soldEl =
+    document.getElementById("soldTotal");
+
+  if(soldEl){
+    soldEl.textContent =
+      formatNumber(soldCount);
+  }
+
+  const amountEl =
+    document.getElementById("soldAmount");
+
+  if(amountEl){
+    amountEl.textContent =
+      formatPeso(soldAmount);
+  }
+
+}
+
 function applySoldFilters(){
 
   if(document.getElementById("sheet")?.value !== "sold"){
@@ -5981,6 +6032,12 @@ function applySoldFilters(){
   }
 
   renderCurrentPage();
+
+  /*
+   * Keep SOLD OUT count and peso total synchronized
+   * with the filtered result.
+   */
+  updateSoldFilteredCounters();
 
 }
 
@@ -7032,6 +7089,41 @@ async function updateStatsDirect(
   ){
 
     return;
+
+  }
+
+  /*
+   * SOLD OUT statistics follow the CURRENT RESULT,
+   * including search + date + marked/unmarked filters.
+   *
+   * AVAILABLE and AUDITED remain global branch totals.
+   */
+  if(document.getElementById("sheet")?.value === "sold"){
+
+    const visibleSoldRows =
+      getVisibleRows();
+
+    sold =
+      visibleSoldRows.length;
+
+    soldAmount = 0;
+
+    visibleSoldRows.forEach(row=>{
+
+      const value =
+        String(row?.sellingPrice ?? "")
+          .replace(/,/g,"")
+          .replace(/₱/g,"")
+          .trim();
+
+      const amount =
+        Number(value);
+
+      if(Number.isFinite(amount)){
+        soldAmount += amount;
+      }
+
+    });
 
   }
 

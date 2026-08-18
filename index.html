@@ -2144,6 +2144,111 @@ tbody tr:last-child td{
 
 
 /* =========================================================
+   UNCONFIRMED CLICKABLE COUNTER
+========================================================= */
+
+.unconfirmedStatCard{
+  cursor:pointer;
+  user-select:none;
+}
+
+.unconfirmedStatCard:focus-visible{
+  outline:3px solid rgba(37,99,235,.22);
+  outline-offset:3px;
+}
+
+.unconfirmedStatCard .statIcon{
+  color:#d97706;
+  background:linear-gradient(135deg,#fff7ed,#fff1f2);
+  border-color:#fed7aa;
+}
+
+.unconfirmedBranchModal{
+  width:min(430px,100%);
+  padding:0;
+  overflow:hidden;
+}
+
+.unconfirmedBranchHead{
+  padding:18px 20px 14px;
+  border-bottom:1px solid #e5edf3;
+  background:linear-gradient(135deg,#f8fcff,#f5f3ff);
+}
+
+.unconfirmedBranchTitle{
+  color:#102033;
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:.02em;
+}
+
+.unconfirmedBranchList{
+  max-height:430px;
+  overflow-y:auto;
+  padding:8px 10px;
+  background:#fff;
+}
+
+.unconfirmedBranchRow{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:13px 12px;
+  margin:2px 0;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:#fff;
+  cursor:pointer;
+  text-align:left;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease;
+}
+
+.unconfirmedBranchRow:hover{
+  background:#f5faff;
+  border-color:#cfe4f2;
+  transform:translateX(2px);
+}
+
+.unconfirmedBranchName{
+  color:#24465b;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.06em;
+}
+
+.unconfirmedBranchCount{
+  min-width:38px;
+  padding:6px 9px;
+  border-radius:9px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#c2410c;
+  font-size:12px;
+  font-weight:900;
+  text-align:center;
+}
+
+.unconfirmedBranchClose{
+  border:0;
+  background:transparent;
+  color:#64748b;
+  font-size:18px;
+  line-height:1;
+  cursor:pointer;
+  padding:4px;
+}
+
+.unconfirmedBranchLoading,
+.unconfirmedBranchEmpty{
+  padding:28px 15px;
+  text-align:center;
+  color:#64748b;
+  font-size:11px;
+}
+
+/* =========================================================
    EMPTY STATE
 ========================================================= */
 
@@ -3706,7 +3811,15 @@ select:disabled{
 
       </div>
 
-      <div class="statCard">
+      <div
+        class="statCard unconfirmedStatCard"
+        id="unconfirmedStatCard"
+        role="button"
+        tabindex="0"
+        onclick="openUnconfirmedBranchPopup()"
+        onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openUnconfirmedBranchPopup(); }"
+        title="View unconfirmed items by branch"
+      >
 
         <div class="statTop">
 
@@ -4181,6 +4294,16 @@ let currentSearch = "";
 let isLoading = false;
 
 let sessionMonitorTimer = null;
+
+/* =========================================================
+   UNCONFIRMED OVERVIEW
+   Overall unconfirmed count + branch breakdown.
+========================================================= */
+
+let unconfirmedBranchCounts = {};
+let unconfirmedOverallTotal = 0;
+let unconfirmedOverviewLoadedAt = 0;
+let unconfirmedOverviewPromise = null;
 
 /* =========================================================
    LOGIN API
@@ -5987,6 +6110,188 @@ function getVisibleRows(){
 
 }
 
+async function loadUnconfirmedOverview(force = false){
+
+  const now = Date.now();
+
+  if(
+    !force &&
+    unconfirmedOverviewLoadedAt &&
+    (now - unconfirmedOverviewLoadedAt) < 10000
+  ){
+    updateUnconfirmedCounterDisplay();
+    return {
+      total: unconfirmedOverallTotal,
+      branches: { ...unconfirmedBranchCounts }
+    };
+  }
+
+  if(unconfirmedOverviewPromise){
+    return unconfirmedOverviewPromise;
+  }
+
+  unconfirmedOverviewPromise = (async ()=>{
+
+    const counts = {};
+
+    await Promise.all(
+      BRANCHES.map(async branch=>{
+
+        try{
+          const rows = await fetchAllRowsForStats(
+            tableName(branch, "sold"),
+            "STATUS"
+          );
+
+          counts[branch] = rows.filter(row=>
+            String(row?.STATUS ?? "").trim().toUpperCase() !== "MARKED"
+          ).length;
+
+        }catch(error){
+          console.error(
+            "Unconfirmed count failed for " + branch + ":",
+            error
+          );
+          counts[branch] = 0;
+        }
+
+      })
+    );
+
+    unconfirmedBranchCounts = counts;
+    unconfirmedOverallTotal = BRANCHES.reduce(
+      (sum, branch)=>sum + Number(counts[branch] || 0),
+      0
+    );
+    unconfirmedOverviewLoadedAt = Date.now();
+
+    updateUnconfirmedCounterDisplay();
+
+    return {
+      total: unconfirmedOverallTotal,
+      branches: { ...unconfirmedBranchCounts }
+    };
+
+  })().finally(()=>{
+    unconfirmedOverviewPromise = null;
+  });
+
+  return unconfirmedOverviewPromise;
+}
+
+function updateUnconfirmedCounterDisplay(){
+
+  const el = document.getElementById("unconfirmedTotal");
+
+  if(el){
+    el.textContent = formatNumber(unconfirmedOverallTotal);
+  }
+
+}
+
+async function openUnconfirmedBranchPopup(){
+
+  const existing = document.getElementById("unconfirmedBranchPopup");
+  if(existing){
+    existing.remove();
+  }
+
+  const backdrop = document.createElement("div");
+  backdrop.id = "unconfirmedBranchPopup";
+  backdrop.className = "modalBackdrop";
+  backdrop.innerHTML = `
+    <div class="modalCard unconfirmedBranchModal" role="dialog" aria-modal="true" aria-label="Unconfirmed items by branch">
+      <div class="unconfirmedBranchHead">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div class="unconfirmedBranchTitle">UNCONFIRMED</div>
+          <button type="button" class="unconfirmedBranchClose" aria-label="Close" onclick="closeUnconfirmedBranchPopup()">✕</button>
+        </div>
+      </div>
+      <div id="unconfirmedBranchList" class="unconfirmedBranchList">
+        <div class="unconfirmedBranchLoading">Loading...</div>
+      </div>
+    </div>
+  `;
+
+  backdrop.addEventListener("click", event=>{
+    if(event.target === backdrop){
+      closeUnconfirmedBranchPopup();
+    }
+  });
+
+  document.body.appendChild(backdrop);
+
+  try{
+    const data = await loadUnconfirmedOverview(true);
+    const list = document.getElementById("unconfirmedBranchList");
+
+    if(!list){
+      return;
+    }
+
+    const branches = BRANCHES.map(branch=>({
+      branch,
+      count: Number(data.branches[branch] || 0)
+    }));
+
+    list.innerHTML = branches.map(item=>`
+      <button
+        type="button"
+        class="unconfirmedBranchRow"
+        onclick="goToUnconfirmedBranch('${item.branch}')"
+      >
+        <span class="unconfirmedBranchName">${escapeHtml(item.branch)}</span>
+        <span class="unconfirmedBranchCount">${formatNumber(item.count)}</span>
+      </button>
+    `).join("");
+
+  }catch(error){
+    console.error("Unconfirmed branch popup failed:", error);
+    const list = document.getElementById("unconfirmedBranchList");
+    if(list){
+      list.innerHTML = `<div class="unconfirmedBranchEmpty">Unable to load unconfirmed items.</div>`;
+    }
+  }
+}
+
+function closeUnconfirmedBranchPopup(){
+  const popup = document.getElementById("unconfirmedBranchPopup");
+  if(popup){
+    popup.remove();
+  }
+}
+
+function goToUnconfirmedBranch(branch){
+
+  branch = String(branch || "").trim().toUpperCase();
+
+  if(!branch || !BRANCHES.includes(branch)){
+    return;
+  }
+
+  closeUnconfirmedBranchPopup();
+
+  const branchEl = document.getElementById("branch");
+  const sheetEl = document.getElementById("sheet");
+  const searchEl = document.getElementById("search");
+  const fromEl = document.getElementById("soldDateFrom");
+  const toEl = document.getElementById("soldDateTo");
+  const markEl = document.getElementById("soldMarkFilter");
+
+  if(branchEl) branchEl.value = branch;
+  if(sheetEl) sheetEl.value = "sold";
+  if(searchEl) searchEl.value = "";
+  if(fromEl) fromEl.value = "";
+  if(toEl) toEl.value = "";
+  if(markEl) markEl.value = "UNMARKED";
+
+  currentSearch = "";
+  currentPage = 1;
+  updateReportTitle();
+  updateSoldOnlyColumns();
+  runSearch();
+}
+
 function updateSoldFilteredCounters(){
 
   /*
@@ -6003,9 +6308,6 @@ function updateSoldFilteredCounters(){
 
   let soldCount = visible.length;
   let soldAmount = 0;
-  let unconfirmedCount =
-    visible.filter(row => !row.marked).length;
-
   visible.forEach(row=>{
 
     const value =
@@ -6038,13 +6340,12 @@ function updateSoldFilteredCounters(){
       formatPeso(soldAmount);
   }
 
-  const unconfirmedEl =
-    document.getElementById("unconfirmedTotal");
-
-  if(unconfirmedEl){
-    unconfirmedEl.textContent =
-      formatNumber(unconfirmedCount);
-  }
+  /*
+   * UNCONFIRMED is an overall cross-branch counter.
+   * It is intentionally NOT reduced by the current SOLD OUT
+   * date/mark/search filters. Click it to see the branch breakdown.
+   */
+  updateUnconfirmedCounterDisplay();
 
 }
 
@@ -6184,6 +6485,9 @@ function resetDashboardDisplay(){
   if(unconfirmedReset){
     unconfirmedReset.textContent = "—";
   }
+  unconfirmedOverviewLoadedAt = 0;
+  unconfirmedBranchCounts = {};
+  unconfirmedOverallTotal = 0;
 
   updateReportTitle();
 
@@ -6266,6 +6570,9 @@ function silentlyClearReport(){
   if(unconfirmedReset){
     unconfirmedReset.textContent = "—";
   }
+  unconfirmedOverviewLoadedAt = 0;
+  unconfirmedBranchCounts = {};
+  unconfirmedOverallTotal = 0;
 
   document
     .getElementById("pageInfo")
@@ -7158,9 +7465,6 @@ async function updateStatsDirect(
     sold =
       visibleSoldRows.length;
 
-    unconfirmed =
-      visibleSoldRows.filter(row => !row.marked).length;
-
     soldAmount = 0;
 
     visibleSoldRows.forEach(row=>{
@@ -7213,17 +7517,13 @@ async function updateStatsDirect(
       );
   }
 
-  const unconfirmedEl =
-    document.getElementById(
-      "unconfirmedTotal"
-    );
-
-  if(unconfirmedEl){
-    unconfirmedEl.textContent =
-      document.getElementById("sheet")?.value === "sold"
-        ? formatNumber(unconfirmed)
-        : "—";
-  }
+  /*
+   * UNCONFIRMED is always the overall total across all branches.
+   * The branch popup provides the per-branch breakdown.
+   */
+  loadUnconfirmedOverview(false).catch(error=>{
+    console.error("Unconfirmed overview refresh failed:", error);
+  });
 
   document
     .getElementById(
@@ -7931,6 +8231,11 @@ async function saveSoldMark(button){
     );
 
     applySoldFilters();
+
+    unconfirmedOverviewLoadedAt = 0;
+    loadUnconfirmedOverview(true).catch(error=>{
+      console.error("Unconfirmed overview refresh failed:", error);
+    });
 
   }catch(error){
 

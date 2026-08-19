@@ -4837,7 +4837,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbzZ6vx_lwTv97rmxl_DsaJjKE94whUBiniLjl7k51okoAlxypSchH6LXD8xHzGTlPA8/exec";
+  "https://script.google.com/macros/s/AKfycbztkVDkjg6wIlCG99zVRUZbD_SYdiCs4CKrvtQyu8GsbxlLCu-1sYynIWoILTfPw1ee/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -5333,6 +5333,13 @@ async function checkExistingSession(){
 
     if(
       data &&
+      data.temporaryError === true
+    ){
+      return true;
+    }
+
+    if(
+      data &&
       data.ok &&
       data.email
     ){
@@ -5468,8 +5475,7 @@ function startSessionMonitor(){
 
   /*
    * Refresh the Dashboard session every 20 seconds.
-   * The Apps Script heartbeat refreshes both CacheService
-   * and the persistent Dashboard session backup.
+   * The Dashboard session is stored and refreshed in Supabase.
    */
   sessionMonitorTimer =
     setInterval(async ()=>{
@@ -7456,20 +7462,9 @@ function updateSoldFilteredCounters(){
 
   const visible = getVisibleRows();
 
-  /*
-   * SOLD COUNTER = MARKED SOLD ITEMS ONLY.
-   * The table may show ALL / MARKED / UNMARKED,
-   * but the main SOLD counter only counts rows
-   * that are actually marked.
-   */
-  const markedVisible =
-    visible.filter(
-      row => row.marked === true
-    );
-
-  let soldCount = markedVisible.length;
+  let soldCount = visible.length;
   let soldAmount = 0;
-  markedVisible.forEach(row=>{
+  visible.forEach(row=>{
 
     const value =
       String(row?.sellingPrice ?? "")
@@ -9525,6 +9520,95 @@ function openStockEditModal(
 
   const raw = row.raw;
 
+  /* =========================================================
+     STOCK EDIT FIELDS A-V ONLY
+
+     A  SDATE
+     B  SUPPLIER
+     C  DR
+     D  COST
+     E  ASG
+     F  CB
+     G  FD
+     H  UNITS
+     I  POWER
+     J  LENSTYPE
+     K  PUNIT
+     L  BR
+     M  NTAGN
+     N  CATEGORY
+     O  DESCRIPTION
+     P  LENSCODE
+     Q  SELLINGPRICE
+     R  DELIVERYDATE
+     S  ORNUMBER
+     T  ORDATE
+     U  REMARKS
+     V  TAGPRICE
+
+     W onward are NEVER shown in the edit window.
+     Blank A-V fields are also NOT shown.
+  ========================================================= */
+
+  const editFields = [
+    ["A", "SDATE"],
+    ["B", "SUPPLIER"],
+    ["C", "DR"],
+    ["D", "COST"],
+    ["E", "ASG"],
+    ["F", "CB"],
+    ["G", "FD"],
+    ["H", "UNITS"],
+    ["I", "POWER"],
+    ["J", "LENSTYPE"],
+    ["K", "PUNIT"],
+    ["L", "BR"],
+    ["M", "NTAGN"],
+    ["N", "CATEGORY"],
+    ["O", "DESCRIPTION"],
+    ["P", "LENSCODE"],
+    ["Q", "SELLINGPRICE"],
+    ["R", "DELIVERYDATE"],
+    ["S", "ORNUMBER"],
+    ["T", "ORDATE"],
+    ["U", "REMARKS"],
+    ["V", "TAGPRICE"]
+  ];
+
+  const escapeValue = key =>
+    escapeHtmlAttribute(
+      raw[key] == null ? "" : String(raw[key])
+    );
+
+  const hasValue = key =>
+    raw[key] !== null &&
+    raw[key] !== undefined &&
+    String(raw[key]).trim() !== "";
+
+  const fieldHtml = editFields
+    .filter(([letter,key]) => hasValue(key))
+    .map(([letter,key]) => {
+      const inputId = "stockEdit_" + letter;
+      const numberInput =
+        key === "COST" ||
+        key === "SELLINGPRICE" ||
+        key === "TAGPRICE";
+
+      return `
+        <label style="font-size:12px;font-weight:700;color:#475569;">
+          ${letter} • ${escapeHtml(String(key))}
+          <input
+            id="${inputId}"
+            data-stock-key="${escapeHtmlAttribute(key)}"
+            value="${escapeValue(key)}"
+            ${numberInput ? 'inputmode="decimal"' : ''}
+            style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;"
+          >
+        </label>
+      `;
+    })
+    .join("");
+
   const modal =
     document.createElement("div");
 
@@ -9535,43 +9619,19 @@ function openStockEditModal(
     background:rgba(15,23,42,.62);padding:20px;
   `;
 
-  const value = key =>
-    escapeHtmlAttribute(
-      raw[key] == null ? "" : String(raw[key])
-    );
-
   modal.innerHTML = `
-    <div style="width:min(620px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.25);">
+    <div style="width:min(760px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.25);">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;">
         <div>
           <div style="font-size:20px;font-weight:800;color:#0f172a;">Edit Stock</div>
           <div style="font-size:13px;color:#64748b;margin-top:4px;">${escapeHtml(String(branch))} • ${escapeHtml(String(tag))}</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:5px;">Only fields A-V containing data are shown.</div>
         </div>
         <button type="button" id="stockEditClose" style="border:0;background:#f1f5f9;border-radius:10px;width:36px;height:36px;font-size:20px;cursor:pointer;">×</button>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <label style="font-size:12px;font-weight:700;color:#475569;">LENS TYPE
-          <input id="stockEditLenstype" value="${value("LENSTYPE")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
-        </label>
-        <label style="font-size:12px;font-weight:700;color:#475569;">NTAGN
-          <input id="stockEditTag" value="${value("NTAGN")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
-        </label>
-        <label style="grid-column:1/-1;font-size:12px;font-weight:700;color:#475569;">DESCRIPTION
-          <input id="stockEditDescription" value="${value("DESCRIPTION")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
-        </label>
-        <label style="font-size:12px;font-weight:700;color:#475569;">SI NO.
-          <input id="stockEditSI" value="${value("SI NO.")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
-        </label>
-        <label style="font-size:12px;font-weight:700;color:#475569;">SELLING PRICE
-          <input id="stockEditPrice" value="${value("SELLINGPRICE")}" inputmode="decimal" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
-        </label>
-        <label style="grid-column:1/-1;font-size:12px;font-weight:700;color:#475569;">DATE AND TIME
-          <input id="stockEditDate" value="${value("DATE AND TIME")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
-        </label>
-        <label style="grid-column:1/-1;font-size:12px;font-weight:700;color:#475569;">QR
-          <input id="stockEditQR" value="${value("QR")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
-        </label>
+        ${fieldHtml || '<div style="grid-column:1/-1;padding:18px;border-radius:12px;background:#f8fafc;color:#64748b;text-align:center;font-size:13px;">No editable A-V fields contain data.</div>'}
       </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
@@ -9619,34 +9679,56 @@ async function saveStockEdit(
     return;
   }
 
+  /* =========================================================
+     COLLECT ONLY THE A-V FIELDS THAT WERE ACTUALLY SHOWN.
+     Blank fields that were not shown are left untouched.
+  ========================================================= */
+  const newValues = {};
+  let invalidField = "";
+
+  modal
+    .querySelectorAll("[data-stock-key]")
+    .forEach(input => {
+      const key = input.getAttribute("data-stock-key");
+      let val = String(input.value || "").trim();
+
+      if(
+        key === "COST" ||
+        key === "SELLINGPRICE" ||
+        key === "TAGPRICE"
+      ){
+        val = val
+          .replace(/,/g, "")
+          .replace(/₱/g, "")
+          .trim();
+
+        if(val !== "" && !/^\d+(\.\d{1,2})?$/.test(val)){
+          invalidField = key;
+          return;
+        }
+
+        newValues[key] =
+          val === "" ? null : Number(val);
+      }else{
+        newValues[key] = val;
+      }
+    });
+
+  if(invalidField){
+    showStatus("Enter a valid value for " + invalidField + ".");
+    return;
+  }
+
+  /* NTAGN is required and is always part of A-V. */
   const newTag =
-    String(modal.querySelector("#stockEditTag").value || "").trim();
+    String(newValues.NTAGN ?? "").trim();
 
   if(!newTag){
     showStatus("NTAGN cannot be empty.");
     return;
   }
 
-  const cleanPrice =
-    String(modal.querySelector("#stockEditPrice").value || "")
-      .replace(/,/g,"")
-      .replace(/₱/g,"")
-      .trim();
-
-  if(cleanPrice !== "" && !/^\d+(\.\d{1,2})?$/.test(cleanPrice)){
-    showStatus("Enter a valid selling price.");
-    return;
-  }
-
-  const newValues = {
-    "LENSTYPE": String(modal.querySelector("#stockEditLenstype").value || "").trim(),
-    "DESCRIPTION": String(modal.querySelector("#stockEditDescription").value || "").trim(),
-    "NTAGN": newTag,
-    "SI NO.": String(modal.querySelector("#stockEditSI").value || "").trim(),
-    "SELLINGPRICE": cleanPrice === "" ? null : Number(cleanPrice),
-    "DATE AND TIME": String(modal.querySelector("#stockEditDate").value || "").trim(),
-    "QR": String(modal.querySelector("#stockEditQR").value || "").trim()
-  };
+  newValues.NTAGN = newTag;
 
   const saveButton =
     modal.querySelector("#stockEditSave");
@@ -10696,123 +10778,7 @@ async function deleteSoldRow(
 
 
     /* =====================================================
-       4. RESTORE AUDIT STATUS
-
-       When a SOLD record is deleted, the stock is restored.
-       The matching Audit record must also become AUDITED so
-       the restored stock is NOT calculated as MISSING.
-
-       If an Audit record already exists, update it.
-       If it does not exist, create it from the restored stock.
-    ===================================================== */
-
-    const auditTable =
-      tableName(
-        branch,
-        "audit"
-      );
-
-    const auditParams =
-      new URLSearchParams();
-
-    auditParams.set(
-      "NTAGN",
-      "eq." + tag
-    );
-
-    auditParams.set(
-      "limit",
-      "1"
-    );
-
-    const existingAudit =
-      await supabaseRequest(
-        auditTable +
-        "?" +
-        auditParams.toString(),
-        {
-          method:"GET"
-        }
-      );
-
-    if(
-      Array.isArray(existingAudit) &&
-      existingAudit.length > 0
-    ){
-
-      const auditUpdate = {
-        STATUS:"AUDITED",
-        "DATE AND TIME":
-          new Date().toISOString()
-      };
-
-      if(currentEmail){
-        auditUpdate["USER EMAIL"] =
-          currentEmail;
-      }
-
-      await supabaseRequest(
-        auditTable +
-        "?" +
-        auditParams.toString(),
-        {
-          method:"PATCH",
-          body:auditUpdate,
-          prefer:"return=minimal"
-        }
-      );
-
-    }else{
-
-      const auditRecord = {
-        ...(stockToRestore || {
-          SDATE:soldRecord.SDATE ?? null,
-          SUPPLIER:soldRecord.SUPPLIER ?? null,
-          DR:soldRecord.DR ?? null,
-          COST:soldRecord.COST ?? null,
-          ASG:soldRecord.ASG ?? null,
-          CB:soldRecord.CB ?? null,
-          FD:soldRecord.FD ?? null,
-          UNITS:soldRecord.UNITS ?? null,
-          POWER:soldRecord.POWER ?? null,
-          LENSTYPE:soldRecord.LENSTYPE ?? null,
-          PUNIT:soldRecord.PUNIT ?? null,
-          BR:soldRecord.BR ?? branch,
-          NTAGN:soldRecord.NTAGN ?? tag,
-          CATEGORY:soldRecord.CATEGORY ?? null,
-          DESCRIPTION:soldRecord.DESCRIPTION ?? null,
-          LENSCODE:soldRecord.LENSCODE ?? null,
-          SELLINGPRICE:soldRecord.SELLINGPRICE ?? null,
-          DELIVERYDATE:soldRecord.DELIVERYDATE ?? null,
-          ORNUMBER:soldRecord.ORNUMBER ?? null,
-          ORDATE:soldRecord.ORDATE ?? null,
-          REMARKS:soldRecord.REMARKS ?? null,
-          TAGPRICE:soldRecord.TAGPRICE ?? null
-        }),
-        STATUS:"AUDITED",
-        "DATE AND TIME":
-          new Date().toISOString()
-      };
-
-      if(currentEmail){
-        auditRecord["USER EMAIL"] =
-          currentEmail;
-      }
-
-      await supabaseRequest(
-        auditTable,
-        {
-          method:"POST",
-          body:[auditRecord],
-          prefer:"return=minimal"
-        }
-      );
-
-    }
-
-
-    /* =====================================================
-       5. DELETE SOLD RECORD
+       4. DELETE SOLD RECORD
     ===================================================== */
 
     const deleteParams =

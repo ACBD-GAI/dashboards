@@ -5333,6 +5333,13 @@ async function checkExistingSession(){
 
     if(
       data &&
+      data.temporaryError === true
+    ){
+      return true;
+    }
+
+    if(
+      data &&
       data.ok &&
       data.email
     ){
@@ -5468,8 +5475,7 @@ function startSessionMonitor(){
 
   /*
    * Refresh the Dashboard session every 20 seconds.
-   * The Apps Script heartbeat refreshes both CacheService
-   * and the persistent Dashboard session backup.
+   * The Dashboard session is stored and refreshed in Supabase.
    */
   sessionMonitorTimer =
     setInterval(async ()=>{

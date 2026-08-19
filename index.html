@@ -5315,30 +5315,6 @@ function backToEmail(){
    SESSION
 ========================================================= */
 
-async function dashboardHeartbeat(){
-
-  if(!sessionId){
-    return false;
-  }
-
-  try{
-    const data = await loginApiGet(
-      "dashboardHeartbeat",
-      {sessionId:sessionId}
-    );
-
-    return !!(data && data.ok);
-
-  }catch(error){
-    console.warn("Dashboard heartbeat failed:",error);
-    if(error && error.message === "SESSION_EXPIRED"){
-      clearLoginSession();
-      return false;
-    }
-    return true;
-  }
-}
-
 async function checkExistingSession(){
 
   if(!sessionId){
@@ -5413,10 +5389,76 @@ async function checkExistingSession(){
 }
 
 /* =========================================================
-   ACTIVE SESSION MONITOR
-   If the same email logs in on another device,
-   the old browser is automatically logged out.
+   DASHBOARD SESSION MONITOR
+   Keeps this Dashboard session alive independently.
 ========================================================= */
+
+async function dashboardHeartbeat(){
+
+  if(!sessionId){
+    return false;
+  }
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "dashboardHeartbeat",
+        {
+          sessionId:sessionId
+        }
+      );
+
+    if(
+      data &&
+      data.ok &&
+      data.email
+    ){
+
+      currentEmail =
+        data.email;
+
+      currentAdmin =
+        data.isAdmin === true;
+
+      localStorage.setItem(
+        USER_KEY,
+        currentEmail
+      );
+
+      localStorage.setItem(
+        ADMIN_KEY,
+        String(currentAdmin)
+      );
+
+      return true;
+    }
+
+    return false;
+
+  }catch(error){
+
+    console.warn(
+      "Dashboard heartbeat failed:",
+      error
+    );
+
+    /*
+     * Temporary network/API problems MUST NOT
+     * log the Dashboard out.
+     */
+    if(
+      error &&
+      error.message === "SESSION_EXPIRED"
+    ){
+      return false;
+    }
+
+    return true;
+
+  }
+
+}
 
 function startSessionMonitor(){
 
@@ -5424,6 +5466,11 @@ function startSessionMonitor(){
     return;
   }
 
+  /*
+   * Refresh the Dashboard session every 20 seconds.
+   * The Apps Script heartbeat refreshes both CacheService
+   * and the persistent Dashboard session backup.
+   */
   sessionMonitorTimer =
     setInterval(async ()=>{
 
@@ -5431,12 +5478,14 @@ function startSessionMonitor(){
         return;
       }
 
-      const loggedIn =
+      const alive =
         await dashboardHeartbeat();
 
-      if(!loggedIn){
+      if(!alive){
 
         stopSessionMonitor();
+
+        clearLoginSession();
 
         document
           .getElementById("dashboard")
@@ -5459,12 +5508,12 @@ function startSessionMonitor(){
           .value = "";
 
         setLoginStatus(
-          "You were logged out because this email was used to log in on another device."
+          "Your Dashboard session expired. Please log in again."
         );
 
       }
 
-    },10000);
+    },20000);
 
 }
 
@@ -8951,6 +9000,9 @@ function renderTable(
   const canEdit =
     report === "sold";
 
+  const canStockEdit =
+    report === "stocks";
+
   const canAuditEdit =
     report === "audit";
 
@@ -9002,12 +9054,46 @@ function renderTable(
        * Default:
        *
        * NO ACTION
-       *
-       * for AVAILABLE.
        */
 
       let actionHTML =
         `<span style="color:#94a3b8">—</span>`;
+
+      /*
+       * STOCKS:
+       * Edit/Delete are synchronized with Audit.
+       * If this NTAGN exists in the branch audit table,
+       * editing Stocks also edits that Audit row; deleting
+       * Stocks also deletes the matching Audit row.
+       */
+
+      if(canStockEdit){
+
+        actionHTML = `
+
+          <button
+            type="button"
+            class="actionBtn"
+            data-stock-edit="1"
+            data-branch="${escapeHtmlAttribute(row.branch)}"
+            data-tag="${escapeHtmlAttribute(row.tag)}"
+          >
+            Edit
+          </button>
+
+          <button
+            type="button"
+            class="actionBtn danger"
+            data-stock-delete="1"
+            data-branch="${escapeHtmlAttribute(row.branch)}"
+            data-tag="${escapeHtmlAttribute(row.tag)}"
+          >
+            Delete
+          </button>
+
+        `;
+
+      }
 
       /*
        * SOLD OUT ONLY:
@@ -9159,6 +9245,46 @@ function renderTable(
    *
    * This fixes the Delete button issue.
    */
+
+  if(canStockEdit){
+
+    body
+      .querySelectorAll(
+        "[data-stock-edit]"
+      )
+      .forEach(
+        button=>{
+          button.addEventListener(
+            "click",
+            ()=>{
+              editStockRow(
+                button.dataset.branch,
+                button.dataset.tag
+              );
+            }
+          );
+        }
+      );
+
+    body
+      .querySelectorAll(
+        "[data-stock-delete]"
+      )
+      .forEach(
+        button=>{
+          button.addEventListener(
+            "click",
+            ()=>{
+              deleteStockRow(
+                button.dataset.branch,
+                button.dataset.tag
+              );
+            }
+          );
+        }
+      );
+
+  }
 
   if(canEdit){
 
@@ -9350,6 +9476,315 @@ function nextPage(){
 
   renderCurrentPage();
 
+}
+
+/* =========================================================
+   STOCK EDIT / DELETE
+
+   STOCKS is the source record.
+   If the same branch + NTAGN exists in Audit:
+     - EDIT updates both Stocks and Audit.
+     - DELETE removes both Stocks and Audit.
+   Audit STATUS remains AUDITED when editing.
+========================================================= */
+
+function openStockEditModal(
+  branch,
+  tag
+){
+
+  const row =
+    currentRows.find(
+      r =>
+        String(r.branch).trim() === String(branch).trim() &&
+        String(r.tag).trim() === String(tag).trim()
+    );
+
+  if(!row || !row.raw){
+    showStatus("Stock record was not found.");
+    return null;
+  }
+
+  const existing =
+    document.getElementById("stockEditModal");
+
+  if(existing){
+    existing.remove();
+  }
+
+  const raw = row.raw;
+
+  const modal =
+    document.createElement("div");
+
+  modal.id = "stockEditModal";
+  modal.style.cssText = `
+    position:fixed;inset:0;z-index:99999;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(15,23,42,.62);padding:20px;
+  `;
+
+  const value = key =>
+    escapeHtmlAttribute(
+      raw[key] == null ? "" : String(raw[key])
+    );
+
+  modal.innerHTML = `
+    <div style="width:min(620px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.25);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;">
+        <div>
+          <div style="font-size:20px;font-weight:800;color:#0f172a;">Edit Stock</div>
+          <div style="font-size:13px;color:#64748b;margin-top:4px;">${escapeHtml(String(branch))} • ${escapeHtml(String(tag))}</div>
+        </div>
+        <button type="button" id="stockEditClose" style="border:0;background:#f1f5f9;border-radius:10px;width:36px;height:36px;font-size:20px;cursor:pointer;">×</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <label style="font-size:12px;font-weight:700;color:#475569;">LENS TYPE
+          <input id="stockEditLenstype" value="${value("LENSTYPE")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
+        </label>
+        <label style="font-size:12px;font-weight:700;color:#475569;">NTAGN
+          <input id="stockEditTag" value="${value("NTAGN")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
+        </label>
+        <label style="grid-column:1/-1;font-size:12px;font-weight:700;color:#475569;">DESCRIPTION
+          <input id="stockEditDescription" value="${value("DESCRIPTION")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
+        </label>
+        <label style="font-size:12px;font-weight:700;color:#475569;">SI NO.
+          <input id="stockEditSI" value="${value("SI NO.")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
+        </label>
+        <label style="font-size:12px;font-weight:700;color:#475569;">SELLING PRICE
+          <input id="stockEditPrice" value="${value("SELLINGPRICE")}" inputmode="decimal" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
+        </label>
+        <label style="grid-column:1/-1;font-size:12px;font-weight:700;color:#475569;">DATE AND TIME
+          <input id="stockEditDate" value="${value("DATE AND TIME")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
+        </label>
+        <label style="grid-column:1/-1;font-size:12px;font-weight:700;color:#475569;">QR
+          <input id="stockEditQR" value="${value("QR")}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;">
+        </label>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button type="button" id="stockEditCancel" class="controlBtn">Cancel</button>
+        <button type="button" id="stockEditSave" class="controlBtn primary">Save Changes</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector("#stockEditClose").onclick =
+  modal.querySelector("#stockEditCancel").onclick =
+    ()=>modal.remove();
+
+  modal.querySelector("#stockEditSave").onclick =
+    ()=>saveStockEdit(branch, tag, modal);
+
+  return modal;
+}
+
+function editStockRow(
+  branch,
+  tag
+){
+  openStockEditModal(branch, tag);
+}
+
+async function saveStockEdit(
+  oldBranch,
+  oldTag,
+  modal
+){
+
+  const row =
+    currentRows.find(
+      r =>
+        String(r.branch).trim() === String(oldBranch).trim() &&
+        String(r.tag).trim() === String(oldTag).trim()
+    );
+
+  if(!row || !row.raw){
+    showStatus("Stock record was not found.");
+    modal.remove();
+    return;
+  }
+
+  const newTag =
+    String(modal.querySelector("#stockEditTag").value || "").trim();
+
+  if(!newTag){
+    showStatus("NTAGN cannot be empty.");
+    return;
+  }
+
+  const cleanPrice =
+    String(modal.querySelector("#stockEditPrice").value || "")
+      .replace(/,/g,"")
+      .replace(/₱/g,"")
+      .trim();
+
+  if(cleanPrice !== "" && !/^\d+(\.\d{1,2})?$/.test(cleanPrice)){
+    showStatus("Enter a valid selling price.");
+    return;
+  }
+
+  const newValues = {
+    "LENSTYPE": String(modal.querySelector("#stockEditLenstype").value || "").trim(),
+    "DESCRIPTION": String(modal.querySelector("#stockEditDescription").value || "").trim(),
+    "NTAGN": newTag,
+    "SI NO.": String(modal.querySelector("#stockEditSI").value || "").trim(),
+    "SELLINGPRICE": cleanPrice === "" ? null : Number(cleanPrice),
+    "DATE AND TIME": String(modal.querySelector("#stockEditDate").value || "").trim(),
+    "QR": String(modal.querySelector("#stockEditQR").value || "").trim()
+  };
+
+  const saveButton =
+    modal.querySelector("#stockEditSave");
+
+  saveButton.disabled = true;
+  saveButton.textContent = "Saving...";
+
+  try{
+
+    const stockTable = tableName(oldBranch, "stocks");
+    const auditTable = tableName(oldBranch, "audit");
+
+    const oldParams = new URLSearchParams();
+    oldParams.set("NTAGN", "eq." + String(oldTag).trim());
+
+    const auditRows =
+      await supabaseRequest(
+        auditTable + "?" + oldParams.toString() + "&limit=1",
+        {method:"GET"}
+      );
+
+    const stockBody = {...newValues};
+
+    await supabaseRequest(
+      stockTable + "?" + oldParams.toString(),
+      {
+        method:"PATCH",
+        body:stockBody,
+        prefer:"return=minimal"
+      }
+    );
+
+    if(Array.isArray(auditRows) && auditRows.length){
+
+      const auditBody = {...newValues};
+      delete auditBody.STATUS;
+
+      await supabaseRequest(
+        auditTable + "?" + oldParams.toString(),
+        {
+          method:"PATCH",
+          body:auditBody,
+          prefer:"return=minimal"
+        }
+      );
+
+    }
+
+    modal.remove();
+
+    showStatus(
+      Array.isArray(auditRows) && auditRows.length
+        ? "Stock updated. Matching AUDITED record updated too."
+        : "Stock updated successfully."
+    );
+
+    currentPage = 1;
+    await refreshDashboard();
+
+  }catch(error){
+
+    console.error("Stock edit failed:", error);
+
+    showStatus(
+      error?.message ||
+      "Unable to update stock."
+    );
+
+    saveButton.disabled = false;
+    saveButton.textContent = "Save Changes";
+
+  }
+}
+
+async function deleteStockRow(
+  branch,
+  tag
+){
+
+  branch = String(branch || "").trim();
+  tag = String(tag || "").trim();
+
+  if(!branch || !tag){
+    showStatus("Missing branch or NTAGN.");
+    return;
+  }
+
+  const confirmed =
+    await inlineConfirm(
+      "Delete stock " + tag + " from " + branch + "?"
+    );
+
+  if(!confirmed){
+    return;
+  }
+
+  try{
+
+    const stockTable = tableName(branch, "stocks");
+    const auditTable = tableName(branch, "audit");
+
+    const params = new URLSearchParams();
+    params.set("NTAGN", "eq." + tag);
+
+    const auditRows =
+      await supabaseRequest(
+        auditTable + "?" + params.toString() + "&limit=1",
+        {method:"GET"}
+      );
+
+    await supabaseRequest(
+      stockTable + "?" + params.toString(),
+      {
+        method:"DELETE",
+        prefer:"return=minimal"
+      }
+    );
+
+    if(Array.isArray(auditRows) && auditRows.length){
+
+      await supabaseRequest(
+        auditTable + "?" + params.toString(),
+        {
+          method:"DELETE",
+          prefer:"return=minimal"
+        }
+      );
+
+    }
+
+    showStatus(
+      Array.isArray(auditRows) && auditRows.length
+        ? "Stock deleted. Matching AUDITED record deleted too."
+        : "Stock deleted successfully."
+    );
+
+    currentPage = 1;
+    await refreshDashboard();
+
+  }catch(error){
+
+    console.error("Stock delete failed:", error);
+
+    showStatus(
+      error?.message ||
+      "Unable to delete stock."
+    );
+
+  }
 }
 
 /* =========================================================

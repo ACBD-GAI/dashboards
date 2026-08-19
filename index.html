@@ -9116,16 +9116,10 @@ async function deleteSoldRow(
         "stocks"
       );
 
-    /*
-     * =====================================================
-     * 1. GET THE ORIGINAL SOLD RECORD FIRST
-     * =====================================================
-     *
-     * We need the complete record because Stocks and
-     * Sold Out use the same headers.
-     *
-     * DO NOT delete anything yet.
-     */
+
+    /* =====================================================
+       1. GET THE ORIGINAL SOLD RECORD
+       ===================================================== */
 
     const soldParams =
       new URLSearchParams();
@@ -9165,92 +9159,155 @@ async function deleteSoldRow(
 
     }
 
-    const originalSoldRecord =
+    const soldRecord =
       soldRecords[0];
 
-    /*
-     * =====================================================
-     * 2. CHECK IF TAG ALREADY EXISTS IN AVAILABLE STOCKS
-     * =====================================================
-     *
-     * If it already exists, DO NOT create another copy.
-     */
 
-    const stockParams =
+    /* =====================================================
+       2. CHECK IF TAG ALREADY EXISTS IN AVAILABLE STOCKS
+       ===================================================== */
+
+    const stockCheckParams =
       new URLSearchParams();
 
-    stockParams.set(
+    stockCheckParams.set(
       "NTAGN",
       "eq." + tag
     );
 
-    stockParams.set(
+    stockCheckParams.set(
       "select",
       "NTAGN"
     );
 
-    stockParams.set(
+    stockCheckParams.set(
       "limit",
       "1"
     );
 
-    const existingStocks =
+    const existingStock =
       await supabaseRequest(
         stockTable +
         "?" +
-        stockParams.toString(),
+        stockCheckParams.toString(),
         {
           method:"GET"
         }
       );
 
     const tagAlreadyExists =
-      Array.isArray(existingStocks) &&
-      existingStocks.length > 0;
+      Array.isArray(existingStock) &&
+      existingStock.length > 0;
 
 
-    /*
-     * =====================================================
-     * 3. RESTORE ONLY IF TAG IS NOT ALREADY IN STOCKS
-     * =====================================================
-     */
+    /* =====================================================
+       3. RESTORE ONLY A-V IF TAG DOES NOT EXIST
+       ===================================================== */
 
     if(!tagAlreadyExists){
 
       /*
-       * Copy the COMPLETE Sold record.
+       * A-V ONLY
        *
-       * Remove the database primary-key ID if Supabase
-       * returned one, because Stocks needs a new ID.
+       * A  SDATE
+       * B  SUPPLIER
+       * C  DR
+       * D  COST
+       * E  ASG
+       * F  CB
+       * G  FD
+       * H  UNITS
+       * I  POWER
+       * J  LENSTYPE
+       * K  PUNIT
+       * L  BR
+       * M  NTAGN
+       * N  CATEGORY
+       * O  DESCRIPTION
+       * P  LENSCODE
+       * Q  SELLINGPRICE
+       * R  DELIVERYDATE
+       * S  ORNUMBER
+       * T  ORDATE
+       * U  REMARKS
+       * V  TAGPRICE
+       *
+       * DO NOT restore W-AA.
        */
 
       const stockToRestore = {
-        ...originalSoldRecord
+
+        SDATE:
+          soldRecord.SDATE ?? null,
+
+        SUPPLIER:
+          soldRecord.SUPPLIER ?? null,
+
+        DR:
+          soldRecord.DR ?? null,
+
+        COST:
+          soldRecord.COST ?? null,
+
+        ASG:
+          soldRecord.ASG ?? null,
+
+        CB:
+          soldRecord.CB ?? null,
+
+        FD:
+          soldRecord.FD ?? null,
+
+        UNITS:
+          soldRecord.UNITS ?? null,
+
+        POWER:
+          soldRecord.POWER ?? null,
+
+        LENSTYPE:
+          soldRecord.LENSTYPE ?? null,
+
+        PUNIT:
+          soldRecord.PUNIT ?? null,
+
+        BR:
+          soldRecord.BR ?? null,
+
+        NTAGN:
+          soldRecord.NTAGN ?? tag,
+
+        CATEGORY:
+          soldRecord.CATEGORY ?? null,
+
+        DESCRIPTION:
+          soldRecord.DESCRIPTION ?? null,
+
+        LENSCODE:
+          soldRecord.LENSCODE ?? null,
+
+        SELLINGPRICE:
+          soldRecord.SELLINGPRICE ?? null,
+
+        DELIVERYDATE:
+          soldRecord.DELIVERYDATE ?? null,
+
+        ORNUMBER:
+          soldRecord.ORNUMBER ?? null,
+
+        ORDATE:
+          soldRecord.ORDATE ?? null,
+
+        REMARKS:
+          soldRecord.REMARKS ?? null,
+
+        TAGPRICE:
+          soldRecord.TAGPRICE ?? null
+
       };
 
-      delete stockToRestore.id;
 
       /*
-       * Change status back to AVAILABLE.
-       *
-       * Your actual column is STATUS based on your
-       * table headers.
-       */
-
-      if(
-        Object.prototype.hasOwnProperty.call(
-          stockToRestore,
-          "STATUS"
-        )
-      ){
-
-        stockToRestore.STATUS =
-          "AVAILABLE";
-
-      }
-
-      /*
-       * Restore the complete original record.
+       * Restore the original stock record.
        */
 
       const restored =
@@ -9274,6 +9331,7 @@ async function deleteSoldRow(
           }
         );
 
+
       if(
         !Array.isArray(restored) ||
         restored.length === 0
@@ -9290,30 +9348,35 @@ async function deleteSoldRow(
       }
 
       console.log(
-        "Restored sold tag " +
+        "Successfully restored " +
         tag +
         " to " +
-        stockTable
+        stockTable +
+        " using A-V only."
       );
 
     }else{
+
+      /*
+       * Tag already exists in Available Stocks.
+       *
+       * Do NOT insert another copy.
+       */
 
       console.log(
         "Tag " +
         tag +
         " already exists in " +
         stockTable +
-        ". No duplicate stock created."
+        ". No duplicate created."
       );
 
     }
 
 
-    /*
-     * =====================================================
-     * 4. DELETE FROM SOLD ONLY AFTER RESTORE SUCCEEDS
-     * =====================================================
-     */
+    /* =====================================================
+       4. DELETE FROM SOLD
+       ===================================================== */
 
     const deleteParams =
       new URLSearchParams();
@@ -9336,6 +9399,7 @@ async function deleteSoldRow(
         }
       );
 
+
     if(
       !Array.isArray(deleted) ||
       deleted.length === 0
@@ -9353,11 +9417,9 @@ async function deleteSoldRow(
     }
 
 
-    /*
-     * =====================================================
-     * 5. REMOVE THE ROW FROM THE CURRENT DISPLAY
-     * =====================================================
-     */
+    /* =====================================================
+       5. REMOVE FROM CURRENT DISPLAY
+       ===================================================== */
 
     currentRows =
       currentRows.filter(
@@ -9377,11 +9439,9 @@ async function deleteSoldRow(
       currentRows.length;
 
 
-    /*
-     * =====================================================
-     * 6. FIX PAGINATION
-     * =====================================================
-     */
+    /* =====================================================
+       6. FIX PAGINATION
+       ===================================================== */
 
     const totalPages =
       Math.max(
@@ -9402,22 +9462,25 @@ async function deleteSoldRow(
 
     }
 
+
+    /* =====================================================
+       7. REFRESH TABLE
+       ===================================================== */
+
     renderCurrentPage();
 
 
-    /*
-     * =====================================================
-     * 7. STATUS MESSAGE
-     * =====================================================
-     */
+    /* =====================================================
+       8. STATUS
+       ===================================================== */
 
     if(tagAlreadyExists){
 
       showStatus(
         "Sold record " +
         tag +
-        " deleted. " +
-        "Available stock already existed, so no duplicate was created."
+        " deleted successfully. " +
+        "Available stock already exists."
       );
 
     }else{
@@ -9431,11 +9494,9 @@ async function deleteSoldRow(
     }
 
 
-    /*
-     * =====================================================
-     * 8. REFRESH DASHBOARD COUNTERS
-     * =====================================================
-     */
+    /* =====================================================
+       9. REFRESH COUNTERS
+       ===================================================== */
 
     const selectedBranch =
       document

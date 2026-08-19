@@ -4837,7 +4837,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbztkVDkjg6wIlCG99zVRUZbD_SYdiCs4CKrvtQyu8GsbxlLCu-1sYynIWoILTfPw1ee/exec";
+  "https://script.google.com/macros/s/AKfycbzZ6vx_lwTv97rmxl_DsaJjKE94whUBiniLjl7k51okoAlxypSchH6LXD8xHzGTlPA8/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -7462,9 +7462,12 @@ function updateSoldFilteredCounters(){
 
   const visible = getVisibleRows();
 
-  let soldCount = visible.length;
+  const markedVisible =
+    visible.filter(row => row.marked === true);
+
+  let soldCount = markedVisible.length;
   let soldAmount = 0;
-  visible.forEach(row=>{
+  markedVisible.forEach(row=>{
 
     const value =
       String(row?.sellingPrice ?? "")
@@ -8747,12 +8750,15 @@ async function updateStatsDirect(
     const visibleSoldRows =
       getVisibleRows();
 
+    const markedSoldRows =
+      visibleSoldRows.filter(row => row.marked === true);
+
     sold =
-      visibleSoldRows.length;
+      markedSoldRows.length;
 
     soldAmount = 0;
 
-    visibleSoldRows.forEach(row=>{
+    markedSoldRows.forEach(row=>{
 
       const value =
         String(row?.sellingPrice ?? "")
@@ -10778,7 +10784,79 @@ async function deleteSoldRow(
 
 
     /* =====================================================
-       4. DELETE SOLD RECORD
+       4. RESTORE / CREATE AUDIT RECORD AS AUDITED
+
+       When a SOLD record is deleted and returned to STOCKS,
+       the same NTAGN must be protected from becoming MISSING.
+    ===================================================== */
+
+    const auditTable = tableName(branch, "audit");
+    const auditParams = new URLSearchParams();
+    auditParams.set("NTAGN", "eq." + tag);
+    auditParams.set("limit", "1");
+
+    const existingAudit = await supabaseRequest(
+      auditTable + "?" + auditParams.toString(),
+      { method:"GET" }
+    );
+
+    if(Array.isArray(existingAudit) && existingAudit.length > 0){
+
+      await supabaseRequest(
+        auditTable + "?" + auditParams.toString(),
+        {
+          method:"PATCH",
+          body:{
+            STATUS:"AUDITED",
+            "DATE AND TIME":new Date().toISOString(),
+            "USER EMAIL":currentEmail || null
+          },
+          prefer:"return=minimal"
+        }
+      );
+
+    }else{
+
+      const auditRecord = {
+        SDATE: soldRecord.SDATE ?? null,
+        SUPPLIER: soldRecord.SUPPLIER ?? null,
+        DR: soldRecord.DR ?? null,
+        COST: soldRecord.COST ?? null,
+        ASG: soldRecord.ASG ?? null,
+        CB: soldRecord.CB ?? null,
+        FD: soldRecord.FD ?? null,
+        UNITS: soldRecord.UNITS ?? null,
+        POWER: soldRecord.POWER ?? null,
+        LENSTYPE: soldRecord.LENSTYPE ?? null,
+        PUNIT: soldRecord.PUNIT ?? null,
+        BR: soldRecord.BR ?? null,
+        NTAGN: soldRecord.NTAGN ?? tag,
+        CATEGORY: soldRecord.CATEGORY ?? null,
+        DESCRIPTION: soldRecord.DESCRIPTION ?? null,
+        LENSCODE: soldRecord.LENSCODE ?? null,
+        SELLINGPRICE: soldRecord.SELLINGPRICE ?? null,
+        DELIVERYDATE: soldRecord.DELIVERYDATE ?? null,
+        ORNUMBER: soldRecord.ORNUMBER ?? null,
+        ORDATE: soldRecord.ORDATE ?? null,
+        REMARKS: soldRecord.REMARKS ?? null,
+        TAGPRICE: soldRecord.TAGPRICE ?? null,
+        STATUS:"AUDITED",
+        "DATE AND TIME":new Date().toISOString(),
+        "USER EMAIL":currentEmail || null
+      };
+
+      await supabaseRequest(
+        auditTable,
+        {
+          method:"POST",
+          body:[auditRecord],
+          prefer:"return=minimal"
+        }
+      );
+    }
+
+    /* =====================================================
+       5. DELETE SOLD RECORD
     ===================================================== */
 
     const deleteParams =

@@ -9104,50 +9104,230 @@ async function deleteSoldRow(
 
   try{
 
-    const table =
+    const soldTable =
       tableName(
         branch,
         "sold"
       );
 
+    const stockTable =
+      tableName(
+        branch,
+        "stocks"
+      );
+
     /*
-     * IMPORTANT:
+     * =====================================================
+     * 1. GET THE ORIGINAL SOLD RECORD FIRST
+     * =====================================================
      *
-     * DO NOT use BR here.
+     * We need the complete record because Stocks and
+     * Sold Out use the same headers.
      *
-     * The table already belongs to
-     * the selected branch.
-     *
-     * Example:
-     *
-     * GAI + SOLD
-     * = gai_scanresults
-     *
-     * Therefore:
-     *
-     * NTAGN=eq.TAG
-     *
-     * is enough.
+     * DO NOT delete anything yet.
      */
 
-    const params =
+    const soldParams =
       new URLSearchParams();
 
-    params.set(
+    soldParams.set(
       "NTAGN",
       "eq." + tag
     );
 
+    soldParams.set(
+      "limit",
+      "1"
+    );
+
+    const soldRecords =
+      await supabaseRequest(
+        soldTable +
+        "?" +
+        soldParams.toString(),
+        {
+          method:"GET"
+        }
+      );
+
+    if(
+      !Array.isArray(soldRecords) ||
+      soldRecords.length === 0
+    ){
+
+      throw new Error(
+        "Sold record " +
+        tag +
+        " was not found in " +
+        soldTable +
+        "."
+      );
+
+    }
+
+    const originalSoldRecord =
+      soldRecords[0];
+
     /*
-     * return=representation lets us verify
-     * that Supabase actually deleted something.
+     * =====================================================
+     * 2. CHECK IF TAG ALREADY EXISTS IN AVAILABLE STOCKS
+     * =====================================================
+     *
+     * If it already exists, DO NOT create another copy.
      */
+
+    const stockParams =
+      new URLSearchParams();
+
+    stockParams.set(
+      "NTAGN",
+      "eq." + tag
+    );
+
+    stockParams.set(
+      "select",
+      "NTAGN"
+    );
+
+    stockParams.set(
+      "limit",
+      "1"
+    );
+
+    const existingStocks =
+      await supabaseRequest(
+        stockTable +
+        "?" +
+        stockParams.toString(),
+        {
+          method:"GET"
+        }
+      );
+
+    const tagAlreadyExists =
+      Array.isArray(existingStocks) &&
+      existingStocks.length > 0;
+
+
+    /*
+     * =====================================================
+     * 3. RESTORE ONLY IF TAG IS NOT ALREADY IN STOCKS
+     * =====================================================
+     */
+
+    if(!tagAlreadyExists){
+
+      /*
+       * Copy the COMPLETE Sold record.
+       *
+       * Remove the database primary-key ID if Supabase
+       * returned one, because Stocks needs a new ID.
+       */
+
+      const stockToRestore = {
+        ...originalSoldRecord
+      };
+
+      delete stockToRestore.id;
+
+      /*
+       * Change status back to AVAILABLE.
+       *
+       * Your actual column is STATUS based on your
+       * table headers.
+       */
+
+      if(
+        Object.prototype.hasOwnProperty.call(
+          stockToRestore,
+          "STATUS"
+        )
+      ){
+
+        stockToRestore.STATUS =
+          "AVAILABLE";
+
+      }
+
+      /*
+       * Restore the complete original record.
+       */
+
+      const restored =
+        await supabaseRequest(
+          stockTable,
+          {
+            method:"POST",
+
+            headers:{
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify(
+                [stockToRestore]
+              ),
+
+            prefer:
+              "return=representation"
+          }
+        );
+
+      if(
+        !Array.isArray(restored) ||
+        restored.length === 0
+      ){
+
+        throw new Error(
+          "Unable to restore tag " +
+          tag +
+          " to " +
+          stockTable +
+          "."
+        );
+
+      }
+
+      console.log(
+        "Restored sold tag " +
+        tag +
+        " to " +
+        stockTable
+      );
+
+    }else{
+
+      console.log(
+        "Tag " +
+        tag +
+        " already exists in " +
+        stockTable +
+        ". No duplicate stock created."
+      );
+
+    }
+
+
+    /*
+     * =====================================================
+     * 4. DELETE FROM SOLD ONLY AFTER RESTORE SUCCEEDS
+     * =====================================================
+     */
+
+    const deleteParams =
+      new URLSearchParams();
+
+    deleteParams.set(
+      "NTAGN",
+      "eq." + tag
+    );
 
     const deleted =
       await supabaseRequest(
-        table +
+        soldTable +
         "?" +
-        params.toString(),
+        deleteParams.toString(),
         {
           method:"DELETE",
 
@@ -9166,15 +9346,17 @@ async function deleteSoldRow(
         "NTAGN " +
         tag +
         " was not found in " +
-        table +
+        soldTable +
         "."
       );
 
     }
 
+
     /*
-     * Remove the deleted row from the local
-     * result immediately.
+     * =====================================================
+     * 5. REMOVE THE ROW FROM THE CURRENT DISPLAY
+     * =====================================================
      */
 
     currentRows =
@@ -9184,6 +9366,7 @@ async function deleteSoldRow(
             String(
               row.branch
             ).trim() === branch &&
+
             String(
               row.tag
             ).trim() === tag
@@ -9193,9 +9376,11 @@ async function deleteSoldRow(
     totalRows =
       currentRows.length;
 
+
     /*
-     * Make sure pagination doesn't point to
-     * a page that no longer exists.
+     * =====================================================
+     * 6. FIX PAGINATION
+     * =====================================================
      */
 
     const totalPages =
@@ -9219,14 +9404,37 @@ async function deleteSoldRow(
 
     renderCurrentPage();
 
-    showStatus(
-      "Sold record " +
-      tag +
-      " deleted successfully."
-    );
 
     /*
-     * Refresh counters in the background.
+     * =====================================================
+     * 7. STATUS MESSAGE
+     * =====================================================
+     */
+
+    if(tagAlreadyExists){
+
+      showStatus(
+        "Sold record " +
+        tag +
+        " deleted. " +
+        "Available stock already existed, so no duplicate was created."
+      );
+
+    }else{
+
+      showStatus(
+        "Sold record " +
+        tag +
+        " deleted and restored to Available Stocks."
+      );
+
+    }
+
+
+    /*
+     * =====================================================
+     * 8. REFRESH DASHBOARD COUNTERS
+     * =====================================================
      */
 
     const selectedBranch =
@@ -9250,6 +9458,7 @@ async function deleteSoldRow(
       }
     );
 
+
   }catch(error){
 
     console.error(
@@ -9265,7 +9474,6 @@ async function deleteSoldRow(
   }
 
 }
-
 /* =========================================================
    CONFIRM
 ========================================================= */

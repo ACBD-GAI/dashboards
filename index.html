@@ -9118,8 +9118,8 @@ async function deleteSoldRow(
 
 
     /* =====================================================
-       1. GET THE ORIGINAL SOLD RECORD
-       ===================================================== */
+       1. GET ORIGINAL SOLD RECORD
+    ===================================================== */
 
     const soldParams =
       new URLSearchParams();
@@ -9164,8 +9164,8 @@ async function deleteSoldRow(
 
 
     /* =====================================================
-       2. CHECK IF TAG ALREADY EXISTS IN AVAILABLE STOCKS
-       ===================================================== */
+       2. CHECK IF TAG ALREADY EXISTS IN STOCKS
+    ===================================================== */
 
     const stockCheckParams =
       new URLSearchParams();
@@ -9201,38 +9201,38 @@ async function deleteSoldRow(
 
 
     /* =====================================================
-       3. RESTORE ONLY A-V IF TAG DOES NOT EXIST
-       ===================================================== */
+       3. RESTORE TO STOCKS ONLY IF TAG DOES NOT EXIST
+    ===================================================== */
 
     if(!tagAlreadyExists){
 
       /*
-       * A-V ONLY
+       * RESTORE A-V ONLY
        *
-       * A  SDATE
-       * B  SUPPLIER
-       * C  DR
-       * D  COST
-       * E  ASG
-       * F  CB
-       * G  FD
-       * H  UNITS
-       * I  POWER
-       * J  LENSTYPE
-       * K  PUNIT
-       * L  BR
-       * M  NTAGN
-       * N  CATEGORY
-       * O  DESCRIPTION
-       * P  LENSCODE
-       * Q  SELLINGPRICE
-       * R  DELIVERYDATE
-       * S  ORNUMBER
-       * T  ORDATE
-       * U  REMARKS
-       * V  TAGPRICE
+       * A  = SDATE
+       * B  = SUPPLIER
+       * C  = DR
+       * D  = COST
+       * E  = ASG
+       * F  = CB
+       * G  = FD
+       * H  = UNITS
+       * I  = POWER
+       * J  = LENSTYPE
+       * K  = PUNIT
+       * L  = BR
+       * M  = NTAGN
+       * N  = CATEGORY
+       * O  = DESCRIPTION
+       * P  = LENSCODE
+       * Q  = SELLINGPRICE
+       * R  = DELIVERYDATE
+       * S  = ORNUMBER
+       * T  = ORDATE
+       * U  = REMARKS
+       * V  = TAGPRICE
        *
-       * DO NOT restore W-AA.
+       * W-AA are intentionally NOT restored.
        */
 
       const stockToRestore = {
@@ -9307,54 +9307,33 @@ async function deleteSoldRow(
 
 
       /*
-       * Restore the original stock record.
+       * IMPORTANT:
+       *
+       * supabaseRequest() already performs
+       * JSON.stringify(options.body).
+       *
+       * Therefore DO NOT JSON.stringify here.
        */
 
-const restored =
-  await supabaseRequest(
-    stockTable,
-    {
-      method:"POST",
+      const restored =
+        await supabaseRequest(
+          stockTable,
+          {
+            method:"POST",
 
-      headers:{
-        "Content-Type":
-          "application/json",
+            prefer:
+              "return=representation",
 
-        "Prefer":
-          "return=representation"
-      },
+            body:[
+              stockToRestore
+            ]
+          }
+        );
 
-      body:
-        JSON.stringify(
-          [stockToRestore]
-        )
-    }
-  );
 
-console.log(
-  "=== RESTORE DEBUG ==="
-);
-
-console.log(
-  "TABLE:",
-  stockTable
-);
-
-console.log(
-  "TAG:",
-  tag
-);
-
-console.log(
-  "DATA SENT:",
-  stockToRestore
-);
-
-console.log(
-  "SUPABASE RESPONSE:",
-  restored
-);
-
+      /*
+       * Verify restore.
+       */
 
       if(
         !Array.isArray(restored) ||
@@ -9362,29 +9341,27 @@ console.log(
       ){
 
         throw new Error(
-          "Unable to restore tag " +
-          tag +
-          " to " +
-          stockTable +
-          "."
+          "Supabase accepted the restore request " +
+          "but returned no restored record."
         );
 
       }
 
       console.log(
-        "Successfully restored " +
+        "Successfully restored tag " +
         tag +
         " to " +
         stockTable +
         " using A-V only."
       );
 
+
     }else{
 
       /*
-       * Tag already exists in Available Stocks.
+       * TAG ALREADY EXISTS.
        *
-       * Do NOT insert another copy.
+       * Do not create a duplicate.
        */
 
       console.log(
@@ -9399,8 +9376,8 @@ console.log(
 
 
     /* =====================================================
-       4. DELETE FROM SOLD
-       ===================================================== */
+       4. DELETE SOLD RECORD
+    ===================================================== */
 
     const deleteParams =
       new URLSearchParams();
@@ -9443,7 +9420,7 @@ console.log(
 
     /* =====================================================
        5. REMOVE FROM CURRENT DISPLAY
-       ===================================================== */
+    ===================================================== */
 
     currentRows =
       currentRows.filter(
@@ -9465,7 +9442,7 @@ console.log(
 
     /* =====================================================
        6. FIX PAGINATION
-       ===================================================== */
+    ===================================================== */
 
     const totalPages =
       Math.max(
@@ -9489,14 +9466,14 @@ console.log(
 
     /* =====================================================
        7. REFRESH TABLE
-       ===================================================== */
+    ===================================================== */
 
     renderCurrentPage();
 
 
     /* =====================================================
        8. STATUS
-       ===================================================== */
+    ===================================================== */
 
     if(tagAlreadyExists){
 
@@ -9520,7 +9497,7 @@ console.log(
 
     /* =====================================================
        9. REFRESH COUNTERS
-       ===================================================== */
+    ===================================================== */
 
     const selectedBranch =
       document
@@ -9550,6 +9527,12 @@ console.log(
       "Delete sold record failed:",
       error
     );
+
+    /*
+     * Show the REAL Supabase error.
+     * This will help identify RLS/constraint/
+     * column/type problems if restoration fails.
+     */
 
     showStatus(
       error?.message ||

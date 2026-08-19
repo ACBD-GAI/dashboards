@@ -6494,6 +6494,208 @@ function mapRow(
 }
 
 /* =========================================================
+   BUILD AUDIT RESULT
+
+   AUDIT RESULT =
+     AUDITED + MISSING
+
+   MISSING is based on the SAME logic used by EXPORT:
+     STOCKS - (SOLD + AUDIT)
+
+   Matching:
+     BRANCH + NTAGN
+========================================================= */
+
+async function fetchAuditResult(
+  branch,
+  search=""
+){
+
+  const [
+    stock,
+    sold,
+    audit
+  ] =
+    await Promise.all([
+
+      fetchBranchData(
+        branch,
+        "stocks",
+        search
+      ),
+
+      fetchBranchData(
+        branch,
+        "sold",
+        ""
+      ),
+
+      fetchBranchData(
+        branch,
+        "audit",
+        search
+      )
+
+    ]);
+
+  const soldKeys =
+    new Set();
+
+  sold.forEach(
+    row=>{
+
+      const branchValue =
+        String(
+          row?.BR ??
+          row?.branch ??
+          branch ??
+          ""
+        ).trim().toUpperCase();
+
+      const tag =
+        String(
+          row?.NTAGN ?? ""
+        ).trim().toUpperCase();
+
+      if(
+        branchValue &&
+        tag
+      ){
+
+        soldKeys.add(
+          branchValue +
+          "|" +
+          tag
+        );
+
+      }
+
+    }
+  );
+
+  const auditedKeys =
+    new Set();
+
+  const auditedRows =
+    audit
+      .filter(
+        row=>{
+
+          const branchValue =
+            String(
+              row?.BR ??
+              row?.branch ??
+              branch ??
+              ""
+            ).trim().toUpperCase();
+
+          const tag =
+            String(
+              row?.NTAGN ?? ""
+            ).trim().toUpperCase();
+
+          if(!tag){
+            return false;
+          }
+
+          const key =
+            branchValue +
+            "|" +
+            tag;
+
+          if(
+            soldKeys.has(key)
+          ){
+            return false;
+          }
+
+          auditedKeys.add(key);
+
+          return true;
+
+        }
+      )
+      .map(
+        row=>({
+          ...row,
+          __AUDIT_STATUS:"AUDITED"
+        })
+      );
+
+  const missingRows =
+    stock
+      .filter(
+        row=>{
+
+          const branchValue =
+            String(
+              row?.BR ??
+              row?.branch ??
+              branch ??
+              ""
+            ).trim().toUpperCase();
+
+          const tag =
+            String(
+              row?.NTAGN ?? ""
+            ).trim().toUpperCase();
+
+          if(!tag){
+            return false;
+          }
+
+          const key =
+            branchValue +
+            "|" +
+            tag;
+
+          return (
+            !soldKeys.has(key) &&
+            !auditedKeys.has(key)
+          );
+
+        }
+      )
+      .map(
+        row=>({
+          ...row,
+          __AUDIT_STATUS:"MISSING"
+        })
+      );
+
+  return [
+    ...auditedRows,
+    ...missingRows
+  ];
+
+}
+
+/* =========================================================
+   MAP AUDIT ROW
+========================================================= */
+
+function mapAuditRow(
+  row,
+  branch
+){
+
+  const mapped =
+    mapRow(
+      row,
+      branch
+    );
+
+  mapped.auditStatus =
+    String(
+      row.__AUDIT_STATUS ||
+      "AUDITED"
+    ).trim().toUpperCase();
+
+  return mapped;
+
+}
+
+/* =========================================================
    BRANCH CHANGE
 ========================================================= */
 
@@ -7761,11 +7963,16 @@ async function refreshDashboard(){
               }
 
               const rows =
-                await fetchBranchData(
-                  b,
-                  report,
-                  search
-                );
+                report === "audit"
+                  ? await fetchAuditResult(
+                      b,
+                      search
+                    )
+                  : await fetchBranchData(
+                      b,
+                      report,
+                      search
+                    );
 
               return {
                 branch:b,
@@ -7793,10 +8000,15 @@ async function refreshDashboard(){
             row=>{
 
               combined.push(
-                mapRow(
-                  row,
-                  result.branch
-                )
+                report === "audit"
+                  ? mapAuditRow(
+                      row,
+                      result.branch
+                    )
+                  : mapRow(
+                      row,
+                      result.branch
+                    )
               );
 
             }
@@ -7853,6 +8065,25 @@ async function refreshDashboard(){
                   branch
                 )
             );
+
+      }else if(
+        report === "audit"
+      ){
+
+        const rows =
+          await fetchAuditResult(
+            branch,
+            search
+          );
+
+        combined =
+          rows.map(
+            row =>
+              mapAuditRow(
+                row,
+                branch
+              )
+          );
 
       }else{
 
@@ -8068,8 +8299,82 @@ async function updateStatsDirect(
           }
         );
 
+        /*
+         * AUDIT RESULT TOTAL =
+         * AUDITED + MISSING
+         *
+         * Same BRANCH + NTAGN logic as export.
+         */
+
+        const soldAuditKeys =
+          new Set();
+
+        soldRows.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim().toUpperCase();
+
+            if(tag){
+              soldAuditKeys.add(tag);
+            }
+
+          }
+        );
+
+        const auditedAuditKeys =
+          new Set();
+
+        auditRows.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim().toUpperCase();
+
+            if(
+              tag &&
+              !soldAuditKeys.has(tag)
+            ){
+
+              auditedAuditKeys.add(
+                tag
+              );
+
+            }
+
+          }
+        );
+
+        let missingAuditCount = 0;
+
+        stocks.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim().toUpperCase();
+
+            if(
+              tag &&
+              !soldAuditKeys.has(tag) &&
+              !auditedAuditKeys.has(tag)
+            ){
+
+              missingAuditCount++;
+
+            }
+
+          }
+        );
+
         audit +=
-          auditRows.length;
+          auditedAuditKeys.size +
+          missingAuditCount;
 
       }
     )
@@ -8345,12 +8650,17 @@ function renderTable(
   /*
    * CRITICAL:
    *
-   * Edit and Delete exist ONLY
-   * when the current report is SOLD OUT.
+   * SOLD OUT keeps its existing edit/delete behavior.
+   *
+   * AUDIT gets ONLY the new Missing/Audited toggle.
+   * No existing SOLD OUT price/SI editing is changed.
    */
 
   const canEdit =
     report === "sold";
+
+  const canAuditEdit =
+    report === "audit";
 
   rows.forEach(
     row=>{
@@ -8401,7 +8711,7 @@ function renderTable(
        *
        * NO ACTION
        *
-       * for AVAILABLE and AUDIT.
+       * for AVAILABLE.
        */
 
       let actionHTML =
@@ -8410,11 +8720,7 @@ function renderTable(
       /*
        * SOLD OUT ONLY:
        *
-       * Show a real Delete button.
-       *
-       * We use a generated data-action
-       * instead of putting complex row data
-       * directly into inline JavaScript.
+       * Existing Mark + Delete behavior.
        */
 
       if(canEdit){
@@ -8440,6 +8746,35 @@ function renderTable(
             data-tag="${escapeHtmlAttribute(row.tag)}"
           >
             Delete
+          </button>
+
+        `;
+
+      }
+
+      /*
+       * AUDIT ONLY:
+       *
+       * MISSING -> save to branch audit table -> AUDITED
+       * AUDITED -> delete from branch audit table -> MISSING
+       */
+
+      if(canAuditEdit){
+
+        const isAudited =
+          row.auditStatus === "AUDITED";
+
+        actionHTML = `
+
+          <button
+            type="button"
+            class="actionBtn ${isAudited ? "danger" : ""}"
+            data-audit-toggle="1"
+            data-branch="${escapeHtmlAttribute(row.branch)}"
+            data-tag="${escapeHtmlAttribute(row.tag)}"
+            data-audited="${isAudited ? "1" : "0"}"
+          >
+            ${isAudited ? "✓ Audited" : "Missing"}
           </button>
 
         `;
@@ -8580,6 +8915,36 @@ function renderTable(
 
   }
 
+  /*
+   * AUDIT TOGGLE HANDLER
+   *
+   * Missing -> Audited
+   * Audited -> Missing
+   */
+
+  if(canAuditEdit){
+
+    body
+      .querySelectorAll(
+        "[data-audit-toggle]"
+      )
+      .forEach(
+        button=>{
+
+          button.addEventListener(
+            "click",
+            ()=>{
+              toggleAuditStatus(
+                button
+              );
+            }
+          );
+
+        }
+      );
+
+  }
+
   const start =
     (currentPage - 1) *
     ROWS_PER_PAGE;
@@ -8692,6 +9057,223 @@ function nextPage(){
   currentPage++;
 
   renderCurrentPage();
+
+}
+
+/* =========================================================
+   AUDIT MISSING / AUDITED TOGGLE
+
+   MISSING:
+     Save the stock record into the designated
+     branch audit table.
+
+   AUDITED:
+     Delete the audit record so the same stock
+     becomes MISSING again.
+========================================================= */
+
+async function toggleAuditStatus(
+  button
+){
+
+  const branch =
+    String(
+      button.dataset.branch ||
+      ""
+    ).trim();
+
+  const tag =
+    String(
+      button.dataset.tag ||
+      ""
+    ).trim();
+
+  const currentlyAudited =
+    button.dataset.audited === "1";
+
+  if(!branch){
+    showStatus(
+      "Missing branch."
+    );
+    return;
+  }
+
+  if(!tag){
+    showStatus(
+      "Missing NTAGN."
+    );
+    return;
+  }
+
+  button.disabled =
+    true;
+
+  const operationGeneration =
+    searchGeneration;
+
+  try{
+
+    const auditTable =
+      tableName(
+        branch,
+        "audit"
+      );
+
+    const params =
+      new URLSearchParams();
+
+    params.set(
+      "NTAGN",
+      "eq." + tag
+    );
+
+    if(currentlyAudited){
+
+      /*
+       * AUDITED -> MISSING
+       *
+       * Remove the audit record.
+       * The next audit result refresh will
+       * calculate this stock as MISSING again.
+       */
+
+      await supabaseRequest(
+        auditTable +
+        "?" +
+        params.toString(),
+        {
+          method:"DELETE",
+          prefer:"return=minimal"
+        }
+      );
+
+      showStatus(
+        tag +
+        " changed back to MISSING."
+      );
+
+    }else{
+
+      /*
+       * MISSING -> AUDITED
+       *
+       * Use the current stock record as the
+       * audit record so the audit table keeps
+       * the same inventory information.
+       */
+
+      const row =
+        currentRows.find(
+          r =>
+            String(
+              r.branch
+            ).trim() === branch &&
+            String(
+              r.tag
+            ).trim() === tag
+        );
+
+      if(!row || !row.raw){
+
+        throw new Error(
+          "Stock record " +
+          tag +
+          " was not found."
+        );
+
+      }
+
+      /*
+       * Prevent accidental duplicate audit rows.
+       */
+
+      const existing =
+        await supabaseRequest(
+          auditTable +
+          "?" +
+          params.toString() +
+          "&limit=1"
+        );
+
+      if(
+        !Array.isArray(existing) ||
+        existing.length === 0
+      ){
+
+        const auditRecord =
+          {
+            ...row.raw
+          };
+
+        /*
+         * Internal UI-only property must never
+         * be sent to Supabase.
+         */
+
+        delete auditRecord.__AUDIT_STATUS;
+
+        auditRecord.STATUS =
+          "AUDITED";
+
+        auditRecord["DATE AND TIME"] =
+          new Date().toISOString();
+
+        if(currentEmail){
+
+          auditRecord["USER EMAIL"] =
+            currentEmail;
+
+        }
+
+        await supabaseRequest(
+          auditTable,
+          {
+            method:"POST",
+            body:[
+              auditRecord
+            ],
+            prefer:"return=minimal"
+          }
+        );
+
+      }
+
+      showStatus(
+        tag +
+        " changed to AUDITED and saved."
+      );
+
+    }
+
+    if(
+      operationGeneration ===
+      searchGeneration
+    ){
+
+      currentPage = 1;
+
+      await refreshDashboard();
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "Audit toggle failed:",
+      error
+    );
+
+    showStatus(
+      error?.message ||
+      "Unable to update audit status."
+    );
+
+  }finally{
+
+    button.disabled =
+      false;
+
+  }
 
 }
 
@@ -10475,6 +11057,93 @@ async function startExport(){
         }
       );
 
+      /*
+       * AVAILABLE STOCKS:
+       *
+       * Keep the existing SOLD exclusion.
+       *
+       * NEW:
+       * Also subtract MISSING records.
+       *
+       * Because MISSING =
+       * STOCKS - (SOLD + AUDIT),
+       * subtracting SOLD + MISSING leaves
+       * the audited stock records available.
+       *
+       * Matching is BRANCH + NTAGN, exactly like
+       * the audit export logic below.
+       */
+
+      const soldStockKeys =
+        new Set();
+
+      sold.forEach(
+        row=>{
+
+          const branchValue =
+            String(
+              row?.BR ??
+              row?.branch ??
+              b ??
+              ""
+            ).trim().toUpperCase();
+
+          const tag =
+            String(
+              row?.NTAGN ?? ""
+            ).trim().toUpperCase();
+
+          if(
+            branchValue &&
+            tag
+          ){
+
+            soldStockKeys.add(
+              branchValue +
+              "|" +
+              tag
+            );
+
+          }
+
+        }
+      );
+
+      const auditStockKeys =
+        new Set();
+
+      audit.forEach(
+        row=>{
+
+          const branchValue =
+            String(
+              row?.BR ??
+              row?.branch ??
+              b ??
+              ""
+            ).trim().toUpperCase();
+
+          const tag =
+            String(
+              row?.NTAGN ?? ""
+            ).trim().toUpperCase();
+
+          if(
+            branchValue &&
+            tag
+          ){
+
+            auditStockKeys.add(
+              branchValue +
+              "|" +
+              tag
+            );
+
+          }
+
+        }
+      );
+
       const available =
         stock.filter(
           row=>{
@@ -10484,9 +11153,36 @@ async function startExport(){
                 row?.NTAGN ?? ""
               ).trim();
 
+            if(!tag){
+              return true;
+            }
+
+            const branchValue =
+              String(
+                row?.BR ??
+                row?.branch ??
+                b ??
+                ""
+              ).trim().toUpperCase();
+
+            const key =
+              branchValue +
+              "|" +
+              tag.toUpperCase();
+
+            /*
+             * SOLD is already excluded.
+             *
+             * MISSING is:
+             *   not SOLD + not AUDITED
+             *
+             * Therefore an item remains in STOCKS
+             * only when it is AUDITED.
+             */
+
             return (
-              !tag ||
-              !soldTags.has(tag)
+              !soldStockKeys.has(key) &&
+              auditStockKeys.has(key)
             );
 
           }

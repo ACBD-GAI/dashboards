@@ -5073,13 +5073,15 @@ function loginApiGet(action, params = {}){
 
         cleanup();
 
-        forceLogout(
-          "Unable to connect to login server. You have been logged out."
-        );
-
+        /*
+         * IMPORTANT:
+         * Temporary login-server/network failures must NEVER
+         * log out an already authenticated Dashboard session.
+         * The session monitor will retry on its next heartbeat.
+         */
         reject(
           new Error(
-            "FORCE_LOGOUT"
+            "NETWORK_ERROR"
           )
         );
 
@@ -5415,6 +5417,14 @@ async function dashboardHeartbeat(){
           sessionId:sessionId
         }
       );
+
+    if(
+      data &&
+      data.temporaryError === true
+    ){
+      /* Temporary API failure: keep the current session. */
+      return true;
+    }
 
     if(
       data &&

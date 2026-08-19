@@ -1047,6 +1047,131 @@ button{
 
 
 /* =========================================================
+   AUDIT FILTERS
+========================================================= */
+
+#auditFilters{
+  display:none;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-top:10px;
+  padding:10px 12px;
+  border:1px solid #d9d8f4;
+  border-radius:13px;
+  background:linear-gradient(180deg,#ffffff,#f8f7ff);
+  box-shadow:0 4px 12px rgba(76,54,138,.05);
+}
+
+#auditFilters.show{
+  display:flex;
+}
+
+.auditFilterLabel{
+  font-size:10px;
+  font-weight:900;
+  color:#5b5077;
+  letter-spacing:.06em;
+}
+
+.auditFilterSelect{
+  min-height:38px;
+  padding:0 12px;
+  border:1px solid #d4cfe8;
+  border-radius:10px;
+  background:#fff;
+  color:#33294a;
+  outline:none;
+  font-size:11px;
+  font-weight:800;
+}
+
+.auditFilterSelect:focus{
+  border-color:#8b5cf6;
+  box-shadow:0 0 0 3px rgba(139,92,246,.10);
+}
+
+.auditBulkOption{
+  width:100%;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:16px;
+  background:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  text-align:left;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.auditBulkOption:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 26px rgba(15,23,42,.09);
+}
+
+.auditBulkOptionIcon{
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:19px;
+  font-weight:900;
+}
+
+.auditBulkOptionText strong{
+  display:block;
+  color:#172033;
+  font-size:13px;
+  font-weight:950;
+  margin-bottom:3px;
+}
+
+.auditBulkOptionText span{
+  display:block;
+  color:#64748b;
+  font-size:10px;
+  line-height:1.45;
+}
+
+.auditBulkOption.audited{
+  border-color:#bbf7d0;
+}
+
+.auditBulkOption.audited .auditBulkOptionIcon{
+  background:#dcfce7;
+  color:#15803d;
+}
+
+.auditBulkOption.missing{
+  border-color:#fecaca;
+}
+
+.auditBulkOption.missing .auditBulkOptionIcon{
+  background:#fee2e2;
+  color:#dc2626;
+}
+
+.auditBulkCancel{
+  width:100%;
+  min-height:42px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  background:#fff;
+  color:#475569;
+  cursor:pointer;
+  font-size:11px;
+  font-weight:850;
+}
+
+.auditBulkCancel:hover{
+  background:#f8fafc;
+}
+
+/* =========================================================
    SOLD OUT FILTERS
 ========================================================= */
 
@@ -4066,6 +4191,18 @@ select:disabled{
       <button type="button" class="controlBtn" onclick="clearSoldFilters()">Clear Filters</button>
     </div>
 
+    <div id="auditFilters" aria-label="Audit filters">
+      <span class="auditFilterLabel">AUDIT FILTER:</span>
+
+      <select id="auditStatusFilter" class="auditFilterSelect" onchange="applyAuditFilters()">
+        <option value="ALL">ALL</option>
+        <option value="AUDITED">AUDITED ONLY</option>
+        <option value="MISSING">MISSING ONLY</option>
+      </select>
+
+      <button type="button" class="controlBtn" onclick="clearAuditFilters()">Clear Filter</button>
+    </div>
+
     <div id="loadingLine" class="loadingLine hidden"></div>
 
     <div class="cards">
@@ -6523,6 +6660,13 @@ function mapRow(
     qr:
       row["QR"] || "",
 
+    auditStatus:
+      String(
+        row.__AUDIT_STATUS ||
+        row["STATUS"] ||
+        ""
+      ).trim().toUpperCase(),
+
     raw:row
 
   };
@@ -6750,6 +6894,10 @@ function updateSoldOnlyColumns(){
     document
       .getElementById("soldFilters");
 
+  const auditFilters =
+    document
+      .getElementById("auditFilters");
+
   if(header){
     header.style.display =
       report === "sold"
@@ -6761,6 +6909,13 @@ function updateSoldOnlyColumns(){
     filters.classList.toggle(
       "show",
       report === "sold"
+    );
+  }
+
+  if(auditFilters){
+    auditFilters.classList.toggle(
+      "show",
+      report === "audit"
     );
   }
 
@@ -6800,6 +6955,27 @@ function getVisibleRows(){
       .getElementById("sheet")
       ?.value;
 
+  if(report === "audit"){
+
+    const auditFilter =
+      document
+        .getElementById("auditStatusFilter")
+        ?.value || "ALL";
+
+    if(auditFilter === "ALL"){
+      return currentRows;
+    }
+
+    return currentRows.filter(
+      row =>
+        String(
+          row?.auditStatus || "MISSING"
+        ).trim().toUpperCase() ===
+        auditFilter
+    );
+
+  }
+
   if(report !== "sold") return currentRows;
 
   const from =
@@ -6829,6 +7005,46 @@ function getVisibleRows(){
     return true;
 
   });
+
+}
+
+function applyAuditFilters(){
+
+  if(document.getElementById("sheet")?.value !== "audit"){
+    return;
+  }
+
+  const visible =
+    getVisibleRows();
+
+  totalRows =
+    visible.length;
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(totalRows / ROWS_PER_PAGE)
+    );
+
+  if(currentPage > totalPages){
+    currentPage = totalPages;
+  }
+
+  renderCurrentPage();
+
+}
+
+function clearAuditFilters(){
+
+  const filter =
+    document.getElementById("auditStatusFilter");
+
+  if(filter){
+    filter.value = "ALL";
+  }
+
+  currentPage = 1;
+  applyAuditFilters();
 
 }
 
@@ -7211,7 +7427,17 @@ function updateSoldFilteredCounters(){
 
 function applySoldFilters(){
 
-  if(document.getElementById("sheet")?.value !== "sold"){
+  const report =
+    document.getElementById("sheet")?.value;
+
+  if(report === "audit"){
+    applyAuditFilters();
+    const unconfirmedEl = document.getElementById("unconfirmedTotal");
+    if(unconfirmedEl) unconfirmedEl.textContent = "—";
+    return;
+  }
+
+  if(report !== "sold"){
     totalRows = currentRows.length;
     currentPage = 1;
     renderCurrentPage();
@@ -7248,6 +7474,7 @@ function branchChanged(){
 
   updateReportTitle();
   updateSoldOnlyColumns();
+  clearAuditFilters();
 
   silentlyClearReport();
 
@@ -7263,6 +7490,7 @@ function reportChanged(){
 
   updateReportTitle();
   updateSoldOnlyColumns();
+  clearAuditFilters();
 
   silentlyClearReport();
 
@@ -11116,89 +11344,134 @@ function openAuditBulkModal(){
 
   modal.id =
     "auditBulkModal";
-
-  modal.style.cssText =
-    "position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.45);backdrop-filter:blur(5px);";
+  modal.className =
+    "modalBackdrop";
 
   modal.innerHTML = `
-    <div style="width:min(460px,100%);background:#fff;border-radius:20px;padding:24px;box-shadow:0 24px 80px rgba(15,23,42,.25);">
+    <div class="modalCard" style="width:min(500px,100%);">
 
-      <div style="font-size:20px;font-weight:900;color:#102033;margin-bottom:6px;">
-        Audit Bulk Action
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+        <div class="modalTitle" style="margin:0;">
+          ✓ Audit Control
+        </div>
+
+        <button
+          type="button"
+          data-audit-bulk-close="1"
+          aria-label="Close"
+          style="width:36px;height:36px;border:0;border-radius:10px;background:#f1f5f9;color:#475569;cursor:pointer;font-size:18px;font-weight:900;"
+        >
+          ×
+        </button>
       </div>
 
-      <div style="font-size:12px;color:#64748b;line-height:1.5;margin-bottom:18px;">
-        Selected scope: <strong>${escapeHtml(branchLabel)}</strong><br>
-        Choose whether the stock should be treated as AUDITED or MISSING.
+      <div class="modalSub" style="margin-bottom:16px;">
+        Scope: <strong>${escapeHtml(branchLabel)}</strong>
       </div>
 
       <div style="display:grid;gap:10px;">
 
-        <button
-          type="button"
-          data-audit-bulk="audited"
-          style="border:0;border-radius:13px;padding:13px 16px;cursor:pointer;font-weight:900;background:#16a34a;color:#fff;"
-        >
-          ✓ MAKE ALL AUDITED
+        <button type="button" class="auditBulkOption audited" data-audit-bulk="audited">
+          <span class="auditBulkOptionIcon">✓</span>
+          <span class="auditBulkOptionText">
+            <strong>Make All Audited</strong>
+            <span>Copy current unsold stock into the audit records and mark it AUDITED.</span>
+          </span>
         </button>
 
-        <button
-          type="button"
-          data-audit-bulk="missing"
-          style="border:0;border-radius:13px;padding:13px 16px;cursor:pointer;font-weight:900;background:#dc2626;color:#fff;"
-        >
-          ⚠ MAKE ALL MISSING
+        <button type="button" class="auditBulkOption missing" data-audit-bulk="missing">
+          <span class="auditBulkOptionIcon">!</span>
+          <span class="auditBulkOptionText">
+            <strong>Make All Missing</strong>
+            <span>Remove audit records so current unsold stock appears as MISSING.</span>
+          </span>
         </button>
 
-        <button
-          type="button"
-          data-audit-bulk-cancel="1"
-          style="border:1px solid #cbd5e1;border-radius:13px;padding:12px 16px;cursor:pointer;font-weight:800;background:#fff;color:#334155;"
-        >
+        <button type="button" class="auditBulkCancel" data-audit-bulk-cancel="1">
           Cancel
         </button>
 
       </div>
+
     </div>
   `;
 
   document.body.appendChild(modal);
 
+  const close =
+    ()=>modal.remove();
+
   modal
     .querySelector("[data-audit-bulk='audited']")
-    .addEventListener(
-      "click",
-      ()=>bulkSetAuditStatus(
-        branch,
-        "AUDITED"
-      )
-    );
+    .addEventListener("click", ()=>showAuditBulkConfirm(modal, branch, "AUDITED"));
 
   modal
     .querySelector("[data-audit-bulk='missing']")
-    .addEventListener(
-      "click",
-      ()=>bulkSetAuditStatus(
-        branch,
-        "MISSING"
-      )
-    );
+    .addEventListener("click", ()=>showAuditBulkConfirm(modal, branch, "MISSING"));
 
   modal
     .querySelector("[data-audit-bulk-cancel='1']")
-    .addEventListener(
-      "click",
-      ()=>modal.remove()
-    );
+    .addEventListener("click", close);
 
-  modal.addEventListener(
-    "click",
-    event=>{
-      if(event.target === modal){
-        modal.remove();
-      }
+  modal
+    .querySelector("[data-audit-bulk-close='1']")
+    .addEventListener("click", close);
+
+  modal.addEventListener("click", event=>{
+    if(event.target === modal){
+      close();
     }
-  );
+  });
+
+}
+
+function showAuditBulkConfirm(modal, branch, status){
+
+  const branchLabel =
+    branch === "ALL"
+      ? "ALL BRANCHES"
+      : branch;
+
+  const audited =
+    status === "AUDITED";
+
+  modal.querySelector(".modalCard").innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div class="auditBulkOptionIcon" style="background:${audited ? "#dcfce7" : "#fee2e2"};color:${audited ? "#15803d" : "#dc2626"};">
+        ${audited ? "✓" : "!"}
+      </div>
+      <div>
+        <div class="modalTitle" style="margin:0;">
+          ${audited ? "Make All Audited?" : "Make All Missing?"}
+        </div>
+        <div class="modalSub" style="margin-top:3px;">
+          ${escapeHtml(branchLabel)}
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:14px;border-radius:12px;background:#f8fafc;color:#475569;font-size:11px;line-height:1.55;margin-bottom:16px;">
+      ${audited
+        ? "All current unsold stock records in the selected scope will be written to the Audit table as AUDITED."
+        : "All Audit records in the selected scope will be removed. Unsold stock will then appear as MISSING."}
+    </div>
+
+    <div style="display:flex;gap:9px;">
+      <button type="button" class="auditBulkCancel" data-audit-back="1" style="flex:1;">Back</button>
+      <button type="button" class="auditBulkCancel" data-audit-confirm="1" style="flex:1;background:${audited ? "#16a34a" : "#dc2626"};border-color:${audited ? "#16a34a" : "#dc2626"};color:#fff;">
+        ${audited ? "✓ Confirm Audited" : "! Confirm Missing"}
+      </button>
+    </div>
+  `;
+
+  modal
+    .querySelector("[data-audit-back='1']")
+    .addEventListener("click", ()=>openAuditBulkModal());
+
+  modal
+    .querySelector("[data-audit-confirm='1']")
+    .addEventListener("click", ()=>bulkSetAuditStatus(branch, status));
+
 }
 
 async function bulkSetAuditStatus(
@@ -11218,25 +11491,6 @@ async function bulkSetAuditStatus(
     status === "AUDITED"
       ? "AUDIT"
       : "MISSING";
-
-  const confirmed =
-    window.confirm(
-      actionText +
-      " ALL STOCKS FOR " +
-      (selectedBranch === "ALL"
-        ? "ALL BRANCHES"
-        : selectedBranch) +
-      "?\n\n" +
-      (
-        status === "AUDITED"
-          ? "Every current stock record will be copied to the branch audit table and marked AUDITED."
-          : "All audit records for the selected branch(es) will be removed, making unsold stock MISSING."
-      )
-    );
-
-  if(!confirmed){
-    return;
-  }
 
   if(modal){
     modal.remove();

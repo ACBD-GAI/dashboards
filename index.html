@@ -9310,29 +9310,48 @@ async function deleteSoldRow(
        * Restore the original stock record.
        */
 
-      const restored =
-        await supabaseRequest(
-          stockTable,
-          {
-            method:"POST",
+const restored =
+  await supabaseRequest(
+    stockTable,
+    {
+      method:"POST",
 
-            headers:{
-              "Content-Type":
-                "application/json"
-            },
+      headers:{
+        "Content-Type":
+          "application/json",
 
-            body:
-              JSON.stringify(
-                [stockToRestore]
-              ),
+        "Prefer":
+          "return=representation"
+      },
 
-            prefer:
-              "return=representation"
-          }
-        );
+      body:
+        JSON.stringify(
+          [stockToRestore]
+        )
+    }
+  );
 
-     console.log(
-  "RESTORE RESPONSE:",
+console.log(
+  "=== RESTORE DEBUG ==="
+);
+
+console.log(
+  "TABLE:",
+  stockTable
+);
+
+console.log(
+  "TAG:",
+  tag
+);
+
+console.log(
+  "DATA SENT:",
+  stockToRestore
+);
+
+console.log(
+  "SUPABASE RESPONSE:",
   restored
 );
 

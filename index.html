@@ -5228,7 +5228,8 @@ async function verifyOTP(){
         "verifyOTP",
         {
           email:email,
-          otp:otp
+          otp:otp,
+          client:"dashboard"
         }
       );
 
@@ -5388,10 +5389,76 @@ async function checkExistingSession(){
 }
 
 /* =========================================================
-   ACTIVE SESSION MONITOR
-   If the same email logs in on another device,
-   the old browser is automatically logged out.
+   DASHBOARD SESSION MONITOR
+   Keeps this Dashboard session alive independently.
 ========================================================= */
+
+async function dashboardHeartbeat(){
+
+  if(!sessionId){
+    return false;
+  }
+
+  try{
+
+    const data =
+      await loginApiGet(
+        "dashboardHeartbeat",
+        {
+          sessionId:sessionId
+        }
+      );
+
+    if(
+      data &&
+      data.ok &&
+      data.email
+    ){
+
+      currentEmail =
+        data.email;
+
+      currentAdmin =
+        data.isAdmin === true;
+
+      localStorage.setItem(
+        USER_KEY,
+        currentEmail
+      );
+
+      localStorage.setItem(
+        ADMIN_KEY,
+        String(currentAdmin)
+      );
+
+      return true;
+    }
+
+    return false;
+
+  }catch(error){
+
+    console.warn(
+      "Dashboard heartbeat failed:",
+      error
+    );
+
+    /*
+     * Temporary network/API problems MUST NOT
+     * log the Dashboard out.
+     */
+    if(
+      error &&
+      error.message === "SESSION_EXPIRED"
+    ){
+      return false;
+    }
+
+    return true;
+
+  }
+
+}
 
 function startSessionMonitor(){
 
@@ -5399,6 +5466,11 @@ function startSessionMonitor(){
     return;
   }
 
+  /*
+   * Refresh the Dashboard session every 20 seconds.
+   * The Apps Script heartbeat refreshes both CacheService
+   * and the persistent Dashboard session backup.
+   */
   sessionMonitorTimer =
     setInterval(async ()=>{
 
@@ -5406,12 +5478,14 @@ function startSessionMonitor(){
         return;
       }
 
-      const loggedIn =
-        await checkExistingSession();
+      const alive =
+        await dashboardHeartbeat();
 
-      if(!loggedIn){
+      if(!alive){
 
         stopSessionMonitor();
+
+        clearLoginSession();
 
         document
           .getElementById("dashboard")
@@ -5434,12 +5508,12 @@ function startSessionMonitor(){
           .value = "";
 
         setLoginStatus(
-          "You were logged out because this email was used to log in on another device."
+          "Your Dashboard session expired. Please log in again."
         );
 
       }
 
-    },10000);
+    },20000);
 
 }
 

@@ -3910,6 +3910,46 @@ select:disabled{
 }
 
 
+
+function philippineDateTime(){
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:"Asia/Manila",
+        year:"numeric",
+        month:"2-digit",
+        day:"2-digit",
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit",
+        hour12:false
+      }
+    ).formatToParts(new Date());
+
+  const get =
+    type =>
+      parts.find(
+        part => part.type === type
+      )?.value || "00";
+
+  return (
+    get("year") +
+    "-" +
+    get("month") +
+    "-" +
+    get("day") +
+    "T" +
+    get("hour") +
+    ":" +
+    get("minute") +
+    ":" +
+    get("second") +
+    "+08:00"
+  );
+}
+
+
 /* =========================================================
    REPORTED MISSING — ADDITIVE FEATURE ONLY
 ========================================================= */
@@ -3923,9 +3963,9 @@ select:disabled{
 .reportedMissingModal{position:relative;}
 .reportedShowingMini{
   position:absolute;
-  top:10px;
-  right:12px;
-  display:flex;
+  top:8px;
+  right:10px;
+  display:none;
   align-items:center;
   gap:6px;
   padding:5px 8px;
@@ -4429,10 +4469,33 @@ select:disabled{
 
       </div>
 
-      <div class="statCard auditStatCard reportedMissingStatCard" id="reportedMissingStatCard" role="button" tabindex="0" style="display:none;" onclick="openReportedMissingPopup()" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openReportedMissingPopup(); }" title="View reported missing items">
+      
+      <div class="statCard" id="showingStatCard">
+        <div class="statTop">
+          <span class="statLabel">
+            SHOWING
+          </span>
+          <span class="statIcon">
+            ≡
+          </span>
+        </div>
+
+        <div
+          id="showingTotal"
+          class="statNumber"
+        >
+          —
+        </div>
+
+        <div class="statHint">
+          Current results
+        </div>
+      </div>
+
+<div class="statCard auditStatCard reportedMissingStatCard" id="reportedMissingStatCard" role="button" tabindex="0" style="display:none;" onclick="openReportedMissingPopup()" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openReportedMissingPopup(); }" title="View reported missing items">
         <div class="statTop">
           <span class="statLabel">REPORTED MISSING</span>
-          <span class="statIcon">!</span>
+          <span class="statIcon"></span>
         </div>
         <div id="reportedMissingTotal" class="statNumber">—</div>
         <div class="statHint">Click to view reported missing</div>
@@ -7093,6 +7156,22 @@ function updateSoldOnlyColumns(){
       report === "audit" ? "" : "none";
   }
 
+  const showingCard =
+    document.getElementById("showingStatCard");
+
+  if(showingCard){
+    showingCard.style.display =
+      report === "audit" ? "none" : "";
+  }
+
+  const showingMini =
+    document.getElementById("showingTotalMini");
+
+  if(showingMini){
+    showingMini.parentElement.style.display =
+      report === "audit" ? "flex" : "none";
+  }
+
 }
 
 function clearSoldFilters(){
@@ -7738,6 +7817,11 @@ function resetDashboardDisplay(){
 
   document
     .getElementById("auditTotal")
+    .textContent =
+      "—";
+
+  document
+    .getElementById("showingTotal")
     .textContent =
       "—";
 
@@ -10198,7 +10282,7 @@ async function toggleAuditStatus(
           "AUDITED";
 
         auditRecord["DATE AND TIME"] =
-          new Date().toISOString();
+          philippineDateTime();
 
         if(currentEmail){
 
@@ -10964,7 +11048,7 @@ async function deleteSoldRow(
           method:"PATCH",
           body:{
             STATUS:"AUDITED",
-            "DATE AND TIME":new Date().toISOString(),
+            "DATE AND TIME":philippineDateTime(),
             "USER EMAIL":currentEmail || null
           },
           prefer:"return=minimal"
@@ -10997,7 +11081,7 @@ async function deleteSoldRow(
         REMARKS: soldRecord.REMARKS ?? null,
         TAGPRICE: soldRecord.TAGPRICE ?? null,
         STATUS:"AUDITED",
-        "DATE AND TIME":new Date().toISOString(),
+        "DATE AND TIME":philippineDateTime(),
         "USER EMAIL":currentEmail || null
       };
 
@@ -12454,7 +12538,7 @@ function reportedMissingRecordFromRow(row, branch, tag){
   record["BR"] = String(branch || raw["BR"] || "").trim().toUpperCase();
   record["NTAGN"] = String(tag || raw["NTAGN"] || "").trim();
   record["STATUS"] = "MISSING";
-  record["DATE AND TIME"] = new Date().toISOString();
+  record["DATE AND TIME"] = philippineDateTime();
   if(currentEmail) record["USER EMAIL"] = currentEmail;
   return record;
 }
@@ -12795,7 +12879,7 @@ function reportedMissingToStockRecord(row){
 function reportedMissingToAuditRecord(row){
   const audit={};
   DB_COLUMNS.forEach(col=>{ audit[col]=row[col]!==undefined&&row[col]!==null?row[col]:null; });
-  audit.STATUS="AUDITED"; audit["DATE AND TIME"]=new Date().toISOString(); if(currentEmail) audit["USER EMAIL"]=currentEmail;
+  audit.STATUS="AUDITED"; audit["DATE AND TIME"]=philippineDateTime(); if(currentEmail) audit["USER EMAIL"]=currentEmail;
   return audit;
 }
 
@@ -12835,7 +12919,7 @@ async function restoreReportedMissingToStocksConfirmed(branch,tag){
             BR:branch,
             NTAGN:tag,
             STATUS:"AUDITED",
-            "DATE AND TIME":new Date().toISOString(),
+            "DATE AND TIME":philippineDateTime(),
             "USER EMAIL":currentEmail||null
           },
           prefer:"return=minimal"

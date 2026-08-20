@@ -12563,8 +12563,8 @@ function openAuditBulkModal(){
         <button type="button" class="auditBulkOption missing" data-audit-bulk="missing">
           <span class="auditBulkOptionIcon">!</span>
           <span class="auditBulkOptionText">
-            <strong>Make All Missing</strong>
-            <span>Remove audit records so current unsold stock appears as MISSING.</span>
+            <strong>Make All For Auditing</strong>
+            <span>Remove audit records so current unsold stock appears as for Auditing.</span>
           </span>
         </button>
 
@@ -12623,7 +12623,7 @@ function showAuditBulkConfirm(modal, branch, status){
       </div>
       <div>
         <div class="modalTitle" style="margin:0;">
-          ${audited ? "Make All Audited?" : "Make All Missing?"}
+          ${audited ? "Make All Audited?" : "Make All For Auditing?"}
         </div>
         <div class="modalSub" style="margin-top:3px;">
           ${escapeHtml(branchLabel)}

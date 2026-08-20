@@ -3911,35 +3911,6 @@ select:disabled{
 
 
 /* =========================================================
-   PHILIPPINE TIME
-   All DATE AND TIME values written by this Dashboard use
-   Asia/Manila (UTC+08:00).
-========================================================= */
-function philippineDateTime(){
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Manila",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  }).formatToParts(new Date());
-
-  const get = name =>
-    parts.find(p => p.type === name)?.value || "00";
-
-  return
-    get("year") + "-" +
-    get("month") + "-" +
-    get("day") + "T" +
-    get("hour") + ":" +
-    get("minute") + ":" +
-    get("second") + "+08:00";
-}
-
-/* =========================================================
    REPORTED MISSING — ADDITIVE FEATURE ONLY
 ========================================================= */
 .reportedMissingStatCard{cursor:pointer;}
@@ -10227,7 +10198,7 @@ async function toggleAuditStatus(
           "AUDITED";
 
         auditRecord["DATE AND TIME"] =
-          philippineDateTime();
+          new Date().toISOString();
 
         if(currentEmail){
 
@@ -10993,7 +10964,7 @@ async function deleteSoldRow(
           method:"PATCH",
           body:{
             STATUS:"AUDITED",
-            "DATE AND TIME":philippineDateTime(),
+            "DATE AND TIME":new Date().toISOString(),
             "USER EMAIL":currentEmail || null
           },
           prefer:"return=minimal"
@@ -11026,7 +10997,7 @@ async function deleteSoldRow(
         REMARKS: soldRecord.REMARKS ?? null,
         TAGPRICE: soldRecord.TAGPRICE ?? null,
         STATUS:"AUDITED",
-        "DATE AND TIME":philippineDateTime(),
+        "DATE AND TIME":new Date().toISOString(),
         "USER EMAIL":currentEmail || null
       };
 
@@ -11617,52 +11588,28 @@ function normalizeCellValue(
 
 }
 
-function formatDateValue(
-  date
-){
+function formatDateValue(date){
 
-  if(
-    !(date instanceof Date)
-  ){
-
-    return String(
-      date || ""
-    );
-
+  const raw = String(date || "").trim();
+  if(!raw){
+    return "";
   }
 
-  const pad =
-    n =>
-      String(n)
-        .padStart(
-          2,
-          "0"
-        );
+  const parsed = new Date(raw);
+  if(!Number.isFinite(parsed.getTime())){
+    return raw;
+  }
 
-  return (
-    date.getFullYear() +
-    "-" +
-    pad(
-      date.getMonth()+1
-    ) +
-    "-" +
-    pad(
-      date.getDate()
-    ) +
-    " " +
-    pad(
-      date.getHours()
-    ) +
-    ":" +
-    pad(
-      date.getMinutes()
-    ) +
-    ":" +
-    pad(
-      date.getSeconds()
-    )
-  );
-
+  return new Intl.DateTimeFormat("en-PH", {
+    timeZone:"Asia/Manila",
+    year:"numeric",
+    month:"2-digit",
+    day:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit",
+    hour12:false
+  }).format(parsed);
 }
 
 /* =========================================================
@@ -12507,7 +12454,7 @@ function reportedMissingRecordFromRow(row, branch, tag){
   record["BR"] = String(branch || raw["BR"] || "").trim().toUpperCase();
   record["NTAGN"] = String(tag || raw["NTAGN"] || "").trim();
   record["STATUS"] = "MISSING";
-  record["DATE AND TIME"] = philippineDateTime();
+  record["DATE AND TIME"] = new Date().toISOString();
   if(currentEmail) record["USER EMAIL"] = currentEmail;
   return record;
 }
@@ -12772,7 +12719,10 @@ async function loadReportedMissingPopup(){
   reportedMissingPopupLoading=true;
   list.innerHTML='<div class="reportedMissingEmpty">⏳ Loading reported missing...</div>';
   try{
-    reportedMissingPopupRows=await fetchAllRowsForStats(reportedMissingTable(),'"BR","LENSTYPE","DESCRIPTION","NTAGN","SI NO.","DATE AND TIME","USER EMAIL","STATUS"');
+    reportedMissingPopupRows=await fetchAllRowsForStats(
+  reportedMissingTable(),
+  'BR,LENSTYPE,DESCRIPTION,NTAGN,"SI NO.","DATE AND TIME","USER EMAIL",STATUS'
+);
     renderReportedMissingPopup();
   }catch(error){
     console.error("Reported missing popup load failed:",error);
@@ -12803,7 +12753,13 @@ function renderReportedMissingPopup(){
       <div class="reportedMissingCell">${escapeHtml(String(row?.LENSTYPE||"—"))}</div>
       <div class="reportedMissingCell description">${escapeHtml(String(row?.DESCRIPTION||"—"))}</div>
       <div class="reportedMissingCell"><span class="tag">${escapeHtml(t||"—")}</span></div>
-      <div class="reportedMissingCell">${escapeHtml(String(row?.["SI NO."]||"—"))}</div>
+      <div class="reportedMissingCell">
+  ${escapeHtml(
+    row?.["DATE AND TIME"]
+      ? formatDateValue(row["DATE AND TIME"])
+      : "—"
+  )}
+</div>
       <div class="reportedMissingActions">
         <button type="button" class="actionBtn reportedMissingRestoreBtn" data-reported-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ Add to Stocks</button>
         <button type="button" class="actionBtn danger" data-reported-delete="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">Delete</button>
@@ -12815,29 +12771,20 @@ function renderReportedMissingPopup(){
 }
 
 async function getReportedMissingRecord(branch,tag){
-  branch = String(branch || "").trim().toUpperCase();
-  tag = String(tag || "").trim();
+  branch=String(branch||"").trim().toUpperCase();
+  tag=String(tag||"").trim();
 
-  const p = new URLSearchParams();
-  p.set("BR","eq." + branch);
-  p.set("NTAGN","eq." + tag);
+  const p=new URLSearchParams();
+  p.set("BR","eq."+branch);
+  p.set("NTAGN","eq."+tag);
   p.set("limit","1");
 
-  const rows =
-    await supabaseRequest(
-      reportedMissingTable() +
-      "?" +
-      p.toString(),
-      {
-        method:"GET"
-      }
-    );
+  const rows=await supabaseRequest(
+    reportedMissingTable()+"?"+p.toString(),
+    {method:"GET"}
+  );
 
-  return
-    Array.isArray(rows) &&
-    rows.length
-      ? rows[0]
-      : null;
+  return Array.isArray(rows)&&rows.length ? rows[0] : null;
 }
 
 function reportedMissingToStockRecord(row){
@@ -12848,7 +12795,7 @@ function reportedMissingToStockRecord(row){
 function reportedMissingToAuditRecord(row){
   const audit={};
   DB_COLUMNS.forEach(col=>{ audit[col]=row[col]!==undefined&&row[col]!==null?row[col]:null; });
-  audit.STATUS="AUDITED"; audit["DATE AND TIME"]=philippineDateTime(); if(currentEmail) audit["USER EMAIL"]=currentEmail;
+  audit.STATUS="AUDITED"; audit["DATE AND TIME"]=new Date().toISOString(); if(currentEmail) audit["USER EMAIL"]=currentEmail;
   return audit;
 }
 
@@ -12888,7 +12835,7 @@ async function restoreReportedMissingToStocksConfirmed(branch,tag){
             BR:branch,
             NTAGN:tag,
             STATUS:"AUDITED",
-            "DATE AND TIME":philippineDateTime(),
+            "DATE AND TIME":new Date().toISOString(),
             "USER EMAIL":currentEmail||null
           },
           prefer:"return=minimal"

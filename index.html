@@ -5225,27 +5225,6 @@ async function saveAllowedUser(){
     return;
   }
 
-  /*
-   * ADD USER ONLY:
-   * Re-read the current session directly from localStorage.
-   * This prevents this page from using an old sessionId when
-   * another login/tab refreshed the stored Dashboard session.
-   *
-   * Nothing else in the login/session/heartbeat code is changed.
-   */
-  const latestSessionId =
-    localStorage.getItem(SESSION_KEY);
-
-  if(latestSessionId){
-    sessionId = latestSessionId;
-  }
-
-  if(!sessionId){
-    showStatus("Session expired. Please login again.");
-    closeAddUserModal();
-    return;
-  }
-
   const email =
     document
       .getElementById("newUserEmail")
@@ -5280,62 +5259,29 @@ async function saveAllowedUser(){
 
   button.disabled = true;
   button.textContent = "Saving...";
-  status.textContent = "Checking session...";
+  status.textContent = "Adding user...";
 
   try{
 
     /*
-     * Confirm that the exact session we are about to use is
-     * still valid before calling Add User.
-     *
-     * This uses the existing checkSession endpoint only.
-     * It does NOT create a new session and does NOT touch
-     * scanner heartbeat/session logic.
-     */
-    const sessionCheck =
-      await loginApiGet(
-        "checkSession",
-        {
-          sessionId: sessionId
-        }
-      );
+      ADD USER ONLY
 
-    if(
-      !sessionCheck ||
-      sessionCheck.ok !== true
-    ){
-      throw new Error(
-        sessionCheck?.error ||
-        "SESSION_EXPIRED"
-      );
-    }
+      Do NOT run checkSession here.
+      Do NOT refresh or modify the existing session.
+      Do NOT touch scanner heartbeat.
+      Do NOT touch login/session monitor.
 
-    /*
-     * Keep the Dashboard state synchronized with the
-     * session that was just verified.
-     */
-    currentEmail =
-      sessionCheck.email ||
-      currentEmail;
-
-    currentAdmin =
-      sessionCheck.isAdmin === true;
-
-    if(!currentAdmin){
-      throw new Error(
-        "Administrator access required."
-      );
-    }
-
-    status.textContent = "Adding user...";
+      Send the SAME existing sessionId that the
+      Dashboard already uses.
+    */
 
     const data =
       await loginApiGet(
         "addAllowedUser",
         {
-          sessionId:sessionId,
-          email:email,
-          branch:branch
+          sessionId: sessionId,
+          email: email,
+          branch: branch
         }
       );
 

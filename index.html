@@ -7624,7 +7624,12 @@ function updateSoldFilteredCounters(){
   const visible = getVisibleRows();
 
   const markedVisible =
-    visible.filter(row => row.marked === true);
+    visible.filter(row =>
+      row?.marked === true ||
+      String(row?.raw?.STATUS ?? row?.STATUS ?? "")
+        .trim()
+        .toUpperCase() === "MARKED"
+    );
 
   let soldCount = markedVisible.length;
   let soldAmount = 0;
@@ -8937,7 +8942,12 @@ async function updateStatsDirect(
       getVisibleRows();
 
     const markedSoldRows =
-      visibleSoldRows.filter(row => row.marked === true);
+      visibleSoldRows.filter(row =>
+        row?.marked === true ||
+        String(row?.raw?.STATUS ?? row?.STATUS ?? "")
+          .trim()
+          .toUpperCase() === "MARKED"
+      );
 
     sold =
       markedSoldRows.length;
@@ -13294,7 +13304,7 @@ async function loadReportedMissingPopup(){
   try{
     reportedMissingPopupRows=await fetchAllRowsForStats(
   reportedMissingTable(),
-  'BR,LENSTYPE,DESCRIPTION,NTAGN,SELLINGPRICE,DELIVERYDATE,"SI NO.","DATE AND TIME","USER EMAIL",STATUS'
+  'BR,LENSTYPE,DESCRIPTION,NTAGN,SELLINGPRICE,DELIVERYDATE,"DATE AND TIME","USER EMAIL",STATUS'
 );
     renderReportedMissingPopup();
   }catch(error){
@@ -13313,7 +13323,7 @@ function renderReportedMissingPopup(){
     const rb=String(row?.BR||"").trim().toUpperCase();
     if(branchFilter!=="ALL" && rb!==branchFilter) return false;
     if(!search) return true;
-    const text=[row?.BR,row?.LENSTYPE,row?.DESCRIPTION,row?.NTAGN,row?.["SI NO."],row?.["USER EMAIL"],row?.STATUS].map(v=>String(v??"").toLowerCase()).join(" ");
+    const text=[row?.BR,row?.LENSTYPE,row?.DESCRIPTION,row?.NTAGN,row?.["USER EMAIL"],row?.STATUS].map(v=>String(v??"").toLowerCase()).join(" ");
     return text.includes(search);
   });
   const status=document.getElementById("reportedMissingPopupStatus");

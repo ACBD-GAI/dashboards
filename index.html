@@ -3784,6 +3784,30 @@ select:disabled{
   }
 }
 
+
+/* =========================================================
+   REPORTED MISSING
+========================================================= */
+.reportedMissingStatCard{cursor:pointer;}
+.reportedMissingIcon{color:#dc2626!important;background:linear-gradient(135deg,#fff1f2,#fee2e2)!important;border-color:#fecaca!important;}
+.reportedMissingModal{width:min(1050px,96vw);max-height:88vh;padding:0;overflow:hidden;}
+.reportedMissingHead{padding:18px 20px 14px;border-bottom:1px solid #e5edf3;background:linear-gradient(135deg,#fff,#fff8f8);}
+.reportedMissingControls{display:grid;grid-template-columns:180px minmax(200px,1fr) auto;gap:9px;margin-top:12px;}
+.reportedMissingList{max-height:58vh;overflow:auto;padding:10px 12px;background:#f8fbfd;}
+.reportedMissingHeader{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 125px 235px;gap:10px;padding:9px 12px;color:#315267;font-size:9px;font-weight:900;letter-spacing:.06em;}
+.reportedMissingRow{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 125px 235px;gap:10px;align-items:center;padding:11px 12px;margin:5px 0;border:1px solid #dce8ef;border-radius:13px;background:#fff;}
+.reportedMissingCell{min-width:0;color:#243b4d;font-size:10px;font-weight:700;}
+.reportedMissingCell.description{white-space:normal;overflow-wrap:anywhere;line-height:1.35;}
+.reportedMissingActions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
+.reportedMissingActions .actionBtn{min-height:32px;}
+.reportMissingBtn{color:#b91c1c!important;border-color:#fecaca!important;background:#fff7f7!important;}
+.reportMissingBtn:hover{color:#fff!important;background:#dc2626!important;border-color:#dc2626!important;}
+.reportedMissingRestoreBtn{color:#166534!important;border-color:#bbf7d0!important;background:#f0fdf4!important;}
+.reportedMissingRestoreBtn:hover{color:#fff!important;background:#16a34a!important;border-color:#16a34a!important;}
+.reportedMissingEmpty{padding:42px 15px;text-align:center;color:#64748b;font-size:11px;}
+@media(max-width:900px){.reportedMissingControls{grid-template-columns:1fr;}.reportedMissingHeader{display:none;}.reportedMissingRow{grid-template-columns:1fr 1fr;}.reportedMissingCell.description{grid-column:1 / -1;}.reportedMissingActions{grid-column:1 / -1;justify-content:flex-start;}}
+@media(min-width:1100px){.cards{grid-template-columns:repeat(6,minmax(0,1fr));}}
+
 </style>
 
 
@@ -4339,6 +4363,41 @@ select:disabled{
 
       </div>
 
+      <div
+        class="statCard auditStatCard reportedMissingStatCard"
+        id="reportedMissingStatCard"
+        role="button"
+        tabindex="0"
+        onclick="openReportedMissingPopup()"
+        onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openReportedMissingPopup(); }"
+        title="View reported missing items"
+      >
+
+        <div class="statTop">
+
+          <span class="statLabel">
+            REPORTED MISSING
+          </span>
+
+          <span class="statIcon reportedMissingIcon">
+            !
+          </span>
+
+        </div>
+
+        <div
+          id="reportedMissingTotal"
+          class="statNumber"
+        >
+          —
+        </div>
+
+        <div class="statHint">
+          Click to view reported missing
+        </div>
+
+      </div>
+
       <div class="statCard">
 
         <div class="statTop">
@@ -4876,6 +4935,8 @@ const BRANCHES = [
   "TIS",
   "TOL"
 ];
+
+const REPORTED_MISSING_TABLE = "reported_missing";
 
 const DB_COLUMNS = [
   "SDATE",
@@ -6364,6 +6425,10 @@ function tableName(
    REPORT LABEL
 ========================================================= */
 
+function reportedMissingTable(){
+  return REPORTED_MISSING_TABLE;
+}
+
 function reportLabel(){
 
   const report =
@@ -6776,6 +6841,26 @@ function mapRow(
      BRANCH + NTAGN
 ========================================================= */
 
+async function fetchReportedMissingKeys(branch){
+  const params = new URLSearchParams();
+  params.set("select","BR,NTAGN");
+  params.set("limit","100000");
+  if(branch && branch !== "ALL") params.set("BR","eq." + branch);
+  try{
+    const rows = await supabaseRequest(reportedMissingTable()+"?"+params.toString());
+    const keys = new Set();
+    (Array.isArray(rows)?rows:[]).forEach(row=>{
+      const b=String(row?.BR??branch??"").trim().toUpperCase();
+      const t=String(row?.NTAGN??"").trim().toUpperCase();
+      if(b&&t) keys.add(b+"|"+t);
+    });
+    return keys;
+  }catch(e){
+    console.warn("Unable to load reported-missing keys:",e);
+    return new Set();
+  }
+}
+
 async function fetchAuditResult(
   branch,
   search=""
@@ -6784,7 +6869,8 @@ async function fetchAuditResult(
   const [
     stock,
     sold,
-    audit
+    audit,
+    reportedMissingKeys
   ] =
     await Promise.all([
 
@@ -6804,6 +6890,10 @@ async function fetchAuditResult(
         branch,
         "audit",
         search
+      ),
+
+      fetchReportedMissingKeys(
+        branch
       )
 
     ]);
@@ -6926,12 +7016,12 @@ async function fetchAuditResult(
 
         }
       )
-      .map(
-        row=>({
-          ...row,
-          __AUDIT_STATUS:"MISSING"
-        })
-      );
+      .map(row=>{
+        const branchValue=String(row?.BR??row?.branch??branch??"").trim().toUpperCase();
+        const tag=String(row?.NTAGN??"").trim().toUpperCase();
+        const key=branchValue+"|"+tag;
+        return { ...row, __AUDIT_STATUS:"MISSING", __REPORTED_MISSING:reportedMissingKeys.has(key) };
+      });
 
   return [
     ...auditedRows,
@@ -8551,6 +8641,15 @@ async function updateStatsDirect(
   let soldAmount = 0;
   let unconfirmed = 0;
   let audit = 0;
+  let reportedMissing = 0;
+
+  const reportedMissingPromise = fetchAllRowsForStats(
+    reportedMissingTable(),
+    "BR,NTAGN"
+  ).catch(error=>{
+    console.error("Reported missing statistics failed:",error);
+    return [];
+  });
 
   await Promise.all(
     branches.map(
@@ -8740,6 +8839,17 @@ async function updateStatsDirect(
     )
   );
 
+  const reportedMissingRows = await reportedMissingPromise;
+
+  if(branch === "ALL"){
+    reportedMissing = reportedMissingRows.length;
+  }else{
+    const selected = String(branch).trim().toUpperCase();
+    reportedMissing = reportedMissingRows.filter(row=>
+      String(row?.BR??"").trim().toUpperCase() === selected
+    ).length;
+  }
+
   if(
     generation !==
     searchGeneration
@@ -8834,6 +8944,11 @@ async function updateStatsDirect(
       formatNumber(
         audit
       );
+
+  const reportedMissingEl = document.getElementById("reportedMissingTotal");
+  if(reportedMissingEl){
+    reportedMissingEl.textContent = formatNumber(reportedMissing);
+  }
 
   document
     .getElementById(
@@ -9177,6 +9292,19 @@ function renderTable(
             ${isAudited ? "✓ Audited" : "Missing"}
           </button>
 
+          ${!isAudited ? `
+            <button
+              type="button"
+              class="actionBtn reportMissingBtn"
+              data-report-missing="1"
+              data-branch="${escapeHtmlAttribute(row.branch)}"
+              data-tag="${escapeHtmlAttribute(row.tag)}"
+              ${row.raw?.__REPORTED_MISSING ? 'disabled title="Already reported"' : ''}
+            >
+              ${row.raw?.__REPORTED_MISSING ? "✓ Reported" : "Report as Missing"}
+            </button>
+          ` : ""}
+
         `;
 
       }
@@ -9375,6 +9503,25 @@ function renderTable(
             "click",
             ()=>{
               toggleAuditStatus(
+                button
+              );
+            }
+          );
+
+        }
+      );
+
+    body
+      .querySelectorAll(
+        "[data-report-missing]"
+      )
+      .forEach(
+        button=>{
+
+          button.addEventListener(
+            "click",
+            ()=>{
+              reportAuditRowAsMissing(
                 button
               );
             }
@@ -9907,6 +10054,128 @@ async function deleteStockRow(
      Delete the audit record so the same stock
      becomes MISSING again.
 ========================================================= */
+
+
+/* =========================================================
+   REPORT MISSING -> CENTRAL TABLE
+========================================================= */
+async function reportAuditRowAsMissing(button){
+  const branch=String(button?.dataset?.branch||"").trim().toUpperCase();
+  const tag=String(button?.dataset?.tag||"").trim();
+  if(!branch||!tag){showStatus("Missing branch or NTAGN.");return;}
+  const confirmed=await inlineConfirm("Report tag "+tag+" from "+branch+" as MISSING?");
+  if(!confirmed)return;
+  const row=currentRows.find(r=>String(r?.branch||"").trim().toUpperCase()===branch&&String(r?.tag||"").trim()===tag);
+  if(!row||!row.raw){showStatus("Stock record "+tag+" was not found.");return;}
+  button.disabled=true;
+  try{
+    const existing=await supabaseRequest(reportedMissingTable()+"?BR=eq."+encodeURIComponent(branch)+"&NTAGN=eq."+encodeURIComponent(tag)+"&select=id&limit=1",{method:"GET"});
+    if(Array.isArray(existing)&&existing.length){
+      showStatus(tag+" is already reported as MISSING.");
+    }else{
+      const raw={...row.raw}; delete raw.__AUDIT_STATUS; delete raw.__REPORTED_MISSING;
+      const reportRecord={SDATE:raw.SDATE??null,SUPPLIER:raw.SUPPLIER??null,DR:raw.DR??null,COST:raw.COST??null,ASG:raw.ASG??null,CB:raw.CB??null,FD:raw.FD??null,UNITS:raw.UNITS??null,POWER:raw.POWER??null,LENSTYPE:raw.LENSTYPE??null,PUNIT:raw.PUNIT??null,BR:raw.BR??branch,NTAGN:raw.NTAGN??tag,CATEGORY:raw.CATEGORY??null,DESCRIPTION:raw.DESCRIPTION??null,LENSCODE:raw.LENSCODE??null,SELLINGPRICE:raw.SELLINGPRICE??null,DELIVERYDATE:raw.DELIVERYDATE??null,ORNUMBER:raw.ORNUMBER??null,ORDATE:raw.ORDATE??null,REMARKS:raw.REMARKS??null,TAGPRICE:raw.TAGPRICE??null,QR:raw.QR??null,"SI NO.":raw["SI NO."]??null,"DATE AND TIME":new Date().toISOString(),"USER EMAIL":currentEmail||raw["USER EMAIL"]||null,STATUS:"MISSING",raw_data:raw};
+      await supabaseRequest(reportedMissingTable(),{method:"POST",body:[reportRecord],prefer:"return=minimal"});
+      if(row.raw)row.raw.__REPORTED_MISSING=true;
+      showStatus(tag+" reported as MISSING.");
+    }
+    await refreshDashboard();
+  }catch(error){console.error("Report missing failed:",error);showStatus(error?.message||"Unable to report item as missing.");}
+  finally{button.disabled=false;}
+}
+
+/* =========================================================
+   REPORTED MISSING POPUP
+========================================================= */
+let reportedMissingPopupRows=[];
+
+async function openReportedMissingPopup(){
+  const existing=document.getElementById("reportedMissingModal"); if(existing)existing.remove();
+  const modal=document.createElement("div"); modal.id="reportedMissingModal"; modal.className="modalBackdrop";
+  modal.innerHTML=`<div class="modalCard reportedMissingModal"><div class="reportedMissingHead"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;"><div><div class="modalTitle" style="margin:0;">⚠ Reported Missing</div><div class="modalSub" style="margin-top:4px;">All branches • Recover or permanently remove unrecoverable items.</div></div><button type="button" data-rm-close="1" style="width:36px;height:36px;border:0;border-radius:10px;background:#f1f5f9;color:#475569;cursor:pointer;font-size:18px;font-weight:900;">×</button></div><div class="reportedMissingControls"><select id="reportedMissingBranchFilter" class="select"><option value="ALL">ALL BRANCHES</option>${BRANCHES.map(b=>`<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`).join("")}</select><input id="reportedMissingSearch" class="searchInput" style="min-height:43px;" placeholder="Search tag, description or lens type" autocomplete="off"><button type="button" class="controlBtn" data-rm-refresh="1">↻ Refresh</button></div></div><div class="reportedMissingHeader"><div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div>DATE</div><div style="text-align:right;">ACTIONS</div></div><div id="reportedMissingList" class="reportedMissingList"><div class="reportedMissingEmpty">Loading reported missing...</div></div><div class="modalActions" style="padding:12px 16px;border-top:1px solid #e5edf3;"><div id="reportedMissingPopupStatus" class="loginStatus" style="margin:0;flex:1;"></div><button type="button" class="controlBtn" data-rm-close="1">Close</button></div></div>`;
+  document.body.appendChild(modal);
+  const close=()=>modal.remove();
+  modal.querySelectorAll("[data-rm-close='1']").forEach(btn=>btn.addEventListener("click",close));
+  modal.addEventListener("click",event=>{if(event.target===modal)close();});
+  modal.querySelector("[data-rm-refresh='1']")?.addEventListener("click",loadReportedMissingPopup);
+  modal.querySelector("#reportedMissingBranchFilter")?.addEventListener("change",renderReportedMissingPopup);
+  modal.querySelector("#reportedMissingSearch")?.addEventListener("input",renderReportedMissingPopup);
+  await loadReportedMissingPopup();
+}
+
+async function loadReportedMissingPopup(){
+  const list=document.getElementById("reportedMissingList"); if(!list)return;
+  const status=document.getElementById("reportedMissingPopupStatus");
+  list.innerHTML='<div class="reportedMissingEmpty">⏳ Loading reported missing...</div>'; if(status)status.textContent="";
+  try{
+    reportedMissingPopupRows=await fetchAllRowsForStats(reportedMissingTable(), 'id,BR,LENSTYPE,DESCRIPTION,NTAGN,"DATE AND TIME",STATUS,raw_data');
+    renderReportedMissingPopup();
+  }catch(error){console.error("Reported missing popup load failed:",error);list.innerHTML='<div class="reportedMissingEmpty">Unable to load reported missing items.</div>';if(status)status.textContent=error?.message||"Unable to load reported missing.";}
+}
+
+function renderReportedMissingPopup(){
+  const list=document.getElementById("reportedMissingList"); if(!list)return;
+  const branchFilter=String(document.getElementById("reportedMissingBranchFilter")?.value||"ALL").trim().toUpperCase();
+  const search=String(document.getElementById("reportedMissingSearch")?.value||"").trim().toLowerCase();
+  const rows=reportedMissingPopupRows.filter(row=>{
+    const branch=String(row?.BR||"").trim().toUpperCase();
+    if(branchFilter!=="ALL"&&branch!==branchFilter)return false;
+    if(search){const hay=[row?.BR,row?.LENSTYPE,row?.DESCRIPTION,row?.NTAGN,row?.["SI NO."],row?.["USER EMAIL"]].map(v=>String(v??"").toLowerCase()).join(" ");if(!hay.includes(search))return false;}
+    return true;
+  });
+  if(!rows.length){list.innerHTML='<div class="reportedMissingEmpty">No reported missing items found.</div>';return;}
+  list.innerHTML=rows.map(row=>{const id=String(row?.id??"");return `<div class="reportedMissingRow"><div class="reportedMissingCell"><span class="branchTag">${escapeHtml(String(row?.BR??"—"))}</span></div><div class="reportedMissingCell">${escapeHtml(String(row?.LENSTYPE??"—"))}</div><div class="reportedMissingCell description">${escapeHtml(String(row?.DESCRIPTION??"—"))}</div><div class="reportedMissingCell"><span class="tag">${escapeHtml(String(row?.NTAGN??"—"))}</span></div><div class="reportedMissingCell">${escapeHtml(String(row?.["DATE AND TIME"]??"—"))}</div><div class="reportedMissingActions"><button type="button" class="actionBtn reportedMissingRestoreBtn" data-rm-restore="1" data-id="${escapeHtmlAttribute(id)}">Add to Stocks</button><button type="button" class="actionBtn danger" data-rm-delete="1" data-id="${escapeHtmlAttribute(id)}">Delete</button></div></div>`;}).join("");
+  list.querySelectorAll("[data-rm-restore]").forEach(btn=>btn.addEventListener("click",()=>restoreReportedMissingToStocks(btn.dataset.id,btn)));
+  list.querySelectorAll("[data-rm-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteReportedMissingUnrecoverable(btn.dataset.id,btn)));
+}
+
+async function getReportedMissingRowById(id){
+  const rows=await supabaseRequest(reportedMissingTable()+"?id=eq."+encodeURIComponent(id)+"&limit=1",{method:"GET"});
+  return Array.isArray(rows)&&rows.length?rows[0]:null;
+}
+
+function buildStockRestoreFromReported(row){
+  const raw=(row&&row.raw_data&&typeof row.raw_data==="object")?row.raw_data:row||{}; const payload={};
+  ["SDATE","SUPPLIER","DR","COST","ASG","CB","FD","UNITS","POWER","LENSTYPE","PUNIT","BR","NTAGN","CATEGORY","DESCRIPTION","LENSCODE","SELLINGPRICE","DELIVERYDATE","ORNUMBER","ORDATE","REMARKS","TAGPRICE","QR"].forEach(k=>payload[k]=raw[k]??null);
+  return payload;
+}
+
+async function markReportedMissingAuditAsAudited(branch,stockPayload){
+  const auditTable=tableName(branch,"audit"), tag=String(stockPayload.NTAGN||"").trim(); if(!tag)return;
+  const q="?NTAGN=eq."+encodeURIComponent(tag)+"&limit=1";
+  const existing=await supabaseRequest(auditTable+q,{method:"GET"});
+  if(Array.isArray(existing)&&existing.length){await supabaseRequest(auditTable+q,{method:"PATCH",body:{STATUS:"AUDITED","DATE AND TIME":new Date().toISOString(),"USER EMAIL":currentEmail||null},prefer:"return=minimal"});return;}
+  const auditRecord={...stockPayload,STATUS:"AUDITED","DATE AND TIME":new Date().toISOString(),"USER EMAIL":currentEmail||null};
+  await supabaseRequest(auditTable,{method:"POST",body:[auditRecord],prefer:"return=minimal"});
+}
+
+async function restoreReportedMissingToStocks(id,button){
+  if(!id)return; const confirmed=await inlineConfirm("Add this reported missing item back to STOCKS?"); if(!confirmed)return; if(button)button.disabled=true;
+  try{
+    const report=await getReportedMissingRowById(id); if(!report)throw new Error("Reported missing record was not found.");
+    const branch=String(report.BR||report.raw_data?.BR||"").trim().toUpperCase(), tag=String(report.NTAGN||report.raw_data?.NTAGN||"").trim(); if(!branch||!tag)throw new Error("Reported missing record has no branch or NTAGN.");
+    const stockTable=tableName(branch,"stocks"), stockQuery="?NTAGN=eq."+encodeURIComponent(tag)+"&limit=1";
+    const existingStock=await supabaseRequest(stockTable+stockQuery,{method:"GET"});
+    const stockPayload=buildStockRestoreFromReported(report);
+    if(!Array.isArray(existingStock)||!existingStock.length){await supabaseRequest(stockTable,{method:"POST",body:[stockPayload],prefer:"return=minimal"});}
+    await markReportedMissingAuditAsAudited(branch,stockPayload);
+    await supabaseRequest(reportedMissingTable()+"?id=eq."+encodeURIComponent(id),{method:"DELETE",prefer:"return=minimal"});
+    showStatus(tag+" restored to STOCKS and marked AUDITED.");
+    reportedMissingPopupRows=reportedMissingPopupRows.filter(r=>String(r?.id??"")!==String(id)); renderReportedMissingPopup(); await refreshDashboard();
+  }catch(error){console.error("Restore reported missing failed:",error);showStatus(error?.message||"Unable to restore reported missing item.");}finally{if(button)button.disabled=false;}
+}
+
+async function deleteReportedMissingUnrecoverable(id,button){
+  if(!id)return; const confirmed=await inlineConfirm("DELETE this reported missing item as UNRECOVERABLE? This will remove it from STOCKS permanently."); if(!confirmed)return; if(button)button.disabled=true;
+  try{
+    const report=await getReportedMissingRowById(id); if(!report)throw new Error("Reported missing record was not found.");
+    const branch=String(report.BR||report.raw_data?.BR||"").trim().toUpperCase(), tag=String(report.NTAGN||report.raw_data?.NTAGN||"").trim(); if(!branch||!tag)throw new Error("Reported missing record has no branch or NTAGN.");
+    const stockTable=tableName(branch,"stocks"); await supabaseRequest(stockTable+"?NTAGN=eq."+encodeURIComponent(tag),{method:"DELETE",prefer:"return=minimal"});
+    const auditTable=tableName(branch,"audit"); await supabaseRequest(auditTable+"?NTAGN=eq."+encodeURIComponent(tag),{method:"DELETE",prefer:"return=minimal"});
+    await supabaseRequest(reportedMissingTable()+"?id=eq."+encodeURIComponent(id),{method:"DELETE",prefer:"return=minimal"});
+    showStatus(tag+" deleted as UNRECOVERABLE."); reportedMissingPopupRows=reportedMissingPopupRows.filter(r=>String(r?.id??"")!==String(id)); renderReportedMissingPopup(); await refreshDashboard();
+  }catch(error){console.error("Delete unrecoverable reported missing failed:",error);showStatus(error?.message||"Unable to delete unrecoverable item.");}finally{if(button)button.disabled=false;}
+}
 
 async function toggleAuditStatus(
   button

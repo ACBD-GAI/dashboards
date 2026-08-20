@@ -1155,6 +1155,20 @@ button{
   color:#dc2626;
 }
 
+
+.auditBulkOption.remaining{
+  border-color:#bae6fd;
+}
+.auditBulkOption.remaining .auditBulkOptionIcon{
+  background:#e0f2fe;
+  color:#0369a1;
+}
+.auditBulkOption.remaining:disabled{
+  opacity:.52;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
 .auditBulkCancel{
   width:100%;
   min-height:42px;
@@ -12568,6 +12582,14 @@ function openAuditBulkModal(){
           </span>
         </button>
 
+        <button type="button" class="auditBulkOption remaining" data-audit-bulk="remaining" id="auditRemainingOption">
+          <span class="auditBulkOptionIcon">↻</span>
+          <span class="auditBulkOptionText">
+            <strong>Audit Remaining</strong>
+            <span id="auditRemainingOptionText">Checking remaining items that are not yet audited…</span>
+          </span>
+        </button>
+
         <button type="button" class="auditBulkCancel" data-audit-bulk-cancel="1">
           Cancel
         </button>
@@ -12591,6 +12613,12 @@ function openAuditBulkModal(){
     .addEventListener("click", ()=>showAuditBulkConfirm(modal, branch, "MISSING"));
 
   modal
+    .querySelector("[data-audit-bulk='remaining']")
+    .addEventListener("click", ()=>showAuditRemainingConfirm(modal, branch));
+
+  loadAuditRemainingCount(branch, modal);
+
+  modal
     .querySelector("[data-audit-bulk-cancel='1']")
     .addEventListener("click", close);
 
@@ -12604,6 +12632,213 @@ function openAuditBulkModal(){
     }
   });
 
+}
+
+
+/* =========================================================
+   AUDIT REMAINING
+   Only affects UNSOLD + NOT YET AUDITED stock.
+   Existing AUDITED rows are never removed or changed.
+========================================================= */
+
+async function getAuditRemainingCount(branch){
+  const branches = branch === "ALL" ? BRANCHES : [branch];
+  let remaining = 0;
+
+  for(const b of branches){
+    const [stocks,sold,audit] = await Promise.all([
+      fetchBranchData(b,"stocks",""),
+      fetchBranchData(b,"sold",""),
+      fetchBranchData(b,"audit","")
+    ]);
+
+    const soldKeys = new Set();
+    const auditedKeys = new Set();
+
+    (Array.isArray(sold) ? sold : []).forEach(row=>{
+      const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+      if(tag) soldKeys.add(tag);
+    });
+
+    (Array.isArray(audit) ? audit : []).forEach(row=>{
+      const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+      const status=String(row?.STATUS ?? "").trim().toUpperCase();
+      if(tag && status === "AUDITED") auditedKeys.add(tag);
+    });
+
+    (Array.isArray(stocks) ? stocks : []).forEach(row=>{
+      const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+      if(tag && !soldKeys.has(tag) && !auditedKeys.has(tag)) remaining++;
+    });
+  }
+
+  return remaining;
+}
+
+async function loadAuditRemainingCount(branch, modal){
+  const option=modal?.querySelector("#auditRemainingOption");
+  const text=modal?.querySelector("#auditRemainingOptionText");
+  if(!option || !text) return;
+
+  try{
+    const remaining=await getAuditRemainingCount(branch);
+    option.dataset.remainingCount=String(remaining);
+
+    if(remaining > 0){
+      option.disabled=false;
+      text.textContent =
+        remaining +
+        " remaining item" +
+        (remaining === 1 ? "" : "s") +
+        " are not yet audited. Click to choose AUDITED or MISSING.";
+    }else{
+      option.disabled=true;
+      text.textContent="No remaining unsold items are waiting for audit.";
+    }
+  }catch(error){
+    console.error("Audit remaining count failed:",error);
+    option.disabled=true;
+    text.textContent="Unable to check remaining items.";
+  }
+}
+
+function showAuditRemainingConfirm(modal, branch){
+  const branchLabel=branch === "ALL" ? "ALL BRANCHES" : branch;
+
+  modal.querySelector(".modalCard").innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div class="auditBulkOptionIcon" style="background:#e0f2fe;color:#0369a1;">↻</div>
+      <div>
+        <div class="modalTitle" style="margin:0;">Audit Remaining</div>
+        <div class="modalSub" style="margin-top:3px;">${escapeHtml(branchLabel)}</div>
+      </div>
+    </div>
+
+    <div style="padding:14px;border-radius:12px;background:#f8fafc;color:#475569;font-size:11px;line-height:1.55;margin-bottom:16px;">
+      Only items that are still UNSOLD and NOT YET AUDITED will be affected.
+      Existing AUDITED records will not be removed or changed.
+    </div>
+
+    <div style="display:grid;gap:10px;">
+      <button type="button" class="auditBulkOption audited" data-audit-remaining-choice="AUDITED">
+        <span class="auditBulkOptionIcon">✓</span>
+        <span class="auditBulkOptionText">
+          <strong>Make Remaining AUDITED</strong>
+          <span>Add only the remaining items to Audit and mark them AUDITED.</span>
+        </span>
+      </button>
+
+      <button type="button" class="auditBulkOption missing" data-audit-remaining-choice="MISSING">
+        <span class="auditBulkOptionIcon">!</span>
+        <span class="auditBulkOptionText">
+          <strong>Leave Remaining as MISSING</strong>
+          <span>Keep the remaining unsold items without an Audit record so they appear as MISSING.</span>
+        </span>
+      </button>
+
+      <button type="button" class="auditBulkCancel" data-audit-remaining-back="1">Back</button>
+    </div>
+  `;
+
+  modal.querySelector("[data-audit-remaining-choice='AUDITED']")
+    .addEventListener("click",()=>bulkSetRemainingAuditStatus(branch,"AUDITED"));
+
+  modal.querySelector("[data-audit-remaining-choice='MISSING']")
+    .addEventListener("click",()=>bulkSetRemainingAuditStatus(branch,"MISSING"));
+
+  modal.querySelector("[data-audit-remaining-back='1']")
+    .addEventListener("click",()=>openAuditBulkModal());
+}
+
+async function bulkSetRemainingAuditStatus(selectedBranch,status){
+  const modal=document.getElementById("auditBulkModal");
+  const branches=selectedBranch === "ALL" ? BRANCHES : [selectedBranch];
+
+  if(modal) modal.remove();
+
+  createQueueCard(
+    "AUDIT",
+    status === "AUDITED"
+      ? "Auditing remaining items..."
+      : "Keeping remaining items as missing..."
+  );
+
+  let processed=0;
+  const total=branches.length;
+
+  try{
+    for(const b of branches){
+      const [stocks,sold,audit]=await Promise.all([
+        fetchBranchData(b,"stocks",""),
+        fetchBranchData(b,"sold",""),
+        fetchBranchData(b,"audit","")
+      ]);
+
+      const soldKeys=new Set();
+      const auditedKeys=new Set();
+
+      (Array.isArray(sold) ? sold : []).forEach(row=>{
+        const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+        if(tag) soldKeys.add(tag);
+      });
+
+      (Array.isArray(audit) ? audit : []).forEach(row=>{
+        const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+        const auditStatus=String(row?.STATUS ?? "").trim().toUpperCase();
+        if(tag && auditStatus === "AUDITED") auditedKeys.add(tag);
+      });
+
+      const remainingRows=(Array.isArray(stocks) ? stocks : []).filter(row=>{
+        const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+        return tag && !soldKeys.has(tag) && !auditedKeys.has(tag);
+      });
+
+      if(status === "AUDITED" && remainingRows.length){
+        const auditRows=remainingRows.map(row=>({...row,STATUS:"AUDITED"}));
+
+        for(let i=0;i<auditRows.length;i+=IMPORT_CHUNK_SIZE){
+          const chunk=auditRows.slice(i,i+IMPORT_CHUNK_SIZE);
+          if(chunk.length){
+            await supabaseRequest(
+              tableName(b,"audit"),
+              {method:"POST",body:chunk,prefer:"return=minimal"}
+            );
+          }
+          await yieldToBrowser();
+        }
+      }
+
+      processed++;
+      updateQueue(
+        "AUDIT",
+        processed,
+        total,
+        b + (status === "AUDITED"
+          ? " remaining items marked AUDITED"
+          : " remaining items left MISSING")
+      );
+      await yieldToBrowser();
+    }
+
+    showStatus(
+      selectedBranch === "ALL"
+        ? (status === "AUDITED"
+            ? "All remaining items are now AUDITED."
+            : "All remaining items are now MISSING.")
+        : (selectedBranch +
+            (status === "AUDITED"
+              ? " remaining items are now AUDITED."
+              : " remaining items are now MISSING."))
+    );
+
+    await refreshDashboard();
+  }catch(error){
+    console.error("Audit remaining update failed:",error);
+    updateQueueError(
+      "AUDIT",
+      error?.message || "Unable to update remaining audit items."
+    );
+  }
 }
 
 function showAuditBulkConfirm(modal, branch, status){

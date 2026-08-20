@@ -3910,46 +3910,6 @@ select:disabled{
 }
 
 
-
-function philippineDateTime(){
-  const parts =
-    new Intl.DateTimeFormat(
-      "en-CA",
-      {
-        timeZone:"Asia/Manila",
-        year:"numeric",
-        month:"2-digit",
-        day:"2-digit",
-        hour:"2-digit",
-        minute:"2-digit",
-        second:"2-digit",
-        hour12:false
-      }
-    ).formatToParts(new Date());
-
-  const get =
-    type =>
-      parts.find(
-        part => part.type === type
-      )?.value || "00";
-
-  return (
-    get("year") +
-    "-" +
-    get("month") +
-    "-" +
-    get("day") +
-    "T" +
-    get("hour") +
-    ":" +
-    get("minute") +
-    ":" +
-    get("second") +
-    "+08:00"
-  );
-}
-
-
 /* =========================================================
    REPORTED MISSING — ADDITIVE FEATURE ONLY
 ========================================================= */
@@ -3963,9 +3923,9 @@ function philippineDateTime(){
 .reportedMissingModal{position:relative;}
 .reportedShowingMini{
   position:absolute;
-  top:8px;
-  right:10px;
-  display:none;
+  top:10px;
+  right:12px;
+  display:flex;
   align-items:center;
   gap:6px;
   padding:5px 8px;
@@ -4039,6 +3999,26 @@ function philippineDateTime(){
 .reportedMissingStatus{min-height:18px;padding:8px 12px 11px;color:#64748b;font-size:10px;font-weight:750;background:#fff;}
 @media(max-width:900px){.reportedMissingControls{grid-template-columns:1fr;}.reportedMissingHeader{display:none;}.reportedMissingRow{grid-template-columns:1fr 1fr;}.reportedMissingCell.description{grid-column:1 / -1;}.reportedMissingActions{grid-column:1 / -1;justify-content:flex-start;}}
 
+</style>
+
+<style id="reportedMissingCounterClear">
+.reportedMissingStatCard .statIcon{
+  display:none !important;
+  width:0 !important;
+  height:0 !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  background:none !important;
+  box-shadow:none !important;
+}
+.reportedMissingStatCard .reportedShowingMini{
+  top:8px !important;
+  right:10px !important;
+  z-index:10 !important;
+}
 </style>
 </head>
 
@@ -4469,33 +4449,18 @@ function philippineDateTime(){
 
       </div>
 
-      
       <div class="statCard" id="showingStatCard">
         <div class="statTop">
-          <span class="statLabel">
-            SHOWING
-          </span>
-          <span class="statIcon">
-            ≡
-          </span>
+          <span class="statLabel">SHOWING</span>
+          <span class="statIcon">≡</span>
         </div>
-
-        <div
-          id="showingTotal"
-          class="statNumber"
-        >
-          —
-        </div>
-
-        <div class="statHint">
-          Current results
-        </div>
+        <div id="showingTotal" class="statNumber">—</div>
+        <div class="statHint">Current results</div>
       </div>
 
-<div class="statCard auditStatCard reportedMissingStatCard" id="reportedMissingStatCard" role="button" tabindex="0" style="display:none;" onclick="openReportedMissingPopup()" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openReportedMissingPopup(); }" title="View reported missing items">
+      <div class="statCard auditStatCard reportedMissingStatCard" id="reportedMissingStatCard" role="button" tabindex="0" style="display:none;" onclick="openReportedMissingPopup()" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openReportedMissingPopup(); }" title="View reported missing items">
         <div class="statTop">
           <span class="statLabel">REPORTED MISSING</span>
-          <span class="statIcon"></span>
         </div>
         <div id="reportedMissingTotal" class="statNumber">—</div>
         <div class="statHint">Click to view reported missing</div>
@@ -7167,7 +7132,7 @@ function updateSoldOnlyColumns(){
   const showingMini =
     document.getElementById("showingTotalMini");
 
-  if(showingMini){
+  if(showingMini && showingMini.parentElement){
     showingMini.parentElement.style.display =
       report === "audit" ? "flex" : "none";
   }
@@ -7909,6 +7874,11 @@ function silentlyClearReport(){
 
   document
     .getElementById("auditTotal")
+    .textContent =
+      "—";
+
+  document
+    .getElementById("showingTotal")
     .textContent =
       "—";
 
@@ -9030,9 +9000,16 @@ async function updateStatsDirect(
   }
 
   const showingCountEl =
-    document.getElementById("showingTotalMini");
+    document.getElementById("showingTotal");
   if(showingCountEl){
     showingCountEl.textContent =
+      formatNumber(totalRows);
+  }
+
+  const showingMiniEl =
+    document.getElementById("showingTotalMini");
+  if(showingMiniEl){
+    showingMiniEl.textContent =
       formatNumber(totalRows);
   }
 
@@ -9638,6 +9615,13 @@ function renderTable(
       formatNumber(
         totalRows
       );
+
+  const showingTotal =
+    document.getElementById("showingTotal");
+  if(showingTotal){
+    showingTotal.textContent =
+      formatNumber(totalRows);
+  }
 
   const showingMini =
     document.getElementById("showingTotalMini");
@@ -11670,6 +11654,34 @@ function normalizeCellValue(
     value
   ).trim();
 
+}
+
+
+function philippineDateTime(){
+
+  const parts =
+    new Intl.DateTimeFormat("en-CA",{
+      timeZone:"Asia/Manila",
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit",
+      hour:"2-digit",
+      minute:"2-digit",
+      second:"2-digit",
+      hour12:false
+    }).formatToParts(new Date());
+
+  const get =
+    type =>
+      parts.find(p => p.type === type)?.value || "00";
+
+  return
+    get("year") + "-" +
+    get("month") + "-" +
+    get("day") + "T" +
+    get("hour") + ":" +
+    get("minute") + ":" +
+    get("second") + "+08:00";
 }
 
 function formatDateValue(date){
@@ -13944,6 +13956,12 @@ function renderError(
     )
     .textContent =
       "Supabase request failed";
+
+  const showingTotalError =
+    document.getElementById("showingTotal");
+  if(showingTotalError){
+    showingTotalError.textContent = "0";
+  }
 
   const showingMiniError =
     document.getElementById("showingTotalMini");

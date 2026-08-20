@@ -4837,7 +4837,7 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dXJobmFybGx2ZmlucGRrZmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzYxNzEsImV4cCI6MjEwMDQ1MjE3MX0.PFAW_RDcYwhNpeBic3CnrNBD2ndKqSi-8wbeH8AbXvM";
 
 const LOGIN_API_URL =
-  "https://script.google.com/macros/s/AKfycbztkVDkjg6wIlCG99zVRUZbD_SYdiCs4CKrvtQyu8GsbxlLCu-1sYynIWoILTfPw1ee/exec";
+  "https://script.google.com/macros/s/AKfycbzZ6vx_lwTv97rmxl_DsaJjKE94whUBiniLjl7k51okoAlxypSchH6LXD8xHzGTlPA8/exec";
 
 const SESSION_KEY =
   "acebedoInventorySession";
@@ -5333,13 +5333,6 @@ async function checkExistingSession(){
 
     if(
       data &&
-      data.temporaryError === true
-    ){
-      return true;
-    }
-
-    if(
-      data &&
       data.ok &&
       data.email
     ){
@@ -5475,7 +5468,8 @@ function startSessionMonitor(){
 
   /*
    * Refresh the Dashboard session every 20 seconds.
-   * The Dashboard session is stored and refreshed in Supabase.
+   * The Apps Script heartbeat refreshes both CacheService
+   * and the persistent Dashboard session backup.
    */
   sessionMonitorTimer =
     setInterval(async ()=>{
@@ -9006,9 +9000,6 @@ function renderTable(
   const canEdit =
     report === "sold";
 
-  const canStockEdit =
-    report === "stocks";
-
   const canAuditEdit =
     report === "audit";
 
@@ -9060,46 +9051,12 @@ function renderTable(
        * Default:
        *
        * NO ACTION
+       *
+       * for AVAILABLE.
        */
 
       let actionHTML =
         `<span style="color:#94a3b8">—</span>`;
-
-      /*
-       * STOCKS:
-       * Edit/Delete are synchronized with Audit.
-       * If this NTAGN exists in the branch audit table,
-       * editing Stocks also edits that Audit row; deleting
-       * Stocks also deletes the matching Audit row.
-       */
-
-      if(canStockEdit){
-
-        actionHTML = `
-
-          <button
-            type="button"
-            class="actionBtn"
-            data-stock-edit="1"
-            data-branch="${escapeHtmlAttribute(row.branch)}"
-            data-tag="${escapeHtmlAttribute(row.tag)}"
-          >
-            Edit
-          </button>
-
-          <button
-            type="button"
-            class="actionBtn danger"
-            data-stock-delete="1"
-            data-branch="${escapeHtmlAttribute(row.branch)}"
-            data-tag="${escapeHtmlAttribute(row.tag)}"
-          >
-            Delete
-          </button>
-
-        `;
-
-      }
 
       /*
        * SOLD OUT ONLY:
@@ -9251,46 +9208,6 @@ function renderTable(
    *
    * This fixes the Delete button issue.
    */
-
-  if(canStockEdit){
-
-    body
-      .querySelectorAll(
-        "[data-stock-edit]"
-      )
-      .forEach(
-        button=>{
-          button.addEventListener(
-            "click",
-            ()=>{
-              editStockRow(
-                button.dataset.branch,
-                button.dataset.tag
-              );
-            }
-          );
-        }
-      );
-
-    body
-      .querySelectorAll(
-        "[data-stock-delete]"
-      )
-      .forEach(
-        button=>{
-          button.addEventListener(
-            "click",
-            ()=>{
-              deleteStockRow(
-                button.dataset.branch,
-                button.dataset.tag
-              );
-            }
-          );
-        }
-      );
-
-  }
 
   if(canEdit){
 
@@ -9482,402 +9399,6 @@ function nextPage(){
 
   renderCurrentPage();
 
-}
-
-/* =========================================================
-   STOCK EDIT / DELETE
-
-   STOCKS is the source record.
-   If the same branch + NTAGN exists in Audit:
-     - EDIT updates both Stocks and Audit.
-     - DELETE removes both Stocks and Audit.
-   Audit STATUS remains AUDITED when editing.
-========================================================= */
-
-function openStockEditModal(
-  branch,
-  tag
-){
-
-  const row =
-    currentRows.find(
-      r =>
-        String(r.branch).trim() === String(branch).trim() &&
-        String(r.tag).trim() === String(tag).trim()
-    );
-
-  if(!row || !row.raw){
-    showStatus("Stock record was not found.");
-    return null;
-  }
-
-  const existing =
-    document.getElementById("stockEditModal");
-
-  if(existing){
-    existing.remove();
-  }
-
-  const raw = row.raw;
-
-  /* =========================================================
-     STOCK EDIT FIELDS A-V ONLY
-
-     A  SDATE
-     B  SUPPLIER
-     C  DR
-     D  COST
-     E  ASG
-     F  CB
-     G  FD
-     H  UNITS
-     I  POWER
-     J  LENSTYPE
-     K  PUNIT
-     L  BR
-     M  NTAGN
-     N  CATEGORY
-     O  DESCRIPTION
-     P  LENSCODE
-     Q  SELLINGPRICE
-     R  DELIVERYDATE
-     S  ORNUMBER
-     T  ORDATE
-     U  REMARKS
-     V  TAGPRICE
-
-     W onward are NEVER shown in the edit window.
-     Blank A-V fields are also NOT shown.
-  ========================================================= */
-
-  const editFields = [
-    ["A", "SDATE"],
-    ["B", "SUPPLIER"],
-    ["C", "DR"],
-    ["D", "COST"],
-    ["E", "ASG"],
-    ["F", "CB"],
-    ["G", "FD"],
-    ["H", "UNITS"],
-    ["I", "POWER"],
-    ["J", "LENSTYPE"],
-    ["K", "PUNIT"],
-    ["L", "BR"],
-    ["M", "NTAGN"],
-    ["N", "CATEGORY"],
-    ["O", "DESCRIPTION"],
-    ["P", "LENSCODE"],
-    ["Q", "SELLINGPRICE"],
-    ["R", "DELIVERYDATE"],
-    ["S", "ORNUMBER"],
-    ["T", "ORDATE"],
-    ["U", "REMARKS"],
-    ["V", "TAGPRICE"]
-  ];
-
-  const escapeValue = key =>
-    escapeHtmlAttribute(
-      raw[key] == null ? "" : String(raw[key])
-    );
-
-  const hasValue = key =>
-    raw[key] !== null &&
-    raw[key] !== undefined &&
-    String(raw[key]).trim() !== "";
-
-  const fieldHtml = editFields
-    .filter(([letter,key]) => hasValue(key))
-    .map(([letter,key]) => {
-      const inputId = "stockEdit_" + letter;
-      const numberInput =
-        key === "COST" ||
-        key === "SELLINGPRICE" ||
-        key === "TAGPRICE";
-
-      return `
-        <label style="font-size:12px;font-weight:700;color:#475569;">
-          ${letter} • ${escapeHtml(String(key))}
-          <input
-            id="${inputId}"
-            data-stock-key="${escapeHtmlAttribute(key)}"
-            value="${escapeValue(key)}"
-            ${numberInput ? 'inputmode="decimal"' : ''}
-            style="width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid #cbd5e1;border-radius:10px;"
-          >
-        </label>
-      `;
-    })
-    .join("");
-
-  const modal =
-    document.createElement("div");
-
-  modal.id = "stockEditModal";
-  modal.style.cssText = `
-    position:fixed;inset:0;z-index:99999;
-    display:flex;align-items:center;justify-content:center;
-    background:rgba(15,23,42,.62);padding:20px;
-  `;
-
-  modal.innerHTML = `
-    <div style="width:min(760px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.25);">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;">
-        <div>
-          <div style="font-size:20px;font-weight:800;color:#0f172a;">Edit Stock</div>
-          <div style="font-size:13px;color:#64748b;margin-top:4px;">${escapeHtml(String(branch))} • ${escapeHtml(String(tag))}</div>
-          <div style="font-size:11px;color:#94a3b8;margin-top:5px;">Only fields A-V containing data are shown.</div>
-        </div>
-        <button type="button" id="stockEditClose" style="border:0;background:#f1f5f9;border-radius:10px;width:36px;height:36px;font-size:20px;cursor:pointer;">×</button>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        ${fieldHtml || '<div style="grid-column:1/-1;padding:18px;border-radius:12px;background:#f8fafc;color:#64748b;text-align:center;font-size:13px;">No editable A-V fields contain data.</div>'}
-      </div>
-
-      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
-        <button type="button" id="stockEditCancel" class="controlBtn">Cancel</button>
-        <button type="button" id="stockEditSave" class="controlBtn primary">Save Changes</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  modal.querySelector("#stockEditClose").onclick =
-  modal.querySelector("#stockEditCancel").onclick =
-    ()=>modal.remove();
-
-  modal.querySelector("#stockEditSave").onclick =
-    ()=>saveStockEdit(branch, tag, modal);
-
-  return modal;
-}
-
-function editStockRow(
-  branch,
-  tag
-){
-  openStockEditModal(branch, tag);
-}
-
-async function saveStockEdit(
-  oldBranch,
-  oldTag,
-  modal
-){
-
-  const row =
-    currentRows.find(
-      r =>
-        String(r.branch).trim() === String(oldBranch).trim() &&
-        String(r.tag).trim() === String(oldTag).trim()
-    );
-
-  if(!row || !row.raw){
-    showStatus("Stock record was not found.");
-    modal.remove();
-    return;
-  }
-
-  /* =========================================================
-     COLLECT ONLY THE A-V FIELDS THAT WERE ACTUALLY SHOWN.
-     Blank fields that were not shown are left untouched.
-  ========================================================= */
-  const newValues = {};
-  let invalidField = "";
-
-  modal
-    .querySelectorAll("[data-stock-key]")
-    .forEach(input => {
-      const key = input.getAttribute("data-stock-key");
-      let val = String(input.value || "").trim();
-
-      if(
-        key === "COST" ||
-        key === "SELLINGPRICE" ||
-        key === "TAGPRICE"
-      ){
-        val = val
-          .replace(/,/g, "")
-          .replace(/₱/g, "")
-          .trim();
-
-        if(val !== "" && !/^\d+(\.\d{1,2})?$/.test(val)){
-          invalidField = key;
-          return;
-        }
-
-        newValues[key] =
-          val === "" ? null : Number(val);
-      }else{
-        newValues[key] = val;
-      }
-    });
-
-  if(invalidField){
-    showStatus("Enter a valid value for " + invalidField + ".");
-    return;
-  }
-
-  /* NTAGN is required and is always part of A-V. */
-  const newTag =
-    String(newValues.NTAGN ?? "").trim();
-
-  if(!newTag){
-    showStatus("NTAGN cannot be empty.");
-    return;
-  }
-
-  newValues.NTAGN = newTag;
-
-  const saveButton =
-    modal.querySelector("#stockEditSave");
-
-  saveButton.disabled = true;
-  saveButton.textContent = "Saving...";
-
-  try{
-
-    const stockTable = tableName(oldBranch, "stocks");
-    const auditTable = tableName(oldBranch, "audit");
-
-    const oldParams = new URLSearchParams();
-    oldParams.set("NTAGN", "eq." + String(oldTag).trim());
-
-    const auditRows =
-      await supabaseRequest(
-        auditTable + "?" + oldParams.toString() + "&limit=1",
-        {method:"GET"}
-      );
-
-    const stockBody = {...newValues};
-
-    await supabaseRequest(
-      stockTable + "?" + oldParams.toString(),
-      {
-        method:"PATCH",
-        body:stockBody,
-        prefer:"return=minimal"
-      }
-    );
-
-    if(Array.isArray(auditRows) && auditRows.length){
-
-      const auditBody = {...newValues};
-      delete auditBody.STATUS;
-
-      await supabaseRequest(
-        auditTable + "?" + oldParams.toString(),
-        {
-          method:"PATCH",
-          body:auditBody,
-          prefer:"return=minimal"
-        }
-      );
-
-    }
-
-    modal.remove();
-
-    showStatus(
-      Array.isArray(auditRows) && auditRows.length
-        ? "Stock updated. Matching AUDITED record updated too."
-        : "Stock updated successfully."
-    );
-
-    currentPage = 1;
-    await refreshDashboard();
-
-  }catch(error){
-
-    console.error("Stock edit failed:", error);
-
-    showStatus(
-      error?.message ||
-      "Unable to update stock."
-    );
-
-    saveButton.disabled = false;
-    saveButton.textContent = "Save Changes";
-
-  }
-}
-
-async function deleteStockRow(
-  branch,
-  tag
-){
-
-  branch = String(branch || "").trim();
-  tag = String(tag || "").trim();
-
-  if(!branch || !tag){
-    showStatus("Missing branch or NTAGN.");
-    return;
-  }
-
-  const confirmed =
-    await inlineConfirm(
-      "Delete stock " + tag + " from " + branch + "?"
-    );
-
-  if(!confirmed){
-    return;
-  }
-
-  try{
-
-    const stockTable = tableName(branch, "stocks");
-    const auditTable = tableName(branch, "audit");
-
-    const params = new URLSearchParams();
-    params.set("NTAGN", "eq." + tag);
-
-    const auditRows =
-      await supabaseRequest(
-        auditTable + "?" + params.toString() + "&limit=1",
-        {method:"GET"}
-      );
-
-    await supabaseRequest(
-      stockTable + "?" + params.toString(),
-      {
-        method:"DELETE",
-        prefer:"return=minimal"
-      }
-    );
-
-    if(Array.isArray(auditRows) && auditRows.length){
-
-      await supabaseRequest(
-        auditTable + "?" + params.toString(),
-        {
-          method:"DELETE",
-          prefer:"return=minimal"
-        }
-      );
-
-    }
-
-    showStatus(
-      Array.isArray(auditRows) && auditRows.length
-        ? "Stock deleted. Matching AUDITED record deleted too."
-        : "Stock deleted successfully."
-    );
-
-    currentPage = 1;
-    await refreshDashboard();
-
-  }catch(error){
-
-    console.error("Stock delete failed:", error);
-
-    showStatus(
-      error?.message ||
-      "Unable to delete stock."
-    );
-
-  }
 }
 
 /* =========================================================

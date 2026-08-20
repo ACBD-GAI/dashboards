@@ -12849,13 +12849,7 @@ function renderReportedMissingPopup(){
       <div class="reportedMissingCell">${escapeHtml(String(row?.LENSTYPE||"—"))}</div>
       <div class="reportedMissingCell description">${escapeHtml(String(row?.DESCRIPTION||"—"))}</div>
       <div class="reportedMissingCell"><span class="tag">${escapeHtml(t||"—")}</span></div>
-      <div class="reportedMissingCell">
-  ${escapeHtml(
-    row?.["DELIVERYDATE"]
-      ? formatDateValue(row["DELIVERYDATE"])
-      : "—"
-  )}
-</div>
+      
       <div class="reportedMissingActions">
         <button type="button" class="actionBtn reportedMissingRestoreBtn" data-reported-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ Add to Stocks</button>
         <button type="button" class="actionBtn danger" data-reported-delete="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">Delete</button>

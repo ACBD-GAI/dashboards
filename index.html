@@ -8841,10 +8841,22 @@ async function updateStatsDirect(
           }
         );
 
-        sold +=
-          soldRows.length;
+        /*
+         * SOLD TOTAL = MARKED SOLD ITEMS ONLY.
+         * Unmarked SOLD rows must never be included in the
+         * dashboard SOLD total or SOLD amount.
+         */
+        const markedSoldRows =
+          soldRows.filter(row =>
+            String(row?.STATUS ?? "")
+              .trim()
+              .toUpperCase() === "MARKED"
+          );
 
-        soldRows.forEach(
+        sold +=
+          markedSoldRows.length;
+
+        markedSoldRows.forEach(
           row=>{
             const value =
               String(

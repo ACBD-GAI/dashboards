@@ -6261,9 +6261,9 @@ async function saveAllowedUser(){
     return;
   }
 
-  // Use the existing Dashboard session already running.
+  // Always get the latest session directly from localStorage.
   const currentSessionId =
-    localStorage.getItem(SESSION_KEY) || sessionId;
+    localStorage.getItem(SESSION_KEY);
 
   if(!currentSessionId){
     showStatus("Session expired. Please login again.");
@@ -6308,31 +6308,6 @@ async function saveAllowedUser(){
   status.textContent = "Adding user...";
 
   try{
-
-    /*
-     * ADD USER ONLY:
-     * Refresh the existing Dashboard session once before
-     * calling addAllowedUser. This does NOT create a new login,
-     * change the session, or touch the scanner heartbeat.
-     * It only refreshes the server-side session used by Add User.
-     */
-    const heartbeat =
-      await loginApiGet(
-        "dashboardHeartbeat",
-        {
-          sessionId: currentSessionId
-        }
-      );
-
-    if(
-      !heartbeat ||
-      heartbeat.ok !== true
-    ){
-      throw new Error(
-        heartbeat?.error ||
-        "SESSION_EXPIRED"
-      );
-    }
 
     const data =
       await loginApiGet(

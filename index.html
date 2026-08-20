@@ -4507,8 +4507,8 @@ select:disabled{
         <div class="tableActions">
 
           <div id="soldPdfActions" class="soldPdfActions" style="display:none;">
-            <button type="button" id="soldPdfDownloadBtn" class="reportPdfBtn primary" onclick="downloadSoldOutPdf()">↓ PDF</button>
-            <button type="button" id="soldPdfEmailBtn" class="reportPdfBtn" onclick="emailSoldOutPdf()">✉ Email</button>
+            <button type="button" id="soldPdfDownloadBtn" class="reportPdfBtn primary" onclick="downloadSoldOutPdf()">↓ DOWNLOAD PDF REPORT</button>
+            
           </div>
 
           <button
@@ -12563,33 +12563,452 @@ async function bulkSetAuditStatus(
 ========================================================= */
 /* =========================================================
    PDF REPORTS — ADDITIVE FEATURE ONLY
+   Presentable A4 landscape reports with embedded logo.
 ========================================================= */
-const ACEBEDO_REPORT_LOGO_URL="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w400";
-function aoPdfSafeText(v){const t=String(v??"").trim();return t||"—";}
-function aoPdfMoney(v){const c=String(v??"").replace(/,/g,"").replace(/₱/g,"").trim();const n=Number(c);return Number.isFinite(n)?formatPeso(n):"—";}
-function aoPdfBranchLabel(v){const b=String(v||"ALL").trim().toUpperCase();return b==="ALL"||!b?"ALL BRANCHES":b;}
-function aoPdfLoadLogo(){return new Promise(resolve=>{try{const img=new Image();img.crossOrigin="anonymous";img.onload=()=>{try{const c=document.createElement("canvas");c.width=img.naturalWidth||400;c.height=img.naturalHeight||400;c.getContext("2d").drawImage(img,0,0);resolve(c.toDataURL("image/png"));}catch(e){resolve(null);}};img.onerror=()=>resolve(null);img.src=ACEBEDO_REPORT_LOGO_URL;}catch(e){resolve(null);}});}
-async function createAcebedoPdfReport(o){
-  if(!window.jspdf||!window.jspdf.jsPDF)throw new Error("PDF library is not available. Please refresh the Dashboard and try again.");
-  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
-  const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),M=12;
-  const logo=await aoPdfLoadLogo();if(logo)doc.addImage(logo,"PNG",M,8,24,24);
-  const tx=logo?M+31:M;doc.setTextColor(16,32,51);doc.setFont("helvetica","bold");doc.setFontSize(17);doc.text("Acebedo Optical",tx,17);doc.setFontSize(14);doc.text(o.title,tx,25);doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(88,106,120);doc.text("Branch: "+aoPdfBranchLabel(o.branch),tx,32);doc.text("Generated: "+formatDateValue(new Date().toISOString()),tx,38);
-  doc.setFontSize(9);doc.setTextColor(55,70,82);doc.text(doc.splitTextToSize(o.description,W-M*2),M,47);
-  let y=60;const C=[{l:"BRANCH",k:"BR",w:27},{l:"LENSTYPE",k:"LENSTYPE",w:30},{l:"DESCRIPTION",k:"DESCRIPTION",w:91},{l:"TAG NUMBER",k:"NTAGN",w:30},{l:"SELLING PRICE",k:"SELLINGPRICE",w:36},{l:"DELIVERY DATE",k:"DELIVERYDATE",w:39}];
-  function header(){let x=M;doc.setFillColor(241,248,252);doc.setDrawColor(207,223,232);doc.setTextColor(49,82,103);doc.setFont("helvetica","bold");doc.setFontSize(8);C.forEach(c=>{doc.rect(x,y-6,c.w,9,"FD");doc.text(c.l,x+2,y-.3);x+=c.w;});y+=7;}
-  function row(R){const vals=[aoPdfSafeText(R.BR),aoPdfSafeText(R.LENSTYPE),aoPdfSafeText(R.DESCRIPTION),aoPdfSafeText(R.NTAGN),aoPdfMoney(R.SELLINGPRICE),R.DELIVERYDATE?aoPdfSafeText(formatDateValue(R.DELIVERYDATE)):"—"];const wrapped=vals.map((v,i)=>doc.splitTextToSize(v,C[i].w-4));const h=Math.max(8,Math.max(...wrapped.map(a=>a.length),1)*4.2+3);if(y+h>H-12){doc.addPage();y=20;header();}let x=M;doc.setDrawColor(225,235,241);doc.setTextColor(32,52,67);doc.setFont("helvetica","normal");doc.setFontSize(7.5);wrapped.forEach((lines,i)=>{doc.rect(x,y-6,C[i].w,h,"S");doc.text(lines,x+2,y-.5);x+=C[i].w;});y+=h;}
-  header();if(!o.rows.length){doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(100,116,139);doc.text("No records found for this report.",M,y+8);}else{o.rows.forEach(row);}
-  const fn=(o.filename||"Acebedo_Report").endsWith(".pdf")?o.filename:o.filename+".pdf";return{blob:doc.output("blob"),filename:fn};
+const ACEBEDO_REPORT_LOGO_DATA = "data:image/jpeg;base64,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";
+
+function aoPdfSafeText(v){
+  const t = String(v ?? "").trim();
+  return t || "—";
 }
-function aoPdfDownload(blob,fn){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
-async function aoPdfEmail(blob,fn,subject,body){const file=new File([blob],fn,{type:"application/pdf"});if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){await navigator.share({title:subject,text:body,files:[file]});return"shared";}aoPdfDownload(blob,fn);window.location.href="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body+"\n\nThe PDF was downloaded to this device. Please attach it to this email.");return"downloaded";}
-function aoMissingPdfRows(){const b=String(document.getElementById("reportedMissingBranchFilter")?.value||"ALL").trim().toUpperCase(),q=String(document.getElementById("reportedMissingSearch")?.value||"").trim().toLowerCase();return reportedMissingPopupRows.filter(r=>{const rb=String(r?.BR||"").trim().toUpperCase();if(b!=="ALL"&&rb!==b)return false;if(!q)return true;return[r?.BR,r?.LENSTYPE,r?.DESCRIPTION,r?.NTAGN,r?.["SI NO."],r?.["USER EMAIL"],r?.STATUS].map(v=>String(v??"").toLowerCase()).join(" ").includes(q);}).map(r=>({BR:r?.BR,LENSTYPE:r?.LENSTYPE,DESCRIPTION:r?.DESCRIPTION,NTAGN:r?.NTAGN,SELLINGPRICE:r?.SELLINGPRICE,DELIVERYDATE:r?.DELIVERYDATE}));}
-async function downloadReportedMissingPdf(){const b=document.querySelector("[data-reported-pdf-download='1']");if(b)b.disabled=true;try{const branch=String(document.getElementById("reportedMissingBranchFilter")?.value||"ALL").trim().toUpperCase(),rows=aoMissingPdfRows(),r=await createAcebedoPdfReport({title:"Reported Missing Inventory Report",description:"This report lists inventory items reported missing for the selected branch or all branches. These records remain in the Reported Missing register until recovered or resolved.",branch,rows,filename:"Acebedo_Reported_Missing_"+branch+"_"+formatFileDate()+".pdf"});aoPdfDownload(r.blob,r.filename);showStatus("Reported Missing PDF downloaded.");}catch(e){console.error("Reported Missing PDF failed:",e);showStatus(e?.message||"Unable to create Reported Missing PDF.");}finally{if(b)b.disabled=false;}}
-async function emailReportedMissingPdf(){const b=document.querySelector("[data-reported-pdf-email='1']");if(b)b.disabled=true;try{const branch=String(document.getElementById("reportedMissingBranchFilter")?.value||"ALL").trim().toUpperCase(),rows=aoMissingPdfRows(),r=await createAcebedoPdfReport({title:"Reported Missing Inventory Report",description:"This report lists inventory items reported missing for the selected branch or all branches. These records remain in the Reported Missing register until recovered or resolved.",branch,rows,filename:"Acebedo_Reported_Missing_"+branch+"_"+formatFileDate()+".pdf"});const res=await aoPdfEmail(r.blob,r.filename,"Acebedo Optical - Reported Missing Inventory","Acebedo Optical Reported Missing Inventory Report\nBranch: "+aoPdfBranchLabel(branch)+"\nRecords: "+rows.length);showStatus(res==="shared"?"PDF ready to send through your email app.":"PDF downloaded and email composer opened.");}catch(e){if(e?.name!=="AbortError"){console.error("Reported Missing email failed:",e);showStatus(e?.message||"Unable to prepare Reported Missing email.");}}finally{if(b)b.disabled=false;}}
-function aoSoldPdfRows(){return getVisibleRows().map(r=>({BR:r?.branch,LENSTYPE:r?.lenstype,DESCRIPTION:r?.description,NTAGN:r?.tag,SELLINGPRICE:r?.sellingPrice,DELIVERYDATE:r?.raw?.DELIVERYDATE}));}
-async function downloadSoldOutPdf(){const b=document.getElementById("soldPdfDownloadBtn");if(b)b.disabled=true;try{const branch=String(document.getElementById("branch")?.value||"ALL").trim().toUpperCase(),rows=aoSoldPdfRows(),r=await createAcebedoPdfReport({title:"Sold Out Inventory Report",description:"This report lists the inventory items currently shown in the Sold Out report for the selected branch and active filters.",branch,rows,filename:"Acebedo_Sold_Out_"+branch+"_"+formatFileDate()+".pdf"});aoPdfDownload(r.blob,r.filename);showStatus("Sold Out PDF downloaded.");}catch(e){console.error("Sold Out PDF failed:",e);showStatus(e?.message||"Unable to create Sold Out PDF.");}finally{if(b)b.disabled=false;}}
-async function emailSoldOutPdf(){const b=document.getElementById("soldPdfEmailBtn");if(b)b.disabled=true;try{const branch=String(document.getElementById("branch")?.value||"ALL").trim().toUpperCase(),rows=aoSoldPdfRows(),r=await createAcebedoPdfReport({title:"Sold Out Inventory Report",description:"This report lists the inventory items currently shown in the Sold Out report for the selected branch and active filters.",branch,rows,filename:"Acebedo_Sold_Out_"+branch+"_"+formatFileDate()+".pdf"});const res=await aoPdfEmail(r.blob,r.filename,"Acebedo Optical - Sold Out Inventory","Acebedo Optical Sold Out Inventory Report\nBranch: "+aoPdfBranchLabel(branch)+"\nRecords: "+rows.length);showStatus(res==="shared"?"PDF ready to send through your email app.":"PDF downloaded and email composer opened.");}catch(e){if(e?.name!=="AbortError"){console.error("Sold Out email failed:",e);showStatus(e?.message||"Unable to prepare Sold Out email.");}}finally{if(b)b.disabled=false;}}
+
+function aoPdfMoney(v){
+  const c = String(v ?? "")
+    .replace(/,/g, "")
+    .replace(/₱/g, "")
+    .trim();
+  const n = Number(c);
+  return Number.isFinite(n)
+    ? formatPeso(n)
+    : "—";
+}
+
+function aoPdfNumber(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function aoPdfBranchLabel(v){
+  const b = String(v || "ALL").trim().toUpperCase();
+  return b === "ALL" || !b ? "ALL BRANCHES" : b;
+}
+
+function aoPdfLoadLogo(){
+  return Promise.resolve(ACEBEDO_REPORT_LOGO_DATA);
+}
+
+async function createAcebedoPdfReport(o){
+  if(
+    !window.jspdf ||
+    !window.jspdf.jsPDF
+  ){
+    throw new Error(
+      "PDF library is not available. Please refresh the Dashboard and try again."
+    );
+  }
+
+  const doc = new window.jspdf.jsPDF({
+    orientation:"landscape",
+    unit:"mm",
+    format:"a4"
+  });
+
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const M = 12;
+
+  const logo = await aoPdfLoadLogo();
+
+  /* =========================================================
+     HEADER
+  ========================================================= */
+  if(logo){
+    try{
+      doc.addImage(
+        logo,
+        "JPEG",
+        M,
+        9,
+        24,
+        24,
+        undefined,
+        "FAST"
+      );
+    }catch(error){
+      console.warn("PDF logo could not be added:",error);
+    }
+  }
+
+  const textX = M + 31;
+
+  doc.setTextColor(15,45,63);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(20);
+  doc.text("Acebedo Optical",textX,17);
+
+  doc.setTextColor(37,99,235);
+  doc.setFontSize(13.5);
+  doc.text(o.title,textX,25);
+
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(9.5);
+  doc.setTextColor(71,85,105);
+  doc.text(
+    "Branch: " + aoPdfBranchLabel(o.branch),
+    textX,
+    32
+  );
+
+  doc.text(
+    "Generated: " + formatDateValue(new Date().toISOString()),
+    textX,
+    38
+  );
+
+  /* Description */
+  doc.setFontSize(8.5);
+  doc.setTextColor(71,85,105);
+  const descLines = doc.splitTextToSize(
+    aoPdfSafeText(o.description),
+    W - M*2
+  );
+  doc.text(descLines,M,47);
+
+  /* =========================================================
+     SUMMARY
+  ========================================================= */
+  const totalItems = o.rows.length;
+  const totalSellingPrice = o.rows.reduce(
+    (sum,row)=>{
+      const raw = String(row?.SELLINGPRICE ?? "")
+        .replace(/,/g,"")
+        .replace(/₱/g,"")
+        .trim();
+      const n = Number(raw);
+      return sum + (Number.isFinite(n) ? n : 0);
+    },
+    0
+  );
+
+  let y = 59;
+
+  doc.setFillColor(239,246,255);
+  doc.setDrawColor(191,219,254);
+  doc.roundedRect(M,y-7,74,17,3,3,"FD");
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(37,99,235);
+  doc.text("TOTAL ITEMS",M+4,y-1);
+  doc.setFontSize(12);
+  doc.setTextColor(15,45,63);
+  doc.text(String(totalItems),M+4,y+6);
+
+  doc.setFillColor(240,253,244);
+  doc.setDrawColor(187,247,208);
+  doc.roundedRect(M+80,y-7,100,17,3,3,"FD");
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(22,101,52);
+  doc.text("TOTAL SELLING PRICE",M+84,y-1);
+  doc.setFontSize(12);
+  doc.setTextColor(15,45,63);
+  doc.text(
+    formatPeso(totalSellingPrice),
+    M+84,
+    y+6
+  );
+
+  y += 24;
+
+  /* =========================================================
+     TABLE
+  ========================================================= */
+  const C = [
+    {l:"BRANCH",       k:"BR",          w:25},
+    {l:"LENSTYPE",     k:"LENSTYPE",    w:32},
+    {l:"DESCRIPTION",  k:"DESCRIPTION", w:91},
+    {l:"TAG NUMBER",   k:"NTAGN",       w:34},
+    {l:"SELLING PRICE",k:"SELLINGPRICE",w:40},
+    {l:"DELIVERY DATE",k:"DELIVERYDATE",w:44}
+  ];
+
+  function drawHeader(){
+    let x = M;
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(8);
+    doc.setTextColor(255,255,255);
+
+    C.forEach(col=>{
+      doc.setFillColor(35,78,103);
+      doc.setDrawColor(35,78,103);
+      doc.rect(x,y-6,col.w,10,"FD");
+      doc.text(col.l,x+2,y+0.4);
+      x += col.w;
+    });
+
+    y += 10;
+  }
+
+  function drawRow(R){
+    const vals = [
+      aoPdfSafeText(R.BR),
+      aoPdfSafeText(R.LENSTYPE),
+      aoPdfSafeText(R.DESCRIPTION),
+      aoPdfSafeText(R.NTAGN),
+      aoPdfMoney(R.SELLINGPRICE),
+      R.DELIVERYDATE
+        ? aoPdfSafeText(formatDateValue(R.DELIVERYDATE))
+        : "—"
+    ];
+
+    const wrapped = vals.map(
+      (v,i)=>doc.splitTextToSize(
+        v,
+        C[i].w - 5
+      )
+    );
+
+    const rowHeight = Math.max(
+      9,
+      Math.max(...wrapped.map(a=>a.length),1) * 4.1 + 4
+    );
+
+    if(y + rowHeight > H - 24){
+      doc.addPage();
+      y = 20;
+      drawHeader();
+    }
+
+    let x = M;
+
+    wrapped.forEach((lines,i)=>{
+      doc.setFillColor(
+        i % 2 === 0 ? 249 : 255,
+        i % 2 === 0 ? 252 : 255,
+        i % 2 === 0 ? 254 : 255
+      );
+      doc.setDrawColor(218,230,238);
+      doc.rect(x,y-6,C[i].w,rowHeight,"FD");
+
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(7.7);
+      doc.setTextColor(32,52,67);
+      doc.text(lines,x+2,y+0.1);
+      x += C[i].w;
+    });
+
+    y += rowHeight;
+  }
+
+  drawHeader();
+
+  if(!o.rows.length){
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100,116,139);
+    doc.text(
+      "No records found for this report.",
+      M,
+      y+8
+    );
+    y += 18;
+  }else{
+    o.rows.forEach(drawRow);
+  }
+
+  /* =========================================================
+     TOTAL FOOTER
+  ========================================================= */
+  if(y + 20 > H - 10){
+    doc.addPage();
+    y = 20;
+  }
+
+  doc.setFillColor(241,248,252);
+  doc.setDrawColor(191,219,254);
+  doc.roundedRect(M,y+3,W-M*2,16,3,3,"FD");
+
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(35,78,103);
+  doc.text(
+    "TOTAL RECORDS: " + totalItems,
+    M+4,
+    y+13
+  );
+  doc.text(
+    "TOTAL SELLING PRICE: " + formatPeso(totalSellingPrice),
+    W-M-4,
+    y+13,
+    {align:"right"}
+  );
+
+  /* Footer on every page */
+  const pageCount = doc.getNumberOfPages();
+  for(let page=1; page<=pageCount; page++){
+    doc.setPage(page);
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(7);
+    doc.setTextColor(148,163,184);
+    doc.text(
+      "Acebedo Optical • Inventory Report",
+      M,
+      H-7
+    );
+    doc.text(
+      "Page " + page + " of " + pageCount,
+      W-M,
+      H-7,
+      {align:"right"}
+    );
+  }
+
+  const fn =
+    (o.filename || "Acebedo_Report").endsWith(".pdf")
+      ? o.filename
+      : o.filename + ".pdf";
+
+  return {
+    blob:doc.output("blob"),
+    filename:fn
+  };
+}
+
+function aoPdfDownload(blob,fn){
+  const u = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = u;
+  a.download = fn;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),1500);
+}
+
+function aoMissingPdfRows(){
+  const b = String(
+    document.getElementById("reportedMissingBranchFilter")?.value || "ALL"
+  ).trim().toUpperCase();
+  const q = String(
+    document.getElementById("reportedMissingSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  return reportedMissingPopupRows
+    .filter(r=>{
+      const rb = String(r?.BR || "").trim().toUpperCase();
+      if(b !== "ALL" && rb !== b) return false;
+      if(!q) return true;
+      return [
+        r?.BR,
+        r?.LENSTYPE,
+        r?.DESCRIPTION,
+        r?.NTAGN,
+        r?.["USER EMAIL"],
+        r?.STATUS
+      ]
+      .map(v=>String(v ?? "").toLowerCase())
+      .join(" ")
+      .includes(q);
+    })
+    .map(r=>({
+      BR:r?.BR,
+      LENSTYPE:r?.LENSTYPE,
+      DESCRIPTION:r?.DESCRIPTION,
+      NTAGN:r?.NTAGN,
+      SELLINGPRICE:r?.SELLINGPRICE,
+      DELIVERYDATE:r?.DELIVERYDATE
+    }));
+}
+
+async function downloadReportedMissingPdf(){
+  const b = document.querySelector(
+    "[data-reported-pdf-download='1']"
+  );
+  if(b) b.disabled = true;
+
+  try{
+    const branch = String(
+      document.getElementById("reportedMissingBranchFilter")?.value || "ALL"
+    ).trim().toUpperCase();
+    const rows = aoMissingPdfRows();
+
+    const r = await createAcebedoPdfReport({
+      title:"Reported Missing Inventory Report",
+      description:
+        "This report presents inventory items reported missing for the selected branch or all branches. Review the records below for recovery and inventory control.",
+      branch,
+      rows,
+      filename:
+        "Acebedo_Reported_Missing_" +
+        branch + "_" +
+        formatFileDate() +
+        ".pdf"
+    });
+
+    aoPdfDownload(r.blob,r.filename);
+    showStatus("Reported Missing PDF downloaded.");
+
+  }catch(e){
+    console.error("Reported Missing PDF failed:",e);
+    showStatus(
+      e?.message ||
+      "Unable to create Reported Missing PDF."
+    );
+
+  }finally{
+    if(b) b.disabled = false;
+  }
+}
+
+function aoSoldPdfRows(){
+  return getVisibleRows().map(r=>({
+    BR:r?.branch,
+    LENSTYPE:r?.lenstype,
+    DESCRIPTION:r?.description,
+    NTAGN:r?.tag,
+    SELLINGPRICE:r?.sellingPrice,
+    DELIVERYDATE:r?.raw?.DELIVERYDATE
+  }));
+}
+
+async function downloadSoldOutPdf(){
+  const b = document.getElementById("soldPdfDownloadBtn");
+  if(b) b.disabled = true;
+
+  try{
+    const branch = String(
+      document.getElementById("branch")?.value || "ALL"
+    ).trim().toUpperCase();
+    const rows = aoSoldPdfRows();
+
+    const r = await createAcebedoPdfReport({
+      title:"Sold Out Inventory Report",
+      description:
+        "This report presents the inventory items currently shown in the Sold Out report for the selected branch and active filters.",
+      branch,
+      rows,
+      filename:
+        "Acebedo_Sold_Out_" +
+        branch + "_" +
+        formatFileDate() +
+        ".pdf"
+    });
+
+    aoPdfDownload(r.blob,r.filename);
+    showStatus("Sold Out PDF downloaded.");
+
+  }catch(e){
+    console.error("Sold Out PDF failed:",e);
+    showStatus(
+      e?.message ||
+      "Unable to create Sold Out PDF."
+    );
+
+  }finally{
+    if(b) b.disabled = false;
+  }
+}
 
 const REPORTED_MISSING_TABLE = "reported_missing";
 function reportedMissingTable(){ return REPORTED_MISSING_TABLE; }
@@ -12786,7 +13205,7 @@ function openReportedMissingPopup(){
       <div class="reportedMissingHead">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
           <div>
-            <div class="modalTitle" style="margin:0;">⚠ Reported Missing</div>
+            <div class="modalTitle" style="margin:0;">Reported Missing</div>
             <div class="modalSub" style="margin-top:4px;">All branches • reported missing records</div>
           </div>
           <button type="button" data-reported-close="1" aria-label="Close" style="width:38px;height:38px;border:1px solid #dbe5ec;border-radius:11px;background:#f8fafc;color:#475569;cursor:pointer;font-size:19px;font-weight:900;">×</button>
@@ -12800,12 +13219,12 @@ function openReportedMissingPopup(){
           <button type="button" class="controlBtn" data-reported-refresh="1">♻ Refresh</button>
         </div>
         <div class="reportPdfActions">
-          <button type="button" class="reportPdfBtn primary" data-reported-pdf-download="1">↓ Download PDF</button>
-          <button type="button" class="reportPdfBtn" data-reported-pdf-email="1">✉ Send Email</button>
+          <button type="button" class="reportPdfBtn primary" data-reported-pdf-download="1">↓ DOWNLOAD PDF REPORT</button>
+          
         </div>
       </div>
       <div class="reportedMissingHeader">
-        <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div>SI NO.</div><div style="text-align:right;">ACTIONS</div>
+        <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div></div><div style="text-align:right;">ACTIONS</div>
       </div>
       <div id="reportedMissingList" class="reportedMissingList"><div class="reportedMissingEmpty">⏳ Loading reported missing...</div></div>
       <div id="reportedMissingPopupStatus" class="reportedMissingStatus"></div>
@@ -12820,8 +13239,7 @@ function openReportedMissingPopup(){
   modal.querySelector("#reportedMissingSearch")?.addEventListener("input",renderReportedMissingPopup);
   modal.querySelector("[data-reported-refresh='1']")?.addEventListener("click",loadReportedMissingPopup);
   modal.querySelector("[data-reported-pdf-download='1']")?.addEventListener("click",downloadReportedMissingPdf);
-  modal.querySelector("[data-reported-pdf-email='1']")?.addEventListener("click",emailReportedMissingPdf);
-  modal.querySelector("[data-reported-close='1']")?.addEventListener("click",()=>modal.remove());
+    modal.querySelector("[data-reported-close='1']")?.addEventListener("click",()=>modal.remove());
   modal.addEventListener("click",e=>{if(e.target===modal) modal.remove();});
   loadReportedMissingPopup();
 }

@@ -4020,6 +4020,16 @@ select:disabled{
   z-index:10 !important;
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style id="aoPdfReportStyles">
+.reportPdfActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
+.reportPdfBtn{min-height:36px;padding:0 11px;border:1px solid #c9dce8;border-radius:10px;background:linear-gradient(180deg,#fff,#f5f9fc);color:#243b4d;cursor:pointer;font-size:10px;font-weight:900;}
+.reportPdfBtn.primary{border-color:transparent;color:#fff;background:linear-gradient(135deg,#0284c7,#2563eb 55%,#4f46e5);}
+.reportPdfBtn:hover{transform:translateY(-1px);}
+.reportPdfBtn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.soldPdfActions{display:flex;gap:6px;align-items:center;}
+@media(max-width:700px){.soldPdfActions{flex-wrap:wrap;}}
+</style>
 </head>
 
 <body>
@@ -4495,6 +4505,11 @@ select:disabled{
         </div>
 
         <div class="tableActions">
+
+          <div id="soldPdfActions" class="soldPdfActions" style="display:none;">
+            <button type="button" id="soldPdfDownloadBtn" class="reportPdfBtn primary" onclick="downloadSoldOutPdf()">↓ PDF</button>
+            <button type="button" id="soldPdfEmailBtn" class="reportPdfBtn" onclick="emailSoldOutPdf()">✉ Email</button>
+          </div>
 
           <button
             class="controlBtn danger clearReportBtn"
@@ -7135,6 +7150,14 @@ function updateSoldOnlyColumns(){
   if(showingMini && showingMini.parentElement){
     showingMini.parentElement.style.display =
       report === "audit" ? "flex" : "none";
+  }
+
+  const soldPdfActions =
+    document.getElementById("soldPdfActions");
+
+  if(soldPdfActions){
+    soldPdfActions.style.display =
+      report === "sold" ? "flex" : "none";
   }
 
 }
@@ -12538,6 +12561,36 @@ async function bulkSetAuditStatus(
    Central table: reported_missing
    Exact same 28 headers as the running Audit/Export.
 ========================================================= */
+/* =========================================================
+   PDF REPORTS — ADDITIVE FEATURE ONLY
+========================================================= */
+const ACEBEDO_REPORT_LOGO_URL="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w400";
+function aoPdfSafeText(v){const t=String(v??"").trim();return t||"—";}
+function aoPdfMoney(v){const c=String(v??"").replace(/,/g,"").replace(/₱/g,"").trim();const n=Number(c);return Number.isFinite(n)?formatPeso(n):"—";}
+function aoPdfBranchLabel(v){const b=String(v||"ALL").trim().toUpperCase();return b==="ALL"||!b?"ALL BRANCHES":b;}
+function aoPdfLoadLogo(){return new Promise(resolve=>{try{const img=new Image();img.crossOrigin="anonymous";img.onload=()=>{try{const c=document.createElement("canvas");c.width=img.naturalWidth||400;c.height=img.naturalHeight||400;c.getContext("2d").drawImage(img,0,0);resolve(c.toDataURL("image/png"));}catch(e){resolve(null);}};img.onerror=()=>resolve(null);img.src=ACEBEDO_REPORT_LOGO_URL;}catch(e){resolve(null);}});}
+async function createAcebedoPdfReport(o){
+  if(!window.jspdf||!window.jspdf.jsPDF)throw new Error("PDF library is not available. Please refresh the Dashboard and try again.");
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
+  const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),M=12;
+  const logo=await aoPdfLoadLogo();if(logo)doc.addImage(logo,"PNG",M,8,24,24);
+  const tx=logo?M+31:M;doc.setTextColor(16,32,51);doc.setFont("helvetica","bold");doc.setFontSize(17);doc.text("Acebedo Optical",tx,17);doc.setFontSize(14);doc.text(o.title,tx,25);doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(88,106,120);doc.text("Branch: "+aoPdfBranchLabel(o.branch),tx,32);doc.text("Generated: "+formatDateValue(new Date().toISOString()),tx,38);
+  doc.setFontSize(9);doc.setTextColor(55,70,82);doc.text(doc.splitTextToSize(o.description,W-M*2),M,47);
+  let y=60;const C=[{l:"BRANCH",k:"BR",w:27},{l:"LENSTYPE",k:"LENSTYPE",w:30},{l:"DESCRIPTION",k:"DESCRIPTION",w:91},{l:"TAG NUMBER",k:"NTAGN",w:30},{l:"SELLING PRICE",k:"SELLINGPRICE",w:36},{l:"DELIVERY DATE",k:"DELIVERYDATE",w:39}];
+  function header(){let x=M;doc.setFillColor(241,248,252);doc.setDrawColor(207,223,232);doc.setTextColor(49,82,103);doc.setFont("helvetica","bold");doc.setFontSize(8);C.forEach(c=>{doc.rect(x,y-6,c.w,9,"FD");doc.text(c.l,x+2,y-.3);x+=c.w;});y+=7;}
+  function row(R){const vals=[aoPdfSafeText(R.BR),aoPdfSafeText(R.LENSTYPE),aoPdfSafeText(R.DESCRIPTION),aoPdfSafeText(R.NTAGN),aoPdfMoney(R.SELLINGPRICE),R.DELIVERYDATE?aoPdfSafeText(formatDateValue(R.DELIVERYDATE)):"—"];const wrapped=vals.map((v,i)=>doc.splitTextToSize(v,C[i].w-4));const h=Math.max(8,Math.max(...wrapped.map(a=>a.length),1)*4.2+3);if(y+h>H-12){doc.addPage();y=20;header();}let x=M;doc.setDrawColor(225,235,241);doc.setTextColor(32,52,67);doc.setFont("helvetica","normal");doc.setFontSize(7.5);wrapped.forEach((lines,i)=>{doc.rect(x,y-6,C[i].w,h,"S");doc.text(lines,x+2,y-.5);x+=C[i].w;});y+=h;}
+  header();if(!o.rows.length){doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(100,116,139);doc.text("No records found for this report.",M,y+8);}else{o.rows.forEach(row);}
+  const fn=(o.filename||"Acebedo_Report").endsWith(".pdf")?o.filename:o.filename+".pdf";return{blob:doc.output("blob"),filename:fn};
+}
+function aoPdfDownload(blob,fn){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
+async function aoPdfEmail(blob,fn,subject,body){const file=new File([blob],fn,{type:"application/pdf"});if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){await navigator.share({title:subject,text:body,files:[file]});return"shared";}aoPdfDownload(blob,fn);window.location.href="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body+"\n\nThe PDF was downloaded to this device. Please attach it to this email.");return"downloaded";}
+function aoMissingPdfRows(){const b=String(document.getElementById("reportedMissingBranchFilter")?.value||"ALL").trim().toUpperCase(),q=String(document.getElementById("reportedMissingSearch")?.value||"").trim().toLowerCase();return reportedMissingPopupRows.filter(r=>{const rb=String(r?.BR||"").trim().toUpperCase();if(b!=="ALL"&&rb!==b)return false;if(!q)return true;return[r?.BR,r?.LENSTYPE,r?.DESCRIPTION,r?.NTAGN,r?.["SI NO."],r?.["USER EMAIL"],r?.STATUS].map(v=>String(v??"").toLowerCase()).join(" ").includes(q);}).map(r=>({BR:r?.BR,LENSTYPE:r?.LENSTYPE,DESCRIPTION:r?.DESCRIPTION,NTAGN:r?.NTAGN,SELLINGPRICE:r?.SELLINGPRICE,DELIVERYDATE:r?.DELIVERYDATE}));}
+async function downloadReportedMissingPdf(){const b=document.querySelector("[data-reported-pdf-download='1']");if(b)b.disabled=true;try{const branch=String(document.getElementById("reportedMissingBranchFilter")?.value||"ALL").trim().toUpperCase(),rows=aoMissingPdfRows(),r=await createAcebedoPdfReport({title:"Reported Missing Inventory Report",description:"This report lists inventory items reported missing for the selected branch or all branches. These records remain in the Reported Missing register until recovered or resolved.",branch,rows,filename:"Acebedo_Reported_Missing_"+branch+"_"+formatFileDate()+".pdf"});aoPdfDownload(r.blob,r.filename);showStatus("Reported Missing PDF downloaded.");}catch(e){console.error("Reported Missing PDF failed:",e);showStatus(e?.message||"Unable to create Reported Missing PDF.");}finally{if(b)b.disabled=false;}}
+async function emailReportedMissingPdf(){const b=document.querySelector("[data-reported-pdf-email='1']");if(b)b.disabled=true;try{const branch=String(document.getElementById("reportedMissingBranchFilter")?.value||"ALL").trim().toUpperCase(),rows=aoMissingPdfRows(),r=await createAcebedoPdfReport({title:"Reported Missing Inventory Report",description:"This report lists inventory items reported missing for the selected branch or all branches. These records remain in the Reported Missing register until recovered or resolved.",branch,rows,filename:"Acebedo_Reported_Missing_"+branch+"_"+formatFileDate()+".pdf"});const res=await aoPdfEmail(r.blob,r.filename,"Acebedo Optical - Reported Missing Inventory","Acebedo Optical Reported Missing Inventory Report\nBranch: "+aoPdfBranchLabel(branch)+"\nRecords: "+rows.length);showStatus(res==="shared"?"PDF ready to send through your email app.":"PDF downloaded and email composer opened.");}catch(e){if(e?.name!=="AbortError"){console.error("Reported Missing email failed:",e);showStatus(e?.message||"Unable to prepare Reported Missing email.");}}finally{if(b)b.disabled=false;}}
+function aoSoldPdfRows(){return getVisibleRows().map(r=>({BR:r?.branch,LENSTYPE:r?.lenstype,DESCRIPTION:r?.description,NTAGN:r?.tag,SELLINGPRICE:r?.sellingPrice,DELIVERYDATE:r?.raw?.DELIVERYDATE}));}
+async function downloadSoldOutPdf(){const b=document.getElementById("soldPdfDownloadBtn");if(b)b.disabled=true;try{const branch=String(document.getElementById("branch")?.value||"ALL").trim().toUpperCase(),rows=aoSoldPdfRows(),r=await createAcebedoPdfReport({title:"Sold Out Inventory Report",description:"This report lists the inventory items currently shown in the Sold Out report for the selected branch and active filters.",branch,rows,filename:"Acebedo_Sold_Out_"+branch+"_"+formatFileDate()+".pdf"});aoPdfDownload(r.blob,r.filename);showStatus("Sold Out PDF downloaded.");}catch(e){console.error("Sold Out PDF failed:",e);showStatus(e?.message||"Unable to create Sold Out PDF.");}finally{if(b)b.disabled=false;}}
+async function emailSoldOutPdf(){const b=document.getElementById("soldPdfEmailBtn");if(b)b.disabled=true;try{const branch=String(document.getElementById("branch")?.value||"ALL").trim().toUpperCase(),rows=aoSoldPdfRows(),r=await createAcebedoPdfReport({title:"Sold Out Inventory Report",description:"This report lists the inventory items currently shown in the Sold Out report for the selected branch and active filters.",branch,rows,filename:"Acebedo_Sold_Out_"+branch+"_"+formatFileDate()+".pdf"});const res=await aoPdfEmail(r.blob,r.filename,"Acebedo Optical - Sold Out Inventory","Acebedo Optical Sold Out Inventory Report\nBranch: "+aoPdfBranchLabel(branch)+"\nRecords: "+rows.length);showStatus(res==="shared"?"PDF ready to send through your email app.":"PDF downloaded and email composer opened.");}catch(e){if(e?.name!=="AbortError"){console.error("Sold Out email failed:",e);showStatus(e?.message||"Unable to prepare Sold Out email.");}}finally{if(b)b.disabled=false;}}
+
 const REPORTED_MISSING_TABLE = "reported_missing";
 function reportedMissingTable(){ return REPORTED_MISSING_TABLE; }
 
@@ -12743,12 +12796,16 @@ function openReportedMissingPopup(){
             <option value="ALL">ALL BRANCHES</option>
             ${BRANCHES.map(b=>`<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`).join("")}
           </select>
-          <input id="reportedMissingSearch" class="reportedMissingInput" type="search" autocomplete="off" placeholder="🔍 Search tag, description, lens type or email">
+          <input id="reportedMissingSearch" class="reportedMissingInput" type="search" autocomplete="off" placeholder="🔍 Search tag, description, lens type, SI No. or email">
           <button type="button" class="controlBtn" data-reported-refresh="1">♻ Refresh</button>
+        </div>
+        <div class="reportPdfActions">
+          <button type="button" class="reportPdfBtn primary" data-reported-pdf-download="1">↓ Download PDF</button>
+          <button type="button" class="reportPdfBtn" data-reported-pdf-email="1">✉ Send Email</button>
         </div>
       </div>
       <div class="reportedMissingHeader">
-        <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div style="text-align:right;">ACTIONS</div>
+        <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div>SI NO.</div><div style="text-align:right;">ACTIONS</div>
       </div>
       <div id="reportedMissingList" class="reportedMissingList"><div class="reportedMissingEmpty">⏳ Loading reported missing...</div></div>
       <div id="reportedMissingPopupStatus" class="reportedMissingStatus"></div>
@@ -12762,6 +12819,8 @@ function openReportedMissingPopup(){
   }
   modal.querySelector("#reportedMissingSearch")?.addEventListener("input",renderReportedMissingPopup);
   modal.querySelector("[data-reported-refresh='1']")?.addEventListener("click",loadReportedMissingPopup);
+  modal.querySelector("[data-reported-pdf-download='1']")?.addEventListener("click",downloadReportedMissingPdf);
+  modal.querySelector("[data-reported-pdf-email='1']")?.addEventListener("click",emailReportedMissingPdf);
   modal.querySelector("[data-reported-close='1']")?.addEventListener("click",()=>modal.remove());
   modal.addEventListener("click",e=>{if(e.target===modal) modal.remove();});
   loadReportedMissingPopup();
@@ -12817,7 +12876,7 @@ async function loadReportedMissingPopup(){
   try{
     reportedMissingPopupRows=await fetchAllRowsForStats(
   reportedMissingTable(),
-  'BR,LENSTYPE,DESCRIPTION,NTAGN,"DATE AND TIME","USER EMAIL",STATUS'
+  'BR,LENSTYPE,DESCRIPTION,NTAGN,SELLINGPRICE,DELIVERYDATE,"SI NO.","DATE AND TIME","USER EMAIL",STATUS'
 );
     renderReportedMissingPopup();
   }catch(error){
@@ -12836,7 +12895,7 @@ function renderReportedMissingPopup(){
     const rb=String(row?.BR||"").trim().toUpperCase();
     if(branchFilter!=="ALL" && rb!==branchFilter) return false;
     if(!search) return true;
-    const text=[row?.BR,row?.LENSTYPE,row?.DESCRIPTION,row?.NTAGN,row?.["DATE AND TIME"],row?.["USER EMAIL"],row?.STATUS].map(v=>String(v??"").toLowerCase()).join(" ");
+    const text=[row?.BR,row?.LENSTYPE,row?.DESCRIPTION,row?.NTAGN,row?.["SI NO."],row?.["USER EMAIL"],row?.STATUS].map(v=>String(v??"").toLowerCase()).join(" ");
     return text.includes(search);
   });
   const status=document.getElementById("reportedMissingPopupStatus");
@@ -12849,7 +12908,13 @@ function renderReportedMissingPopup(){
       <div class="reportedMissingCell">${escapeHtml(String(row?.LENSTYPE||"—"))}</div>
       <div class="reportedMissingCell description">${escapeHtml(String(row?.DESCRIPTION||"—"))}</div>
       <div class="reportedMissingCell"><span class="tag">${escapeHtml(t||"—")}</span></div>
-      
+      <div class="reportedMissingCell">
+  ${escapeHtml(
+    row?.["DATE AND TIME"]
+      ? formatDateValue(row["DATE AND TIME"])
+      : "—"
+  )}
+</div>
       <div class="reportedMissingActions">
         <button type="button" class="actionBtn reportedMissingRestoreBtn" data-reported-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ Add to Stocks</button>
         <button type="button" class="actionBtn danger" data-reported-delete="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">Delete</button>

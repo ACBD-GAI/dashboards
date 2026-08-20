@@ -13029,23 +13029,218 @@ async function bulkSetAuditStatus(
 
       }else{
 
-        const deleteParams =
-          new URLSearchParams();
+        /*
+         * MAKE ALL FOR AUDITING / REPORT AS MISSING
+         *
+         * IMPORTANT:
+         * Do NOT only delete the Audit rows.
+         *
+         * The individual "⚠ Report as Missing" button does
+         * three things:
+         *   1. Saves the stock to reported_missing
+         *   2. Removes it from STOCKS
+         *   3. Removes it from AUDIT
+         *
+         * Bulk MISSING must use the same behavior.
+         */
 
-        deleteParams.set(
-          "NTAGN",
-          "not.is.null"
-        );
+        const [stocks, sold] =
+          await Promise.all([
+            fetchBranchData(
+              b,
+              "stocks",
+              ""
+            ),
+            fetchBranchData(
+              b,
+              "sold",
+              ""
+            )
+          ]);
 
-        await supabaseRequest(
-          auditTable +
-          "?" +
-          deleteParams.toString(),
-          {
-            method:"DELETE",
-            prefer:"return=minimal"
+        const soldKeys =
+          new Set();
+
+        sold.forEach(row=>{
+          const tag =
+            String(
+              row?.NTAGN ?? ""
+            ).trim().toUpperCase();
+
+          if(tag){
+            soldKeys.add(tag);
           }
-        );
+        });
+
+        /*
+         * Only UNSOLD stock can be reported as missing.
+         */
+        const missingRows =
+          (Array.isArray(stocks) ? stocks : [])
+            .filter(row=>{
+              const tag =
+                String(
+                  row?.NTAGN ?? ""
+                ).trim().toUpperCase();
+
+              return tag && !soldKeys.has(tag);
+            });
+
+        /*
+         * Save to central reported_missing first.
+         * Use BR + NTAGN so it behaves exactly like
+         * the individual Report as Missing action.
+         */
+        const reportedTable =
+          reportedMissingTable();
+
+        for(
+          let i=0;
+          i<missingRows.length;
+          i+=IMPORT_CHUNK_SIZE
+        ){
+
+          const chunk =
+            missingRows
+              .slice(
+                i,
+                i + IMPORT_CHUNK_SIZE
+              )
+              .map(row=>{
+
+                const branchValue =
+                  String(
+                    row?.BR ?? b ?? ""
+                  ).trim().toUpperCase();
+
+                const tag =
+                  String(
+                    row?.NTAGN ?? ""
+                  ).trim();
+
+                return reportedMissingRecordFromRow(
+                  {
+                    raw:row
+                  },
+                  branchValue,
+                  tag
+                );
+
+              });
+
+          if(chunk.length){
+
+            await supabaseRequest(
+              reportedTable +
+              "?on_conflict=BR,NTAGN",
+              {
+                method:"POST",
+                body:chunk,
+                prefer:"resolution=ignore-duplicates,return=minimal"
+              }
+            );
+
+          }
+
+          await yieldToBrowser();
+        }
+
+        /*
+         * After the records are safely stored in
+         * reported_missing, remove the same unsold
+         * stock records from STOCKS.
+         *
+         * Delete one BR + NTAGN at a time so this is
+         * identical to the individual Report as Missing
+         * behavior and does not touch other branches.
+         */
+        for(const row of missingRows){
+
+          const branchValue =
+            String(
+              row?.BR ?? b ?? ""
+            ).trim().toUpperCase();
+
+          const tag =
+            String(
+              row?.NTAGN ?? ""
+            ).trim();
+
+          if(!branchValue || !tag){
+            continue;
+          }
+
+          const stockParams =
+            new URLSearchParams();
+
+          stockParams.set(
+            "BR",
+            "eq." + branchValue
+          );
+
+          stockParams.set(
+            "NTAGN",
+            "eq." + tag
+          );
+
+          await supabaseRequest(
+            tableName(
+              b,
+              "stocks"
+            ) +
+            "?" +
+            stockParams.toString(),
+            {
+              method:"DELETE",
+              prefer:"return=minimal"
+            }
+          );
+
+        }
+
+        /*
+         * Finally remove the matching Audit records.
+         */
+        for(const row of missingRows){
+
+          const branchValue =
+            String(
+              row?.BR ?? b ?? ""
+            ).trim().toUpperCase();
+
+          const tag =
+            String(
+              row?.NTAGN ?? ""
+            ).trim();
+
+          if(!branchValue || !tag){
+            continue;
+          }
+
+          const auditParams =
+            new URLSearchParams();
+
+          auditParams.set(
+            "BR",
+            "eq." + branchValue
+          );
+
+          auditParams.set(
+            "NTAGN",
+            "eq." + tag
+          );
+
+          await supabaseRequest(
+            auditTable +
+            "?" +
+            auditParams.toString(),
+            {
+              method:"DELETE",
+              prefer:"return=minimal"
+            }
+          );
+
+        }
 
       }
 

@@ -6261,7 +6261,11 @@ async function saveAllowedUser(){
     return;
   }
 
-  if(!sessionId){
+  // Always get the latest session directly from localStorage.
+  const currentSessionId =
+    localStorage.getItem(SESSION_KEY);
+
+  if(!currentSessionId){
     showStatus("Session expired. Please login again.");
     closeAddUserModal();
     return;
@@ -6309,9 +6313,9 @@ async function saveAllowedUser(){
       await loginApiGet(
         "addAllowedUser",
         {
-          sessionId:sessionId,
-          email:email,
-          branch:branch
+          sessionId: currentSessionId,
+          email: email,
+          branch: branch
         }
       );
 

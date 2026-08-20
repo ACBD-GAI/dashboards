@@ -6255,35 +6255,29 @@ function closeAddUserModal(){
 
 async function saveAllowedUser(){
 
+  /*
+   * ADD USER ONLY
+   * Keep this flow isolated from the other dashboard functions.
+   */
+
   if(!currentAdmin){
     showStatus("Administrator access required.");
-    closeAddUserModal();
     return;
   }
 
-  // Always get the latest session directly from localStorage.
   const currentSessionId =
     localStorage.getItem(SESSION_KEY);
 
   if(!currentSessionId){
     showStatus("Session expired. Please login again.");
-    closeAddUserModal();
     return;
   }
 
-  const email =
-    document
-      .getElementById("newUserEmail")
-      .value
-      .trim()
-      .toLowerCase();
+  const emailInput =
+    document.getElementById("newUserEmail");
 
-  const branch =
-    document
-      .getElementById("newUserBranch")
-      .value
-      .trim()
-      .toUpperCase();
+  const branchInput =
+    document.getElementById("newUserBranch");
 
   const status =
     document.getElementById("addUserStatus");
@@ -6291,15 +6285,40 @@ async function saveAllowedUser(){
   const button =
     document.getElementById("saveAllowedUserBtn");
 
+  if(!emailInput || !branchInput || !status || !button){
+    console.error("Add User form elements are missing.");
+    showStatus("Add User form is unavailable.");
+    return;
+  }
+
+  const email =
+    String(emailInput.value || "")
+      .trim()
+      .toLowerCase();
+
+  const branch =
+    String(branchInput.value || "")
+      .trim()
+      .toUpperCase();
+
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
     status.textContent =
       "Enter a valid email address.";
+    emailInput.focus();
     return;
   }
 
   if(!BRANCHES.includes(branch)){
     status.textContent =
       "Select a valid allowed branch.";
+    branchInput.focus();
+    return;
+  }
+
+  /*
+   * Prevent double-clicks / duplicate requests.
+   */
+  if(button.disabled){
     return;
   }
 
@@ -6336,10 +6355,15 @@ async function saveAllowedUser(){
       "."
     );
 
-    setTimeout(
-      closeAddUserModal,
-      700
-    );
+    /*
+     * Refresh the Branch Users list so the newly added
+     * user is immediately visible after reopening it.
+     */
+    if(typeof loadAllowedUsers === "function"){
+      await loadAllowedUsers();
+    }
+
+    closeAddUserModal();
 
   }catch(error){
 

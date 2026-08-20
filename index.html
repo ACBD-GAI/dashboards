@@ -9459,6 +9459,34 @@ function renderTable(
         }
       );
 
+    /*
+     * REPORT AS MISSING HANDLER
+     *
+     * Identifies the record ONLY by:
+     *   BR + NTAGN
+     *
+     * This is deliberately separate from the existing
+     * Missing <-> Audited toggle.
+     */
+    body
+      .querySelectorAll(
+        "[data-report-missing]"
+      )
+      .forEach(
+        button=>{
+
+          button.addEventListener(
+            "click",
+            ()=>{
+              reportAuditItemMissing(
+                button
+              );
+            }
+          );
+
+        }
+      );
+
   }
 
   const start =
@@ -12414,30 +12442,161 @@ function reportedMissingRecordFromRow(row, branch, tag){
 }
 
 async function reportAuditItemMissing(button){
-  const branch=String(button.dataset.branch||"").trim();
-  const tag=String(button.dataset.tag||"").trim();
-  if(!branch || !tag){ showStatus("Missing branch or NTAGN."); return; }
-  button.disabled=true;
+  const branch =
+    String(
+      button.dataset.branch || ""
+    ).trim().toUpperCase();
+
+  const tag =
+    String(
+      button.dataset.tag || ""
+    ).trim();
+
+  /*
+   * PRIMARY IDENTIFIER:
+   * BR + NTAGN
+   */
+  if(!branch || !tag){
+    showStatus("Missing BR or NTAGN.");
+    return;
+  }
+
+  button.disabled = true;
+
   try{
-    const p=new URLSearchParams();
-    p.set("BR","eq."+branch); p.set("NTAGN","eq."+tag); p.set("limit","1");
-    const existing=await supabaseRequest(reportedMissingTable()+"?"+p.toString(),{method:"GET"});
-    if(Array.isArray(existing)&&existing.length){
-      button.textContent="✓ Already Reported";
-      showStatus(tag+" is already reported as MISSING.");
+
+    /*
+     * Check the CURRENT central reported_missing table
+     * using the composite identifier BR + NTAGN.
+     */
+    const checkParams =
+      new URLSearchParams();
+
+    checkParams.set(
+      "BR",
+      "eq." + branch
+    );
+
+    checkParams.set(
+      "NTAGN",
+      "eq." + tag
+    );
+
+    checkParams.set(
+      "limit",
+      "1"
+    );
+
+    const existing =
+      await supabaseRequest(
+        reportedMissingTable() +
+        "?" +
+        checkParams.toString(),
+        {
+          method:"GET"
+        }
+      );
+
+    if(
+      Array.isArray(existing) &&
+      existing.length
+    ){
+      button.textContent =
+        "✓ Already Reported";
+
+      showStatus(
+        tag +
+        " is already reported as MISSING."
+      );
+
       return;
     }
-    const row=currentRows.find(r=>String(r?.branch||"").trim()===branch && String(r?.tag||"").trim()===tag);
-    if(!row || !row.raw) throw new Error("Audit stock record "+tag+" was not found.");
-    await supabaseRequest(reportedMissingTable(),{method:"POST",body:[reportedMissingRecordFromRow(row,branch,tag)],prefer:"return=minimal"});
-    button.textContent="✓ Reported";
-    showStatus(tag+" reported as MISSING.");
-    const c=document.getElementById("reportedMissingTotal");
-    if(c){ const n=Number(String(c.textContent||"0").replace(/,/g,"")); if(Number.isFinite(n)) c.textContent=formatNumber(n+1); }
+
+    /*
+     * Find the current Audit result using
+     * the SAME BR + NTAGN identifier.
+     */
+    const row =
+      currentRows.find(
+        r =>
+          String(
+            r?.branch || ""
+          ).trim().toUpperCase() === branch &&
+          String(
+            r?.tag || ""
+          ).trim() === tag
+      );
+
+    if(
+      !row ||
+      !row.raw
+    ){
+      throw new Error(
+        "Audit stock record " +
+        tag +
+        " (" +
+        branch +
+        ") was not found."
+      );
+    }
+
+    const record =
+      reportedMissingRecordFromRow(
+        row,
+        branch,
+        tag
+      );
+
+    /*
+     * Composite-key upsert.
+     * This uses BR + NTAGN as the conflict key.
+     */
+    await supabaseRequest(
+      reportedMissingTable() +
+      "?on_conflict=BR,NTAGN",
+      {
+        method:"POST",
+        body:[record],
+        prefer:
+          "resolution=ignore-duplicates,return=minimal"
+      }
+    );
+
+    button.textContent =
+      "✓ Reported";
+
+    showStatus(
+      tag +
+      " (" +
+      branch +
+      ") reported as MISSING."
+    );
+
+    /*
+     * Refresh the Reported Missing counter.
+     * Do not disturb the existing Audit result.
+     */
+    if(
+      typeof loadReportedMissingCount ===
+      "function"
+    ){
+      loadReportedMissingCount();
+    }
+
   }catch(error){
-    console.error("Report as missing failed:",error);
-    button.disabled=false;
-    showStatus(error?.message||"Unable to report item as missing.");
+
+    console.error(
+      "Report as missing failed:",
+      error
+    );
+
+    button.disabled =
+      false;
+
+    showStatus(
+      error?.message ||
+      "Unable to report item as missing."
+    );
   }
 }
 
@@ -12540,9 +12699,29 @@ function renderReportedMissingPopup(){
 }
 
 async function getReportedMissingRecord(branch,tag){
-  const p=new URLSearchParams(); p.set("BR","eq."+String(branch||"").trim()); p.set("NTAGN","eq."+String(tag||"").trim()); p.set("limit","1");
-  const rows=await supabaseRequest(reportedMissingTable()+"?"+p.toString(),{method:"GET"});
-  return Array.isArray(rows)&&rows.length?rows[0]:null;
+  branch = String(branch || "").trim().toUpperCase();
+  tag = String(tag || "").trim();
+
+  const p = new URLSearchParams();
+  p.set("BR","eq." + branch);
+  p.set("NTAGN","eq." + tag);
+  p.set("limit","1");
+
+  const rows =
+    await supabaseRequest(
+      reportedMissingTable() +
+      "?" +
+      p.toString(),
+      {
+        method:"GET"
+      }
+    );
+
+  return
+    Array.isArray(rows) &&
+    rows.length
+      ? rows[0]
+      : null;
 }
 
 function reportedMissingToStockRecord(row){

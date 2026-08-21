@@ -4535,7 +4535,7 @@ select:disabled{
 
           <div id="soldPdfActions" class="soldPdfActions" style="display:none;">
             <button type="button" id="soldPdfDownloadBtn" class="reportPdfBtn primary" onclick="downloadSoldOutPdf()">↓ DOWNLOAD PDF REPORT</button>
-            
+            <button type="button" id="soldExcelDownloadBtn" class="reportPdfBtn" onclick="downloadSoldOutExcel()">↓ DOWNLOAD EXCEL</button>
           </div>
 
           <button
@@ -13883,6 +13883,190 @@ async function downloadSoldOutPdf(){
   }
 }
 
+
+function aoExcelCellValue(row,col){
+  const value = row?.raw?.[col] ?? row?.[col] ?? "";
+  return value === null || value === undefined ? "" : value;
+}
+
+function aoExcelMoney(value){
+  const n = Number(
+    String(value ?? "")
+      .replace(/,/g,"")
+      .replace(/₱/g,"")
+      .trim()
+  );
+  return Number.isFinite(n) ? n : 0;
+}
+
+async function downloadSoldOutExcel(){
+  const button=document.getElementById("soldExcelDownloadBtn");
+  if(button) button.disabled=true;
+
+  try{
+    const branch=String(
+      document.getElementById("branch")?.value || "ALL"
+    ).trim().toUpperCase();
+
+    /* Export the current Sold Out result, but only MARKED rows. */
+    const sourceRows=getVisibleRows().filter(r=>
+      String(r?.raw?.STATUS ?? r?.STATUS ?? "")
+        .trim().toUpperCase()==="MARKED"
+    );
+
+    /* A-Z = the first 26 source columns, including the header row. */
+    const headers=DB_COLUMNS.slice(0,26);
+    const data=sourceRows.map(row=>
+      headers.map(col=>aoExcelCellValue(row,col))
+    );
+
+    const wb=XLSX.utils.book_new();
+    const ws=XLSX.utils.aoa_to_sheet([headers,...data]);
+    ws["!cols"]=headers.map(()=>({wch:18}));
+    XLSX.utils.book_append_sheet(wb,ws,"SOLD OUT");
+
+    const grouped=new Map();
+    sourceRows.forEach(row=>{
+      const b=String(
+        row?.raw?.BR ?? row?.branch ?? branch ?? ""
+      ).trim().toUpperCase() || "UNKNOWN";
+      const amount=aoExcelMoney(
+        row?.raw?.SELLINGPRICE ?? row?.sellingPrice
+      );
+      const item=grouped.get(b) || {branch:b,items:0,amount:0};
+      item.items++;
+      item.amount+=amount;
+      grouped.set(b,item);
+    });
+
+    const summaryRows=Array.from(grouped.values()).sort((a,b)=>
+      String(a.branch).localeCompare(String(b.branch))
+    );
+    const totalAmount=summaryRows.reduce((sum,row)=>sum+row.amount,0);
+
+    const summaryData=[
+      ["SOLD ITEMS SUMMARY"],
+      ["Branch Filter",branch],
+      ["Date From",document.getElementById("soldDateFrom")?.value || ""],
+      ["Date To",document.getElementById("soldDateTo")?.value || ""],
+      [],
+      ["BRANCH","ITEMS","TOTAL SELLING PRICE"],
+      ...summaryRows.map(x=>[x.branch,x.items,x.amount]),
+      ["GRAND TOTAL",sourceRows.length,totalAmount]
+    ];
+    const summaryWs=XLSX.utils.aoa_to_sheet(summaryData);
+    summaryWs["!cols"]=[{wch:22},{wch:18},{wch:22}];
+    XLSX.utils.book_append_sheet(wb,summaryWs,"SUMMARY");
+
+    const filename=
+      "Acebedo_Sold_Out_"+branch+"_"+formatFileDate()+".xlsx";
+    XLSX.writeFile(wb,filename);
+    showStatus("Sold Out Excel downloaded.");
+  }catch(e){
+    console.error("Sold Out Excel failed:",e);
+    showStatus(e?.message || "Unable to create Sold Out Excel.");
+  }finally{
+    if(button) button.disabled=false;
+  }
+}
+
+function aoMissingExcelRows(){
+  const branch=String(
+    document.getElementById("reportedMissingBranchFilter")?.value || ""
+  ).trim().toUpperCase();
+  const search=String(
+    document.getElementById("reportedMissingSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  return reportedMissingPopupRows.filter(row=>{
+    /* Download is always UNRESOLVED only. */
+    if(normalizeReportedMissingStatus(row?.STATUS)!=="UNRESOLVED"){
+      return false;
+    }
+
+    const rb=String(row?.BR || "").trim().toUpperCase();
+    if(branch && rb!==branch) return false;
+
+    if(!search) return true;
+
+    return DB_COLUMNS.slice(0,22)
+      .map(col=>row?.[col])
+      .concat([row?.STATUS])
+      .map(v=>String(v ?? "").toLowerCase())
+      .join(" ")
+      .includes(search);
+  });
+}
+
+async function downloadReportedMissingExcel(){
+  const button=document.querySelector(
+    "[data-reported-excel-download='1']"
+  );
+  if(button) button.disabled=true;
+
+  try{
+    const branch=String(
+      document.getElementById("reportedMissingBranchFilter")?.value || ""
+    ).trim().toUpperCase();
+
+    const sourceRows=aoMissingExcelRows();
+    /* A-V = first 22 source columns, including the header row. */
+    const headers=DB_COLUMNS.slice(0,22);
+    const data=sourceRows.map(row=>
+      headers.map(col=>row?.[col] ?? "")
+    );
+
+    const wb=XLSX.utils.book_new();
+    const ws=XLSX.utils.aoa_to_sheet([headers,...data]);
+    ws["!cols"]=headers.map(()=>({wch:18}));
+    XLSX.utils.book_append_sheet(
+      wb,
+      ws,
+      "REPORTED MISSING"
+    );
+
+    const grouped=new Map();
+    sourceRows.forEach(row=>{
+      const b=String(row?.BR ?? "").trim().toUpperCase() || "UNKNOWN";
+      const amount=aoExcelMoney(row?.SELLINGPRICE);
+      const item=grouped.get(b) || {branch:b,items:0,amount:0};
+      item.items++;
+      item.amount+=amount;
+      grouped.set(b,item);
+    });
+
+    const summaryRows=Array.from(grouped.values()).sort((a,b)=>
+      String(a.branch).localeCompare(String(b.branch))
+    );
+    const totalAmount=summaryRows.reduce((sum,row)=>sum+row.amount,0);
+
+    const summaryData=[
+      ["REPORTED MISSING SUMMARY"],
+      ["STATUS","UNRESOLVED ONLY"],
+      ["Branch Filter",branch || "ALL SELECTED BRANCHES"],
+      [],
+      ["BRANCH","UNRESOLVED ITEMS","TOTAL SELLING PRICE"],
+      ...summaryRows.map(x=>[x.branch,x.items,x.amount]),
+      ["GRAND TOTAL",sourceRows.length,totalAmount]
+    ];
+    const summaryWs=XLSX.utils.aoa_to_sheet(summaryData);
+    summaryWs["!cols"]=[{wch:22},{wch:20},{wch:22}];
+    XLSX.utils.book_append_sheet(wb,summaryWs,"SUMMARY");
+
+    const filename=
+      "Acebedo_Reported_Missing_"+
+      (branch || "ALL_BRANCHES")+"_"+
+      formatFileDate()+".xlsx";
+    XLSX.writeFile(wb,filename);
+    showStatus("Reported Missing Excel downloaded (UNRESOLVED only).");
+  }catch(e){
+    console.error("Reported Missing Excel failed:",e);
+    showStatus(e?.message || "Unable to create Reported Missing Excel.");
+  }finally{
+    if(button) button.disabled=false;
+  }
+}
+
 const REPORTED_MISSING_TABLE = "reported_missing";
 function reportedMissingTable(){ return REPORTED_MISSING_TABLE; }
 
@@ -14097,7 +14281,7 @@ function openReportedMissingPopup(){
         </div>
         <div class="reportPdfActions">
           <button type="button" class="reportPdfBtn primary" data-reported-pdf-download="1">↓ DOWNLOAD PDF REPORT</button>
-          
+          <button type="button" class="reportPdfBtn" data-reported-excel-download="1">↓ DOWNLOAD EXCEL</button>
         </div>
       </div>
       <div class="reportedMissingHeader">
@@ -14121,7 +14305,8 @@ function openReportedMissingPopup(){
   modal.querySelector("#reportedMissingSearch")?.addEventListener("input",renderReportedMissingPopup);
   modal.querySelector("[data-reported-refresh='1']")?.addEventListener("click",loadReportedMissingPopup);
   modal.querySelector("[data-reported-pdf-download='1']")?.addEventListener("click",downloadReportedMissingPdf);
-    modal.querySelector("[data-reported-close='1']")?.addEventListener("click",()=>modal.remove());
+  modal.querySelector("[data-reported-excel-download='1']")?.addEventListener("click",downloadReportedMissingExcel);
+  modal.querySelector("[data-reported-close='1']")?.addEventListener("click",()=>modal.remove());
   modal.addEventListener("click",e=>{if(e.target===modal) modal.remove();});
   loadReportedMissingPopup();
 }
@@ -14182,9 +14367,9 @@ async function loadReportedMissingPopup(){
   list.innerHTML='<div class="reportedMissingEmpty">⏳ Loading reported missing...</div>';
   try{
     reportedMissingPopupRows=await fetchAllRowsForStats(
-  reportedMissingTable(),
-  'BR,LENSTYPE,DESCRIPTION,NTAGN,SELLINGPRICE,DELIVERYDATE,"USER EMAIL",STATUS'
-);
+      reportedMissingTable(),
+      DB_COLUMNS.slice(0,22).join(",") + ",STATUS"
+    );
     const statusFilter=document.getElementById("reportedMissingStatusFilter");
     if(statusFilter) statusFilter.value="UNRESOLVED";
     renderReportedMissingPopup();
@@ -14391,32 +14576,25 @@ async function startExport(){
 
   const branch =
     document
-      .getElementById(
-        "branch"
-      )
+      .getElementById("branch")
       .value;
 
   createQueueCard(
     "EXPORT",
-    "Preparing XLSX..."
+    "Preparing Remaining Stocks XLSX..."
   );
 
   try{
-
     const branches =
       branch === "ALL"
         ? BRANCHES
         : [branch];
 
-    const wb =
-      XLSX.utils.book_new();
-
+    const wb = XLSX.utils.book_new();
     let completed = 0;
+    let totalRemaining = 0;
 
-    for(
-      const b of branches
-    ){
-
+    for(const b of branches){
       updateQueue(
         "EXPORT",
         completed,
@@ -14424,496 +14602,63 @@ async function startExport(){
         "Reading " + b
       );
 
-      const [
-        stock,
-        sold,
-        audit
-      ] =
-        await Promise.all([
+      const [stock,sold,audit] = await Promise.all([
+        fetchBranchData(b,"stocks",""),
+        fetchBranchData(b,"sold",""),
+        fetchBranchData(b,"audit","")
+      ]);
 
-          fetchBranchData(
-            b,
-            "stocks",
-            ""
-          ),
-
-          fetchBranchData(
-            b,
-            "sold",
-            ""
-          ),
-
-          fetchBranchData(
-            b,
-            "audit",
-            ""
-          )
-
-        ]);
-
-      const soldTags =
-        new Set();
-
-      sold.forEach(
-        row=>{
-
-          const tag =
-            String(
-              row?.NTAGN ?? ""
-            ).trim();
-
-          if(tag){
-
-            soldTags.add(
-              tag
-            );
-
-          }
-
+      const soldStockKeys = new Set();
+      sold.forEach(row=>{
+        const branchValue = String(
+          row?.BR ?? row?.branch ?? b ?? ""
+        ).trim().toUpperCase();
+        const tag = String(row?.NTAGN ?? "").trim().toUpperCase();
+        if(branchValue && tag){
+          soldStockKeys.add(branchValue + "|" + tag);
         }
-      );
+      });
 
-      /*
-       * AVAILABLE STOCKS:
-       *
-       * Keep the existing SOLD exclusion.
-       *
-       * NEW:
-       * Also subtract MISSING records.
-       *
-       * Because MISSING =
-       * STOCKS - (SOLD + AUDIT),
-       * subtracting SOLD + MISSING leaves
-       * the audited stock records available.
-       *
-       * Matching is BRANCH + NTAGN, exactly like
-       * the audit export logic below.
-       */
-
-      const soldStockKeys =
-        new Set();
-
-      sold.forEach(
-        row=>{
-
-          const branchValue =
-            String(
-              row?.BR ??
-              row?.branch ??
-              b ??
-              ""
-            ).trim().toUpperCase();
-
-          const tag =
-            String(
-              row?.NTAGN ?? ""
-            ).trim().toUpperCase();
-
-          if(
-            branchValue &&
-            tag
-          ){
-
-            soldStockKeys.add(
-              branchValue +
-              "|" +
-              tag
-            );
-
-          }
-
+      const auditStockKeys = new Set();
+      audit.forEach(row=>{
+        const branchValue = String(
+          row?.BR ?? row?.branch ?? b ?? ""
+        ).trim().toUpperCase();
+        const tag = String(row?.NTAGN ?? "").trim().toUpperCase();
+        if(branchValue && tag){
+          auditStockKeys.add(branchValue + "|" + tag);
         }
-      );
+      });
 
-      const auditStockKeys =
-        new Set();
+      /* Remaining Stocks = STOCKS not SOLD and still AUDITED. */
+      const remaining = stock.filter(row=>{
+        const tag = String(row?.NTAGN ?? "").trim();
+        if(!tag) return true;
 
-      audit.forEach(
-        row=>{
+        const branchValue = String(
+          row?.BR ?? row?.branch ?? b ?? ""
+        ).trim().toUpperCase();
+        const key = branchValue + "|" + tag.toUpperCase();
 
-          const branchValue =
-            String(
-              row?.BR ??
-              row?.branch ??
-              b ??
-              ""
-            ).trim().toUpperCase();
+        return !soldStockKeys.has(key) && auditStockKeys.has(key);
+      });
 
-          const tag =
-            String(
-              row?.NTAGN ?? ""
-            ).trim().toUpperCase();
-
-          if(
-            branchValue &&
-            tag
-          ){
-
-            auditStockKeys.add(
-              branchValue +
-              "|" +
-              tag
-            );
-
-          }
-
-        }
-      );
-
-      const available =
-        stock.filter(
-          row=>{
-
-            const tag =
-              String(
-                row?.NTAGN ?? ""
-              ).trim();
-
-            if(!tag){
-              return true;
-            }
-
-            const branchValue =
-              String(
-                row?.BR ??
-                row?.branch ??
-                b ??
-                ""
-              ).trim().toUpperCase();
-
-            const key =
-              branchValue +
-              "|" +
-              tag.toUpperCase();
-
-            /*
-             * SOLD is already excluded.
-             *
-             * MISSING is:
-             *   not SOLD + not AUDITED
-             *
-             * Therefore an item remains in STOCKS
-             * only when it is AUDITED.
-             */
-
-            return (
-              !soldStockKeys.has(key) &&
-              auditStockKeys.has(key)
-            );
-
-          }
-        );
+      totalRemaining += remaining.length;
 
       XLSX.utils.book_append_sheet(
         wb,
-        XLSX.utils.json_to_sheet(
-          available
-        ),
-        safeSheetName(
-          b + "_STOCKS"
-        )
+        XLSX.utils.json_to_sheet(remaining),
+        safeSheetName(b + "_REMAINING")
       );
-
-      XLSX.utils.book_append_sheet(
-        wb,
-        XLSX.utils.json_to_sheet(
-          sold
-        ),
-        safeSheetName(
-          b + "_SOLD"
-        )
-      );
-
-/* =========================================================
-   AUDIT EXPORT
-
-   IMPORTANT:
-   Matching is based on BOTH:
-
-     BRANCH + NTAGN
-
-   If the same branch + NTAGN exists in SOLD,
-   that AUDIT record is NOT exported.
-
-   MISSING =
-     STOCKS - (SOLD + AUDIT)
-
-   STATUS:
-     AUDITED
-     MISSING
-========================================================= */
-
-
-/* =========================================================
-   CREATE SOLD KEYS
-   BRANCH + NTAGN
-========================================================= */
-
-const soldKeys =
-  new Set();
-
-sold.forEach(
-  row=>{
-
-    const branchValue =
-      String(
-        row?.BR ??
-        row?.branch ??
-        ""
-      ).trim().toUpperCase();
-
-    const tag =
-      String(
-        row?.NTAGN ?? ""
-      ).trim().toUpperCase();
-
-    if(
-      branchValue &&
-      tag
-    ){
-
-      soldKeys.add(
-        branchValue +
-        "|" +
-        tag
-      );
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   AUDITED RECORDS
-
-   DO NOT INCLUDE AUDIT RECORDS WHERE
-   SAME BRANCH + SAME NTAGN EXISTS IN SOLD
-========================================================= */
-
-const auditedExport =
-  audit
-    .filter(
-      row=>{
-
-        const branchValue =
-          String(
-            row?.BR ??
-            row?.branch ??
-            b ??
-            ""
-          ).trim().toUpperCase();
-
-        const tag =
-          String(
-            row?.NTAGN ?? ""
-          ).trim().toUpperCase();
-
-        if(!tag){
-          return false;
-        }
-
-        const key =
-          branchValue +
-          "|" +
-          tag;
-
-        /*
-         * SAME BRANCH + SAME TAG
-         * EXISTS IN SOLD
-         *
-         * DO NOT EXPORT AUDIT
-         */
-        if(
-          soldKeys.has(key)
-        ){
-          return false;
-        }
-
-        return true;
-
-      }
-    )
-    .map(
-      row=>({
-
-        ...row,
-
-        STATUS:
-          "AUDITED"
-
-      })
-    );
-
-
-/* =========================================================
-   GET AUDITED KEYS
-
-   Also use BOTH BRANCH + NTAGN
-========================================================= */
-
-const auditedKeys =
-  new Set();
-
-auditedExport.forEach(
-  row=>{
-
-    const branchValue =
-      String(
-        row?.BR ??
-        row?.branch ??
-        b ??
-        ""
-      ).trim().toUpperCase();
-
-    const tag =
-      String(
-        row?.NTAGN ?? ""
-      ).trim().toUpperCase();
-
-    if(
-      branchValue &&
-      tag
-    ){
-
-      auditedKeys.add(
-        branchValue +
-        "|" +
-        tag
-      );
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   FIND MISSING STOCKS
-
-   MISSING =
-   STOCKS - (SOLD + AUDITED)
-
-   ALSO MATCH BY:
-   BRANCH + NTAGN
-========================================================= */
-
-const missingExport =
-  stock
-    .filter(
-      row=>{
-
-        const branchValue =
-          String(
-            row?.BR ??
-            row?.branch ??
-            b ??
-            ""
-          ).trim().toUpperCase();
-
-        const tag =
-          String(
-            row?.NTAGN ?? ""
-          ).trim().toUpperCase();
-
-        if(!tag){
-          return false;
-        }
-
-        const key =
-          branchValue +
-          "|" +
-          tag;
-
-
-        /*
-         * SAME BRANCH + SAME TAG
-         * EXISTS IN SOLD
-         *
-         * NOT MISSING
-         */
-        if(
-          soldKeys.has(key)
-        ){
-          return false;
-        }
-
-
-        /*
-         * SAME BRANCH + SAME TAG
-         * EXISTS IN AUDIT
-         *
-         * NOT MISSING
-         */
-        if(
-          auditedKeys.has(key)
-        ){
-          return false;
-        }
-
-
-        /*
-         * STOCK EXISTS BUT IT IS
-         * NOT SOLD AND NOT AUDITED
-         *
-         * THEREFORE MISSING
-         */
-        return true;
-
-      }
-    )
-    .map(
-      row=>({
-
-        ...row,
-
-        STATUS:
-          "MISSING"
-
-      })
-    );
-
-
-/* =========================================================
-   COMBINE
-
-   AUDITED
-   +
-   MISSING
-========================================================= */
-
-const auditExport =
-  [
-    ...auditedExport,
-    ...missingExport
-  ];
-
-
-/* =========================================================
-   CREATE AUDIT SHEET
-========================================================= */
-
-XLSX.utils.book_append_sheet(
-  wb,
-  XLSX.utils.json_to_sheet(
-    auditExport
-  ),
-  safeSheetName(
-    b + "_AUDIT"
-  )
-);
 
       completed++;
-
       updateQueue(
         "EXPORT",
         completed,
         branches.length,
-        b + " complete"
+        b + " complete • " + remaining.length + " remaining stocks"
       );
-
       await yieldToBrowser();
-
     }
 
     updateQueue(
@@ -14924,46 +14669,34 @@ XLSX.utils.book_append_sheet(
     );
 
     const filename =
-      "Acebedo_Inventory_" +
+      "Acebedo_Remaining_Stocks_" +
       formatFileDate() +
       ".xlsx";
 
-    XLSX.writeFile(
-      wb,
-      filename
-    );
+    XLSX.writeFile(wb,filename);
 
     updateQueue(
       "EXPORT",
       branches.length,
       branches.length,
-      "Download started: " +
-      filename
+      "Download started: " + filename
     );
 
     showStatus(
-      "XLSX export completed."
+      "Remaining Stocks XLSX exported: " +
+      formatNumber(totalRemaining) +
+      " items."
     );
 
   }catch(error){
-
-    console.error(
-      "Export failed:",
-      error
-    );
-
+    console.error("Remaining Stocks export failed:",error);
     updateQueueError(
       "EXPORT",
-      error.message
+      error?.message || "Unable to export Remaining Stocks."
     );
-
   }
 
 }
-
-/* =========================================================
-   SAFE SHEET NAME
-========================================================= */
 
 function safeSheetName(
   name

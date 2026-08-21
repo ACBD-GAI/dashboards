@@ -9313,6 +9313,8 @@ function renderTable(
       const date =
         escapeHtml(
           row.date
+            ? formatDateValue(row.date) || String(row.date)
+            : "—"
         );
 
       /*
@@ -10045,7 +10047,8 @@ async function addStockToSoldConfirmed(branch,tag,siNo){
   soldRecord["BR"] = branch;
   soldRecord["NTAGN"] = tag;
   soldRecord["SI NO."] = siNo;
-  soldRecord["DATE AND TIME"] = philippineDateTime();
+  /* Store a real ISO date/time value so Supabase date/time filtering works. */
+  soldRecord["DATE AND TIME"] = new Date().toISOString();
   soldRecord["USER EMAIL"] = currentEmail || "";
   soldRecord["STATUS"] = "";
 
@@ -10820,13 +10823,19 @@ async function saveSoldMark(button){
     const params = new URLSearchParams();
     params.set("NTAGN","eq." + tag);
 
+    const markBody = {
+      STATUS: currentlyMarked ? "" : "MARKED"
+    };
+
+    if(!currentlyMarked){
+      markBody["DATE AND TIME"] = new Date().toISOString();
+    }
+
     await supabaseRequest(
       table + "?" + params.toString(),
       {
         method:"PATCH",
-        body:{
-          STATUS: currentlyMarked ? "" : "MARKED"
-        },
+        body:markBody,
         prefer:"return=minimal"
       }
     );
@@ -10838,7 +10847,13 @@ async function saveSoldMark(button){
 
     if(row){
       row.marked = !currentlyMarked;
-      if(row.raw) row.raw.STATUS = row.marked ? "MARKED" : "";
+      if(row.raw){
+        row.raw.STATUS = row.marked ? "MARKED" : "";
+        if(!currentlyMarked){
+          row.raw["DATE AND TIME"] = markBody["DATE AND TIME"];
+          row.date = markBody["DATE AND TIME"];
+        }
+      }
     }
 
     showStatus(

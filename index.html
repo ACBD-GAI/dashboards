@@ -13738,40 +13738,19 @@ function normalizeReportedMissingStatus(value){
 }
 
 function aoMissingPdfRows(){
-  const b = String(
-    document.getElementById("reportedMissingBranchFilter")?.value || "ALL"
-  ).trim().toUpperCase();
-  const q = String(
-    document.getElementById("reportedMissingSearch")?.value || ""
-  ).trim().toLowerCase();
-
-  return reportedMissingPopupRows
-    .filter(r=>{
-      const status = normalizeReportedMissingStatus(r?.STATUS);
-      if(status === "SOLVED") return false;
-      const rb = String(r?.BR || "").trim().toUpperCase();
-      if(b && rb !== b) return false;
-      if(!q) return true;
-      return [
-        r?.BR,
-        r?.LENSTYPE,
-        r?.DESCRIPTION,
-        r?.NTAGN,
-        r?.["USER EMAIL"],
-        r?.STATUS
-      ]
-      .map(v=>String(v ?? "").toLowerCase())
-      .join(" ")
-      .includes(q);
-    })
-    .map(r=>({
-      BR:r?.BR,
-      LENSTYPE:r?.LENSTYPE,
-      DESCRIPTION:r?.DESCRIPTION,
-      NTAGN:r?.NTAGN,
-      SELLINGPRICE:r?.SELLINGPRICE,
-      DELIVERYDATE:r?.DELIVERYDATE
-    }));
+  /*
+   * Use the exact same filtered source as the working Excel export.
+   * This keeps PDF and Excel in sync and guarantees SOLVED items
+   * are excluded in the same way.
+   */
+  return aoMissingExcelRows().map(r=>({
+    BR:r?.BR,
+    LENSTYPE:r?.LENSTYPE,
+    DESCRIPTION:r?.DESCRIPTION,
+    NTAGN:r?.NTAGN,
+    SELLINGPRICE:r?.SELLINGPRICE,
+    DELIVERYDATE:r?.DELIVERYDATE
+  }));
 }
 
 async function downloadReportedMissingPdf(){

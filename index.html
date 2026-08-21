@@ -13894,7 +13894,7 @@ function reportedMissingRecordFromRow(row, branch, tag){
   });
   record["BR"] = String(branch || raw["BR"] || "").trim().toUpperCase();
   record["NTAGN"] = String(tag || raw["NTAGN"] || "").trim();
-  record["STATUS"] = "MISSING";
+  record["STATUS"] = "UNRESOLVED";
   record["DATE AND TIME"] = philippineDateTime();
   if(currentEmail) record["USER EMAIL"] = currentEmail;
   return record;
@@ -13946,7 +13946,7 @@ async function reportAuditItemMissing(button){
 
     if(Array.isArray(existing) && existing.length){
       button.textContent = "✓ Already Reported";
-      showStatus(tag + " is already reported as MISSING.");
+      showStatus(tag + " is already reported as UNRESOLVED.");
       return;
     }
 
@@ -13995,10 +13995,10 @@ async function reportAuditItemMissing(button){
       }
     );
 
-    button.textContent = "✓ Reported";
+    button.textContent = "✓ UNRESOLVED";
 
     showStatus(
-      tag + " (" + branch + ") reported as MISSING. Stock and Audit removed."
+      tag + " (" + branch + ") reported as UNRESOLVED. Stock and Audit removed."
     );
 
     /* Remove immediately from the current Audit display. */
@@ -14231,7 +14231,7 @@ function renderReportedMissingPopup(){
 </div>
       <div class="reportedMissingActions">
         <button type="button" class="actionBtn reportedMissingRestoreBtn" data-reported-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ Add to Stocks</button>
-        <button type="button" class="actionBtn" data-reported-status-toggle="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}" data-status="${escapeHtmlAttribute(status)}">${status === "SOLVED" ? "UNRESOLVED" : "SOLVED"}</button>
+        <button type="button" class="actionBtn" data-reported-status-toggle="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}" data-status="${escapeHtmlAttribute(status)}">${status}</button>
       </div>
     </div>`;
   }).join("");

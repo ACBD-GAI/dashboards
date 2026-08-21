@@ -12334,6 +12334,24 @@ async function importDirect(
       { method:"POST", body:chunk, prefer:"return=minimal" }
     );
 
+    /*
+     * AUDIT MIRROR FOR NEW IMPORTS:
+     * Every newly imported stock is immediately marked AUDITED.
+     * Only the newly inserted chunk is added to Audit; existing
+     * Audit records are never changed or deleted.
+     */
+    const auditChunk = chunk.map(row => ({
+      ...row,
+      STATUS:"AUDITED",
+      "DATE AND TIME":philippineDateTime(),
+      "USER EMAIL":currentEmail || null
+    }));
+
+    await supabaseRequest(
+      auditTable,
+      { method:"POST", body:auditChunk, prefer:"return=minimal" }
+    );
+
     inserted += chunk.length;
 
     updateQueue(

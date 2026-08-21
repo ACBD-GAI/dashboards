@@ -4018,6 +4018,18 @@ select:disabled{
 .reportedMissingRestoreBtn:hover{color:#fff!important;background:#16a34a!important;border-color:#16a34a!important;}
 .reportedMissingEmpty{padding:42px 15px;text-align:center;color:#64748b;font-size:11px;}
 .reportedMissingStatus{min-height:18px;padding:8px 12px 11px;color:#64748b;font-size:10px;font-weight:750;background:#fff;}
+.reportedMissingBranchSummary{margin:0 12px 8px;padding:10px 12px;border:1px solid #dce8ef;border-radius:12px;background:linear-gradient(135deg,#ffffff,#f8fbfd);}
+.reportedMissingBranchSummaryTitle{font-size:9px;font-weight:950;letter-spacing:.08em;color:#315267;margin-bottom:7px;}
+.reportedMissingBranchSummaryList{display:flex;flex-wrap:wrap;gap:7px;}
+.reportedMissingBranchItem{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:145px;padding:7px 9px;border:1px solid #d7e4eb;border-radius:10px;background:#fff;color:#173247;cursor:pointer;transition:transform .12s ease,border-color .12s ease,background .12s ease;}
+.reportedMissingBranchItem:hover{transform:translateY(-1px);border-color:#7dd3fc;background:#f0f9ff;}
+.reportedMissingBranchItem.zero{opacity:.55;cursor:default;}
+.reportedMissingBranchItem.active{border-color:#38bdf8;background:#eff6ff;}
+.reportedMissingBranchName{font-size:9px;font-weight:850;white-space:nowrap;}
+.reportedMissingBranchCount{min-width:24px;text-align:center;padding:3px 6px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:9px;font-weight:950;}
+.reportedMissingBranchItem.zero .reportedMissingBranchCount{background:#f1f5f9;color:#64748b;}
+.reportedMissingBranchSummaryLoading{color:#94a3b8;font-size:9px;font-weight:750;}
+
 @media(max-width:900px){.reportedMissingControls{grid-template-columns:1fr;}.reportedMissingHeader{display:none;}.reportedMissingRow{grid-template-columns:1fr 1fr;}.reportedMissingCell.description{grid-column:1 / -1;}.reportedMissingActions{grid-column:1 / -1;justify-content:flex-start;}}
 
 </style>
@@ -14179,6 +14191,12 @@ function openReportedMissingPopup(){
           <button type="button" class="reportPdfBtn" data-reported-bulk-status="UNRESOLVED">↺ MAKE ALL UNRESOLVED</button>
         </div>
       </div>
+      <div id="reportedMissingBranchSummary" class="reportedMissingBranchSummary">
+        <div class="reportedMissingBranchSummaryTitle">UNRESOLVED BY BRANCH</div>
+        <div id="reportedMissingBranchSummaryList" class="reportedMissingBranchSummaryList">
+          <div class="reportedMissingBranchSummaryLoading">Checking branches…</div>
+        </div>
+      </div>
       <div class="reportedMissingHeader">
         <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div style="text-align:right;">SELLING PRICE</div><div style="text-align:right;">ACTIONS</div>
       </div>
@@ -14189,7 +14207,7 @@ function openReportedMissingPopup(){
   const filter=modal.querySelector("#reportedMissingBranchFilter");
   if(filter){
     filter.value="GAI";
-    filter.addEventListener("change",renderReportedMissingPopup);
+    filter.addEventListener("change",()=>{ renderReportedMissingPopup(); loadReportedMissingBranchSummary(); });
   }
   const statusFilter=modal.querySelector("#reportedMissingStatusFilter");
   if(statusFilter){
@@ -14256,6 +14274,45 @@ async function loadReportedMissingCount(){
   }
 }
 
+async function loadReportedMissingBranchSummary(){
+  const list=document.getElementById("reportedMissingBranchSummaryList");
+  if(!list) return;
+  list.innerHTML='<div class="reportedMissingBranchSummaryLoading">Checking branches…</div>';
+  try{
+    const rows=await fetchAllRowsForStats(
+      reportedMissingTable(),
+      "BR,STATUS"
+    );
+    const counts=new Map(BRANCHES.map(b=>[String(b).toUpperCase(),0]));
+    (Array.isArray(rows)?rows:[]).forEach(row=>{
+      const b=String(row?.BR||"").trim().toUpperCase();
+      if(!counts.has(b)) return;
+      if(normalizeReportedMissingStatus(row?.STATUS)==="UNRESOLVED") counts.set(b,(counts.get(b)||0)+1);
+    });
+    const current=String(document.getElementById("reportedMissingBranchFilter")?.value||"").trim().toUpperCase();
+    list.innerHTML=BRANCHES.map(b=>{
+      const branch=String(b).toUpperCase();
+      const count=counts.get(branch)||0;
+      const label=typeof aoPdfBranchLabel === "function" ? aoPdfBranchLabel(branch) : branch;
+      const text=label===branch ? branch : label;
+      const active=current===branch;
+      return `<button type="button" class="reportedMissingBranchItem ${count===0?"zero":""} ${active?"active":""}" data-reported-branch-summary="${escapeHtmlAttribute(branch)}" ${count===0?'disabled':''}>
+        <span class="reportedMissingBranchName">${escapeHtml(text)}</span>
+        <span class="reportedMissingBranchCount">${formatNumber(count)}</span>
+      </button>`;
+    }).join("");
+    list.querySelectorAll("[data-reported-branch-summary]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const filter=document.getElementById("reportedMissingBranchFilter");
+        if(filter){ filter.value=btn.dataset.reportedBranchSummary; renderReportedMissingPopup(); loadReportedMissingBranchSummary(); }
+      });
+    });
+  }catch(error){
+    console.error("Reported missing branch summary failed:",error);
+    list.innerHTML='<div class="reportedMissingBranchSummaryLoading">Unable to load branch summary.</div>';
+  }
+}
+
 async function loadReportedMissingPopup(){
   const list=document.getElementById("reportedMissingList");
   const status=document.getElementById("reportedMissingPopupStatus");
@@ -14270,6 +14327,7 @@ async function loadReportedMissingPopup(){
     const statusFilter=document.getElementById("reportedMissingStatusFilter");
     if(statusFilter) statusFilter.value="UNRESOLVED";
     renderReportedMissingPopup();
+    loadReportedMissingBranchSummary();
   }catch(error){
     console.error("Reported missing popup load failed:",error);
     list.innerHTML='<div class="reportedMissingEmpty">Unable to load reported missing items.</div>';

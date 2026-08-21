@@ -13732,6 +13732,11 @@ function aoPdfDownload(blob,fn){
   setTimeout(()=>URL.revokeObjectURL(u),1500);
 }
 
+function normalizeReportedMissingStatus(value){
+  const s=String(value||"").trim().toUpperCase();
+  return s === "SOLVED" ? "SOLVED" : "UNRESOLVED";
+}
+
 function aoMissingPdfRows(){
   const b = String(
     document.getElementById("reportedMissingBranchFilter")?.value || "ALL"
@@ -13742,8 +13747,10 @@ function aoMissingPdfRows(){
 
   return reportedMissingPopupRows
     .filter(r=>{
+      const status = normalizeReportedMissingStatus(r?.STATUS);
+      if(status === "SOLVED") return false;
       const rb = String(r?.BR || "").trim().toUpperCase();
-      if(b !== "ALL" && rb !== b) return false;
+      if(b && rb !== b) return false;
       if(!q) return true;
       return [
         r?.BR,
@@ -13775,7 +13782,7 @@ async function downloadReportedMissingPdf(){
 
   try{
     const branch = String(
-      document.getElementById("reportedMissingBranchFilter")?.value || "ALL"
+      document.getElementById("reportedMissingBranchFilter")?.value || ""
     ).trim().toUpperCase();
     const rows = aoMissingPdfRows();
 
@@ -13787,7 +13794,7 @@ async function downloadReportedMissingPdf(){
       rows,
       filename:
         "Acebedo_Reported_Missing_" +
-        branch + "_" +
+        (branch || "ALL_BRANCHES") + "_" +
         formatFileDate() +
         ".pdf"
     });
@@ -14078,8 +14085,12 @@ function openReportedMissingPopup(){
         </div>
         <div class="reportedMissingControls">
           <select id="reportedMissingBranchFilter" class="reportedMissingSelect">
-            <option value="ALL">ALL BRANCHES</option>
+            <option value="">SELECT BRANCH</option>
             ${BRANCHES.map(b=>`<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`).join("")}
+          </select>
+          <select id="reportedMissingStatusFilter" class="reportedMissingSelect">
+            <option value="UNRESOLVED" selected>UNRESOLVED</option>
+            <option value="SOLVED">SOLVED</option>
           </select>
           <input id="reportedMissingSearch" class="reportedMissingInput" type="search" autocomplete="off" placeholder="🔍 Search tag, description, lens type or email">
           <button type="button" class="controlBtn" data-reported-refresh="1">♻ Refresh</button>
@@ -14099,9 +14110,10 @@ function openReportedMissingPopup(){
   const filter=modal.querySelector("#reportedMissingBranchFilter");
   if(filter){
     const b=String(selectedBranch).trim().toUpperCase();
-    filter.value=BRANCHES.includes(b)?b:"ALL";
+    filter.value=BRANCHES.includes(b)?b:"";
     filter.addEventListener("change",renderReportedMissingPopup);
   }
+  modal.querySelector("#reportedMissingStatusFilter")?.addEventListener("change",renderReportedMissingPopup);
   modal.querySelector("#reportedMissingSearch")?.addEventListener("input",renderReportedMissingPopup);
   modal.querySelector("[data-reported-refresh='1']")?.addEventListener("click",loadReportedMissingPopup);
   modal.querySelector("[data-reported-pdf-download='1']")?.addEventListener("click",downloadReportedMissingPdf);
@@ -14129,9 +14141,9 @@ async function loadReportedMissingCount(){
         .trim().toUpperCase();
 
     const params = new URLSearchParams();
-    params.set("select","BR,NTAGN");
+    params.set("select","BR,NTAGN,STATUS");
 
-    if(selectedBranch !== "ALL"){
+    if(selectedBranch && selectedBranch !== "ALL"){
       params.set("BR","eq." + selectedBranch);
     }
 
@@ -14141,7 +14153,14 @@ async function loadReportedMissingCount(){
         { method:"GET" }
       );
 
-    const count = Array.isArray(rows) ? rows.length : 0;
+    /*
+     * COUNTER = UNRESOLVED ONLY.
+     * Existing MISSING rows are treated as UNRESOLVED so older
+     * reported-missing records remain included.
+     */
+    const count = Array.isArray(rows)
+      ? rows.filter(row => normalizeReportedMissingStatus(row?.STATUS) === "UNRESOLVED").length
+      : 0;
     counter.textContent = formatNumber(count);
     card.style.display = "block";
 
@@ -14173,11 +14192,14 @@ async function loadReportedMissingPopup(){
 function renderReportedMissingPopup(){
   const list=document.getElementById("reportedMissingList");
   if(!list) return;
-  const branchFilter=String(document.getElementById("reportedMissingBranchFilter")?.value||"ALL").trim().toUpperCase();
+  const branchFilter=String(document.getElementById("reportedMissingBranchFilter")?.value||"").trim().toUpperCase();
+  const statusFilter=String(document.getElementById("reportedMissingStatusFilter")?.value||"UNRESOLVED").trim().toUpperCase();
   const search=String(document.getElementById("reportedMissingSearch")?.value||"").trim().toLowerCase();
   const rows=reportedMissingPopupRows.filter(row=>{
     const rb=String(row?.BR||"").trim().toUpperCase();
-    if(branchFilter!=="ALL" && rb!==branchFilter) return false;
+    const rs=normalizeReportedMissingStatus(row?.STATUS);
+    if(branchFilter && rb!==branchFilter) return false;
+    if(rs!==statusFilter) return false;
     if(!search) return true;
     const text=[row?.BR,row?.LENSTYPE,row?.DESCRIPTION,row?.NTAGN,row?.["USER EMAIL"],row?.STATUS].map(v=>String(v??"").toLowerCase()).join(" ");
     return text.includes(search);
@@ -14187,6 +14209,7 @@ function renderReportedMissingPopup(){
   if(!rows.length){ list.innerHTML='<div class="reportedMissingEmpty">No reported missing items found.</div>'; return; }
   list.innerHTML=rows.map(row=>{
     const b=String(row?.BR||"").trim(), t=String(row?.NTAGN||"").trim();
+    const status=normalizeReportedMissingStatus(row?.STATUS);
     return `<div class="reportedMissingRow">
       <div class="reportedMissingCell"><span class="branchTag">${escapeHtml(b||"—")}</span></div>
       <div class="reportedMissingCell">${escapeHtml(String(row?.LENSTYPE||"—"))}</div>
@@ -14201,12 +14224,12 @@ function renderReportedMissingPopup(){
 </div>
       <div class="reportedMissingActions">
         <button type="button" class="actionBtn reportedMissingRestoreBtn" data-reported-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ Add to Stocks</button>
-        <button type="button" class="actionBtn danger" data-reported-delete="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">Delete</button>
+        <button type="button" class="actionBtn" data-reported-status-toggle="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}" data-status="${escapeHtmlAttribute(status)}">${status === "SOLVED" ? "UNRESOLVED" : "SOLVED"}</button>
       </div>
     </div>`;
   }).join("");
   list.querySelectorAll("[data-reported-restore]").forEach(btn=>btn.addEventListener("click",()=>restoreReportedMissingToStocks(btn.dataset.branch,btn.dataset.tag)));
-  list.querySelectorAll("[data-reported-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteReportedMissingUnrecoverable(btn.dataset.branch,btn.dataset.tag)));
+  list.querySelectorAll("[data-reported-status-toggle]").forEach(btn=>btn.addEventListener("click",()=>toggleReportedMissingStatus(btn.dataset.branch,btn.dataset.tag,btn.dataset.status)));
 }
 
 async function getReportedMissingRecord(branch,tag){
@@ -14290,6 +14313,41 @@ async function restoreReportedMissingToStocksConfirmed(branch,tag){
     if(typeof loadReportedMissingCount === "function") loadReportedMissingCount();
     await refreshDashboard();
   }catch(error){console.error("Restore reported missing failed:",error);showStatus(error?.message||"Unable to restore reported missing item.");}
+}
+
+async function toggleReportedMissingStatus(branch,tag,currentStatus){
+  branch=String(branch||"").trim().toUpperCase();
+  tag=String(tag||"").trim();
+  currentStatus=normalizeReportedMissingStatus(currentStatus);
+  if(!branch||!tag){showStatus("Missing branch or NTAGN.");return;}
+
+  const nextStatus=currentStatus === "SOLVED" ? "UNRESOLVED" : "SOLVED";
+
+  try{
+    await supabaseRequest(
+      reportedMissingTable()+
+      "?BR=eq."+encodeURIComponent(branch)+
+      "&NTAGN=eq."+encodeURIComponent(tag),
+      {
+        method:"PATCH",
+        body:{STATUS:nextStatus},
+        prefer:"return=minimal"
+      }
+    );
+
+    const row=reportedMissingPopupRows.find(r=>
+      String(r?.BR||"").trim().toUpperCase()===branch &&
+      String(r?.NTAGN||"").trim()===tag
+    );
+    if(row) row.STATUS=nextStatus;
+
+    renderReportedMissingPopup();
+    if(typeof loadReportedMissingCount === "function") loadReportedMissingCount();
+    showStatus(tag+" marked "+nextStatus+".");
+  }catch(error){
+    console.error("Reported missing status update failed:",error);
+    showStatus(error?.message||"Unable to update reported missing status.");
+  }
 }
 
 async function deleteReportedMissingUnrecoverable(branch,tag){

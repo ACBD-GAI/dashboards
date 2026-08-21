@@ -14127,7 +14127,7 @@ async function downloadReportedMissingExcel(){
     const headers=DB_COLUMNS.slice(0,22);
     const data=sourceRows.map(row=>headers.map(col=>row?.[col] ?? ""));
     const meta=[
-      ["Branch",branch ? aoPdfBranchLabel(branch) : "ALL BRANCH"],
+      ["Branch",branch ? aoPdfBranchLabel(branch) : "Selected branches"],
       ["Status","UNRESOLVED ONLY"],
       ["Records",sourceRows.length]
     ];
@@ -14382,7 +14382,6 @@ function openReportedMissingPopup(){
         </div>
         <div class="reportedMissingControls">
           <select id="reportedMissingBranchFilter" class="reportedMissingSelect">
-            <option value="">SELECT BRANCH</option>
             ${BRANCHES.map(b=>`<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`).join("")}
           </select>
           <select id="reportedMissingStatusFilter" class="reportedMissingSelect">
@@ -14408,8 +14407,7 @@ function openReportedMissingPopup(){
   document.body.appendChild(modal);
   const filter=modal.querySelector("#reportedMissingBranchFilter");
   if(filter){
-    const b=String(selectedBranch).trim().toUpperCase();
-    filter.value=BRANCHES.includes(b)?b:"";
+    filter.value="GAI";
     filter.addEventListener("change",renderReportedMissingPopup);
   }
   const statusFilter=modal.querySelector("#reportedMissingStatusFilter");

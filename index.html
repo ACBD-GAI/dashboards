@@ -6892,13 +6892,10 @@ function mapRow(
     marked:
       String(row["STATUS"] ?? "").trim().toUpperCase() === "MARKED",
 
-    /* DATE AND TIME is the actual Sold Out timestamp column.
-       Keep it as text exactly as stored in Supabase. */
     date:
-      row["DATE AND TIME"] != null &&
-      String(row["DATE AND TIME"]).trim() !== ""
-        ? String(row["DATE AND TIME"]).trim()
-        : "",
+      row["DATE AND TIME"] ||
+      row["DELIVERYDATE"] ||
+      "",
 
     qr:
       row["QR"] || "",
@@ -10048,8 +10045,7 @@ async function addStockToSoldConfirmed(branch,tag,siNo){
   soldRecord["BR"] = branch;
   soldRecord["NTAGN"] = tag;
   soldRecord["SI NO."] = siNo;
-  const soldTimestamp = philippineDateTime();
-  soldRecord["DATE AND TIME"] = String(soldTimestamp);
+  soldRecord["DATE AND TIME"] = philippineDateTime();
   soldRecord["USER EMAIL"] = currentEmail || "";
   soldRecord["STATUS"] = "";
 
@@ -10824,22 +10820,13 @@ async function saveSoldMark(button){
     const params = new URLSearchParams();
     params.set("NTAGN","eq." + tag);
 
-    const markedNow = !currentlyMarked;
-    const markTimestamp = String(philippineDateTime());
-    const markBody = {
-      STATUS: markedNow ? "MARKED" : ""
-    };
-
-    /* Only refresh the timestamp when the SOLD row is MARKED. */
-    if(markedNow){
-      markBody["DATE AND TIME"] = markTimestamp;
-    }
-
     await supabaseRequest(
       table + "?" + params.toString(),
       {
         method:"PATCH",
-        body:markBody,
+        body:{
+          STATUS: currentlyMarked ? "" : "MARKED"
+        },
         prefer:"return=minimal"
       }
     );
@@ -10850,16 +10837,8 @@ async function saveSoldMark(button){
     );
 
     if(row){
-      row.marked = markedNow;
-      if(row.raw){
-        row.raw.STATUS = row.marked ? "MARKED" : "";
-        if(markedNow){
-          row.raw["DATE AND TIME"] = markTimestamp;
-        }
-      }
-      if(markedNow && row.date !== undefined){
-        row.date = markTimestamp;
-      }
+      row.marked = !currentlyMarked;
+      if(row.raw) row.raw.STATUS = row.marked ? "MARKED" : "";
     }
 
     showStatus(
@@ -12033,7 +12012,7 @@ function normalizeCellValue(
 function philippineDateTime(){
 
   const parts =
-    new Intl.DateTimeFormat("en-PH",{
+    new Intl.DateTimeFormat("en-CA",{
       timeZone:"Asia/Manila",
       year:"numeric",
       month:"2-digit",
@@ -12041,25 +12020,20 @@ function philippineDateTime(){
       hour:"2-digit",
       minute:"2-digit",
       second:"2-digit",
-      hour12:true
+      hour12:false
     }).formatToParts(new Date());
 
   const get =
     type =>
       parts.find(p => p.type === type)?.value || "00";
 
-  /*
-   * IMPORTANT: DATE AND TIME is stored as plain TEXT.
-   * Example: 08/21/2026 10:40:35 AM
-   */
   return
-    get("month") + "/" +
-    get("day") + "/" +
-    get("year") + " " +
+    get("year") + "-" +
+    get("month") + "-" +
+    get("day") + "T" +
     get("hour") + ":" +
     get("minute") + ":" +
-    get("second") + " " +
-    get("dayPeriod");
+    get("second") + "+08:00";
 }
 
 function formatDateValue(date){

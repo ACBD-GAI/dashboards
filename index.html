@@ -4001,8 +4001,15 @@ select:disabled{
 .reportedMissingInput,.reportedMissingSelect{width:100%;min-height:40px;padding:0 12px;border:1px solid #cbd5e1;border-radius:11px;background:#fff;color:#173247;outline:none;font-size:11px;font-weight:750;}
 .reportedMissingInput:focus,.reportedMissingSelect:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
 .reportedMissingList{max-height:58vh;overflow:auto;padding:10px 12px;background:#f8fbfd;}
-.reportedMissingHeader{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 125px 235px;gap:10px;padding:9px 12px;color:#315267;font-size:9px;font-weight:900;letter-spacing:.06em;}
-.reportedMissingRow{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 125px 235px;gap:10px;align-items:center;padding:11px 12px;margin:5px 0;border:1px solid #dce8ef;border-radius:13px;background:#fff;box-shadow:0 3px 9px rgba(15,23,42,.03);}
+.reportedMissingHeader{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 125px 115px 235px;gap:10px;padding:9px 12px;color:#315267;font-size:9px;font-weight:900;letter-spacing:.06em;}
+.reportedMissingRow{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 125px 115px 235px;gap:10px;align-items:center;padding:11px 12px;margin:5px 0;border:1px solid #dce8ef;border-radius:13px;background:#fff;box-shadow:0 3px 9px rgba(15,23,42,.03);}
+.reportedMissingPriceInput{width:100%;min-height:32px;padding:6px 8px;border:1px solid #cbdde7;border-radius:8px;outline:none;background:#fff;color:#173247;font-size:11px;font-weight:850;text-align:right;box-sizing:border-box;}
+.reportedMissingPriceInput:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
+.reportedMissingPriceInput.saving{opacity:.65;}
+.reportedMissingPriceInput.saved{border-color:#86efac;background:#f0fdf4;}
+.reportedMissingPriceInput.error{border-color:#fca5a5;background:#fff1f2;}
+.reportedMissingPriceHint{display:block;margin-top:3px;color:#94a3b8;font-size:8px;font-weight:700;}
+
 .reportedMissingCell{min-width:0;color:#243b4d;font-size:10px;font-weight:700;}
 .reportedMissingCell.description{white-space:normal;overflow-wrap:anywhere;line-height:1.35;}
 .reportedMissingActions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
@@ -14393,7 +14400,7 @@ function openReportedMissingPopup(){
         </div>
       </div>
       <div class="reportedMissingHeader">
-        <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div></div><div style="text-align:right;">ACTIONS</div>
+        <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div>DATE AND TIME</div><div style="text-align:right;">SELLING PRICE</div><div style="text-align:right;">ACTIONS</div>
       </div>
       <div id="reportedMissingList" class="reportedMissingList"><div class="reportedMissingEmpty">⏳ Loading reported missing...</div></div>
       <div id="reportedMissingPopupStatus" class="reportedMissingStatus"></div>
@@ -14525,6 +14532,21 @@ function renderReportedMissingPopup(){
       : "—"
   )}
 </div>
+      <div class="reportedMissingCell">
+        <input
+          type="number"
+          class="reportedMissingPriceInput"
+          value="${escapeHtmlAttribute(row?.SELLINGPRICE ?? "")}"
+          min="0"
+          step="0.01"
+          inputmode="decimal"
+          data-reported-price="1"
+          data-branch="${escapeHtmlAttribute(b)}"
+          data-tag="${escapeHtmlAttribute(t)}"
+          aria-label="Selling price for ${escapeHtmlAttribute(t)}"
+        >
+        <span class="reportedMissingPriceHint">Enter price</span>
+      </div>
       <div class="reportedMissingActions">
         <button type="button" class="actionBtn reportedMissingRestoreBtn" data-reported-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ Add to Stocks</button>
         <button type="button" class="actionBtn" data-reported-status-toggle="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}" data-status="${escapeHtmlAttribute(status)}">${status}</button>
@@ -14533,6 +14555,63 @@ function renderReportedMissingPopup(){
   }).join("");
   list.querySelectorAll("[data-reported-restore]").forEach(btn=>btn.addEventListener("click",()=>restoreReportedMissingToStocks(btn.dataset.branch,btn.dataset.tag)));
   list.querySelectorAll("[data-reported-status-toggle]").forEach(btn=>btn.addEventListener("click",()=>toggleReportedMissingStatus(btn.dataset.branch,btn.dataset.tag,btn.dataset.status)));
+  list.querySelectorAll("[data-reported-price]").forEach(input=>{
+    let lastSaved=String(input.value||"").trim();
+    input.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){ e.preventDefault(); input.blur(); }
+    });
+    input.addEventListener("focus",()=>{
+      lastSaved=String(input.value||"").trim();
+      input.classList.remove("error","saved");
+    });
+    input.addEventListener("blur",async()=>{
+      const next=String(input.value||"").trim();
+      if(next===lastSaved) return;
+      if(next!=="" && (!Number.isFinite(Number(next)) || Number(next)<0)){
+        input.value=lastSaved;
+        input.classList.add("error");
+        showStatus("Invalid selling price.");
+        return;
+      }
+      await updateReportedMissingSellingPrice(input,input.dataset.branch,input.dataset.tag,next);
+      lastSaved=String(input.value||"").trim();
+    });
+  });
+}
+
+async function updateReportedMissingSellingPrice(input,branch,tag,value){
+  branch=String(branch||"").trim().toUpperCase();
+  tag=String(tag||"").trim();
+  if(!branch||!tag) return;
+  const normalized=value===""?null:Number(value);
+  input.classList.remove("error","saved");
+  input.classList.add("saving");
+  try{
+    await supabaseRequest(
+      reportedMissingTable()+
+      "?BR=eq."+encodeURIComponent(branch)+
+      "&NTAGN=eq."+encodeURIComponent(tag),
+      {
+        method:"PATCH",
+        body:{SELLINGPRICE:normalized},
+        prefer:"return=minimal"
+      }
+    );
+    const row=reportedMissingPopupRows.find(r=>
+      String(r?.BR||"").trim().toUpperCase()===branch &&
+      String(r?.NTAGN||"").trim()===tag
+    );
+    if(row) row.SELLINGPRICE=normalized;
+    input.classList.remove("saving");
+    input.classList.add("saved");
+    showStatus(tag+" selling price saved.");
+    setTimeout(()=>input.classList.remove("saved"),900);
+  }catch(error){
+    console.error("Reported missing selling price update failed:",error);
+    input.classList.remove("saving");
+    input.classList.add("error");
+    showStatus(error?.message||"Unable to save selling price.");
+  }
 }
 
 async function getReportedMissingRecord(branch,tag){

@@ -13266,7 +13266,33 @@ function aoPdfNumber(v){
 
 function aoPdfBranchLabel(v){
   const b = String(v || "ALL").trim().toUpperCase();
-  return b === "ALL" || !b ? "ALL BRANCHES" : b;
+  if(b === "ALL" || !b) return "ALL BRANCHES";
+
+  const labels = {
+    GAI:"Gaisano Iloilo",
+    CAS:"Casa Plaza",
+    BAC:"Bacolod",
+    BIN:"Binalbagan",
+    BIS:"Bislig",
+    CAD:"Cadiz",
+    DGT:"Dumaguete",
+    KAB:"Kabankalan",
+    KAL:"Kalibo",
+    PAS:"Passi",
+    POT:"Pototan",
+    SAN:"San Carlos",
+    TAB:"Tabunok",
+    TAN:"Tandag",
+    TIS:"Tisa",
+    TOL:"Toledo"
+  };
+
+  return labels[b] ? b + " - " + labels[b] : b;
+}
+
+function aoPdfDateRangeLabel(v){
+  const range = String(v || "").trim();
+  return range || "All Dates";
 }
 
 function aoPdfLoadLogo(){
@@ -13344,6 +13370,14 @@ async function createAcebedoPdfReport(o){
     38
   );
 
+  if(o.dateRange !== undefined){
+    doc.text(
+      "Date Range: " + aoPdfDateRangeLabel(o.dateRange),
+      textX,
+      44
+    );
+  }
+
   /* Description */
   doc.setFontSize(8.5);
   doc.setTextColor(71,85,105);
@@ -13351,7 +13385,7 @@ async function createAcebedoPdfReport(o){
     aoPdfSafeText(o.description),
     W - M*2
   );
-  doc.text(descLines,M,47);
+  doc.text(descLines,M,52);
 
   /* =========================================================
      SUMMARY
@@ -13369,7 +13403,7 @@ async function createAcebedoPdfReport(o){
     0
   );
 
-  let y = 59;
+  let y = 65;
 
   doc.setFillColor(239,246,255);
   doc.setDrawColor(191,219,254);
@@ -13700,12 +13734,24 @@ async function downloadSoldOutPdf(){
     ).trim().toUpperCase();
     const rows = aoSoldPdfRows();
 
+    const from = document.getElementById("soldDateFrom")?.value || "";
+    const to = document.getElementById("soldDateTo")?.value || "";
+    const dateRange =
+      from && to
+        ? from + " to " + to
+        : from
+          ? from + " onward"
+          : to
+            ? "Up to " + to
+            : "All Dates";
+
     const r = await createAcebedoPdfReport({
       title:"Sold Out Inventory Report",
       description:
         "This report presents the inventory items currently shown in the Sold Out report for the selected branch and active filters.",
       branch,
       rows,
+      dateRange,
       filename:
         "Acebedo_Sold_Out_" +
         branch + "_" +

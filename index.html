@@ -9973,105 +9973,85 @@ async function addStockToSoldConfirmed(branch,tag,siNo){
   tag = String(tag || "").trim();
   siNo = String(siNo || "").trim();
 
-  if(!branch || !tag){
-    throw new Error("Missing BR or NTAGN.");
-  }
+  if(!branch || !tag) throw new Error("Missing BR or NTAGN.");
+  if(!siNo) throw new Error("SI No. is required.");
 
-  if(!siNo){
-    throw new Error("SI No. is required.");
-  }
+  const stockTable = tableName(branch,"stocks");
+  const auditTable = tableName(branch,"audit");
+  const soldTable = tableName(branch,"sold");
 
-  const stockTable =
-    tableName(branch,"stocks");
-
-  const soldTable =
-    tableName(branch,"sold");
-
-  /* =====================================================
-     1. GET THE STOCK USING BR + NTAGN
-     ===================================================== */
-  const stockParams =
-    new URLSearchParams();
-
+  /* 1. GET STOCK */
+  const stockParams = new URLSearchParams();
   stockParams.set("BR","eq." + branch);
   stockParams.set("NTAGN","eq." + tag);
   stockParams.set("limit","1");
 
-  const stocks =
-    await supabaseRequest(
-      stockTable + "?" + stockParams.toString(),
-      {method:"GET"}
-    );
+  const stocks = await supabaseRequest(
+    stockTable + "?" + stockParams.toString(),
+    {method:"GET"}
+  );
 
   if(!Array.isArray(stocks) || !stocks.length){
-    throw new Error(
-      "Stock record " + tag + " (" + branch + ") was not found."
-    );
+    throw new Error("Stock record " + tag + " (" + branch + ") was not found.");
   }
 
-  const stock =
-    stocks[0];
+  const stock = stocks[0];
 
-  /* =====================================================
-     2. DUPLICATE CHECK — SAME BR + NTAGN
-     ===================================================== */
-  const soldParams =
-    new URLSearchParams();
-
+  /* 2. DUPLICATE CHECK IN SOLD */
+  const soldParams = new URLSearchParams();
   soldParams.set("BR","eq." + branch);
   soldParams.set("NTAGN","eq." + tag);
   soldParams.set("limit","1");
 
-  const existingSold =
-    await supabaseRequest(
-      soldTable + "?" + soldParams.toString(),
-      {method:"GET"}
-    );
+  const existingSold = await supabaseRequest(
+    soldTable + "?" + soldParams.toString(),
+    {method:"GET"}
+  );
 
   if(Array.isArray(existingSold) && existingSold.length){
-    throw new Error(
-      tag + " is already in Sold Out."
-    );
+    throw new Error(tag + " is already in Sold Out.");
   }
 
-  /* =====================================================
-     3. COPY STOCK RECORD TO SOLD
-
-     Same fields and values as the Scanner directSave()
-     workflow, with Dashboard-entered SI No. and current
-     user/time metadata.
-     ===================================================== */
+  /* 3. COPY STOCK TO SOLD */
   const soldRecord = {};
-
   DB_COLUMNS.forEach(col=>{
-    soldRecord[col] =
-      stock[col] !== undefined &&
-      stock[col] !== null
-        ? stock[col]
-        : null;
+    soldRecord[col] = stock[col] !== undefined && stock[col] !== null ? stock[col] : null;
   });
 
   soldRecord["BR"] = branch;
   soldRecord["NTAGN"] = tag;
   soldRecord["SI NO."] = siNo;
-  /* Store a real ISO date/time value so Supabase date/time filtering works. */
   soldRecord["DATE AND TIME"] = new Date().toISOString();
   soldRecord["USER EMAIL"] = currentEmail || "";
   soldRecord["STATUS"] = "";
 
   await supabaseRequest(
     soldTable,
-    {
-      method:"POST",
-      body:[soldRecord],
-      prefer:"return=representation"
-    }
+    {method:"POST", body:[soldRecord], prefer:"return=minimal"}
   );
 
-  showStatus(
-    tag + " added to Sold Out."
-  );
+  /* 4. REMOVE FROM BOTH STOCKS AND AUDIT
+     Sold Out Delete restores them later. */
+  const deleteStockParams = new URLSearchParams();
+  deleteStockParams.set("BR","eq." + branch);
+  deleteStockParams.set("NTAGN","eq." + tag);
 
+  const deleteAuditParams = new URLSearchParams();
+  deleteAuditParams.set("NTAGN","eq." + tag);
+  deleteAuditParams.set("BR","eq." + branch);
+
+  await Promise.all([
+    supabaseRequest(
+      stockTable + "?" + deleteStockParams.toString(),
+      {method:"DELETE", prefer:"return=minimal"}
+    ),
+    supabaseRequest(
+      auditTable + "?" + deleteAuditParams.toString(),
+      {method:"DELETE", prefer:"return=minimal"}
+    )
+  ]);
+
+  showStatus(tag + " added to Sold Out and removed from Stocks and Audit.");
   currentPage = 1;
   await refreshDashboard();
 }
@@ -12229,95 +12209,39 @@ async function importDirect(
   fileName
 ){
 
-  const table =
-    tableName(
-      branch,
-      "stocks"
-    );
-
-  const auditTable =
-    tableName(
-      branch,
-      "audit"
-    );
+  const table = tableName(branch,"stocks");
+  const auditTable = tableName(branch,"audit");
 
   /* =======================================================
      NORMALIZE FILE
   ======================================================= */
-
-  let mappedRows =
-    rows
-      .map(
-        normalizeImportRow
-      )
-      .filter(
-        row =>
-          String(
-            row["NTAGN"] || ""
-          ).trim()
-      );
+  let mappedRows = rows
+    .map(normalizeImportRow)
+    .filter(row => String(row["NTAGN"] || "").trim());
 
   if(!mappedRows.length){
-
-    throw new Error(
-      "No valid NTAGN values were found."
-    );
-
+    throw new Error("No valid NTAGN values were found.");
   }
 
   /* =======================================================
      FORCE SELECTED BRANCH
   ======================================================= */
-
-  mappedRows.forEach(
-    row=>{
-
-      row["BR"] =
-        branch;
-
-    }
-  );
+  mappedRows.forEach(row=>{ row["BR"] = branch; });
 
   /* =======================================================
-     REMOVE DUPLICATE NTAGN
+     REMOVE DUPLICATE NTAGN INSIDE THE UPLOAD
   ======================================================= */
-
-  const unique =
-    new Map();
-
-  mappedRows.forEach(
-    row=>{
-
-      const tag =
-        String(
-          row["NTAGN"] || ""
-        ).trim();
-
-      if(tag){
-
-        unique.set(
-          tag,
-          row
-        );
-
-      }
-
-    }
-  );
-
-  mappedRows =
-    Array.from(
-      unique.values()
-    );
+  const unique = new Map();
+  mappedRows.forEach(row=>{
+    const tag = String(row["NTAGN"] || "").trim();
+    if(tag) unique.set(tag, row);
+  });
+  mappedRows = Array.from(unique.values());
 
   /* =======================================================
      SKIP ITEMS ALREADY IN REPORTED MISSING
-
-     Match by BR + NTAGN only. Any imported stock that already
-     exists in reported_missing is not uploaded to STOCKS or
-     mirrored into AUDIT.
+     Match by BR + NTAGN.
   ======================================================= */
-  const reportedMissingTable ="reported_missing";
   const reportedMissingKeys = new Set();
   let reportedMissingOffset = 0;
 
@@ -12329,11 +12253,10 @@ async function importDirect(
     params.set("offset",String(reportedMissingOffset));
 
     const reportedRows = await supabaseRequest(
-      reportedMissingTable + "?" + params.toString()
+      "reported_missing?" + params.toString()
     );
 
     const batch = Array.isArray(reportedRows) ? reportedRows : [];
-
     batch.forEach(row=>{
       const rowBranch = String(row?.BR ?? "").trim().toUpperCase();
       const rowTag = String(row?.NTAGN ?? "").trim().toUpperCase();
@@ -12342,15 +12265,11 @@ async function importDirect(
       }
     });
 
-    if(batch.length < SUPABASE_PAGE_SIZE){
-      break;
-    }
-
+    if(batch.length < SUPABASE_PAGE_SIZE) break;
     reportedMissingOffset += SUPABASE_PAGE_SIZE;
   }
 
   const beforeReportedMissingFilter = mappedRows.length;
-
   mappedRows = mappedRows.filter(row=>{
     const rowBranch = String(row?.BR ?? branch).trim().toUpperCase();
     const rowTag = String(row?.NTAGN ?? "").trim().toUpperCase();
@@ -12360,239 +12279,83 @@ async function importDirect(
   const skippedReportedMissing =
     beforeReportedMissingFilter - mappedRows.length;
 
+  /* =======================================================
+     CHECK DUPLICATE NTAGN IN BOTH STOCKS AND AUDIT
+
+     Existing tag in either table = SKIP.
+     Nothing existing is deleted or replaced.
+  ======================================================= */
+  const uploadTags = new Set(
+    mappedRows.map(row=>String(row?.NTAGN || "").trim()).filter(Boolean)
+  );
+
+  const [existingStocks, existingAudit] = await Promise.all([
+    getExistingImportTags(table, uploadTags),
+    getExistingImportTags(auditTable, uploadTags)
+  ]);
+
+  const existingAnywhere = new Set();
+  existingStocks.forEach(tag=>existingAnywhere.add(String(tag).trim()));
+  existingAudit.forEach(tag=>existingAnywhere.add(String(tag).trim()));
+
+  const beforeExistingFilter = mappedRows.length;
+  mappedRows = mappedRows.filter(row=>{
+    const tag = String(row?.NTAGN || "").trim();
+    return !existingAnywhere.has(tag);
+  });
+
+  const skippedExisting =
+    beforeExistingFilter - mappedRows.length;
+
+  const totalSkipped = skippedReportedMissing + skippedExisting;
+
   if(!mappedRows.length){
     throw new Error(
-      skippedReportedMissing
-        ? "Import cancelled: all uploaded items already exist in Reported Missing."
+      totalSkipped
+        ? "Import finished: all uploaded items were skipped because they already exist in Stocks, Audit, or Reported Missing."
         : "No valid stock records found after processing."
     );
   }
 
-  if(skippedReportedMissing){
-    showStatus(
-      skippedReportedMissing +
-      " uploaded item" +
-      (skippedReportedMissing === 1 ? "" : "s") +
-      " skipped because already in Reported Missing."
-    );
-  }
-
-  if(!mappedRows.length){
-
-    throw new Error(
-      "No valid stock records found after processing."
-    );
-
-  }
-
   /* =======================================================
-     DELETE OLD STOCKS FIRST
+     INSERT ONLY NEW STOCKS
+
+     DO NOT DELETE existing Stocks.
+     DO NOT DELETE existing Audit.
+     DO NOT rebuild Audit from the import.
   ======================================================= */
-
-  updateQueue(
-    "IMPORT",
-    0,
-    Math.max(
-      1,
-      mappedRows.length
-    ),
-    "Deleting old " +
-    branch +
-    " stocks..."
-  );
-
-  const deleteParams =
-    new URLSearchParams();
-
-  /*
-   * The table is already branch-specific.
-   * NTAGN not null is used so PostgREST
-   * accepts the DELETE filter.
-   */
-
-  deleteParams.set(
-    "NTAGN",
-    "not.is.null"
-  );
-
-  await supabaseRequest(
-    table +
-    "?" +
-    deleteParams.toString(),
-    {
-      method:"DELETE",
-
-      /*
-       * Do NOT return deleted rows.
-       * Returning them makes the delete slower.
-       */
-
-      prefer:
-        "return=minimal"
-    }
-  );
-
-  updateQueue(
-    "IMPORT",
-    0,
-    Math.max(
-      1,
-      mappedRows.length
-    ),
-    "Old stocks deleted. Importing new stocks..."
-  );
-
-  await yieldToBrowser();
-
-  /* =======================================================
-     DELETE OLD AUDIT RECORDS
-
-     IMPORT NOW REBUILDS AUDIT FROM THE SAME STOCK FILE.
-     EVERY IMPORTED STOCK STARTS AS AUDITED.
-  ======================================================= */
-
-  updateQueue(
-    "IMPORT",
-    0,
-    Math.max(
-      1,
-      mappedRows.length
-    ),
-    "Deleting old " +
-    branch +
-    " audit records..."
-  );
-
-  const auditDeleteParams =
-    new URLSearchParams();
-
-  auditDeleteParams.set(
-    "NTAGN",
-    "not.is.null"
-  );
-
-  await supabaseRequest(
-    auditTable +
-    "?" +
-    auditDeleteParams.toString(),
-    {
-      method:"DELETE",
-      prefer:"return=minimal"
-    }
-  );
-
-  await yieldToBrowser();
-
-  /* =======================================================
-     INSERT NEW STOCKS IN BULK CHUNKS
-  ======================================================= */
-
   let inserted = 0;
-  let auditedInserted = 0;
 
-  for(
-    let i=0;
-    i<mappedRows.length;
-    i+=IMPORT_CHUNK_SIZE
-  ){
-
-    const chunk =
-      mappedRows.slice(
-        i,
-        i + IMPORT_CHUNK_SIZE
-      );
+  for(let i=0; i<mappedRows.length; i+=IMPORT_CHUNK_SIZE){
+    const chunk = mappedRows.slice(i, i + IMPORT_CHUNK_SIZE);
 
     await supabaseRequest(
       table,
-      {
-        method:"POST",
-
-        body:chunk,
-
-        /*
-         * Do not return inserted rows.
-         * This significantly reduces response data.
-         */
-
-        prefer:
-          "return=minimal"
-      }
+      { method:"POST", body:chunk, prefer:"return=minimal" }
     );
 
-    /*
-     * AUDIT MIRROR:
-     * Copy the exact imported stock data into the
-     * branch audit table and mark every record AUDITED.
-     */
-    const auditChunk =
-      chunk.map(
-        row=>({
-          ...row,
-          STATUS:"AUDITED"
-        })
-      );
-
-    await supabaseRequest(
-      auditTable,
-      {
-        method:"POST",
-        body:auditChunk,
-        prefer:"return=minimal"
-      }
-    );
-
-    auditedInserted +=
-      auditChunk.length;
-
-    inserted +=
-      chunk.length;
+    inserted += chunk.length;
 
     updateQueue(
       "IMPORT",
       inserted,
       mappedRows.length,
-      "Importing " +
-      inserted +
-      "/" +
-      mappedRows.length +
-      " stocks + audit..."
+      "Adding new stocks " + inserted + "/" + mappedRows.length + "..."
     );
 
     await yieldToBrowser();
-
   }
 
-  /* =======================================================
-     COMPLETE
-  ======================================================= */
-
-  updateQueue(
-    "IMPORT",
-    mappedRows.length,
-    mappedRows.length,
-    "Complete • " +
-    inserted +
-    " stocks + " +
-    auditedInserted +
-    " audited records imported"
-  );
-
   showStatus(
-    "Import completed: " +
-    inserted +
-    " stocks imported and " +
-    auditedInserted +
-    " audit records marked AUDITED. Old stocks and audit records were replaced."
+    "Import complete. " +
+    inserted + " new stock" + (inserted === 1 ? " was" : "s were") +
+    " added; " + totalSkipped + " skipped. Existing Stocks and Audit were preserved."
   );
 
-  setTimeout(
-    ()=>{
-      refreshDashboard();
-    },
-    300
-  );
-
+  currentPage = 1;
+  await refreshDashboard();
 }
+
 /* =========================================================
    BROWSER YIELD
 ========================================================= */

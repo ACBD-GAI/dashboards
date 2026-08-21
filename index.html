@@ -13520,14 +13520,24 @@ async function createAcebedoPdfReport(o){
   /* =========================================================
      TABLE
   ========================================================= */
-  const C = [
-    {l:"BRANCH",        k:"BR",           w:25},
-    {l:"LENSTYPE",      k:"LENSTYPE",     w:34},
-    {l:"DESCRIPTION",   k:"DESCRIPTION",  w:88},
-    {l:"TAG NUMBER",    k:"NTAGN",        w:34},
-    {l:"SELLING PRICE", k:"SELLINGPRICE", w:42},
-    {l:"DELIVERY DATE", k:"DELIVERYDATE", w:50}
-  ];
+  const C = o.includeSoldDate
+    ? [
+        {l:"BRANCH",        k:"BR",           w:22},
+        {l:"LENSTYPE",      k:"LENSTYPE",     w:28},
+        {l:"DESCRIPTION",   k:"DESCRIPTION",  w:72},
+        {l:"TAG NUMBER",    k:"NTAGN",        w:30},
+        {l:"SELLING PRICE", k:"SELLINGPRICE", w:40},
+        {l:"DELIVERY DATE", k:"DELIVERYDATE", w:39},
+        {l:"SOLD DATE",     k:"SOLD_DATE",    w:42}
+      ]
+    : [
+        {l:"BRANCH",        k:"BR",           w:25},
+        {l:"LENSTYPE",      k:"LENSTYPE",     w:34},
+        {l:"DESCRIPTION",   k:"DESCRIPTION",  w:88},
+        {l:"TAG NUMBER",    k:"NTAGN",        w:34},
+        {l:"SELLING PRICE", k:"SELLINGPRICE", w:42},
+        {l:"DELIVERY DATE", k:"DELIVERYDATE", w:50}
+      ];
 
   function drawHeader(){
     let x = M;
@@ -13558,6 +13568,14 @@ async function createAcebedoPdfReport(o){
         ? aoPdfDate(R.DELIVERYDATE)
         : "—"
     ];
+
+    if(o.includeSoldDate){
+      vals.push(
+        R.SOLD_DATE
+          ? formatDateValue(R.SOLD_DATE)
+          : "—"
+      );
+    }
 
     const wrapped = vals.map(
       (v,i)=>doc.splitTextToSize(
@@ -13802,7 +13820,8 @@ function aoSoldPdfRows(){
       DESCRIPTION:r?.description,
       NTAGN:r?.tag,
       SELLINGPRICE:r?.sellingPrice,
-      DELIVERYDATE:r?.raw?.DELIVERYDATE
+      DELIVERYDATE:r?.raw?.DELIVERYDATE,
+      SOLD_DATE:r?.raw?.["DATE AND TIME"]
     }));
 }
 
@@ -13834,6 +13853,7 @@ async function downloadSoldOutPdf(){
       branch,
       rows,
       dateRange,
+      includeSoldDate:true,
       filename:
         "Acebedo_Sold_Out_" +
         branch + "_" +

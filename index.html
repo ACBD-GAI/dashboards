@@ -12822,20 +12822,25 @@ async function bulkSetRemainingAuditStatus(selectedBranch,status){
           }
           await yieldToBrowser();
         }
+
       }else if(status === "MISSING" && remainingRows.length){
 
         /*
-         * LEAVE REMAINING AS MISSING
+         * FAST BULK "LEAVE REMAINING AS MISSING"
          *
-         * This must behave exactly like the individual
-         * "⚠ Report as Missing" button.
+         * The previous version did 3+ Supabase requests PER ITEM:
+         *   - check reported_missing
+         *   - insert reported_missing
+         *   - delete stocks
+         *   - delete audit
          *
-         * For EVERY remaining item:
-         *   1. Save the full stock record to reported_missing
-         *   2. Remove the stock record from STOCKS
-         *   3. Remove the matching record from AUDIT
+         * That becomes very slow with hundreds/thousands of items.
          *
-         * Do NOT merely leave the stock without an audit row.
+         * The final database result is the same, but the work is
+         * now done in chunks:
+         *   1) bulk upsert/ignore-duplicates to reported_missing
+         *   2) bulk delete from stocks
+         *   3) bulk delete from audit
          */
 
         const reportedTable =
@@ -12847,128 +12852,124 @@ async function bulkSetRemainingAuditStatus(selectedBranch,status){
         const auditTable =
           tableName(b,"audit");
 
-        for(const row of remainingRows){
+        const bulkRows = remainingRows
+          .map(row=>{
+            const branchValue =
+              String(row?.BR ?? b ?? "").trim().toUpperCase();
 
-          const branchValue =
-            String(
-              row?.BR ?? b ?? ""
-            ).trim().toUpperCase();
+            const tag =
+              String(row?.NTAGN ?? "").trim();
 
-          const tag =
-            String(
-              row?.NTAGN ?? ""
-            ).trim();
+            if(!branchValue || !tag){
+              return null;
+            }
 
-          if(!branchValue || !tag){
-            continue;
-          }
+            return {
+              row,
+              branchValue,
+              tag,
+              record:
+                reportedMissingRecordFromRow(
+                  {raw:row},
+                  branchValue,
+                  tag
+                )
+            };
+          })
+          .filter(Boolean);
 
-          /* =====================================================
-             1) CHECK IF ALREADY REPORTED
-             Same BR + NTAGN rule as the individual button.
-          ===================================================== */
-          const checkParams =
-            new URLSearchParams();
+        for(let i=0;i<bulkRows.length;i+=IMPORT_CHUNK_SIZE){
 
-          checkParams.set(
-            "BR",
-            "eq." + branchValue
-          );
-
-          checkParams.set(
-            "NTAGN",
-            "eq." + tag
-          );
-
-          checkParams.set(
-            "limit",
-            "1"
-          );
-
-          const existing =
-            await supabaseRequest(
-              reportedTable +
-              "?" +
-              checkParams.toString(),
-              {method:"GET"}
+          const chunk =
+            bulkRows.slice(
+              i,
+              i + IMPORT_CHUNK_SIZE
             );
 
-          /* =====================================================
-             2) SAVE TO reported_missing
-             Same record builder as the individual button.
-          ===================================================== */
-          if(!(Array.isArray(existing) && existing.length)){
-            const record =
-              reportedMissingRecordFromRow(
-                {raw:row},
-                branchValue,
-                tag
-              );
+          const records =
+            chunk.map(item=>item.record);
+
+          const tags =
+            chunk.map(item=>item.tag);
+
+          /*
+           * 1) Save all missing records in one request.
+           *
+           * on_conflict keeps the same duplicate-safe behavior
+           * as the individual missing button.
+           */
+          if(records.length){
 
             await supabaseRequest(
-              reportedTable +
-              "?on_conflict=BR,NTAGN",
+              reportedTable + "?on_conflict=BR,NTAGN",
               {
                 method:"POST",
-                body:[record],
+                body:records,
                 prefer:"resolution=ignore-duplicates,return=minimal"
               }
             );
+
           }
 
-          /* =====================================================
-             3) REMOVE FROM STOCKS
-             Same BR + NTAGN identifier as individual button.
-          ===================================================== */
-          const stockParams =
-            new URLSearchParams();
+          /*
+           * Build one PostgREST IN filter for this chunk.
+           * Tags are encoded individually so spaces/special
+           * characters cannot break the query.
+           */
+          const tagList =
+            tags
+              .map(tag =>
+                String(tag)
+                  .replace(/\\/g,"\\\\")
+                  .replace(/"/g,'\\"')
+              )
+              .join(",");
 
-          stockParams.set(
-            "BR",
-            "eq." + branchValue
-          );
+          if(tagList){
 
-          stockParams.set(
-            "NTAGN",
-            "eq." + tag
-          );
+            const stockParams =
+              new URLSearchParams();
 
-          await supabaseRequest(
-            stockTable +
-            "?" +
-            stockParams.toString(),
-            {
-              method:"DELETE",
-              prefer:"return=representation"
-            }
-          );
+            stockParams.set(
+              "BR",
+              "eq." + chunk[0].branchValue
+            );
 
-          /* =====================================================
-             4) REMOVE FROM AUDIT
-             Same BR + NTAGN identifier as individual button.
-          ===================================================== */
-          const auditParams =
-            new URLSearchParams();
+            stockParams.set(
+              "NTAGN",
+              "in.(" + tagList + ")"
+            );
 
-          auditParams.set(
-            "BR",
-            "eq." + branchValue
-          );
+            await supabaseRequest(
+              stockTable + "?" + stockParams.toString(),
+              {
+                method:"DELETE",
+                prefer:"return=minimal"
+              }
+            );
 
-          auditParams.set(
-            "NTAGN",
-            "eq." + tag
-          );
+            const auditParams =
+              new URLSearchParams();
 
-          await supabaseRequest(
-            auditTable +
-            "?" +
-            auditParams.toString(),
-            {
-              method:"DELETE",
-              prefer:"return=representation"
-            }
-          );
+            auditParams.set(
+              "BR",
+              "eq." + chunk[0].branchValue
+            );
+
+            auditParams.set(
+              "NTAGN",
+              "in.(" + tagList + ")"
+            );
+
+            await supabaseRequest(
+              auditTable + "?" + auditParams.toString(),
+              {
+                method:"DELETE",
+                prefer:"return=minimal"
+              }
+            );
+
+          }
 
           await yieldToBrowser();
         }

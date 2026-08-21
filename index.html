@@ -14388,6 +14388,8 @@ function openReportedMissingPopup(){
         <div class="reportPdfActions">
           <button type="button" class="reportPdfBtn primary" data-reported-pdf-download="1">↓ DOWNLOAD PDF REPORT</button>
           <button type="button" class="reportPdfBtn" data-reported-excel-download="1">↓ DOWNLOAD EXCEL</button>
+          <button type="button" class="reportPdfBtn" data-reported-bulk-status="SOLVED">✓ MAKE ALL SOLVED</button>
+          <button type="button" class="reportPdfBtn" data-reported-bulk-status="UNRESOLVED">↺ MAKE ALL UNRESOLVED</button>
         </div>
       </div>
       <div class="reportedMissingHeader">
@@ -14412,6 +14414,9 @@ function openReportedMissingPopup(){
   modal.querySelector("[data-reported-refresh='1']")?.addEventListener("click",loadReportedMissingPopup);
   modal.querySelector("[data-reported-pdf-download='1']")?.addEventListener("click",downloadReportedMissingPdf);
   modal.querySelector("[data-reported-excel-download='1']")?.addEventListener("click",downloadReportedMissingExcel);
+  modal.querySelectorAll("[data-reported-bulk-status]").forEach(btn=>
+    btn.addEventListener("click",()=>setAllReportedMissingStatus(btn.dataset.reportedBulkStatus))
+  );
   modal.querySelector("[data-reported-close='1']")?.addEventListener("click",()=>modal.remove());
   modal.addEventListener("click",e=>{if(e.target===modal) modal.remove();});
   loadReportedMissingPopup();
@@ -14611,6 +14616,107 @@ async function restoreReportedMissingToStocksConfirmed(branch,tag){
     if(typeof loadReportedMissingCount === "function") loadReportedMissingCount();
     await refreshDashboard();
   }catch(error){console.error("Restore reported missing failed:",error);showStatus(error?.message||"Unable to restore reported missing item.");}
+}
+
+async function setAllReportedMissingStatus(targetStatus){
+  targetStatus = String(targetStatus || "").trim().toUpperCase();
+  if(targetStatus !== "SOLVED" && targetStatus !== "UNRESOLVED"){
+    showStatus("Invalid status.");
+    return;
+  }
+
+  const branchFilter = String(
+    document.getElementById("reportedMissingBranchFilter")?.value || ""
+  ).trim().toUpperCase();
+  const statusFilterRaw = String(
+    document.getElementById("reportedMissingStatusFilter")?.value || "UNRESOLVED"
+  ).trim().toUpperCase();
+  const statusFilter = statusFilterRaw === "SOLVED" ? "SOLVED" : "UNRESOLVED";
+  const search = String(
+    document.getElementById("reportedMissingSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  const rows = reportedMissingPopupRows.filter(row=>{
+    const rb = String(row?.BR || "").trim().toUpperCase();
+    const rs = normalizeReportedMissingStatus(row?.STATUS);
+    if(branchFilter && rb !== branchFilter) return false;
+    if(rs !== statusFilter) return false;
+    if(!search) return true;
+    const text = [
+      row?.BR, row?.LENSTYPE, row?.DESCRIPTION, row?.NTAGN,
+      row?.["USER EMAIL"], row?.STATUS
+    ].map(v=>String(v ?? "").toLowerCase()).join(" ");
+    return text.includes(search);
+  });
+
+  if(!rows.length){
+    showStatus("No reported missing items match the current filter.");
+    return;
+  }
+
+  const currentLabel = statusFilter === "SOLVED" ? "SOLVED" : "UNRESOLVED";
+  const confirm = window.confirm(
+    "Change all " + rows.length + " currently shown " + currentLabel +
+    " item" + (rows.length === 1 ? "" : "s") +
+    " to " + targetStatus + "?"
+  );
+  if(!confirm) return;
+
+  const buttons = Array.from(document.querySelectorAll("[data-reported-bulk-status]"));
+  buttons.forEach(btn=>btn.disabled=true);
+
+  try{
+    /*
+     * Update only the rows currently shown by the active branch/status/search
+     * filters. Requests are chunked so a large Reported Missing list does not
+     * freeze the browser.
+     */
+    const uniqueKeys = new Set();
+    const updates = rows.filter(row=>{
+      const branch = String(row?.BR || "").trim().toUpperCase();
+      const tag = String(row?.NTAGN || "").trim();
+      const key = branch + "\u0000" + tag;
+      if(!branch || !tag || uniqueKeys.has(key)) return false;
+      uniqueKeys.add(key);
+      return true;
+    });
+
+    const chunkSize = 20;
+    for(let i=0;i<updates.length;i+=chunkSize){
+      const chunk = updates.slice(i,i+chunkSize);
+      await Promise.all(chunk.map(row=>{
+        const branch = String(row?.BR || "").trim().toUpperCase();
+        const tag = String(row?.NTAGN || "").trim();
+        return supabaseRequest(
+          reportedMissingTable() +
+          "?BR=eq." + encodeURIComponent(branch) +
+          "&NTAGN=eq." + encodeURIComponent(tag),
+          {
+            method:"PATCH",
+            body:{STATUS:targetStatus},
+            prefer:"return=minimal"
+          }
+        );
+      }));
+    }
+
+    updates.forEach(row=>{
+      row.STATUS = targetStatus;
+    });
+
+    renderReportedMissingPopup();
+    if(typeof loadReportedMissingCount === "function") loadReportedMissingCount();
+    showStatus(
+      updates.length +
+      " reported missing item" + (updates.length === 1 ? "" : "s") +
+      " changed to " + targetStatus + "."
+    );
+  }catch(error){
+    console.error("Bulk reported missing status update failed:",error);
+    showStatus(error?.message || "Unable to update all reported missing statuses.");
+  }finally{
+    buttons.forEach(btn=>btn.disabled=false);
+  }
 }
 
 async function toggleReportedMissingStatus(branch,tag,currentStatus){

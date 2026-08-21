@@ -12598,7 +12598,7 @@ function openAuditBulkModal(){
           </span>
         </button>
 
-        <button type="button" class="auditBulkOption remaining" data-audit-bulk="remaining" id="auditRemainingOption">
+        <button type="button" class="auditBulkOption remaining" data-audit-bulk="remaining" id="auditRemainingOption" disabled>
           <span class="auditBulkOptionIcon">↻</span>
           <span class="auditBulkOptionText">
             <strong>Audit Remaining</strong>
@@ -12659,36 +12659,45 @@ function openAuditBulkModal(){
 
 async function getAuditRemainingCount(branch){
   const branches = branch === "ALL" ? BRANCHES : [branch];
-  let remaining = 0;
 
-  for(const b of branches){
-    const [stocks,sold,audit] = await Promise.all([
-      fetchBranchData(b,"stocks",""),
-      fetchBranchData(b,"sold",""),
-      fetchBranchData(b,"audit","")
-    ]);
+  /*
+   * Check branches in parallel instead of one branch at a time.
+   * This changes no audit logic; it only removes the unnecessary
+   * sequential wait when ALL branches are selected.
+   */
+  const results = await Promise.all(
+    branches.map(async b => {
+      const [stocks,sold,audit] = await Promise.all([
+        fetchBranchData(b,"stocks",""),
+        fetchBranchData(b,"sold",""),
+        fetchBranchData(b,"audit","")
+      ]);
 
-    const soldKeys = new Set();
-    const auditedKeys = new Set();
+      const soldKeys = new Set();
+      const auditedKeys = new Set();
 
-    (Array.isArray(sold) ? sold : []).forEach(row=>{
-      const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
-      if(tag) soldKeys.add(tag);
-    });
+      (Array.isArray(sold) ? sold : []).forEach(row=>{
+        const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+        if(tag) soldKeys.add(tag);
+      });
 
-    (Array.isArray(audit) ? audit : []).forEach(row=>{
-      const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
-      const status=String(row?.STATUS ?? "").trim().toUpperCase();
-      if(tag && status === "AUDITED") auditedKeys.add(tag);
-    });
+      (Array.isArray(audit) ? audit : []).forEach(row=>{
+        const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+        const status=String(row?.STATUS ?? "").trim().toUpperCase();
+        if(tag && status === "AUDITED") auditedKeys.add(tag);
+      });
 
-    (Array.isArray(stocks) ? stocks : []).forEach(row=>{
-      const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
-      if(tag && !soldKeys.has(tag) && !auditedKeys.has(tag)) remaining++;
-    });
-  }
+      let count = 0;
+      (Array.isArray(stocks) ? stocks : []).forEach(row=>{
+        const tag=String(row?.NTAGN ?? "").trim().toUpperCase();
+        if(tag && !soldKeys.has(tag) && !auditedKeys.has(tag)) count++;
+      });
 
-  return remaining;
+      return count;
+    })
+  );
+
+  return results.reduce((sum,count)=>sum + count,0);
 }
 
 async function loadAuditRemainingCount(branch, modal){
@@ -12696,8 +12705,17 @@ async function loadAuditRemainingCount(branch, modal){
   const text=modal?.querySelector("#auditRemainingOptionText");
   if(!option || !text) return;
 
+  /* IMPORTANT: disabled while the count is being checked. */
+  option.disabled=true;
+  option.dataset.remainingCount="0";
+  text.textContent="Checking remaining items that are not yet audited…";
+
   try{
     const remaining=await getAuditRemainingCount(branch);
+
+    /* The modal may have been closed while the request was running. */
+    if(!document.body.contains(option)) return;
+
     option.dataset.remainingCount=String(remaining);
 
     if(remaining > 0){
@@ -12713,8 +12731,11 @@ async function loadAuditRemainingCount(branch, modal){
     }
   }catch(error){
     console.error("Audit remaining count failed:",error);
-    option.disabled=true;
-    text.textContent="Unable to check remaining items.";
+    if(document.body.contains(option)){
+      option.disabled=true;
+      option.dataset.remainingCount="0";
+      text.textContent="Unable to check remaining items.";
+    }
   }
 }
 
@@ -12832,13 +12853,14 @@ async function bulkSetRemainingAuditStatus(selectedBranch,status){
          *   2) remove it from STOCKS
          *   3) remove its matching AUDIT row
          *
-         * The old implementation did 3-4 HTTP requests PER ITEM.
-         * This version batches inserts and deletes, reducing thousands
-         * of requests to only a few requests per chunk.
+         * Instead of making a GET + POST + DELETE + DELETE request
+         * for every item, use one bulk upsert and two bulk deletes
+         * per chunk. This is dramatically faster for large audits.
          */
         const reportedTable = reportedMissingTable();
         const stockTable = tableName(b,"stocks");
         const auditTable = tableName(b,"audit");
+        const BULK_MISSING_CHUNK = 200;
 
         const validRows = remainingRows.filter(row => {
           const branchValue = String(row?.BR ?? b ?? "").trim().toUpperCase();
@@ -12846,13 +12868,9 @@ async function bulkSetRemainingAuditStatus(selectedBranch,status){
           return !!branchValue && !!tag;
         });
 
-        const BULK_MISSING_CHUNK = 50;
-
         for(let i=0;i<validRows.length;i+=BULK_MISSING_CHUNK){
           const chunk = validRows.slice(i,i+BULK_MISSING_CHUNK);
 
-          /* Save all missing records in this chunk.
-             on_conflict preserves the same duplicate protection. */
           const records = chunk.map(row =>
             reportedMissingRecordFromRow(
               {raw:row},
@@ -12861,43 +12879,47 @@ async function bulkSetRemainingAuditStatus(selectedBranch,status){
             )
           );
 
-          if(records.length){
-            await supabaseRequest(
-              reportedTable + "?on_conflict=BR,NTAGN",
-              {
-                method:"POST",
-                body:records,
-                prefer:"resolution=ignore-duplicates,return=minimal"
-              }
-            );
-          }
-
-          /* Build one OR expression for the exact BR + NTAGN pairs. */
-          const pairs = chunk.map(row => {
-            const br = String(row?.BR ?? b ?? "").trim().toUpperCase();
-            const tag = String(row?.NTAGN ?? "").trim();
-            return `and(BR.eq.${encodeURIComponent(br)},NTAGN.eq.${encodeURIComponent(tag)})`;
-          }).join(',');
-
-          const orQuery = "&or=(" + pairs + ")";
-
-          /* Delete matching STOCKS records in one request. */
+          /* Existing reported_missing rows are safely ignored by the
+             same BR + NTAGN conflict rule used by the individual action. */
           await supabaseRequest(
-            stockTable + "?" + orQuery.slice(1),
+            reportedTable + "?on_conflict=BR,NTAGN",
             {
-              method:"DELETE",
-              prefer:"return=minimal"
+              method:"POST",
+              body:records,
+              prefer:"resolution=ignore-duplicates,return=minimal"
             }
           );
 
-          /* Delete matching AUDIT records in one request. */
-          await supabaseRequest(
-            auditTable + "?" + orQuery.slice(1),
-            {
-              method:"DELETE",
-              prefer:"return=minimal"
-            }
+          /* All rows in this chunk belong to the selected branch, so
+             one BR filter + NTAGN IN list replaces 2N individual requests. */
+          const tags = chunk.map(row =>
+            String(row?.NTAGN ?? "").trim()
           );
+
+          const escapedTags = tags.map(tag =>
+            tag
+              .replace(/\\/g,"\\\\")
+              .replace(/,/g,"\\,")
+              .replace(/\(/g,"\\(")
+              .replace(/\)/g,"\\)")
+          );
+
+          const br = String(chunk[0]?.BR ?? b ?? "").trim().toUpperCase();
+          const commonParams = new URLSearchParams();
+          commonParams.set("BR","eq." + br);
+          commonParams.set("NTAGN","in.(" + escapedTags.join(",") + ")");
+          const filter = "?" + commonParams.toString();
+
+          await Promise.all([
+            supabaseRequest(
+              stockTable + filter,
+              {method:"DELETE",prefer:"return=minimal"}
+            ),
+            supabaseRequest(
+              auditTable + filter,
+              {method:"DELETE",prefer:"return=minimal"}
+            )
+          ]);
 
           await yieldToBrowser();
         }

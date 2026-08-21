@@ -12303,6 +12303,73 @@ async function importDirect(
       unique.values()
     );
 
+  /* =======================================================
+     SKIP ITEMS ALREADY IN REPORTED MISSING
+
+     Match by BR + NTAGN only. Any imported stock that already
+     exists in reported_missing is not uploaded to STOCKS or
+     mirrored into AUDIT.
+  ======================================================= */
+  const reportedMissingTable ="reported_missing";
+  const reportedMissingKeys = new Set();
+  let reportedMissingOffset = 0;
+
+  while(true){
+    const params = new URLSearchParams();
+    params.set("select","BR,NTAGN");
+    params.set("BR","eq." + branch);
+    params.set("limit",String(SUPABASE_PAGE_SIZE));
+    params.set("offset",String(reportedMissingOffset));
+
+    const reportedRows = await supabaseRequest(
+      reportedMissingTable + "?" + params.toString()
+    );
+
+    const batch = Array.isArray(reportedRows) ? reportedRows : [];
+
+    batch.forEach(row=>{
+      const rowBranch = String(row?.BR ?? "").trim().toUpperCase();
+      const rowTag = String(row?.NTAGN ?? "").trim().toUpperCase();
+      if(rowBranch && rowTag){
+        reportedMissingKeys.add(rowBranch + "|" + rowTag);
+      }
+    });
+
+    if(batch.length < SUPABASE_PAGE_SIZE){
+      break;
+    }
+
+    reportedMissingOffset += SUPABASE_PAGE_SIZE;
+  }
+
+  const beforeReportedMissingFilter = mappedRows.length;
+
+  mappedRows = mappedRows.filter(row=>{
+    const rowBranch = String(row?.BR ?? branch).trim().toUpperCase();
+    const rowTag = String(row?.NTAGN ?? "").trim().toUpperCase();
+    return !reportedMissingKeys.has(rowBranch + "|" + rowTag);
+  });
+
+  const skippedReportedMissing =
+    beforeReportedMissingFilter - mappedRows.length;
+
+  if(!mappedRows.length){
+    throw new Error(
+      skippedReportedMissing
+        ? "Import cancelled: all uploaded items already exist in Reported Missing."
+        : "No valid stock records found after processing."
+    );
+  }
+
+  if(skippedReportedMissing){
+    showStatus(
+      skippedReportedMissing +
+      " uploaded item" +
+      (skippedReportedMissing === 1 ? "" : "s") +
+      " skipped because already in Reported Missing."
+    );
+  }
+
   if(!mappedRows.length){
 
     throw new Error(

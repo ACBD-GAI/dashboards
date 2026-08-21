@@ -14127,7 +14127,7 @@ async function downloadReportedMissingExcel(){
     const headers=DB_COLUMNS.slice(0,22);
     const data=sourceRows.map(row=>headers.map(col=>row?.[col] ?? ""));
     const meta=[
-      ["Branch",branch ? aoPdfBranchLabel(branch) : "Selected branches"],
+      ["Branch",branch ? aoPdfBranchLabel(branch) : "ALL BRANCH"],
       ["Status","UNRESOLVED ONLY"],
       ["Records",sourceRows.length]
     ];

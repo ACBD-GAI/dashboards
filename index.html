@@ -15764,6 +15764,10 @@ function escapeHtmlAttribute(
 /* ================= PRIVATE CHAT: ADMIN <-> SELECTED BRANCH ================= */
 let aoChatOpen=false, aoChatSending=false, aoChatTimer=null, aoChatUnreadTotal=0;
 let aoChatNotifications=[];
+const aoChatRecipientCache=new Map();
+const aoChatConversationCache=new Map();
+let aoChatUnreadBusy=false;
+let aoChatLoadBusy=false, aoChatLoadSeq=0;
 
 function aoChatBranch(){
   const e=document.getElementById("branch");
@@ -15888,12 +15892,14 @@ async function aoChatOpenNotification(branch,email){
 
     if(option){
       branchSelect.value=option.value;
-
-      /*
-       * Load recipients exactly once for the target branch.
-       * Do not trigger the dashboard's normal branch change handler.
-       */
-      await aoChatLoadRecipients(targetEmail);
+      const select=document.getElementById("aoChatRecipient");
+      if(select){
+        select.disabled=false;
+        select.innerHTML='<option value="'+aoChatEsc(targetEmail)+'">'+aoChatEsc(targetEmail)+'</option>';
+        select.value=targetEmail;
+      }
+      /* Build the full recipient list in the background; do not make the notification click wait for it. */
+      aoChatLoadRecipients(targetEmail).catch(()=>{});
     }
   }else{
     /*
@@ -15910,11 +15916,13 @@ async function aoChatOpenNotification(branch,email){
       if(wanted){
         select.value=wanted.value;
       }else if(targetEmail){
-        /*
-         * If this email is not currently in the list, load the list
-         * once and restore the exact target email.
-         */
-        await aoChatLoadRecipients(targetEmail);
+        const opt=document.createElement("option");
+        opt.value=targetEmail;
+        opt.textContent=targetEmail;
+        select.appendChild(opt);
+        select.value=targetEmail;
+        select.disabled=false;
+        aoChatLoadRecipients(targetEmail).catch(()=>{});
       }
     }
   }
@@ -15943,6 +15951,20 @@ async function aoChatLoadRecipients(preferredEmail=""){
   }
 
   const old=String(preferredEmail||select.value||"").toLowerCase();
+
+  const cached=aoChatRecipientCache.get(branch);
+  if(Array.isArray(cached) && cached.length){
+    select.innerHTML=
+      '<option value="">Select a branch user...</option>'+
+      cached.map(e=>{
+        const n=aoChatNotifications.find(x=>x.branch===branch&&x.email===e)?.count||0;
+        return '<option value="'+aoChatEsc(e)+'">'+aoChatEsc(e)+(n?'  •  '+n+' UNREAD':'')+'</option>';
+      }).join("");
+    if(old&&cached.includes(old))select.value=old;
+    select.disabled=false;
+    return;
+  }
+
   select.disabled=true;
   select.innerHTML='<option value="">Loading branch users...</option>';
 
@@ -15979,6 +16001,7 @@ async function aoChatLoadRecipients(preferredEmail=""){
     }
 
     const list=Array.from(emails).sort();
+    aoChatRecipientCache.set(branch,list);
 
     if(!list.length){
       select.innerHTML='<option value="">No branch users found</option>';
@@ -15999,8 +16022,6 @@ async function aoChatLoadRecipients(preferredEmail=""){
 
     if(old&&list.includes(old))select.value=old;
     select.disabled=false;
-
-    if(aoChatRecipient())await aoChatLoad();
   }catch(e){
     console.warn("Chat recipient load failed:",e);
     select.innerHTML='<option value="">Unable to load branch users</option>';
@@ -16008,156 +16029,86 @@ async function aoChatLoadRecipients(preferredEmail=""){
   }
 }
 async function aoChatLoadUnread(){
-  if(!sessionId||!currentEmail)return;
-
+  if(!sessionId||!currentEmail||aoChatUnreadBusy)return;
+  aoChatUnreadBusy=true;
   try{
     const rows=await supabaseRequest(
       "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at"+
-      "&order=created_at.asc&limit=5000"
+      "&sender_type=eq.SCANNER&order=created_at.desc&limit=1000"
     );
-    const all=Array.isArray(rows)?rows:[];
     const grouped=new Map();
-
-    all.forEach(r=>{
-      if(String(r.sender_type||"").toUpperCase()!=="SCANNER")return;
-
+    (Array.isArray(rows)?rows:[]).forEach(r=>{
       const branch=String(r.branch||"").trim().toUpperCase();
       const email=String(r.scanner_email||"").trim().toLowerCase();
       const ts=new Date(r.created_at).getTime();
       if(!branch||!email||!Number.isFinite(ts))return;
-
       const read=aoChatRead(branch,email);
       if(ts<=read)return;
-
       const key=branch+"|"+email;
       let g=grouped.get(key);
-      if(!g){
-        g={
-          branch:branch,
-          email:email,
-          count:0,
-          last_created_at:r.created_at,
-          last_message:String(r.message||"")
-        };
-        grouped.set(key,g);
-      }
+      if(!g){g={branch,email,count:0,last_created_at:r.created_at,last_message:String(r.message||"")};grouped.set(key,g);}
       g.count++;
-      if(ts>=new Date(g.last_created_at).getTime()){
-        g.last_created_at=r.created_at;
-        g.last_message=String(r.message||"");
-      }
+      if(ts>=new Date(g.last_created_at).getTime()){g.last_created_at=r.created_at;g.last_message=String(r.message||"");}
     });
-
     aoChatNotifications=Array.from(grouped.values());
-    aoChatBadge(
-      aoChatNotifications.reduce((total,x)=>total+Number(x.count||0),0)
-    );
+    aoChatBadge(aoChatNotifications.reduce((t,x)=>t+Number(x.count||0),0));
     aoChatRenderNotifications();
-  }catch(e){
-    console.warn("Unread chat notification load failed:",e);
-  }
+  }catch(e){console.warn("Unread chat notification load failed:",e);}
+  finally{aoChatUnreadBusy=false;}
 }
 async function aoChatLoad(){
   if(!sessionId||!currentEmail)return;
-
-  const branch=aoChatBranch();
-  const recipient=aoChatRecipient();
+  const loadSeq=++aoChatLoadSeq;
+  const branch=aoChatBranch(), recipient=aoChatRecipient();
   const box=document.getElementById("aoChatMessages");
   if(!box)return;
+  if(!branch||branch==="ALL"){box.innerHTML='<div class="ao-chat-empty">Select a specific branch to open a private conversation.</div>';return;}
+  if(!recipient){box.innerHTML='<div class="ao-chat-empty">Select a branch user above to view that private conversation.</div>';const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · Select branch user";return;}
 
-  if(!branch||branch==="ALL"){
-    box.innerHTML=
-      '<div class="ao-chat-empty">Select a specific branch to open a private conversation.</div>';
-    return;
-  }
-  if(!recipient){
-    box.innerHTML=
-      '<div class="ao-chat-empty">Select a branch user above to view that private conversation.</div>';
-    const s=document.getElementById("aoChatSub");
-    if(s)s.textContent=branch+" · Select branch user";
-    return;
-  }
+  const key=branch+"|"+recipient;
+  const cached=aoChatConversationCache.get(key);
+  if(Array.isArray(cached))aoChatRenderConversation(cached,branch,recipient,box);
+  else box.innerHTML='<div class="ao-chat-empty">Loading conversation…</div>';
 
+  aoChatLoadBusy=true;
   try{
     const rows=await supabaseRequest(
       "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at"+
       "&branch=eq."+encodeURIComponent(branch)+
       "&scanner_email=eq."+encodeURIComponent(recipient)+
-      "&order=created_at.asc&limit=500"
+      "&order=created_at.asc&limit=300"
     );
-
+    if(loadSeq!==aoChatLoadSeq)return;
     const list=Array.isArray(rows)?rows:[];
-    const read=aoChatRead(branch,recipient);
-    const incoming=list.filter(r=>
-      String(r.sender_type||"").toUpperCase()==="SCANNER"
-    );
-    const unread=incoming.filter(r=>
-      new Date(r.created_at).getTime()>read
-    );
-
-    const boxOld=box.scrollTop;
-    const bottom=(box.scrollHeight-box.clientHeight-boxOld)<60;
-
-    if(!list.length){
-      box.innerHTML=
-        '<div class="ao-chat-empty">No messages with '+
-        aoChatEsc(recipient)+' yet.</div>';
-    }else{
-      const firstUnread=unread.length?unread[0].id:null;
-
-      box.innerHTML=list.map(r=>{
-        const mine=
-          String(r.sender_email||"").toLowerCase()===
-          String(currentEmail||"").toLowerCase();
-
-        const label=
-          String(r.sender_type||"").toUpperCase()==="SCANNER"
-            ?"BRANCH"
-            :(String(r.sender_type||"").toUpperCase()==="DASHBOARD"
-              ?"ADMIN"
-              :r.sender_type||"");
-
-        const sep=
-          firstUnread!==null&&r.id===firstUnread
-            ?'<div class="ao-chat-unread-divider">'+
-                unread.length+' UNREAD MESSAGE'+
-                (unread.length===1?'':'S')+
-                ' FROM '+aoChatEsc(recipient)+
-              '</div>'
-            :'';
-
-        return sep+
-          '<div class="ao-chat-row '+(mine?'mine':'')+'">'+
-            '<div class="ao-chat-bubble">'+
-              '<div class="ao-chat-name">'+
-                aoChatEsc(label)+' · '+aoChatEsc(r.sender_email||"")+
-              '</div>'+
-              '<div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div>'+
-              '<div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div>'+
-            '</div>'+
-          '</div>';
-      }).join("");
-
-      if(aoChatOpen&&bottom)box.scrollTop=box.scrollHeight;
-    }
-
-    /*
-     * Only mark incoming messages as read when this exact conversation
-     * is actually open. Merely polling notifications must NOT clear them.
-     */
-    if(aoChatOpen && incoming.length){
-      const last=new Date(incoming[incoming.length-1].created_at).getTime();
-      if(last)aoChatMark(branch,recipient,last);
-      await aoChatLoadUnread();
-    }
-
-    const sub=document.getElementById("aoChatSub");
-    if(sub)sub.textContent=branch+" · "+recipient;
-
-  }catch(e){
-    aoChatStatus(e?.message||"Chat temporarily unavailable.");
-    console.warn("Dashboard chat load failed:",e);
+    aoChatConversationCache.set(key,list);
+    aoChatRenderConversation(list,branch,recipient,box);
+  }catch(e){aoChatStatus(e?.message||"Chat temporarily unavailable.");console.warn("Dashboard chat load failed:",e);}
+  finally{aoChatLoadBusy=false;}
+}
+function aoChatRenderConversation(list,branch,recipient,box){
+  const read=aoChatRead(branch,recipient);
+  const incoming=list.filter(r=>String(r.sender_type||"").toUpperCase()==="SCANNER");
+  const unread=incoming.filter(r=>new Date(r.created_at).getTime()>read);
+  const wasBottom=(box.scrollHeight-box.clientHeight-box.scrollTop)<60;
+  if(!list.length){box.innerHTML='<div class="ao-chat-empty">No messages with '+aoChatEsc(recipient)+' yet.</div>';}
+  else{
+    const firstUnread=unread.length?unread[0].id:null;
+    box.innerHTML=list.map(r=>{
+      const mine=String(r.sender_email||"").toLowerCase()===String(currentEmail||"").toLowerCase();
+      const label=String(r.sender_type||"").toUpperCase()==="SCANNER"?"BRANCH":(String(r.sender_type||"").toUpperCase()==="DASHBOARD"?"ADMIN":r.sender_type||"");
+      const sep=firstUnread!==null&&r.id===firstUnread?'<div class="ao-chat-unread-divider">'+unread.length+' UNREAD MESSAGE'+(unread.length===1?'':'S')+' FROM '+aoChatEsc(recipient)+'</div>':'';
+      return sep+'<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(label)+' · '+aoChatEsc(r.sender_email||"")+'</div><div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div><div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';
+    }).join("");
+    if(aoChatOpen&&wasBottom)box.scrollTop=box.scrollHeight;
   }
+  if(aoChatOpen&&incoming.length){
+    const last=new Date(incoming[incoming.length-1].created_at).getTime();
+    if(last)aoChatMark(branch,recipient,last);
+    aoChatNotifications=aoChatNotifications.filter(x=>!(x.branch===branch&&x.email===recipient));
+    aoChatBadge(aoChatNotifications.reduce((t,x)=>t+Number(x.count||0),0));
+    aoChatRenderNotifications();
+  }
+  const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · "+recipient;
 }
 function aoChatToggle(){
   aoChatOpen=!aoChatOpen;
@@ -16221,8 +16172,9 @@ async function aoChatSend(){
 
     input.value="";
     aoChatStatus("");
+    aoChatConversationCache.delete(branch+"|"+recipient);
     await aoChatLoad();
-    await aoChatLoadUnread();
+    aoChatLoadUnread().catch(()=>{});
   }catch(e){
     console.error("Dashboard chat send failed:",e);
     aoChatStatus(e?.message||"Message could not be sent.");
@@ -16271,14 +16223,15 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(!aoChatTimer){
     aoChatTimer=setInterval(()=>{
       if(sessionId&&currentEmail){
-        /* Poll unread notifications every 5 seconds.
-           NEVER rebuild the email dropdown here. */
-        aoChatLoadUnread();
-        if(aoChatOpen){
-          aoChatLoad();
+        const now=Date.now();
+        if(!window.__aoChatUnreadTick && (!window.__aoChatLastUnread || now-window.__aoChatLastUnread>=10000)){
+          window.__aoChatUnreadTick=true;
+          window.__aoChatLastUnread=now;
+          aoChatLoadUnread().finally(()=>{window.__aoChatUnreadTick=false;});
         }
+        if(aoChatOpen && !aoChatLoadBusy){aoChatLoad();}
       }
-    },5000);
+    },3000);
   }
 });
 </script>

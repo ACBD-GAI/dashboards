@@ -12822,84 +12822,46 @@ async function bulkSetRemainingAuditStatus(selectedBranch,status){
           }
           await yieldToBrowser();
         }
-
       }else if(status === "MISSING" && remainingRows.length){
 
         /*
-         * FAST BULK "LEAVE REMAINING AS MISSING"
+         * FAST BULK MISSING PATH.
          *
-         * The previous version did 3+ Supabase requests PER ITEM:
-         *   - check reported_missing
-         *   - insert reported_missing
-         *   - delete stocks
-         *   - delete audit
+         * Same result as the individual "Report as Missing" action:
+         *   1) save the full stock row to reported_missing
+         *   2) remove it from STOCKS
+         *   3) remove its matching AUDIT row
          *
-         * That becomes very slow with hundreds/thousands of items.
-         *
-         * The final database result is the same, but the work is
-         * now done in chunks:
-         *   1) bulk upsert/ignore-duplicates to reported_missing
-         *   2) bulk delete from stocks
-         *   3) bulk delete from audit
+         * The old implementation did 3-4 HTTP requests PER ITEM.
+         * This version batches inserts and deletes, reducing thousands
+         * of requests to only a few requests per chunk.
          */
+        const reportedTable = reportedMissingTable();
+        const stockTable = tableName(b,"stocks");
+        const auditTable = tableName(b,"audit");
 
-        const reportedTable =
-          reportedMissingTable();
+        const validRows = remainingRows.filter(row => {
+          const branchValue = String(row?.BR ?? b ?? "").trim().toUpperCase();
+          const tag = String(row?.NTAGN ?? "").trim();
+          return !!branchValue && !!tag;
+        });
 
-        const stockTable =
-          tableName(b,"stocks");
+        const BULK_MISSING_CHUNK = 50;
 
-        const auditTable =
-          tableName(b,"audit");
+        for(let i=0;i<validRows.length;i+=BULK_MISSING_CHUNK){
+          const chunk = validRows.slice(i,i+BULK_MISSING_CHUNK);
 
-        const bulkRows = remainingRows
-          .map(row=>{
-            const branchValue =
-              String(row?.BR ?? b ?? "").trim().toUpperCase();
+          /* Save all missing records in this chunk.
+             on_conflict preserves the same duplicate protection. */
+          const records = chunk.map(row =>
+            reportedMissingRecordFromRow(
+              {raw:row},
+              String(row?.BR ?? b ?? "").trim().toUpperCase(),
+              String(row?.NTAGN ?? "").trim()
+            )
+          );
 
-            const tag =
-              String(row?.NTAGN ?? "").trim();
-
-            if(!branchValue || !tag){
-              return null;
-            }
-
-            return {
-              row,
-              branchValue,
-              tag,
-              record:
-                reportedMissingRecordFromRow(
-                  {raw:row},
-                  branchValue,
-                  tag
-                )
-            };
-          })
-          .filter(Boolean);
-
-        for(let i=0;i<bulkRows.length;i+=IMPORT_CHUNK_SIZE){
-
-          const chunk =
-            bulkRows.slice(
-              i,
-              i + IMPORT_CHUNK_SIZE
-            );
-
-          const records =
-            chunk.map(item=>item.record);
-
-          const tags =
-            chunk.map(item=>item.tag);
-
-          /*
-           * 1) Save all missing records in one request.
-           *
-           * on_conflict keeps the same duplicate-safe behavior
-           * as the individual missing button.
-           */
           if(records.length){
-
             await supabaseRequest(
               reportedTable + "?on_conflict=BR,NTAGN",
               {
@@ -12908,68 +12870,34 @@ async function bulkSetRemainingAuditStatus(selectedBranch,status){
                 prefer:"resolution=ignore-duplicates,return=minimal"
               }
             );
-
           }
 
-          /*
-           * Build one PostgREST IN filter for this chunk.
-           * Tags are encoded individually so spaces/special
-           * characters cannot break the query.
-           */
-          const tagList =
-            tags
-              .map(tag =>
-                String(tag)
-                  .replace(/\\/g,"\\\\")
-                  .replace(/"/g,'\\"')
-              )
-              .join(",");
+          /* Build one OR expression for the exact BR + NTAGN pairs. */
+          const pairs = chunk.map(row => {
+            const br = String(row?.BR ?? b ?? "").trim().toUpperCase();
+            const tag = String(row?.NTAGN ?? "").trim();
+            return `and(BR.eq.${encodeURIComponent(br)},NTAGN.eq.${encodeURIComponent(tag)})`;
+          }).join(',');
 
-          if(tagList){
+          const orQuery = "&or=(" + pairs + ")";
 
-            const stockParams =
-              new URLSearchParams();
+          /* Delete matching STOCKS records in one request. */
+          await supabaseRequest(
+            stockTable + "?" + orQuery.slice(1),
+            {
+              method:"DELETE",
+              prefer:"return=minimal"
+            }
+          );
 
-            stockParams.set(
-              "BR",
-              "eq." + chunk[0].branchValue
-            );
-
-            stockParams.set(
-              "NTAGN",
-              "in.(" + tagList + ")"
-            );
-
-            await supabaseRequest(
-              stockTable + "?" + stockParams.toString(),
-              {
-                method:"DELETE",
-                prefer:"return=minimal"
-              }
-            );
-
-            const auditParams =
-              new URLSearchParams();
-
-            auditParams.set(
-              "BR",
-              "eq." + chunk[0].branchValue
-            );
-
-            auditParams.set(
-              "NTAGN",
-              "in.(" + tagList + ")"
-            );
-
-            await supabaseRequest(
-              auditTable + "?" + auditParams.toString(),
-              {
-                method:"DELETE",
-                prefer:"return=minimal"
-              }
-            );
-
-          }
+          /* Delete matching AUDIT records in one request. */
+          await supabaseRequest(
+            auditTable + "?" + orQuery.slice(1),
+            {
+              method:"DELETE",
+              prefer:"return=minimal"
+            }
+          );
 
           await yieldToBrowser();
         }

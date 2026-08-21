@@ -14113,7 +14113,11 @@ function openReportedMissingPopup(){
     filter.value=BRANCHES.includes(b)?b:"";
     filter.addEventListener("change",renderReportedMissingPopup);
   }
-  modal.querySelector("#reportedMissingStatusFilter")?.addEventListener("change",renderReportedMissingPopup);
+  const statusFilter=modal.querySelector("#reportedMissingStatusFilter");
+  if(statusFilter){
+    statusFilter.value="UNRESOLVED";
+    statusFilter.addEventListener("change",renderReportedMissingPopup);
+  }
   modal.querySelector("#reportedMissingSearch")?.addEventListener("input",renderReportedMissingPopup);
   modal.querySelector("[data-reported-refresh='1']")?.addEventListener("click",loadReportedMissingPopup);
   modal.querySelector("[data-reported-pdf-download='1']")?.addEventListener("click",downloadReportedMissingPdf);
@@ -14181,6 +14185,8 @@ async function loadReportedMissingPopup(){
   reportedMissingTable(),
   'BR,LENSTYPE,DESCRIPTION,NTAGN,SELLINGPRICE,DELIVERYDATE,"USER EMAIL",STATUS'
 );
+    const statusFilter=document.getElementById("reportedMissingStatusFilter");
+    if(statusFilter) statusFilter.value="UNRESOLVED";
     renderReportedMissingPopup();
   }catch(error){
     console.error("Reported missing popup load failed:",error);
@@ -14193,7 +14199,8 @@ function renderReportedMissingPopup(){
   const list=document.getElementById("reportedMissingList");
   if(!list) return;
   const branchFilter=String(document.getElementById("reportedMissingBranchFilter")?.value||"").trim().toUpperCase();
-  const statusFilter=String(document.getElementById("reportedMissingStatusFilter")?.value||"UNRESOLVED").trim().toUpperCase();
+  const statusFilterRaw=String(document.getElementById("reportedMissingStatusFilter")?.value||"UNRESOLVED").trim().toUpperCase();
+  const statusFilter=statusFilterRaw === "SOLVED" ? "SOLVED" : "UNRESOLVED";
   const search=String(document.getElementById("reportedMissingSearch")?.value||"").trim().toLowerCase();
   const rows=reportedMissingPopupRows.filter(row=>{
     const rb=String(row?.BR||"").trim().toUpperCase();

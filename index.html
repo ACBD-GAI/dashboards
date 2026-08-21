@@ -7,7 +7,7 @@
 
 <title>Acebedo Optical Inventory</title>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
 
 
@@ -13884,6 +13884,142 @@ async function downloadSoldOutPdf(){
 }
 
 
+function aoExcelApplyPolishedStyle(ws, opts={}){
+  const range = ws["!ref"] ? XLSX.utils.decode_range(ws["!ref"]) : null;
+  if(!range) return;
+
+  const titleRows = Number(opts.titleRows || 0);
+  const headerRow = Number(opts.headerRow ?? titleRows);
+  const moneyCols = new Set(opts.moneyCols || []);
+  const dateCols = new Set(opts.dateCols || []);
+  const widths = opts.widths || [];
+
+  if(headerRow >= 0 && range.e.c >= range.s.c){
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const addr=XLSX.utils.encode_cell({r:headerRow,c});
+      const cell=ws[addr];
+      if(!cell) continue;
+      cell.s={
+        fill:{fgColor:{rgb:"1F4E78"}},
+        font:{bold:true,color:{rgb:"FFFFFF"},sz:11},
+        alignment:{horizontal:"center",vertical:"center",wrapText:true},
+        border:{
+          top:{style:"thin",color:{rgb:"D9E2F3"}},
+          bottom:{style:"thin",color:{rgb:"D9E2F3"}},
+          left:{style:"thin",color:{rgb:"D9E2F3"}},
+          right:{style:"thin",color:{rgb:"D9E2F3"}}
+        }
+      };
+    }
+  }
+
+  /* Light zebra rows for readability. */
+  for(let r=headerRow+1;r<=range.e.r;r++){
+    const fill = ((r-headerRow)%2===0) ? "F7FBFF" : "FFFFFF";
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const addr=XLSX.utils.encode_cell({r,c});
+      const cell=ws[addr];
+      if(!cell) continue;
+      cell.s={
+        fill:{fgColor:{rgb:fill}},
+        font:{color:{rgb:"203040"},sz:10},
+        alignment:{vertical:"center",wrapText:false},
+        border:{
+          bottom:{style:"hair",color:{rgb:"DCE6F1"}}
+        }
+      };
+
+      const col=XLSX.utils.encode_col(c);
+      if(moneyCols.has(c) || moneyCols.has(col)){
+        cell.z='₱#,##0.00';
+        cell.alignment={horizontal:"right",vertical:"center"};
+      }
+      if(dateCols.has(c) || dateCols.has(col)){
+        cell.z='yyyy-mm-dd hh:mm:ss';
+        cell.alignment={horizontal:"center",vertical:"center"};
+      }
+    }
+  }
+
+  for(const c of opts.centerCols || []){
+    for(let r=headerRow+1;r<=range.e.r;r++){
+      const cell=ws[XLSX.utils.encode_cell({r,c})];
+      if(cell) cell.s={...(cell.s||{}),alignment:{horizontal:"center",vertical:"center",wrapText:false}};
+    }
+  }
+
+  ws['!cols'] = widths.map(w=>({wch:w}));
+  ws['!rows'] = [];
+  if(titleRows){
+    for(let r=0;r<headerRow;r++) ws['!rows'][r]={hpt:r===0?24:18};
+  }
+  ws['!rows'][headerRow]={hpt:30};
+  for(let r=headerRow+1;r<=range.e.r;r++) ws['!rows'][r]={hpt:20};
+
+  if(range.e.r >= headerRow){
+    ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:headerRow,c:range.s.c},e:{r:range.e.r,c:range.e.c}})};
+  }
+  ws['!freeze']={xSplit:0,ySplit:headerRow+1};
+}
+
+function aoExcelMakeTitleSheet(title, metaRows, headers, dataRows, opts={}){
+  const aoa=[];
+  aoa.push([title]);
+  for(const row of (metaRows||[])) aoa.push(row);
+  aoa.push([]);
+  const headerRow=aoa.length;
+  aoa.push(headers);
+  aoa.push(...dataRows);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  const totalCols=Math.max(1,headers.length);
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:totalCols-1}}];
+  const titleCell=ws['A1'];
+  if(titleCell){
+    titleCell.s={
+      fill:{fgColor:{rgb:"0F3D58"}},
+      font:{bold:true,color:{rgb:"FFFFFF"},sz:16},
+      alignment:{horizontal:"left",vertical:"center"}
+    };
+  }
+  for(let r=1;r<headerRow;r++){
+    const cell=ws[XLSX.utils.encode_cell({r,c:0})];
+    if(cell) cell.s={font:{bold:true,color:{rgb:"4B6475"},sz:10},fill:{fgColor:{rgb:"F2F7FB"}}};
+  }
+  aoExcelApplyPolishedStyle(ws,{...opts,titleRows:headerRow,headerRow:headerRow,widths:opts.widths||[]});
+  return ws;
+}
+
+function aoExcelStyleSummary(ws, widths, headerRow=5){
+  const range=XLSX.utils.decode_range(ws['!ref']);
+  ws['!cols']=(widths||[]).map(w=>({wch:w}));
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:2}}];
+  if(ws.A1) ws.A1.s={fill:{fgColor:{rgb:"0F3D58"}},font:{bold:true,color:{rgb:"FFFFFF"},sz:16},alignment:{horizontal:"left",vertical:"center"}};
+  for(let c=0;c<=2;c++){
+    const h=ws[XLSX.utils.encode_cell({r:headerRow,c})];
+    if(h) h.s={fill:{fgColor:{rgb:"1F4E78"}},font:{bold:true,color:{rgb:"FFFFFF"},sz:11},alignment:{horizontal:"center",vertical:"center",wrapText:true}};
+  }
+  for(let r=headerRow+1;r<=range.e.r;r++){
+    for(let c=0;c<=2;c++){
+      const cell=ws[XLSX.utils.encode_cell({r,c})];
+      if(!cell) continue;
+      cell.s={fill:{fgColor:{rgb:(r%2===0?"F7FBFF":"FFFFFF")}},font:{color:{rgb:"203040"},sz:10},border:{bottom:{style:"hair",color:{rgb:"DCE6F1"}}}};
+    }
+  }
+  const totalRow=range.e.r;
+  for(let c=0;c<=2;c++){
+    const cell=ws[XLSX.utils.encode_cell({r:totalRow,c})];
+    if(cell) cell.s={fill:{fgColor:{rgb:"D9EAF7"}},font:{bold:true,color:{rgb:"0F3D58"},sz:10},border:{top:{style:"thin",color:{rgb:"9FBAD0"}}}};
+  }
+  for(let r=headerRow+1;r<=totalRow;r++){
+    const cell=ws[XLSX.utils.encode_cell({r,c:2})];
+    if(cell) { cell.z='₱#,##0.00'; cell.alignment={horizontal:"right",vertical:"center"}; }
+  }
+  ws['!rows']=[]; ws['!rows'][0]={hpt:24}; ws['!rows'][headerRow]={hpt:28};
+  for(let r=headerRow+1;r<=range.e.r;r++) ws['!rows'][r]={hpt:20};
+  ws['!freeze']={xSplit:0,ySplit:headerRow+1};
+  ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:headerRow,c:0},e:{r:range.e.r,c:2}})};
+}
+
 function aoExcelCellValue(row,col){
   const value = row?.raw?.[col] ?? row?.[col] ?? "";
   return value === null || value === undefined ? "" : value;
@@ -13904,63 +14040,60 @@ async function downloadSoldOutExcel(){
   if(button) button.disabled=true;
 
   try{
-    const branch=String(
-      document.getElementById("branch")?.value || "ALL"
-    ).trim().toUpperCase();
-
-    /* Export the current Sold Out result, but only MARKED rows. */
+    const branch=String(document.getElementById("branch")?.value || "ALL").trim().toUpperCase();
     const sourceRows=getVisibleRows().filter(r=>
-      String(r?.raw?.STATUS ?? r?.STATUS ?? "")
-        .trim().toUpperCase()==="MARKED"
+      String(r?.raw?.STATUS ?? r?.STATUS ?? "").trim().toUpperCase()==="MARKED"
     );
 
-    /* A-Z = the first 26 source columns, including the header row. */
     const headers=DB_COLUMNS.slice(0,26);
-    const data=sourceRows.map(row=>
-      headers.map(col=>aoExcelCellValue(row,col))
-    );
+    const data=sourceRows.map(row=>headers.map(col=>aoExcelCellValue(row,col)));
+    const meta=[
+      ["Branch",aoPdfBranchLabel(branch)],
+      ["Date From",document.getElementById("soldDateFrom")?.value || "All"],
+      ["Date To",document.getElementById("soldDateTo")?.value || "All"],
+      ["Records",sourceRows.length]
+    ];
 
     const wb=XLSX.utils.book_new();
-    const ws=XLSX.utils.aoa_to_sheet([headers,...data]);
-    ws["!cols"]=headers.map(()=>({wch:18}));
+    const ws=aoExcelMakeTitleSheet(
+      "ACEBEDO OPTICAL — SOLD OUT",
+      meta,
+      headers,
+      data,
+      {
+        widths:[14,16,18,14,14,14,14,14,16,14,12,12,12,12,28,14,14,18,18,18,18,26,14,18,15,22],
+        moneyCols:[16],
+        dateCols:[],
+        centerCols:[0,12,20,21,23,24,25]
+      }
+    );
     XLSX.utils.book_append_sheet(wb,ws,"SOLD OUT");
 
     const grouped=new Map();
     sourceRows.forEach(row=>{
-      const b=String(
-        row?.raw?.BR ?? row?.branch ?? branch ?? ""
-      ).trim().toUpperCase() || "UNKNOWN";
-      const amount=aoExcelMoney(
-        row?.raw?.SELLINGPRICE ?? row?.sellingPrice
-      );
-      const item=grouped.get(b) || {branch:b,items:0,amount:0};
-      item.items++;
-      item.amount+=amount;
-      grouped.set(b,item);
+      const b=String(row?.raw?.BR ?? row?.branch ?? branch ?? "").trim().toUpperCase() || "UNKNOWN";
+      const amount=aoExcelMoney(row?.raw?.SELLINGPRICE ?? row?.sellingPrice);
+      const item=grouped.get(b)||{branch:b,items:0,amount:0};
+      item.items++; item.amount+=amount; grouped.set(b,item);
     });
-
-    const summaryRows=Array.from(grouped.values()).sort((a,b)=>
-      String(a.branch).localeCompare(String(b.branch))
-    );
+    const summaryRows=Array.from(grouped.values()).sort((a,b)=>String(a.branch).localeCompare(String(b.branch)));
     const totalAmount=summaryRows.reduce((sum,row)=>sum+row.amount,0);
-
     const summaryData=[
       ["SOLD ITEMS SUMMARY"],
-      ["Branch Filter",branch],
-      ["Date From",document.getElementById("soldDateFrom")?.value || ""],
-      ["Date To",document.getElementById("soldDateTo")?.value || ""],
+      ["Branch Filter",aoPdfBranchLabel(branch)],
+      ["Date From",document.getElementById("soldDateFrom")?.value || "All"],
+      ["Date To",document.getElementById("soldDateTo")?.value || "All"],
+      ["Generated",formatDateValue(new Date().toISOString())],
       [],
       ["BRANCH","ITEMS","TOTAL SELLING PRICE"],
       ...summaryRows.map(x=>[x.branch,x.items,x.amount]),
       ["GRAND TOTAL",sourceRows.length,totalAmount]
     ];
     const summaryWs=XLSX.utils.aoa_to_sheet(summaryData);
-    summaryWs["!cols"]=[{wch:22},{wch:18},{wch:22}];
+    aoExcelStyleSummary(summaryWs,[24,18,24],6);
     XLSX.utils.book_append_sheet(wb,summaryWs,"SUMMARY");
 
-    const filename=
-      "Acebedo_Sold_Out_"+branch+"_"+formatFileDate()+".xlsx";
-    XLSX.writeFile(wb,filename);
+    XLSX.writeFile(wb,"Acebedo_Sold_Out_"+branch+"_"+formatFileDate()+".xlsx");
     showStatus("Sold Out Excel downloaded.");
   }catch(e){
     console.error("Sold Out Excel failed:",e);
@@ -13999,65 +14132,59 @@ function aoMissingExcelRows(){
 }
 
 async function downloadReportedMissingExcel(){
-  const button=document.querySelector(
-    "[data-reported-excel-download='1']"
-  );
+  const button=document.querySelector("[data-reported-excel-download='1']");
   if(button) button.disabled=true;
 
   try{
-    const branch=String(
-      document.getElementById("reportedMissingBranchFilter")?.value || ""
-    ).trim().toUpperCase();
-
+    const branch=String(document.getElementById("reportedMissingBranchFilter")?.value || "").trim().toUpperCase();
     const sourceRows=aoMissingExcelRows();
-    /* A-V = first 22 source columns, including the header row. */
     const headers=DB_COLUMNS.slice(0,22);
-    const data=sourceRows.map(row=>
-      headers.map(col=>row?.[col] ?? "")
-    );
+    const data=sourceRows.map(row=>headers.map(col=>row?.[col] ?? ""));
+    const meta=[
+      ["Branch",branch ? aoPdfBranchLabel(branch) : "Selected branches"],
+      ["Status","UNRESOLVED ONLY"],
+      ["Records",sourceRows.length]
+    ];
 
     const wb=XLSX.utils.book_new();
-    const ws=XLSX.utils.aoa_to_sheet([headers,...data]);
-    ws["!cols"]=headers.map(()=>({wch:18}));
-    XLSX.utils.book_append_sheet(
-      wb,
-      ws,
-      "REPORTED MISSING"
+    const ws=aoExcelMakeTitleSheet(
+      "ACEBEDO OPTICAL — REPORTED MISSING",
+      meta,
+      headers,
+      data,
+      {
+        widths:[14,16,30,18,18,16,16,16,16,14,14,12,14,14,30,20,18,18,18,18,18,22],
+        moneyCols:[16],
+        dateCols:[],
+        centerCols:[0,11,20,21]
+      }
     );
+    XLSX.utils.book_append_sheet(wb,ws,"REPORTED MISSING");
 
     const grouped=new Map();
     sourceRows.forEach(row=>{
       const b=String(row?.BR ?? "").trim().toUpperCase() || "UNKNOWN";
       const amount=aoExcelMoney(row?.SELLINGPRICE);
-      const item=grouped.get(b) || {branch:b,items:0,amount:0};
-      item.items++;
-      item.amount+=amount;
-      grouped.set(b,item);
+      const item=grouped.get(b)||{branch:b,items:0,amount:0};
+      item.items++; item.amount+=amount; grouped.set(b,item);
     });
-
-    const summaryRows=Array.from(grouped.values()).sort((a,b)=>
-      String(a.branch).localeCompare(String(b.branch))
-    );
+    const summaryRows=Array.from(grouped.values()).sort((a,b)=>String(a.branch).localeCompare(String(b.branch)));
     const totalAmount=summaryRows.reduce((sum,row)=>sum+row.amount,0);
-
     const summaryData=[
       ["REPORTED MISSING SUMMARY"],
-      ["STATUS","UNRESOLVED ONLY"],
-      ["Branch Filter",branch || "ALL SELECTED BRANCHES"],
+      ["Status","UNRESOLVED ONLY"],
+      ["Branch Filter",branch ? aoPdfBranchLabel(branch) : "Selected branches"],
+      ["Generated",formatDateValue(new Date().toISOString())],
       [],
       ["BRANCH","UNRESOLVED ITEMS","TOTAL SELLING PRICE"],
       ...summaryRows.map(x=>[x.branch,x.items,x.amount]),
       ["GRAND TOTAL",sourceRows.length,totalAmount]
     ];
     const summaryWs=XLSX.utils.aoa_to_sheet(summaryData);
-    summaryWs["!cols"]=[{wch:22},{wch:20},{wch:22}];
+    aoExcelStyleSummary(summaryWs,[24,22,24],5);
     XLSX.utils.book_append_sheet(wb,summaryWs,"SUMMARY");
 
-    const filename=
-      "Acebedo_Reported_Missing_"+
-      (branch || "ALL_BRANCHES")+"_"+
-      formatFileDate()+".xlsx";
-    XLSX.writeFile(wb,filename);
+    XLSX.writeFile(wb,"Acebedo_Reported_Missing_"+(branch||"SELECTED_BRANCHES")+"_"+formatFileDate()+".xlsx");
     showStatus("Reported Missing Excel downloaded (UNRESOLVED only).");
   }catch(e){
     console.error("Reported Missing Excel failed:",e);
@@ -14645,9 +14772,39 @@ async function startExport(){
 
       totalRemaining += remaining.length;
 
+      const exportHeaders = DB_COLUMNS.filter(col=>
+        remaining.some(row=>Object.prototype.hasOwnProperty.call(row,col))
+      );
+      const exportRows = remaining.map(row=>
+        exportHeaders.map(col=>row?.[col] ?? "")
+      );
+      const exportWs = aoExcelMakeTitleSheet(
+        "ACEBEDO OPTICAL — "+b+" REMAINING STOCKS",
+        [
+          ["Branch",aoPdfBranchLabel(b)],
+          ["Records",remaining.length],
+          ["Generated",formatDateValue(new Date().toISOString())]
+        ],
+        exportHeaders,
+        exportRows,
+        {
+          widths:exportHeaders.map(col=>{
+            if(col==="DESCRIPTION") return 34;
+            if(col==="SUPPLIER") return 24;
+            if(col==="USER EMAIL") return 28;
+            if(col==="DATE AND TIME") return 22;
+            if(col==="QR") return 20;
+            return 14;
+          }),
+          moneyCols:exportHeaders.includes("SELLINGPRICE")?[exportHeaders.indexOf("SELLINGPRICE")]:[],
+          centerCols:exportHeaders
+            .map((col,i)=>["BR","NTAGN","LENSTYPE","SI NO.","STATUS"].includes(col)?i:-1)
+            .filter(i=>i>=0)
+        }
+      );
       XLSX.utils.book_append_sheet(
         wb,
-        XLSX.utils.json_to_sheet(remaining),
+        exportWs,
         safeSheetName(b + "_REMAINING")
       );
 

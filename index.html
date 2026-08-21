@@ -14085,7 +14085,7 @@ function openReportedMissingPopup(){
         </div>
         <div class="reportedMissingControls">
           <select id="reportedMissingBranchFilter" class="reportedMissingSelect">
-        
+            <option value="">SELECT BRANCH</option>
             ${BRANCHES.map(b=>`<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`).join("")}
           </select>
           <select id="reportedMissingStatusFilter" class="reportedMissingSelect">

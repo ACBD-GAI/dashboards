@@ -10820,13 +10820,22 @@ async function saveSoldMark(button){
     const params = new URLSearchParams();
     params.set("NTAGN","eq." + tag);
 
+    const markedNow = !currentlyMarked;
+    const markTimestamp = philippineDateTime();
+    const markBody = {
+      STATUS: markedNow ? "MARKED" : ""
+    };
+
+    /* Only refresh the timestamp when the SOLD row is MARKED. */
+    if(markedNow){
+      markBody["DATE AND TIME"] = markTimestamp;
+    }
+
     await supabaseRequest(
       table + "?" + params.toString(),
       {
         method:"PATCH",
-        body:{
-          STATUS: currentlyMarked ? "" : "MARKED"
-        },
+        body:markBody,
         prefer:"return=minimal"
       }
     );
@@ -10837,8 +10846,16 @@ async function saveSoldMark(button){
     );
 
     if(row){
-      row.marked = !currentlyMarked;
-      if(row.raw) row.raw.STATUS = row.marked ? "MARKED" : "";
+      row.marked = markedNow;
+      if(row.raw){
+        row.raw.STATUS = row.marked ? "MARKED" : "";
+        if(markedNow){
+          row.raw["DATE AND TIME"] = markTimestamp;
+        }
+      }
+      if(markedNow && row.date !== undefined){
+        row.date = markTimestamp;
+      }
     }
 
     showStatus(

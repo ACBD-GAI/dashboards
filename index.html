@@ -4001,8 +4001,8 @@ select:disabled{
 .reportedMissingInput,.reportedMissingSelect{width:100%;min-height:40px;padding:0 12px;border:1px solid #cbd5e1;border-radius:11px;background:#fff;color:#173247;outline:none;font-size:11px;font-weight:750;}
 .reportedMissingInput:focus,.reportedMissingSelect:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
 .reportedMissingList{max-height:58vh;overflow:auto;padding:10px 12px;background:#f8fbfd;}
-.reportedMissingHeader{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 125px 115px 235px;gap:10px;padding:9px 12px;color:#315267;font-size:9px;font-weight:900;letter-spacing:.06em;}
-.reportedMissingRow{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 125px 115px 235px;gap:10px;align-items:center;padding:11px 12px;margin:5px 0;border:1px solid #dce8ef;border-radius:13px;background:#fff;box-shadow:0 3px 9px rgba(15,23,42,.03);}
+.reportedMissingHeader{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 115px 235px;gap:10px;padding:9px 12px;color:#315267;font-size:9px;font-weight:900;letter-spacing:.06em;}
+.reportedMissingRow{display:grid;grid-template-columns:72px 120px minmax(220px,1fr) 110px 115px 235px;gap:10px;align-items:center;padding:11px 12px;margin:5px 0;border:1px solid #dce8ef;border-radius:13px;background:#fff;box-shadow:0 3px 9px rgba(15,23,42,.03);}
 .reportedMissingPriceInput{width:100%;min-height:32px;padding:6px 8px;border:1px solid #cbdde7;border-radius:8px;outline:none;background:#fff;color:#173247;font-size:11px;font-weight:850;text-align:right;box-sizing:border-box;}
 .reportedMissingPriceInput:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
 .reportedMissingPriceInput.saving{opacity:.65;}
@@ -14400,7 +14400,7 @@ function openReportedMissingPopup(){
         </div>
       </div>
       <div class="reportedMissingHeader">
-        <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div>DATE AND TIME</div><div style="text-align:right;">SELLING PRICE</div><div style="text-align:right;">ACTIONS</div>
+        <div>BRANCH</div><div>LENS TYPE</div><div>DESCRIPTION</div><div>TAG</div><div style="text-align:right;">SELLING PRICE</div><div style="text-align:right;">ACTIONS</div>
       </div>
       <div id="reportedMissingList" class="reportedMissingList"><div class="reportedMissingEmpty">⏳ Loading reported missing...</div></div>
       <div id="reportedMissingPopupStatus" class="reportedMissingStatus"></div>
@@ -14525,13 +14525,6 @@ function renderReportedMissingPopup(){
       <div class="reportedMissingCell">${escapeHtml(String(row?.LENSTYPE||"—"))}</div>
       <div class="reportedMissingCell description">${escapeHtml(String(row?.DESCRIPTION||"—"))}</div>
       <div class="reportedMissingCell"><span class="tag">${escapeHtml(t||"—")}</span></div>
-      <div class="reportedMissingCell">
-  ${escapeHtml(
-    row?.["DATE AND TIME"]
-      ? formatDateValue(row["DATE AND TIME"])
-      : "—"
-  )}
-</div>
       <div class="reportedMissingCell">
         <input
           type="number"

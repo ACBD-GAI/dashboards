@@ -12237,6 +12237,7 @@ async function importDirect(
   /* =======================================================
      NORMALIZE FILE
   ======================================================= */
+
   let mappedRows =
     rows
       .map(
@@ -12250,41 +12251,50 @@ async function importDirect(
       );
 
   if(!mappedRows.length){
+
     throw new Error(
       "No valid NTAGN values were found."
     );
+
   }
 
   /* =======================================================
      FORCE SELECTED BRANCH
   ======================================================= */
+
   mappedRows.forEach(
     row=>{
+
       row["BR"] =
         branch;
+
     }
   );
 
   /* =======================================================
-     REMOVE DUPLICATES INSIDE THE UPLOADED FILE
-     Keep the last occurrence of each tag number.
+     REMOVE DUPLICATE NTAGN
   ======================================================= */
+
   const unique =
     new Map();
 
   mappedRows.forEach(
     row=>{
+
       const tag =
         String(
           row["NTAGN"] || ""
         ).trim();
 
       if(tag){
+
         unique.set(
           tag,
           row
         );
+
       }
+
     }
   );
 
@@ -12293,104 +12303,190 @@ async function importDirect(
       unique.values()
     );
 
+  /* =======================================================
+     SKIP ITEMS ALREADY IN REPORTED MISSING
+
+     Match by BR + NTAGN only. Any imported stock that already
+     exists in reported_missing is not uploaded to STOCKS or
+     mirrored into AUDIT.
+  ======================================================= */
+  const reportedMissingTable ="reported_missing";
+  const reportedMissingKeys = new Set();
+  let reportedMissingOffset = 0;
+
+  while(true){
+    const params = new URLSearchParams();
+    params.set("select","BR,NTAGN");
+    params.set("BR","eq." + branch);
+    params.set("limit",String(SUPABASE_PAGE_SIZE));
+    params.set("offset",String(reportedMissingOffset));
+
+    const reportedRows = await supabaseRequest(
+      reportedMissingTable + "?" + params.toString()
+    );
+
+    const batch = Array.isArray(reportedRows) ? reportedRows : [];
+
+    batch.forEach(row=>{
+      const rowBranch = String(row?.BR ?? "").trim().toUpperCase();
+      const rowTag = String(row?.NTAGN ?? "").trim().toUpperCase();
+      if(rowBranch && rowTag){
+        reportedMissingKeys.add(rowBranch + "|" + rowTag);
+      }
+    });
+
+    if(batch.length < SUPABASE_PAGE_SIZE){
+      break;
+    }
+
+    reportedMissingOffset += SUPABASE_PAGE_SIZE;
+  }
+
+  const beforeReportedMissingFilter = mappedRows.length;
+
+  mappedRows = mappedRows.filter(row=>{
+    const rowBranch = String(row?.BR ?? branch).trim().toUpperCase();
+    const rowTag = String(row?.NTAGN ?? "").trim().toUpperCase();
+    return !reportedMissingKeys.has(rowBranch + "|" + rowTag);
+  });
+
+  const skippedReportedMissing =
+    beforeReportedMissingFilter - mappedRows.length;
+
   if(!mappedRows.length){
     throw new Error(
-      "No valid stock records found after processing."
+      skippedReportedMissing
+        ? "Import cancelled: all uploaded items already exist in Reported Missing."
+        : "No valid stock records found after processing."
     );
   }
 
-  /* =======================================================
-     CHECK DUPLICATES IN BOTH STOCKS AND AUDIT
-
-     A tag is skipped when the same NTAGN already exists in
-     either the branch Stocks table OR the branch Audit table.
-
-     NOTHING is deleted.
-  ======================================================= */
-  const uploadedTags =
-    new Set(
-      mappedRows.map(
-        row =>
-          String(
-            row["NTAGN"] || ""
-          ).trim()
-      )
+  if(skippedReportedMissing){
+    showStatus(
+      skippedReportedMissing +
+      " uploaded item" +
+      (skippedReportedMissing === 1 ? "" : "s") +
+      " skipped because already in Reported Missing."
     );
+  }
+
+  if(!mappedRows.length){
+
+    throw new Error(
+      "No valid stock records found after processing."
+    );
+
+  }
+
+  /* =======================================================
+     DELETE OLD STOCKS FIRST
+  ======================================================= */
 
   updateQueue(
     "IMPORT",
     0,
     Math.max(
       1,
-      uploadedTags.size
+      mappedRows.length
     ),
-    "Checking duplicate tags in Stocks and Audit..."
+    "Deleting old " +
+    branch +
+    " stocks..."
   );
 
-  const [existingStockTags, existingAuditTags] =
-    await Promise.all([
-      getExistingImportTags(
-        table,
-        uploadedTags
-      ),
-      getExistingImportTags(
-        auditTable,
-        uploadedTags
-      )
-    ]);
+  const deleteParams =
+    new URLSearchParams();
 
-  const existingTags =
-    new Set([
-      ...existingStockTags,
-      ...existingAuditTags
-    ]);
+  /*
+   * The table is already branch-specific.
+   * NTAGN not null is used so PostgREST
+   * accepts the DELETE filter.
+   */
 
-  const beforeDuplicateFilter =
-    mappedRows.length;
+  deleteParams.set(
+    "NTAGN",
+    "not.is.null"
+  );
 
-  mappedRows =
-    mappedRows.filter(
-      row =>
-        !existingTags.has(
-          String(
-            row["NTAGN"] || ""
-          ).trim()
-        )
-    );
+  await supabaseRequest(
+    table +
+    "?" +
+    deleteParams.toString(),
+    {
+      method:"DELETE",
 
-  const skippedDuplicates =
-    beforeDuplicateFilter -
-    mappedRows.length;
+      /*
+       * Do NOT return deleted rows.
+       * Returning them makes the delete slower.
+       */
 
-  if(skippedDuplicates){
-    showStatus(
-      skippedDuplicates +
-      " uploaded item" +
-      (skippedDuplicates === 1 ? "" : "s") +
-      " skipped because the tag already exists in Stocks or Audit."
-    );
-  }
+      prefer:
+        "return=minimal"
+    }
+  );
 
-  if(!mappedRows.length){
-    throw new Error(
-      skippedDuplicates
-        ? "Import cancelled: all uploaded tag numbers already exist in Stocks or Audit."
-        : "No valid stock records remain to import."
-    );
-  }
+  updateQueue(
+    "IMPORT",
+    0,
+    Math.max(
+      1,
+      mappedRows.length
+    ),
+    "Old stocks deleted. Importing new stocks..."
+  );
+
+  await yieldToBrowser();
 
   /* =======================================================
-     INSERT NEW STOCKS ONLY
+     DELETE OLD AUDIT RECORDS
 
-     Existing Stocks and Audit records are preserved.
-     No DELETE operation is performed by this import.
+     IMPORT NOW REBUILDS AUDIT FROM THE SAME STOCK FILE.
+     EVERY IMPORTED STOCK STARTS AS AUDITED.
   ======================================================= */
+
+  updateQueue(
+    "IMPORT",
+    0,
+    Math.max(
+      1,
+      mappedRows.length
+    ),
+    "Deleting old " +
+    branch +
+    " audit records..."
+  );
+
+  const auditDeleteParams =
+    new URLSearchParams();
+
+  auditDeleteParams.set(
+    "NTAGN",
+    "not.is.null"
+  );
+
+  await supabaseRequest(
+    auditTable +
+    "?" +
+    auditDeleteParams.toString(),
+    {
+      method:"DELETE",
+      prefer:"return=minimal"
+    }
+  );
+
+  await yieldToBrowser();
+
+  /* =======================================================
+     INSERT NEW STOCKS IN BULK CHUNKS
+  ======================================================= */
+
   let inserted = 0;
+  let auditedInserted = 0;
 
   for(
-    let i = 0;
-    i < mappedRows.length;
-    i += IMPORT_CHUNK_SIZE
+    let i=0;
+    i<mappedRows.length;
+    i+=IMPORT_CHUNK_SIZE
   ){
 
     const chunk =
@@ -12403,10 +12499,43 @@ async function importDirect(
       table,
       {
         method:"POST",
+
         body:chunk,
+
+        /*
+         * Do not return inserted rows.
+         * This significantly reduces response data.
+         */
+
+        prefer:
+          "return=minimal"
+      }
+    );
+
+    /*
+     * AUDIT MIRROR:
+     * Copy the exact imported stock data into the
+     * branch audit table and mark every record AUDITED.
+     */
+    const auditChunk =
+      chunk.map(
+        row=>({
+          ...row,
+          STATUS:"AUDITED"
+        })
+      );
+
+    await supabaseRequest(
+      auditTable,
+      {
+        method:"POST",
+        body:auditChunk,
         prefer:"return=minimal"
       }
     );
+
+    auditedInserted +=
+      auditChunk.length;
 
     inserted +=
       chunk.length;
@@ -12415,39 +12544,38 @@ async function importDirect(
       "IMPORT",
       inserted,
       mappedRows.length,
-      "Adding " +
+      "Importing " +
       inserted +
       "/" +
       mappedRows.length +
-      " new stocks..."
+      " stocks + audit..."
     );
 
     await yieldToBrowser();
+
   }
 
   /* =======================================================
      COMPLETE
   ======================================================= */
+
   updateQueue(
     "IMPORT",
     mappedRows.length,
     mappedRows.length,
     "Complete • " +
     inserted +
-    " new stocks imported" +
-    (skippedDuplicates
-      ? " • " + skippedDuplicates + " duplicates skipped"
-      : "")
+    " stocks + " +
+    auditedInserted +
+    " audited records imported"
   );
 
   showStatus(
     "Import completed: " +
     inserted +
-    " new stocks imported" +
-    (skippedDuplicates
-      ? " • " + skippedDuplicates + " duplicates skipped"
-      : "") +
-    ". Existing Stocks and Audit records were preserved."
+    " stocks imported and " +
+    auditedInserted +
+    " audit records marked AUDITED. Old stocks and audit records were replaced."
   );
 
   setTimeout(
@@ -12458,7 +12586,6 @@ async function importDirect(
   );
 
 }
-
 /* =========================================================
    BROWSER YIELD
 ========================================================= */

@@ -4029,354 +4029,6 @@ select:disabled{
 
 </style>
 
-
-<style id="reportedMissingStylishOnly">
-/* =========================================================
-   REPORTED MISSING — VISUAL ENHANCEMENT ONLY
-   No logic/function changes.
-========================================================= */
-
-#reportedMissingModal .reportedMissingModal{
-  width:min(1180px,97vw);
-  height:min(90vh,920px);
-  max-height:90vh;
-  border-radius:24px;
-  border:1px solid rgba(220,38,38,.16);
-  background:#f8fafc;
-  box-shadow:
-    0 30px 90px rgba(15,23,42,.22),
-    0 8px 28px rgba(220,38,38,.10);
-  overflow:hidden;
-}
-
-#reportedMissingModal .reportedMissingHead{
-  padding:20px 22px 16px;
-  background:
-    radial-gradient(circle at 100% 0%,rgba(254,226,226,.95),transparent 34%),
-    linear-gradient(135deg,#ffffff 0%,#fff7f7 55%,#fff 100%);
-  border-bottom:1px solid #fee2e2;
-}
-
-#reportedMissingModal .reportedMissingHead .modalTitle{
-  font-size:25px !important;
-  font-weight:1000 !important;
-  letter-spacing:-.03em;
-  color:#7f1d1d !important;
-}
-
-#reportedMissingModal .reportedMissingHead .modalSub{
-  color:#991b1b !important;
-  font-weight:800 !important;
-  font-size:12px !important;
-}
-
-#reportedMissingModal .reportedMissingControls{
-  display:grid;
-  grid-template-columns:minmax(235px,1.1fr) minmax(150px,.55fr) minmax(280px,1.35fr) auto;
-  gap:10px;
-  margin-top:14px;
-  align-items:center;
-}
-
-#reportedMissingModal .reportedMissingSelect,
-#reportedMissingModal .reportedMissingInput{
-  min-height:50px;
-  height:50px;
-  border-radius:14px;
-  border:1.5px solid #d9e2ea;
-  background:#ffffff;
-  color:#172033;
-  font-size:14px;
-  font-weight:850;
-  outline:none;
-  box-shadow:0 4px 12px rgba(15,23,42,.045);
-  transition:.18s ease;
-}
-
-#reportedMissingModal #reportedMissingBranchFilter{
-  background:#ffffff;
-  color:#111827;
-  border:2px solid #ef4444;
-  font-size:16px;
-  font-weight:1000;
-  box-shadow:0 5px 16px rgba(220,38,38,.12);
-}
-
-#reportedMissingModal #reportedMissingStatusFilter{
-  color:#111827;
-  background:#ffffff;
-  border-color:#d9e2ea;
-}
-
-#reportedMissingModal #reportedMissingSearch{
-  color:#111827;
-  background:#ffffff;
-  border-color:#d9e2ea;
-}
-
-#reportedMissingModal #reportedMissingBranchFilter:focus{
-  border-color:#dc2626;
-  box-shadow:0 0 0 4px rgba(239,68,68,.12),0 6px 18px rgba(220,38,38,.13);
-}
-
-#reportedMissingModal #reportedMissingStatusFilter:focus,
-#reportedMissingModal #reportedMissingSearch:focus{
-  border-color:#94a3b8;
-  box-shadow:0 0 0 3px rgba(100,116,139,.10);
-}
-
-#reportedMissingModal #reportedMissingBranchFilter option{
-  font-size:14px;
-  font-weight:900;
-  color:#111827;
-  background:#ffffff;
-}
-
-#reportedMissingModal .controlBtn{
-  min-height:50px;
-  height:50px;
-  padding:0 16px;
-  border-radius:14px;
-  border:1px solid #cbd5e1;
-  background:#ffffff;
-  color:#334155;
-  font-weight:900;
-  box-shadow:0 4px 12px rgba(15,23,42,.045);
-}
-
-#reportedMissingModal .reportPdfActions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:9px;
-  margin-top:12px;
-}
-
-#reportedMissingModal .reportPdfBtn{
-  min-height:42px;
-  border-radius:12px;
-  padding:0 14px;
-  font-size:11px;
-  font-weight:950;
-  border:1px solid #d7e0e8;
-  box-shadow:0 4px 12px rgba(15,23,42,.04);
-  transition:.16s ease;
-}
-
-#reportedMissingModal .reportPdfBtn.primary{
-  background:#dc2626 !important;
-  border-color:#dc2626 !important;
-  color:#ffffff !important;
-  box-shadow:0 7px 18px rgba(220,38,38,.22);
-}
-
-#reportedMissingModal .reportPdfBtn:not(.primary){
-  background:#ffffff;
-  color:#334155;
-}
-
-#reportedMissingModal .reportPdfBtn:hover{
-  transform:translateY(-1px);
-}
-
-#reportedMissingModal .reportedMissingHeader{
-  padding:10px 16px;
-  margin:0 10px;
-  border-radius:12px;
-  background:#fee2e2;
-  color:#7f1d1d;
-  font-size:10px;
-  font-weight:1000;
-  letter-spacing:.08em;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
-}
-
-#reportedMissingModal .reportedMissingList{
-  padding:12px 14px 14px;
-  background:
-    linear-gradient(#f8fafc,#f8fafc) padding-box;
-  scrollbar-color:#ef4444 #eef2f7;
-  scrollbar-width:thin;
-}
-
-#reportedMissingModal .reportedMissingList::-webkit-scrollbar{
-  width:10px;
-}
-
-#reportedMissingModal .reportedMissingList::-webkit-scrollbar-track{
-  background:#eef2f7;
-  border-radius:999px;
-}
-
-#reportedMissingModal .reportedMissingList::-webkit-scrollbar-thumb{
-  background:linear-gradient(#ef4444,#b91c1c);
-  border-radius:999px;
-  border:2px solid #eef2f7;
-}
-
-#reportedMissingModal .reportedMissingRow{
-  padding:13px 14px;
-  margin:7px 0;
-  border:1px solid #e2e8f0;
-  border-left:4px solid #ef4444;
-  border-radius:16px;
-  background:#ffffff;
-  box-shadow:0 5px 16px rgba(15,23,42,.055);
-  transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;
-}
-
-#reportedMissingModal .reportedMissingRow:hover{
-  transform:translateY(-1px);
-  border-color:#fecaca;
-  box-shadow:0 9px 22px rgba(15,23,42,.08);
-}
-
-#reportedMissingModal .reportedMissingCell{
-  color:#243447;
-  font-size:12px;
-  font-weight:700;
-}
-
-#reportedMissingModal .reportedMissingCell.description{
-  color:#0f172a;
-  font-size:13px;
-  font-weight:800;
-  line-height:1.35;
-}
-
-#reportedMissingModal .branchTag{
-  display:inline-flex;
-  align-items:center;
-  min-height:28px;
-  padding:4px 9px;
-  border-radius:999px;
-  background:#fff1f2;
-  color:#b91c1c;
-  border:1px solid #fecaca;
-  font-weight:1000;
-  letter-spacing:.03em;
-}
-
-#reportedMissingModal .tag{
-  display:inline-flex;
-  align-items:center;
-  min-height:28px;
-  padding:4px 9px;
-  border-radius:9px;
-  background:#f1f5f9;
-  border:1px solid #dbe4eb;
-  color:#0f172a;
-  font-size:13px;
-  font-weight:1000;
-}
-
-#reportedMissingModal .reportedMissingPriceInput{
-  min-height:38px;
-  border-radius:10px;
-  border:1.5px solid #cbd5e1;
-  background:#ffffff;
-  color:#0f172a;
-  font-size:13px;
-  font-weight:900;
-}
-
-#reportedMissingModal .reportedMissingActions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-  justify-content:flex-end;
-}
-
-#reportedMissingModal .reportedMissingActions .actionBtn{
-  min-height:34px;
-  border-radius:10px;
-  font-size:10px;
-  font-weight:950;
-  padding:0 10px;
-}
-
-#reportedMissingModal .reportedMissingStatus{
-  padding:9px 14px 12px;
-  background:#ffffff;
-  border-top:1px solid #e5e7eb;
-  color:#64748b;
-  font-size:11px;
-  font-weight:800;
-}
-
-#reportedMissingModal .reportedMissingEmpty{
-  min-height:160px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  color:#64748b;
-  background:#ffffff;
-  border:1px dashed #cbd5e1;
-  border-radius:16px;
-  margin:8px 0;
-  font-size:13px;
-  font-weight:800;
-}
-
-@media(max-width:900px){
-  #reportedMissingModal .reportedMissingControls{
-    grid-template-columns:1fr 1fr;
-  }
-  #reportedMissingModal .reportedMissingSearch{
-    grid-column:1 / -1;
-  }
-  #reportedMissingModal .controlBtn{
-    width:100%;
-  }
-}
-
-@media(max-width:560px){
-  #reportedMissingModal .reportedMissingModal{
-    width:96vw;
-    height:92vh;
-    max-height:92vh;
-    border-radius:20px;
-  }
-
-  #reportedMissingModal .reportedMissingHead{
-    padding:16px 14px 12px;
-  }
-
-  #reportedMissingModal .reportedMissingControls{
-    grid-template-columns:1fr;
-  }
-
-  #reportedMissingModal .reportPdfActions{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-  }
-
-  #reportedMissingModal .reportPdfBtn{
-    width:100%;
-    min-height:40px;
-  }
-
-  #reportedMissingModal .reportedMissingHeader{
-    display:none;
-  }
-
-  #reportedMissingModal .reportedMissingRow{
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    padding:12px;
-  }
-
-  #reportedMissingModal .reportedMissingCell.description{
-    grid-column:1 / -1;
-  }
-
-  #reportedMissingModal .reportedMissingActions{
-    grid-column:1 / -1;
-    justify-content:flex-start;
-  }
-}
-</style>
-
 <style id="reportedMissingCounterClear">
 .reportedMissingStatCard .statIcon{
   display:none !important;
@@ -4420,7 +4072,7 @@ select:disabled{
 </style>
 
 
-<style id="reportedMissingCompactOnly">
+<style id="reportedMissingCompactV2">
 #reportedMissingModal .reportedMissingModal{
   width:min(1040px,95vw);
   height:min(84vh,820px);
@@ -4429,6 +4081,7 @@ select:disabled{
 }
 #reportedMissingModal .reportedMissingHead{
   padding:15px 17px 12px;
+  background:linear-gradient(135deg,#fff,#fff8f8);
 }
 #reportedMissingModal .reportedMissingHead .modalTitle{
   font-size:21px !important;
@@ -4443,20 +4096,25 @@ select:disabled{
 }
 #reportedMissingModal .reportedMissingSelect,
 #reportedMissingModal .reportedMissingInput{
-  min-height:42px;
-  height:42px;
+  min-height:42px !important;
+  height:42px !important;
   border-radius:11px;
-  font-size:12px;
   padding:0 10px;
+  font-size:12px;
 }
 #reportedMissingModal #reportedMissingBranchFilter{
-  font-size:13px;
+  background:#fff !important;
+  color:#111827 !important;
+  border:2px solid #ef4444 !important;
+  font-size:13px !important;
+  font-weight:1000 !important;
 }
-#reportedMissingModal #reportedMissingStatusFilter{
-  font-size:12px;
-}
+#reportedMissingModal #reportedMissingStatusFilter,
 #reportedMissingModal #reportedMissingSearch{
-  font-size:12px;
+  background:#fff !important;
+  color:#111827 !important;
+  border-color:#d9e2ea !important;
+  font-weight:800 !important;
 }
 #reportedMissingModal .controlBtn{
   min-height:42px;
@@ -4483,7 +4141,12 @@ select:disabled{
 }
 #reportedMissingModal .reportedMissingList{
   padding:8px 10px 10px;
+  scrollbar-width:thin;
+  scrollbar-color:#ef4444 #eef2f7;
 }
+#reportedMissingModal .reportedMissingList::-webkit-scrollbar{width:9px}
+#reportedMissingModal .reportedMissingList::-webkit-scrollbar-track{background:#eef2f7;border-radius:999px}
+#reportedMissingModal .reportedMissingList::-webkit-scrollbar-thumb{background:#ef4444;border-radius:999px}
 #reportedMissingModal .reportedMissingRow{
   grid-template-columns:68px 108px minmax(190px,1fr) 95px 105px 205px;
   gap:8px;
@@ -4491,12 +4154,8 @@ select:disabled{
   margin:4px 0;
   border-radius:12px;
 }
-#reportedMissingModal .reportedMissingCell{
-  font-size:10px;
-}
-#reportedMissingModal .reportedMissingCell.description{
-  font-size:11px;
-}
+#reportedMissingModal .reportedMissingCell{font-size:10px}
+#reportedMissingModal .reportedMissingCell.description{font-size:11px}
 #reportedMissingModal .branchTag,
 #reportedMissingModal .tag{
   min-height:24px;
@@ -4510,9 +4169,7 @@ select:disabled{
   border-radius:8px;
   font-size:11px;
 }
-#reportedMissingModal .reportedMissingActions{
-  gap:5px;
-}
+#reportedMissingModal .reportedMissingActions{gap:5px}
 #reportedMissingModal .reportedMissingActions .actionBtn{
   min-height:30px;
   border-radius:8px;
@@ -4524,13 +4181,25 @@ select:disabled{
   font-size:9px;
 }
 @media(max-width:900px){
-  #reportedMissingModal .reportedMissingControls{
-    grid-template-columns:1fr 1fr;
-  }
-  #reportedMissingModal .reportedMissingSearch{
-    grid-column:1 / -1;
-  }
+  #reportedMissingModal .reportedMissingControls{grid-template-columns:1fr 1fr}
+  #reportedMissingModal #reportedMissingSearch{grid-column:1/-1}
 }
+@media(max-width:560px){
+  #reportedMissingModal .reportedMissingModal{
+    width:96vw;
+    height:90vh;
+    max-height:90vh;
+    border-radius:18px;
+  }
+  #reportedMissingModal .reportedMissingControls{grid-template-columns:1fr}
+  #reportedMissingModal .reportPdfActions{display:grid;grid-template-columns:1fr 1fr}
+  #reportedMissingModal .reportPdfBtn{width:100%}
+  #reportedMissingModal .reportedMissingHeader{display:none}
+  #reportedMissingModal .reportedMissingRow{grid-template-columns:1fr 1fr}
+  #reportedMissingModal .reportedMissingCell.description{grid-column:1/-1}
+  #reportedMissingModal .reportedMissingActions{grid-column:1/-1;justify-content:flex-start}
+}
+</style>
 
 </head>
 

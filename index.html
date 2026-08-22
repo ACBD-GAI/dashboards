@@ -7278,6 +7278,20 @@ function updateSoldOnlyColumns(){
     document
       .getElementById("soldFilters");
 
+  /* SOLD OUT CARD: visible ONLY while SOLD OUT is selected. */
+  const soldTotalEl =
+    document.getElementById("soldTotal");
+
+  const soldStatCard =
+    soldTotalEl
+      ? soldTotalEl.closest(".statCard")
+      : null;
+
+  if(soldStatCard){
+    soldStatCard.style.display =
+      report === "sold" ? "" : "none";
+  }
+
   const auditFilters =
     document
       .getElementById("auditFilters");
@@ -7294,6 +7308,11 @@ function updateSoldOnlyColumns(){
       "show",
       report === "sold"
     );
+  }
+
+  /* SOLD OUT default date range = TODAY through TODAY. */
+  if(report === "sold"){
+    setSoldDateRangeToday();
   }
 
   if(auditFilters){
@@ -7337,14 +7356,32 @@ function updateSoldOnlyColumns(){
 
 }
 
+function setSoldDateRangeToday(){
+
+  const now = new Date();
+
+  /* Use the browser's local date, matching the dashboard user's local day. */
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const today = year + "-" + month + "-" + day;
+
+  const from = document.getElementById("soldDateFrom");
+  const to = document.getElementById("soldDateTo");
+
+  if(from && !from.value) from.value = today;
+  if(to && !to.value) to.value = today;
+}
+
 function clearSoldFilters(){
 
   const from = document.getElementById("soldDateFrom");
   const to = document.getElementById("soldDateTo");
   const mark = document.getElementById("soldMarkFilter");
 
-  if(from) from.value = "";
-  if(to) to.value = "";
+  /* Keep SOLD OUT defaulted to TODAY - TODAY. */
+  setSoldDateRangeToday();
+
   if(mark) mark.value = "ALL";
 
   applySoldFilters();

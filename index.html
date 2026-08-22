@@ -16193,23 +16193,36 @@ function aoChatSetAttachment(file){
   if(clear) clear.style.display=file ? "inline-flex" : "none";
 }
 function aoChatClearAttachment(){ const f=document.getElementById("aoChatFile"); if(f)f.value=""; aoChatSetAttachment(null); }
-function aoChatUploadImage(file,branch,email,sessionId,targetEmail){
+function aoChatUploadImage(file,branch,email,sessionId,targetEmail,message){
   return new Promise((resolve,reject)=>{
-    if(!AO_CHAT_ATTACHMENT_API_URL || AO_CHAT_ATTACHMENT_API_URL.includes("PASTE_CHAT_ATTACHMENT")){ reject(new Error("Chat attachment service is not configured yet.")); return; }
+    if(!AO_CHAT_ATTACHMENT_API_URL || AO_CHAT_ATTACHMENT_API_URL.includes('PASTE_CHAT_ATTACHMENT')){ reject(new Error('Chat attachment service is not configured yet.')); return; }
+    const clientId='att_'+Date.now()+'_'+Math.random().toString(36).slice(2,10);
     const reader=new FileReader();
     reader.onload=()=>{
-      const base64=String(reader.result||"").split(",")[1]||"";
-      const iframe=document.createElement("iframe"); iframe.name="aoChatUploadFrame_"+Date.now(); iframe.style.display="none";
-      let settled=false;
-      const cleanup=()=>{window.removeEventListener("message",onMessage); setTimeout(()=>iframe.remove(),1000);};
-      const onMessage=e=>{const d=e.data||{}; if(d.type!=="ACEBEDO_CHAT_UPLOAD_RESULT") return; if(settled)return; settled=true; cleanup(); d.ok?resolve(d):reject(new Error(d.error||"Image upload failed."));};
-      window.addEventListener("message",onMessage); document.body.appendChild(iframe);
-      const form=document.createElement("form"); form.method="POST"; form.action=AO_CHAT_ATTACHMENT_API_URL; form.target=iframe.name; form.enctype="application/x-www-form-urlencoded"; form.style.display="none";
-      const fields={action:"upload",sessionId,email,branch,targetEmail,fileName:file.name,mimeType:"image/jpeg",base64};
-      Object.entries(fields).forEach(([k,v])=>{const input=document.createElement("input"); input.type="hidden"; input.name=k; input.value=v; form.appendChild(input);});
-      document.body.appendChild(form); form.submit(); setTimeout(()=>{if(!settled){settled=true;cleanup();reject(new Error("Image upload timed out."));}},45000);
+      const base64=String(reader.result||'').split(',')[1]||'';
+      const iframe=document.createElement('iframe');
+      iframe.name='aoChatUploadFrame_'+clientId;
+      iframe.style.display='none';
+      const form=document.createElement('form');
+      form.method='POST'; form.action=AO_CHAT_ATTACHMENT_API_URL; form.target=iframe.name;
+      form.enctype='application/x-www-form-urlencoded'; form.style.display='none';
+      const fields={action:'upload',sessionId,email,branch,targetEmail,senderType:'DASHBOARD',message,clientId,fileName:file.name,mimeType:'image/jpeg',base64};
+      Object.entries(fields).forEach(([k,v])=>{const input=document.createElement('input');input.type='hidden';input.name=k;input.value=v;form.appendChild(input);});
+      document.body.appendChild(iframe); document.body.appendChild(form); form.submit();
+      let attempts=0;
+      const poll=async()=>{
+        attempts++;
+        try{
+          const rows=await supabaseRequest('chat_messages?select=id,attachment_drive_id,attachment_url,attachment_name,attachment_type,attachment_size,created_at&attachment_client_id=eq.'+encodeURIComponent(clientId)+'&limit=1');
+          if(Array.isArray(rows)&&rows.length){ iframe.remove(); form.remove(); resolve(rows[0]); return; }
+        }catch(e){}
+        if(attempts>=40){ iframe.remove(); form.remove(); reject(new Error('Image upload did not complete.')); return; }
+        setTimeout(poll,500);
+      };
+      setTimeout(poll,700);
     };
-    reader.onerror=()=>reject(new Error("Could not read image.")); reader.readAsDataURL(file);
+    reader.onerror=()=>reject(new Error('Could not read image.'));
+    reader.readAsDataURL(file);
   });
 }
 async function aoChatSend(){
@@ -16221,12 +16234,12 @@ async function aoChatSend(){
   if(!recipient){aoChatStatus("Select a branch user first.");return;}
   aoChatSending=true; const btn=document.getElementById("aoChatSend"); if(btn)btn.disabled=true; aoChatStatus(aoChatAttachmentFile?"Preparing image...":"Sending...");
   try{
-    let attachment={};
     if(aoChatAttachmentFile){
       aoChatAttachmentBusy=true; const compact=await aoChatCompressImage(aoChatAttachmentFile); aoChatStatus("Uploading image...");
-      attachment=await aoChatUploadImage(compact,branch,String(currentEmail).trim().toLowerCase(),sessionId,recipient);
+      await aoChatUploadImage(compact,branch,String(currentEmail).trim().toLowerCase(),sessionId,recipient,text);
+    }else{
+      await supabaseRequest("chat_messages",{method:"POST",prefer:"return=minimal",body:{branch,scanner_email:recipient,sender_email:String(currentEmail).trim().toLowerCase(),sender_type:"DASHBOARD",message:text}});
     }
-    await supabaseRequest("chat_messages",{method:"POST",prefer:"return=minimal",body:{branch,scanner_email:recipient,sender_email:String(currentEmail).trim().toLowerCase(),sender_type:"DASHBOARD",message:text,attachment_drive_id:attachment.fileId||null,attachment_url:attachment.url||null,attachment_name:attachment.fileName||null,attachment_type:attachment.mimeType||null,attachment_size:attachment.size||null}});
     input.value=""; aoChatClearAttachment(); aoChatStatus(""); aoChatConversationCache.delete(branch+"|"+recipient); await aoChatLoad(); aoChatLoadUnread().catch(()=>{});
   }catch(e){console.error("Dashboard chat send failed:",e);aoChatStatus(e?.message||"Message could not be sent.");}finally{aoChatAttachmentBusy=false;aoChatSending=false;if(btn)btn.disabled=false;}
 }

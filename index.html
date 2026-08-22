@@ -3999,8 +3999,9 @@ select:disabled{
 .reportedMissingHead{padding:18px 20px 14px;border-bottom:1px solid #e5edf3;background:linear-gradient(135deg,#ffffff,#fff8f8);flex:0 0 auto;}
 .reportedMissingControls{display:grid;grid-template-columns:180px minmax(220px,1fr) auto;gap:9px;margin-top:12px;}
 .reportedMissingSelect{width:100%;min-height:48px;padding:0 13px;border:2px solid #ef4444;border-radius:12px;background:#fff1f2;color:#111827;outline:none;font-size:16px;font-weight:950;letter-spacing:.01em;}
-#reportedMissingBranchFilter{color:#dc2626;background:#fff1f2;border-color:#ef4444;font-size:16px;font-weight:950;}
-#reportedMissingBranchFilter option{font-size:16px;font-weight:950;background:#fff1f2;}
+#reportedMissingBranchFilter{color:#111827;background:#fff;border-color:#cbd5e1;font-size:16px;font-weight:950;}
+#reportedMissingBranchFilter option{font-size:16px;font-weight:950;background:#fff;color:#111827;}
+#reportedMissingBranchFilter.has-unresolved{color:#fff;background:#dc2626;border-color:#dc2626;}
 #reportedMissingStatusFilter{color:#111827;background:#fff;border:2px solid #cbd5e1;font-size:15px;font-weight:850;}
 #reportedMissingSearch{width:100%;min-height:48px;padding:0 13px;border:2px solid #cbd5e1;border-radius:12px;background:#fff;color:#111827;outline:none;font-size:15px;font-weight:700;letter-spacing:.01em;}
 #reportedMissingBranchFilter:focus{border-color:#dc2626;box-shadow:0 0 0 3px rgba(239,68,68,.16);}
@@ -14301,11 +14302,17 @@ function updateReportedMissingBranchFilterCounts(){
     if(!b) return;
     const count=counts.get(b)||0;
     option.textContent=b+" ("+formatNumber(count)+")";
-    option.style.color = count > 0 ? "#dc2626" : "#111827";
+    option.style.color = count > 0 ? "#ffffff" : "#111827";
+    option.style.backgroundColor = count > 0 ? "#dc2626" : "#ffffff";
     option.style.fontWeight = "950";
   });
 
   if(selected) filter.value=selected;
+  const selectedCount = counts.get(selected)||0;
+  filter.classList.toggle("has-unresolved", selectedCount > 0);
+  filter.style.color = selectedCount > 0 ? "#ffffff" : "#111827";
+  filter.style.backgroundColor = selectedCount > 0 ? "#dc2626" : "#ffffff";
+  filter.style.borderColor = selectedCount > 0 ? "#dc2626" : "#cbd5e1";
 }
 
 function renderReportedMissingPopup(){

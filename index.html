@@ -15799,8 +15799,6 @@ function escapeHtmlAttribute(
 
 /* ================= PRIVATE CHAT: ADMIN <-> SELECTED BRANCH ================= */
 let aoChatOpen=false, aoChatSending=false, aoChatTimer=null, aoChatUnreadTotal=0;
-const AO_CHAT_ATTACHMENT_API_URL = "https://script.google.com/macros/s/AKfycbzGRfBqr3RBPxvfKJVgxRBgJZrBBNT89ISoM4jpKpE5t8ne7JK9Nppk_g_gyBfY7qkZ/exec";
-let aoChatAttachmentFile=null, aoChatAttachmentBusy=false;
 let aoChatNotifications=[];
 const aoChatRecipientCache=new Map();
 const aoChatConversationCache=new Map();
@@ -16071,7 +16069,7 @@ async function aoChatLoadUnread(){
   aoChatUnreadBusy=true;
   try{
     const rows=await supabaseRequest(
-      "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at,attachment_drive_id,attachment_url,attachment_name,attachment_type,attachment_size"+
+      "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at"+
       "&sender_type=eq.SCANNER&order=created_at.desc&limit=1000"
     );
     const grouped=new Map();
@@ -16111,7 +16109,7 @@ async function aoChatLoad(){
   aoChatLoadBusy=true;
   try{
     const rows=await supabaseRequest(
-      "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at,attachment_drive_id,attachment_url,attachment_name,attachment_type,attachment_size"+
+      "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at"+
       "&branch=eq."+encodeURIComponent(branch)+
       "&scanner_email=eq."+encodeURIComponent(recipient)+
       "&order=created_at.asc&limit=300"
@@ -16135,8 +16133,7 @@ function aoChatRenderConversation(list,branch,recipient,box){
       const mine=String(r.sender_email||"").toLowerCase()===String(currentEmail||"").toLowerCase();
       const label=String(r.sender_type||"").toUpperCase()==="SCANNER"?"BRANCH":(String(r.sender_type||"").toUpperCase()==="DASHBOARD"?"ADMIN":r.sender_type||"");
       const sep=firstUnread!==null&&r.id===firstUnread?'<div class="ao-chat-unread-divider">'+unread.length+' UNREAD MESSAGE'+(unread.length===1?'':'S')+' FROM '+aoChatEsc(recipient)+'</div>':'';
-      const attachment=r.attachment_url ? '<div class="ao-chat-attachment"><img src="'+aoChatEsc(r.attachment_url)+'" alt="Chat attachment" loading="lazy" onclick="window.open(this.src)"></div>' : '';
-      return sep+'<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(label)+' · '+aoChatEsc(r.sender_email||"")+'</div><div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div>'+attachment+'<div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';
+      return sep+'<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(label)+' · '+aoChatEsc(r.sender_email||"")+'</div><div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div><div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';
     }).join("");
     if(aoChatOpen&&wasBottom)box.scrollTop=box.scrollHeight;
   }
@@ -16170,84 +16167,60 @@ function aoChatToggle(){
     setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);
   }
 }
-async function aoChatCompressImage(file){
-  if(!file||!file.type.startsWith("image/")) throw new Error("Please select an image file.");
-  const bitmap=await createImageBitmap(file);
-  const max=1280;
-  const scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
-  const w=Math.max(1,Math.round(bitmap.width*scale));
-  const h=Math.max(1,Math.round(bitmap.height*scale));
-  const canvas=document.createElement("canvas"); canvas.width=w; canvas.height=h;
-  const ctx=canvas.getContext("2d",{alpha:false}); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); ctx.drawImage(bitmap,0,0,w,h);
-  bitmap.close();
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.75));
-  if(!blob) throw new Error("Could not prepare image.");
-  return new File([blob],(file.name||"image").replace(/\.[^.]+$/i,"")+'.jpg',{type:"image/jpeg"});
-}
-function aoChatPickImage(){ document.getElementById("aoChatFile")?.click(); }
-function aoChatSetAttachment(file){
-  aoChatAttachmentFile=file||null;
-  const name=document.getElementById("aoChatAttachmentName");
-  const clear=document.getElementById("aoChatAttachmentClear");
-  if(name) name.textContent=file ? "📷 "+file.name : "";
-  if(clear) clear.style.display=file ? "inline-flex" : "none";
-}
-function aoChatClearAttachment(){ const f=document.getElementById("aoChatFile"); if(f)f.value=""; aoChatSetAttachment(null); }
-function aoChatUploadImage(file,branch,email,sessionId,targetEmail,message){
-  return new Promise((resolve,reject)=>{
-    if(!AO_CHAT_ATTACHMENT_API_URL || AO_CHAT_ATTACHMENT_API_URL.includes('PASTE_CHAT_ATTACHMENT')){reject(new Error('Chat attachment service is not configured yet.'));return;}
-    const clientId='att_'+Date.now()+'_'+Math.random().toString(36).slice(2,10);
-    const reader=new FileReader();
-    reader.onload=()=>{
-      const base64=String(reader.result||'').split(',')[1]||'';
-      const iframe=document.createElement('iframe');
-      iframe.name='aoChatUploadFrame_'+clientId;
-      iframe.id=iframe.name;
-      iframe.style.display='none';
-      const form=document.createElement('form');
-      form.method='POST';
-      form.action=AO_CHAT_ATTACHMENT_API_URL;
-      form.target=iframe.name;
-      form.enctype='application/x-www-form-urlencoded';
-      form.style.display='none';
-      const fields={action:'upload',sessionId,email,branch,targetEmail,senderType:'DASHBOARD',message,clientId,fileName:file.name,mimeType:'image/jpeg',base64};
-      Object.entries(fields).forEach(([k,v])=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=v;form.appendChild(i)});
-      let done=false;
-      const cleanup=()=>{iframe.remove();form.remove();};
-      const finish=()=>{if(done)return;done=true;cleanup();setTimeout(()=>resolve({ok:true,clientId}),300);};
-      iframe.onload=finish;
-      iframe.onerror=()=>{if(done)return;done=true;cleanup();reject(new Error('Image upload request failed.'));};
-      document.body.appendChild(iframe);
-      document.body.appendChild(form);
-      form.submit();
-      setTimeout(()=>{if(!done)finish();},15000);
-    };
-    reader.onerror=()=>reject(new Error('Could not read image.'));
-    reader.readAsDataURL(file);
-  });
-}
-
 async function aoChatSend(){
   if(aoChatSending)return;
-  const input=document.getElementById("aoChatInput"); const text=String(input?.value||"").trim();
-  const branch=aoChatBranch(), recipient=aoChatRecipient();
-  if((!text&&!aoChatAttachmentFile)||!sessionId||!currentEmail){aoChatStatus("Type a message or attach an image, then log in.");return;}
-  if(!branch||branch==="ALL"){aoChatStatus("Select a specific branch first.");return;}
-  if(!recipient){aoChatStatus("Select a branch user first.");return;}
-  aoChatSending=true; const btn=document.getElementById("aoChatSend"); if(btn)btn.disabled=true; aoChatStatus(aoChatAttachmentFile?"Preparing image...":"Sending...");
+
+  const input=document.getElementById("aoChatInput");
+  const text=String(input?.value||"").trim();
+  const branch=aoChatBranch();
+  const recipient=aoChatRecipient();
+
+  if(!text||!sessionId||!currentEmail){
+    aoChatStatus("Please log in first.");
+    return;
+  }
+  if(!branch||branch==="ALL"){
+    aoChatStatus("Select a specific branch first.");
+    return;
+  }
+  if(!recipient){
+    aoChatStatus("Select a branch user first.");
+    return;
+  }
+
+  aoChatSending=true;
+  const btn=document.getElementById("aoChatSend");
+  if(btn)btn.disabled=true;
+  aoChatStatus("Sending...");
+
   try{
-    if(aoChatAttachmentFile){
-      aoChatAttachmentBusy=true; const compact=await aoChatCompressImage(aoChatAttachmentFile); aoChatStatus("Uploading image...");
-      await aoChatUploadImage(compact,branch,String(currentEmail).trim().toLowerCase(),sessionId,recipient,text);
-    }else{
-      await supabaseRequest("chat_messages",{method:"POST",prefer:"return=minimal",body:{branch,scanner_email:recipient,sender_email:String(currentEmail).trim().toLowerCase(),sender_type:"DASHBOARD",message:text}});
-    }
-    input.value=""; aoChatClearAttachment(); aoChatStatus(""); aoChatConversationCache.delete(branch+"|"+recipient); await aoChatLoad(); aoChatLoadUnread().catch(()=>{});
-  }catch(e){console.error("Dashboard chat send failed:",e);aoChatStatus(e?.message||"Message could not be sent.");}finally{aoChatAttachmentBusy=false;aoChatSending=false;if(btn)btn.disabled=false;}
+    await supabaseRequest("chat_messages",{
+      method:"POST",
+      prefer:"return=minimal",
+      body:{
+        branch:branch,
+        scanner_email:recipient,
+        sender_email:String(currentEmail).trim().toLowerCase(),
+        sender_type:"DASHBOARD",
+        message:text
+      }
+    });
+
+    input.value="";
+    aoChatStatus("");
+    aoChatConversationCache.delete(branch+"|"+recipient);
+    await aoChatLoad();
+    aoChatLoadUnread().catch(()=>{});
+  }catch(e){
+    console.error("Dashboard chat send failed:",e);
+    aoChatStatus(e?.message||"Message could not be sent.");
+  }finally{
+    aoChatSending=false;
+    if(btn)btn.disabled=false;
+  }
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
-  const file=document.getElementById("aoChatFile"); if(file)file.addEventListener("change",e=>aoChatSetAttachment(e.target.files?.[0]||null));
   const input=document.getElementById("aoChatInput");
   if(input){
     input.addEventListener("keydown",e=>{
@@ -16327,11 +16300,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="ao-chat-compose">
     <input id="aoChatInput" class="ao-chat-input" maxlength="500" autocomplete="off"
       placeholder="Message selected branch user...">
-    <button id="aoChatAttach" class="ao-chat-send" type="button" onclick="aoChatPickImage()" title="Attach image">📎</button>
     <button id="aoChatSend" class="ao-chat-send" type="button" onclick="aoChatSend()">➤</button>
-    <input id="aoChatFile" type="file" accept="image/jpeg,image/png,image/webp" style="display:none">
-    <span id="aoChatAttachmentName" style="display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px"></span>
-    <button id="aoChatAttachmentClear" type="button" onclick="aoChatClearAttachment()" style="display:none;min-width:30px;min-height:30px;padding:4px">✕</button>
   </div>
 
   <div id="aoChatStatus" class="ao-chat-status"></div>

@@ -16195,16 +16195,9 @@ function aoChatSetAttachment(file){
 function aoChatClearAttachment(){ const f=document.getElementById("aoChatFile"); if(f)f.value=""; aoChatSetAttachment(null); }
 function aoChatUploadImage(file,branch,email,sessionId,targetEmail,message){
   return new Promise((resolve,reject)=>{
-    if(!AO_CHAT_ATTACHMENT_API_URL || AO_CHAT_ATTACHMENT_API_URL.includes('PASTE_CHAT_ATTACHMENT')){
-      reject(new Error('Chat attachment service is not configured yet.'));
-      return;
-    }
+    if(!AO_CHAT_ATTACHMENT_API_URL || AO_CHAT_ATTACHMENT_API_URL.includes('PASTE_CHAT_ATTACHMENT')){reject(new Error('Chat attachment service is not configured yet.'));return;}
     const clientId='att_'+Date.now()+'_'+Math.random().toString(36).slice(2,10);
     const reader=new FileReader();
-    const cleanupNodes=()=>{
-      document.getElementById('aoChatUploadFrame_'+clientId)?.remove();
-      document.getElementById('aoChatUploadForm_'+clientId)?.remove();
-    };
     reader.onload=()=>{
       const base64=String(reader.result||'').split(',')[1]||'';
       const iframe=document.createElement('iframe');
@@ -16212,44 +16205,28 @@ function aoChatUploadImage(file,branch,email,sessionId,targetEmail,message){
       iframe.id=iframe.name;
       iframe.style.display='none';
       const form=document.createElement('form');
-      form.method='POST'; form.action=AO_CHAT_ATTACHMENT_API_URL; form.target=iframe.name;
-      form.enctype='application/x-www-form-urlencoded'; form.style.display='none';
-      form.id='aoChatUploadForm_'+clientId;
+      form.method='POST';
+      form.action=AO_CHAT_ATTACHMENT_API_URL;
+      form.target=iframe.name;
+      form.enctype='application/x-www-form-urlencoded';
+      form.style.display='none';
       const fields={action:'upload',sessionId,email,branch,targetEmail,senderType:'DASHBOARD',message,clientId,fileName:file.name,mimeType:'image/jpeg',base64};
-      Object.entries(fields).forEach(([k,v])=>{const input=document.createElement('input');input.type='hidden';input.name=k;input.value=v;form.appendChild(input);});
-      document.body.appendChild(iframe); document.body.appendChild(form); form.submit();
-
-      let attempts=0;
-      const poll=()=>{
-        attempts++;
-        const callbackName='aoChatUploadStatus_'+clientId.replace(/[^a-zA-Z0-9_$]/g,'_')+'_'+attempts;
-        const script=document.createElement('script');
-        const cleanupScript=()=>{try{delete window[callbackName];}catch(e){} script.remove();};
-        window[callbackName]=(status)=>{
-          cleanupScript();
-          if(status?.status==='completed'){
-            cleanupNodes(); resolve(status.result); return;
-          }
-          if(status?.status==='error'){
-            cleanupNodes(); reject(new Error(status.error||'Image upload failed.')); return;
-          }
-          if(attempts>=60){cleanupNodes();reject(new Error('Image upload did not complete.'));return;}
-          setTimeout(poll,500);
-        };
-        script.onerror=()=>{
-          cleanupScript();
-          if(attempts>=60){cleanupNodes();reject(new Error('Unable to check image upload status.'));return;}
-          setTimeout(poll,500);
-        };
-        script.src=AO_CHAT_ATTACHMENT_API_URL+'?action=status&clientId='+encodeURIComponent(clientId)+'&callback='+encodeURIComponent(callbackName);
-        document.body.appendChild(script);
-      };
-      setTimeout(poll,700);
+      Object.entries(fields).forEach(([k,v])=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=v;form.appendChild(i)});
+      let done=false;
+      const cleanup=()=>{iframe.remove();form.remove();};
+      const finish=()=>{if(done)return;done=true;cleanup();setTimeout(()=>resolve({ok:true,clientId}),300);};
+      iframe.onload=finish;
+      iframe.onerror=()=>{if(done)return;done=true;cleanup();reject(new Error('Image upload request failed.'));};
+      document.body.appendChild(iframe);
+      document.body.appendChild(form);
+      form.submit();
+      setTimeout(()=>{if(!done)finish();},15000);
     };
     reader.onerror=()=>reject(new Error('Could not read image.'));
     reader.readAsDataURL(file);
   });
 }
+
 async function aoChatSend(){
   if(aoChatSending)return;
   const input=document.getElementById("aoChatInput"); const text=String(input?.value||"").trim();

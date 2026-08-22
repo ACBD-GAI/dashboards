@@ -4419,6 +4419,119 @@ select:disabled{
 }
 </style>
 
+
+<style id="reportedMissingCompactOnly">
+#reportedMissingModal .reportedMissingModal{
+  width:min(1040px,95vw);
+  height:min(84vh,820px);
+  max-height:84vh;
+  border-radius:20px;
+}
+#reportedMissingModal .reportedMissingHead{
+  padding:15px 17px 12px;
+}
+#reportedMissingModal .reportedMissingHead .modalTitle{
+  font-size:21px !important;
+}
+#reportedMissingModal .reportedMissingHead .modalSub{
+  font-size:10px !important;
+}
+#reportedMissingModal .reportedMissingControls{
+  grid-template-columns:170px 145px minmax(220px,1fr) auto;
+  gap:7px;
+  margin-top:10px;
+}
+#reportedMissingModal .reportedMissingSelect,
+#reportedMissingModal .reportedMissingInput{
+  min-height:42px;
+  height:42px;
+  border-radius:11px;
+  font-size:12px;
+  padding:0 10px;
+}
+#reportedMissingModal #reportedMissingBranchFilter{
+  font-size:13px;
+}
+#reportedMissingModal #reportedMissingStatusFilter{
+  font-size:12px;
+}
+#reportedMissingModal #reportedMissingSearch{
+  font-size:12px;
+}
+#reportedMissingModal .controlBtn{
+  min-height:42px;
+  height:42px;
+  padding:0 12px;
+  border-radius:11px;
+  font-size:11px;
+}
+#reportedMissingModal .reportPdfActions{
+  gap:7px;
+  margin-top:9px;
+}
+#reportedMissingModal .reportPdfBtn{
+  min-height:36px;
+  border-radius:10px;
+  padding:0 11px;
+  font-size:9px;
+}
+#reportedMissingModal .reportedMissingHeader{
+  margin:0 8px;
+  padding:8px 10px;
+  font-size:8px;
+  gap:7px;
+}
+#reportedMissingModal .reportedMissingList{
+  padding:8px 10px 10px;
+}
+#reportedMissingModal .reportedMissingRow{
+  grid-template-columns:68px 108px minmax(190px,1fr) 95px 105px 205px;
+  gap:8px;
+  padding:9px 10px;
+  margin:4px 0;
+  border-radius:12px;
+}
+#reportedMissingModal .reportedMissingCell{
+  font-size:10px;
+}
+#reportedMissingModal .reportedMissingCell.description{
+  font-size:11px;
+}
+#reportedMissingModal .branchTag,
+#reportedMissingModal .tag{
+  min-height:24px;
+  padding:3px 7px;
+  font-size:10px;
+  border-radius:8px;
+}
+#reportedMissingModal .reportedMissingPriceInput{
+  min-height:32px;
+  padding:5px 7px;
+  border-radius:8px;
+  font-size:11px;
+}
+#reportedMissingModal .reportedMissingActions{
+  gap:5px;
+}
+#reportedMissingModal .reportedMissingActions .actionBtn{
+  min-height:30px;
+  border-radius:8px;
+  font-size:9px;
+  padding:0 8px;
+}
+#reportedMissingModal .reportedMissingStatus{
+  padding:7px 10px 9px;
+  font-size:9px;
+}
+@media(max-width:900px){
+  #reportedMissingModal .reportedMissingControls{
+    grid-template-columns:1fr 1fr;
+  }
+  #reportedMissingModal .reportedMissingSearch{
+    grid-column:1 / -1;
+  }
+}
+
 </head>
 
 <body>

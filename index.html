@@ -5708,20 +5708,16 @@ async function dashboardHeartbeat(){
 
     const data =
       await loginApiGet(
-        "dashboardHeartbeat",
+        "checkSession",
         {
           sessionId:sessionId
         }
       );
 
-    if(
-      data &&
-      data.temporaryError === true
-    ){
-      /* Temporary API failure: keep the current session. */
-      return true;
-    }
-
+    /*
+     * Valid session:
+     * keep the Dashboard logged in.
+     */
     if(
       data &&
       data.ok &&
@@ -5747,18 +5743,33 @@ async function dashboardHeartbeat(){
       return true;
     }
 
-    return false;
+    /*
+     * Only an explicitly expired session
+     * should log the Dashboard out.
+     */
+    if(
+      data &&
+      data.error === "SESSION_EXPIRED"
+    ){
+      return false;
+    }
+
+    /*
+     * Unexpected response:
+     * keep the existing session.
+     */
+    return true;
 
   }catch(error){
 
     console.warn(
-      "Dashboard heartbeat failed:",
+      "Dashboard session check failed:",
       error
     );
 
     /*
-     * Temporary network/API problems MUST NOT
-     * log the Dashboard out.
+     * Only a confirmed expired session
+     * should cause logout.
      */
     if(
       error &&
@@ -5767,10 +5778,12 @@ async function dashboardHeartbeat(){
       return false;
     }
 
+    /*
+     * Network / temporary Apps Script problem:
+     * DO NOT log the Dashboard out.
+     */
     return true;
-
   }
-
 }
 
 function startSessionMonitor(){

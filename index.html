@@ -5206,6 +5206,297 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 </style>
 
+<style id="advancedInventorySearchStyles">
+/* =========================================================
+   ADVANCED INVENTORY SEARCH
+   ADDITIVE ONLY
+========================================================= */
+
+.advancedSearchBtn{
+  color:#245b83;
+  border-color:#b9d9eb;
+  background:linear-gradient(135deg,#f5fcff,#eef7ff);
+}
+
+.advancedSearchBtn:hover{
+  color:#155a8b;
+  border-color:#72b9e4;
+  background:#ffffff;
+}
+
+.advancedSearchModal{
+  width:min(900px,96vw);
+  max-height:90vh;
+  padding:0;
+  overflow:hidden;
+}
+
+.advancedSearchHead{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:15px;
+  padding:20px 22px 14px;
+  border-bottom:1px solid #e0eaf3;
+  background:linear-gradient(110deg,#ffffff,#f4f9ff);
+}
+
+.advancedSearchFields{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  padding:16px 22px 4px;
+}
+
+.advancedSearchFields .field{
+  margin-bottom:0;
+}
+
+.advancedSearchFields .input{
+  min-height:43px;
+}
+
+.advancedSearchToolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:12px 22px 0;
+  padding:10px 12px;
+  border:1px solid #d6e5ef;
+  border-radius:13px;
+  background:linear-gradient(180deg,#fafdff,#f3f9fd);
+}
+
+.advancedSearchContext,
+.advancedSearchCount{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.advancedSearchContext span,
+.advancedSearchCount span{
+  color:#6b8498;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.advancedSearchContext strong{
+  color:#1d5579;
+  font-size:11px;
+  font-weight:950;
+}
+
+.advancedSearchCount strong{
+  min-width:42px;
+  padding:5px 9px;
+  border-radius:9px;
+  text-align:center;
+  color:#ffffff;
+  background:linear-gradient(135deg,#123560,#245992);
+  font-size:12px;
+  font-weight:950;
+  box-shadow:0 5px 12px rgba(20,57,105,.16);
+}
+
+.advancedSearchStatus{
+  min-height:18px;
+  margin:7px 22px 0;
+}
+
+.advancedSearchResults{
+  margin:0 22px;
+  max-height:430px;
+  overflow:auto;
+  border:1px solid #d6e4ee;
+  border-radius:14px;
+  background:#ffffff;
+}
+
+.advancedSearchResults table{
+  width:100%;
+  min-width:720px;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+.advancedSearchResults thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:10px 11px;
+  color:#eaf6ff;
+  background:linear-gradient(100deg,#173b68,#205383 56%,#254c85);
+  border-bottom:1px solid #2d639c;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-align:left;
+  white-space:nowrap;
+}
+
+.advancedSearchResults tbody td{
+  padding:10px 11px;
+  color:#294463;
+  background:#ffffff;
+  border-bottom:1px solid #e7eef3;
+  font-size:10px;
+  font-weight:650;
+  white-space:nowrap;
+}
+
+.advancedSearchResults tbody tr:nth-child(even) td{
+  background:#f8fbfe;
+}
+
+.advancedSearchResults tbody tr:hover td{
+  background:#eff8ff;
+}
+
+.advancedSearchResults .advancedTag{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:4px 8px;
+  border:1px solid #cfe0ff;
+  border-radius:8px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-size:10px;
+  font-weight:900;
+}
+
+.advancedSearchResults .advancedLensCode{
+  color:#0369a1;
+  font-weight:900;
+}
+
+.advancedSearchEmpty{
+  padding:45px 20px;
+  text-align:center;
+}
+
+.advancedSearchEmpty .emptyIcon{
+  margin-bottom:10px;
+}
+
+.advancedSearchEmpty .emptyTitle{
+  color:#355574;
+}
+
+.advancedSearchEmpty .emptyText{
+  color:#7895b2;
+}
+
+.advancedSearchLoading{
+  padding:42px 20px;
+  text-align:center;
+  color:#54728d;
+  font-size:11px;
+  font-weight:800;
+}
+
+.advancedSearchLoading::before{
+  content:"";
+  display:block;
+  width:30px;
+  height:30px;
+  margin:0 auto 12px;
+  border:3px solid #d8eaf6;
+  border-top-color:#2b94f1;
+  border-radius:50%;
+  animation:advancedSearchSpin .8s linear infinite;
+}
+
+@keyframes advancedSearchSpin{
+  to{transform:rotate(360deg);}
+}
+
+.advancedSearchNoResults{
+  padding:45px 20px;
+  text-align:center;
+  color:#6f879a;
+  font-size:11px;
+  font-weight:750;
+}
+
+.advancedSearchHint{
+  margin:10px 22px 0;
+  color:#7890a0;
+  font-size:9px;
+  line-height:1.45;
+}
+
+@media(max-width:760px){
+  .advancedSearchModal{
+    width:min(96vw,620px);
+    max-height:92vh;
+  }
+
+  .advancedSearchFields{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .advancedSearchResults{
+    max-height:380px;
+  }
+
+  .advancedSearchToolbar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .advancedSearchContext,
+  .advancedSearchCount{
+    width:100%;
+    justify-content:space-between;
+  }
+}
+
+@media(max-width:480px){
+  .advancedSearchHead{
+    padding:17px 16px 12px;
+  }
+
+  .advancedSearchFields{
+    padding:13px 16px 2px;
+  }
+
+  .advancedSearchToolbar{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .advancedSearchStatus{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .advancedSearchResults{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .advancedSearchHint{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .advancedSearchModal .modalActions{
+    padding-left:16px;
+    padding-right:16px;
+    flex-wrap:wrap;
+  }
+
+  .advancedSearchModal .modalActions .controlBtn{
+    flex:1 1 auto;
+  }
+}
+</style>
 </head>
 
 <body>
@@ -5688,6 +5979,15 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
           </div>
 
           <button
+            type="button"
+            class="controlBtn advancedSearchBtn"
+            onclick="openAdvancedInventorySearch()"
+            title="Search inventory by LensCode, LensType, or Tag Number"
+          >
+            ⌕ Advanced Search
+          </button>
+
+          <button
             class="controlBtn danger clearReportBtn"
             onclick="clearReport()"
             title="Permanently delete the selected report"
@@ -6109,6 +6409,137 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
         onclick="saveEditedAllowedUser()"
       >
         Save Changes
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =========================================================
+     ADVANCED INVENTORY SEARCH MODAL
+     ADDITIVE ONLY — DOES NOT CHANGE EXISTING SEARCH FUNCTIONS
+========================================================= -->
+<div
+  id="advancedInventorySearchModal"
+  class="modalBackdrop hidden"
+>
+  <div class="modalCard advancedSearchModal" role="dialog" aria-modal="true" aria-labelledby="advancedSearchTitle">
+
+    <div class="advancedSearchHead">
+      <div>
+        <div id="advancedSearchTitle" class="modalTitle">
+          Advanced Inventory Search
+        </div>
+        <div class="modalSub">
+          Search available inventory by LensCode, LensType, or Tag Number.
+          The selected branch is used automatically.
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="closeAdvancedInventorySearch()"
+        aria-label="Close advanced search"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="advancedSearchFields">
+
+      <div class="field">
+        <label>LENS CODE</label>
+        <input
+          id="advancedSearchLensCode"
+          class="input"
+          type="text"
+          placeholder="Enter lens code..."
+          autocomplete="off"
+          spellcheck="false"
+        >
+      </div>
+
+      <div class="field">
+        <label>LENS TYPE</label>
+        <input
+          id="advancedSearchLensType"
+          class="input"
+          type="text"
+          placeholder="Enter lens type..."
+          autocomplete="off"
+          spellcheck="false"
+        >
+      </div>
+
+      <div class="field">
+        <label>TAG NUMBER</label>
+        <input
+          id="advancedSearchTag"
+          class="input"
+          type="text"
+          placeholder="Enter tag number..."
+          autocomplete="off"
+          spellcheck="false"
+        >
+      </div>
+
+    </div>
+
+    <div class="advancedSearchToolbar">
+      <div class="advancedSearchContext">
+        <span>BRANCH</span>
+        <strong id="advancedSearchBranchLabel">ALL BRANCHES</strong>
+      </div>
+
+      <div class="advancedSearchCount">
+        <span>RESULTS</span>
+        <strong id="advancedSearchCount">0</strong>
+      </div>
+    </div>
+
+    <div
+      id="advancedSearchStatus"
+      class="loginStatus advancedSearchStatus"
+    ></div>
+
+    <div
+      id="advancedSearchResults"
+      class="advancedSearchResults"
+    >
+      <div class="advancedSearchEmpty">
+        <div class="emptyIcon">⌕</div>
+        <div class="emptyTitle">Ready to search</div>
+        <div class="emptyText">
+          Enter at least one search field above.
+        </div>
+      </div>
+    </div>
+
+    <div class="modalActions">
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="clearAdvancedInventorySearch()"
+      >
+        Clear
+      </button>
+
+      <button
+        type="button"
+        id="advancedSearchRunBtn"
+        class="controlBtn primary"
+        onclick="runAdvancedInventorySearch()"
+      >
+        ⌕ Search Inventory
+      </button>
+
+      <button
+        type="button"
+        class="controlBtn"
+        onclick="closeAdvancedInventorySearch()"
+      >
+        Close
       </button>
     </div>
 
@@ -17436,6 +17867,656 @@ document.addEventListener("DOMContentLoaded",()=>{
     },3000);
   }
 });
+
+/* =========================================================
+   ADVANCED INVENTORY SEARCH
+   ADDITIVE ONLY — DOES NOT MODIFY THE EXISTING SEARCH
+========================================================= */
+
+const ADVANCED_SEARCH_MAX_ROWS = 10000;
+let advancedSearchGeneration = 0;
+
+function advancedSearchClean(value){
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g," ");
+}
+
+function advancedSearchEscape(value){
+  return String(value || "")
+    .replace(/\\/g,"\\\\")
+    .replace(/"/g,'\\"')
+    .replace(/\(/g,"\\(")
+    .replace(/\)/g,"\\)")
+    .replace(/,/g,"\\,")
+    .replace(/\*/g,"\\*");
+}
+
+function advancedSearchFieldPattern(value){
+  return "*" + advancedSearchEscape(value) + "*";
+}
+
+function advancedSearchReportTable(branch){
+  return tableName(branch,"stocks");
+}
+
+function openAdvancedInventorySearch(){
+  if(!sessionId){
+    showStatus("Session expired. Please login again.");
+    return;
+  }
+
+  const modal =
+    document.getElementById("advancedInventorySearchModal");
+
+  if(!modal){
+    return;
+  }
+
+  const branch =
+    document.getElementById("branch")?.value || "ALL";
+
+  const label =
+    document.getElementById("advancedSearchBranchLabel");
+
+  if(label){
+    label.textContent =
+      branch === "ALL"
+        ? "ALL BRANCHES"
+        : branch;
+  }
+
+  const status =
+    document.getElementById("advancedSearchStatus");
+
+  if(status){
+    status.textContent = "";
+  }
+
+  modal.classList.remove("hidden");
+
+  setTimeout(()=>{
+    document
+      .getElementById("advancedSearchLensCode")
+      ?.focus();
+  },50);
+}
+
+function closeAdvancedInventorySearch(){
+  const modal =
+    document.getElementById("advancedInventorySearchModal");
+
+  if(modal){
+    modal.classList.add("hidden");
+  }
+
+  advancedSearchGeneration++;
+}
+
+function clearAdvancedInventorySearch(){
+  advancedSearchGeneration++;
+
+  const ids = [
+    "advancedSearchLensCode",
+    "advancedSearchLensType",
+    "advancedSearchTag"
+  ];
+
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.value="";
+  });
+
+  const count =
+    document.getElementById("advancedSearchCount");
+
+  if(count){
+    count.textContent="0";
+  }
+
+  const status =
+    document.getElementById("advancedSearchStatus");
+
+  if(status){
+    status.textContent="";
+  }
+
+  const results =
+    document.getElementById("advancedSearchResults");
+
+  if(results){
+    results.innerHTML=`
+      <div class="advancedSearchEmpty">
+        <div class="emptyIcon">⌕</div>
+        <div class="emptyTitle">Ready to search</div>
+        <div class="emptyText">
+          Enter at least one search field above.
+        </div>
+      </div>
+    `;
+  }
+}
+
+function advancedSearchSetStatus(message){
+  const status =
+    document.getElementById("advancedSearchStatus");
+
+  if(status){
+    status.textContent =
+      message || "";
+  }
+}
+
+async function fetchAdvancedStockRows(
+  branch,
+  lensCode,
+  lensType,
+  tag
+){
+  const params =
+    new URLSearchParams();
+
+  params.set(
+    "select",
+    "BR,LENSTYPE,LENSCODE,NTAGN,DESCRIPTION,DELIVERYDATE,QR"
+  );
+
+  if(lensCode){
+    params.set(
+      "LENSCODE",
+      "ilike." +
+      advancedSearchFieldPattern(lensCode)
+    );
+  }
+
+  if(lensType){
+    params.set(
+      "LENSTYPE",
+      "ilike." +
+      advancedSearchFieldPattern(lensType)
+    );
+  }
+
+  if(tag){
+    params.set(
+      "NTAGN",
+      "ilike." +
+      advancedSearchFieldPattern(tag)
+    );
+  }
+
+  params.set(
+    "order",
+    "NTAGN.asc.nullslast"
+  );
+
+  const all=[];
+  let offset=0;
+  let capped=false;
+
+  while(offset < ADVANCED_SEARCH_MAX_ROWS){
+    params.set(
+      "limit",
+      String(SUPABASE_PAGE_SIZE)
+    );
+
+    params.set(
+      "offset",
+      String(offset)
+    );
+
+    const rows =
+      await supabaseRequest(
+        advancedSearchReportTable(branch) +
+        "?" +
+        params.toString()
+      );
+
+    const batch =
+      Array.isArray(rows)
+        ? rows
+        : [];
+
+    all.push(...batch);
+
+    if(
+      batch.length <
+      SUPABASE_PAGE_SIZE
+    ){
+      break;
+    }
+
+    offset +=
+      SUPABASE_PAGE_SIZE;
+
+    if(
+      all.length >=
+      ADVANCED_SEARCH_MAX_ROWS
+    ){
+      capped=true;
+      break;
+    }
+  }
+
+  return {
+    rows:all.slice(
+      0,
+      ADVANCED_SEARCH_MAX_ROWS
+    ),
+    capped
+  };
+}
+
+async function runAdvancedInventorySearch(){
+  if(!sessionId){
+    advancedSearchSetStatus(
+      "Session expired. Please login again."
+    );
+    return;
+  }
+
+  const lensCode =
+    advancedSearchClean(
+      document.getElementById(
+        "advancedSearchLensCode"
+      )?.value || ""
+    );
+
+  const lensType =
+    advancedSearchClean(
+      document.getElementById(
+        "advancedSearchLensType"
+      )?.value || ""
+    );
+
+  const tag =
+    advancedSearchClean(
+      document.getElementById(
+        "advancedSearchTag"
+      )?.value || ""
+    );
+
+  if(
+    !lensCode &&
+    !lensType &&
+    !tag
+  ){
+    advancedSearchSetStatus(
+      "Enter at least one search value."
+    );
+    return;
+  }
+
+  const branch =
+    document.getElementById("branch")?.value ||
+    "ALL";
+
+  const label =
+    document.getElementById(
+      "advancedSearchBranchLabel"
+    );
+
+  if(label){
+    label.textContent =
+      branch === "ALL"
+        ? "ALL BRANCHES"
+        : branch;
+  }
+
+  const generation =
+    ++advancedSearchGeneration;
+
+  const results =
+    document.getElementById(
+      "advancedSearchResults"
+    );
+
+  const count =
+    document.getElementById(
+      "advancedSearchCount"
+    );
+
+  const button =
+    document.getElementById(
+      "advancedSearchRunBtn"
+    );
+
+  if(button){
+    button.disabled=true;
+  }
+
+  if(count){
+    count.textContent="…";
+  }
+
+  advancedSearchSetStatus(
+    "Searching available inventory..."
+  );
+
+  if(results){
+    results.innerHTML=`
+      <div class="advancedSearchLoading">
+        Searching inventory...
+      </div>
+    `;
+  }
+
+  try{
+    const branches =
+      branch === "ALL"
+        ? BRANCHES
+        : [branch];
+
+    const branchResults =
+      await Promise.all(
+        branches.map(
+          async b=>{
+            const [
+              searchResult,
+              soldTags
+            ] =
+              await Promise.all([
+                fetchAdvancedStockRows(
+                  b,
+                  lensCode,
+                  lensType,
+                  tag
+                ),
+                getSoldTags(b)
+              ]);
+
+            if(
+              generation !==
+              advancedSearchGeneration
+            ){
+              return {
+                rows:[],
+                capped:false
+              };
+            }
+
+            const available =
+              searchResult.rows.filter(
+                row=>{
+                  const rowTag =
+                    String(
+                      row?.NTAGN ?? ""
+                    ).trim();
+
+                  return (
+                    !rowTag ||
+                    !soldTags.has(rowTag)
+                  );
+                }
+              );
+
+            return {
+              rows:available.map(
+                row=>({
+                  ...row,
+                  __BRANCH:
+                    String(
+                      row?.BR ||
+                      b ||
+                      ""
+                    ).trim().toUpperCase()
+                })
+              ),
+              capped:
+                searchResult.capped
+            };
+          }
+        )
+      );
+
+    if(
+      generation !==
+      advancedSearchGeneration
+    ){
+      return;
+    }
+
+    const combined=[];
+    let capped=false;
+
+    branchResults.forEach(result=>{
+      if(result?.capped){
+        capped=true;
+      }
+
+      if(Array.isArray(result?.rows)){
+        combined.push(
+          ...result.rows
+        );
+      }
+    });
+
+    combined.sort(
+      (a,b)=>
+        String(a.__BRANCH||"").localeCompare(
+          String(b.__BRANCH||"")
+        ) ||
+        String(a.NTAGN||"").localeCompare(
+          String(b.NTAGN||"")
+        )
+    );
+
+    const displayRows =
+      combined.slice(
+        0,
+        ADVANCED_SEARCH_MAX_ROWS
+      );
+
+    if(count){
+      count.textContent =
+        String(
+          displayRows.length
+        ) +
+        (
+          capped ||
+          combined.length >
+          ADVANCED_SEARCH_MAX_ROWS
+            ? "+"
+            : ""
+        );
+    }
+
+    if(!displayRows.length){
+      if(results){
+        results.innerHTML=`
+          <div class="advancedSearchNoResults">
+            <div style="font-size:24px;margin-bottom:8px;">⌕</div>
+            No matching available stock found.
+          </div>
+        `;
+      }
+
+      advancedSearchSetStatus(
+        "No results found."
+      );
+
+      return;
+    }
+
+    if(results){
+      results.innerHTML=`
+        <table>
+          <thead>
+            <tr>
+              <th>BRANCH</th>
+              <th>LENS TYPE</th>
+              <th>LENS CODE</th>
+              <th>TAG NUMBER</th>
+              <th>DESCRIPTION</th>
+              <th>DELIVERY DATE</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${displayRows.map(row=>{
+              const branchValue =
+                escapeHtml(
+                  row.__BRANCH || ""
+                );
+
+              const lensTypeValue =
+                escapeHtml(
+                  row.LENSTYPE || ""
+                );
+
+              const lensCodeValue =
+                escapeHtml(
+                  row.LENSCODE || ""
+                );
+
+              const tagValue =
+                escapeHtml(
+                  row.NTAGN || ""
+                );
+
+              const descriptionValue =
+                escapeHtml(
+                  row.DESCRIPTION || ""
+                );
+
+              const deliveryDate =
+                escapeHtml(
+                  row.DELIVERYDATE
+                    ? (
+                        formatDateValue(
+                          row.DELIVERYDATE
+                        ) ||
+                        String(
+                          row.DELIVERYDATE
+                        )
+                      )
+                    : "—"
+                );
+
+              return `
+                <tr>
+                  <td>
+                    <span class="branchTag">
+                      ${branchValue}
+                    </span>
+                  </td>
+                  <td>${lensTypeValue || "—"}</td>
+                  <td>
+                    <span class="advancedLensCode">
+                      ${lensCodeValue || "—"}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="advancedTag">
+                      ${tagValue || "—"}
+                    </span>
+                  </td>
+                  <td>${descriptionValue || "—"}</td>
+                  <td>${deliveryDate}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    advancedSearchSetStatus(
+      capped
+        ? "Search completed. More than the display limit may match."
+        : displayRows.length +
+          (
+            displayRows.length === 1
+              ? " result found."
+              : " results found."
+          )
+    );
+
+  }catch(error){
+    console.error(
+      "Advanced inventory search failed:",
+      error
+    );
+
+    if(
+      generation !==
+      advancedSearchGeneration
+    ){
+      return;
+    }
+
+    if(count){
+      count.textContent="0";
+    }
+
+    if(results){
+      results.innerHTML=`
+        <div class="advancedSearchNoResults">
+          Unable to load search results.
+        </div>
+      `;
+    }
+
+    advancedSearchSetStatus(
+      error?.message ||
+      "Advanced search failed."
+    );
+
+  }finally{
+    if(
+      generation ===
+      advancedSearchGeneration
+    ){
+      if(button){
+        button.disabled=false;
+      }
+    }
+  }
+}
+
+function advancedSearchKeydown(event){
+  if(event.key === "Enter"){
+    event.preventDefault();
+    runAdvancedInventorySearch();
+  }
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  ()=>{
+    [
+      "advancedSearchLensCode",
+      "advancedSearchLensType",
+      "advancedSearchTag"
+    ].forEach(id=>{
+      const input =
+        document.getElementById(id);
+
+      if(input){
+        input.addEventListener(
+          "keydown",
+          advancedSearchKeydown
+        );
+      }
+    });
+
+    const modal =
+      document.getElementById(
+        "advancedInventorySearchModal"
+      );
+
+    if(modal){
+      modal.addEventListener(
+        "click",
+        event=>{
+          if(event.target === modal){
+            closeAdvancedInventorySearch();
+          }
+        }
+      );
+    }
+  }
+);
+
 </script>
 <!-- PRIVATE ADMIN CHAT -->
 <button id="aoChatFab" class="ao-chat-fab" type="button" onclick="aoChatToggle()" aria-label="Open chat">

@@ -5731,15 +5731,6 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
       </button>
 
       <button
-        type="button"
-        class="controlBtn advancedSearchBtn"
-        onclick="openAdvancedInventorySearch()"
-        title="Search remaining lens stocks"
-      >
-        ⌕ Search Remaining Lens
-      </button>
-
-      <button
         class="controlBtn primary"
         onclick="runSearch()"
       >
@@ -6012,6 +6003,15 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
             title="Permanently delete the selected report"
           >
             ⚠ Clear Report
+          </button>
+
+          <button
+            type="button"
+            class="controlBtn advancedSearchBtn"
+            onclick="openAdvancedInventorySearch()"
+            title="Search remaining lens stocks"
+          >
+            ⌕ Search Remaining Lens
           </button>
 
         </div>
@@ -6450,7 +6450,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
           Advanced Inventory Search
         </div>
         <div class="modalSub">
-          Search available inventory by LensCode, LensType, or Tag Number.
+          Search remaining inventory by LensCode, LensCode range, or Description.
           The selected branch is used automatically.
         </div>
       </div>
@@ -6484,8 +6484,13 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
       </div>
 
       <div class="field">
-        <label>LENS TYPE</label>
-        <input id="advancedSearchLensType" class="input" type="text" placeholder="Enter lens type..." autocomplete="off" spellcheck="false">
+        <label>LENSCODE RANGE</label>
+        <select id="advancedSearchLensType" class="select">
+          <option value="">ALL LENS TYPES</option>
+          <option value="ORD">ORD — LENSCODE 1–240</option>
+          <option value="MC">MC — LENSCODE 1001–1240</option>
+          <option value="PHOTOGRAY">PHOTOGRAY — LENSCODE 5001–5240</option>
+        </select>
       </div>
 
       <div class="field">
@@ -6520,7 +6525,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
         <div class="emptyIcon">⌕</div>
         <div class="emptyTitle">Ready to search</div>
         <div class="emptyText">
-          Enter at least one search field above.
+          Select a LENSCODE range, enter an exact Lens Code, or enter a Description.
         </div>
       </div>
     </div>
@@ -17921,14 +17926,22 @@ function clearAdvancedInventorySearch(){
   ["advancedSearchLensCode","advancedSearchLensType","advancedSearchDescription"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
   const c=document.getElementById("advancedSearchCount");if(c)c.textContent="0";
   const st=document.getElementById("advancedSearchStatus");if(st)st.textContent="";
-  const r=document.getElementById("advancedSearchResults");if(r)r.innerHTML=`<div class="advancedSearchEmpty"><div class="emptyIcon">⌕</div><div class="emptyTitle">Ready to search</div><div class="emptyText">Enter at least one search field above.</div></div>`;
+  const r=document.getElementById("advancedSearchResults");if(r)r.innerHTML=`<div class="advancedSearchEmpty"><div class="emptyIcon">⌕</div><div class="emptyTitle">Ready to search</div><div class="emptyText">Select a LENSCODE range, enter an exact Lens Code, or enter a Description.</div></div>`;
 }
 function advancedSearchSetStatus(message){const e=document.getElementById("advancedSearchStatus");if(e)e.textContent=message||"";}
+
+function advancedSearchLensTypeRange(lensType){
+  const ranges={
+    ORD:{min:"1",max:"240"},
+    MC:{min:"1001",max:"1240"},
+    PHOTOGRAY:{min:"5001",max:"5240"}
+  };
+  return ranges[String(lensType||"").trim().toUpperCase()]||null;
+}
 
 async function getAdvancedAvailableRows(branch,lensCode,lensType,description,fullData=false){
   const p=new URLSearchParams(); p.set("select","*");
   if(lensCode)p.set("LENSCODE","eq."+lensCode);
-  if(lensType)p.set("LENSTYPE","ilike."+advancedSearchFieldPattern(lensType));
   if(description)p.set("DESCRIPTION","ilike."+advancedSearchFieldPattern(description));
   p.set("order","LENSCODE.asc.nullslast,NTAGN.asc.nullslast");
   const all=[];let offset=0;const limit=SUPABASE_PAGE_SIZE;const max=fullData?MAX_FETCH_ROWS:ADVANCED_SEARCH_MAX_ROWS;
@@ -17941,7 +17954,7 @@ async function runAdvancedInventorySearch(){
   const lensCode=advancedSearchClean(document.getElementById("advancedSearchLensCode")?.value||"");
   const lensType=advancedSearchClean(document.getElementById("advancedSearchLensType")?.value||"");
   const description=advancedSearchClean(document.getElementById("advancedSearchDescription")?.value||"");
-  if(!lensCode&&!lensType&&!description){advancedSearchSetStatus("Enter at least one search value.");return;}
+  if(!lensCode&&!lensType&&!description){advancedSearchSetStatus("Select a LENSCODE range, enter an exact Lens Code, or enter a Description.");return;}
   if(lensCode&&!/^\d+(?:\.\d+)?$/.test(lensCode)){advancedSearchSetStatus("Lens Code must contain numbers only, with an optional decimal point.");return;}
   const branch=advancedSearchGetBranch();advancedSearchUpdateBranchLabel();const gen=++advancedSearchGeneration;
   const results=document.getElementById("advancedSearchResults"),count=document.getElementById("advancedSearchCount"),button=document.getElementById("advancedSearchRunBtn");
@@ -17950,7 +17963,16 @@ async function runAdvancedInventorySearch(){
     const branches=branch==="ALL"?BRANCHES:[branch];
     const branchResults=await Promise.all(branches.map(async b=>{
       const [stock,sold]=await Promise.all([getAdvancedAvailableRows(b,lensCode,lensType,description,false),getSoldTags(b)]);
-      const rows=stock.rows.filter(row=>{const tag=String(row?.NTAGN??"").trim();return !tag||!sold.has(tag);}).map(row=>({...row,__BRANCH:String(row?.BR||b||"").trim().toUpperCase()}));
+      const rows=stock.rows.filter(row=>{
+        const tag=String(row?.NTAGN??"").trim();
+        if(tag && sold.has(tag)) return false;
+        if(!lensCode && lensType){
+          const code=Number(String(row?.LENSCODE??"").trim());
+          const range=advancedSearchLensTypeRange(lensType);
+          if(!Number.isFinite(code) || !range || code < Number(range.min) || code > Number(range.max)) return false;
+        }
+        return true;
+      }).map(row=>({...row,__BRANCH:String(row?.BR||b||"").trim().toUpperCase()}));
       return {rows,capped:stock.capped};
     }));
     if(gen!==advancedSearchGeneration)return;const combined=[];let capped=false;branchResults.forEach(r=>{if(r.capped)capped=true;combined.push(...r.rows);});

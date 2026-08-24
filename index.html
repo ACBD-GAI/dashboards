@@ -17918,7 +17918,10 @@ function openAdvancedInventorySearch(){
   if(select && [...select.options].some(o=>o.value===mainBranch))select.value=mainBranch;
   else if(select)select.value="ALL";
   advancedSearchUpdateBranchLabel(); advancedSearchSetStatus(""); modal.classList.remove("hidden");
-  setTimeout(()=>document.getElementById("advancedSearchLensCode")?.focus(),50);
+  const range=document.getElementById("advancedSearchLensType");
+  if(range)range.value="";
+  // ALL LENS TYPES is the default: immediately show all remaining stocks with numeric LENSCODE.
+  setTimeout(()=>runAdvancedInventorySearch(),50);
 }
 function closeAdvancedInventorySearch(){ const m=document.getElementById("advancedInventorySearchModal"); if(m)m.classList.add("hidden"); advancedSearchGeneration++; }
 function clearAdvancedInventorySearch(){

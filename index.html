@@ -17934,11 +17934,24 @@ function clearAdvancedInventorySearch(){
 function advancedSearchSetStatus(message){const e=document.getElementById("advancedSearchStatus");if(e)e.textContent=message||"";}
 
 function advancedSearchLensTypeRange(lensType){
+  /*
+   * ADD / EDIT LENSCODE RANGES HERE.
+   * One lens type can have MULTIPLE ranges.
+   * Example: MC has 1001-1240 and 2000-2240.
+   */
   const ranges={
-    ORD:{min:"1",max:"240"},
-    MC:{min:"1001",max:"1240"},
-    PHOTOGRAY:{min:"5001",max:"5240"}
+    ORD:[
+      {min:1,max:240}
+    ],
+    MC:[
+      {min:1001,max:1240},
+      {min:2000,max:2240}
+    ],
+    PHOTOGRAY:[
+      {min:5001,max:5240}
+    ]
   };
+
   return ranges[String(lensType||"").trim().toUpperCase()]||null;
 }
 
@@ -18004,9 +18017,16 @@ async function runAdvancedInventorySearch(){
         // even when an exact Lens Code is also entered. The two filters are ANDed.
         // Example: ORD + 5001 = 0 results; PHOTOGRAY + 5001 = matching results.
         if(!showAllLensTypes){
-          const range=advancedSearchLensTypeRange(lensType);
-          if(!range) return false;
-          if(code < Number(range.min) || code > Number(range.max)) return false;
+          const ranges=advancedSearchLensTypeRange(lensType);
+          if(!Array.isArray(ranges) || !ranges.length) return false;
+
+          // A LENSCODE is valid when it falls inside ANY configured range.
+          const matchesRange=ranges.some(range=>
+            code >= Number(range.min) &&
+            code <= Number(range.max)
+          );
+
+          if(!matchesRange) return false;
         }
 
         return true;

@@ -5224,11 +5224,15 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   background:#ffffff;
 }
 
+@media(max-width:640px){
+  .advancedSearchBtn{min-width:0;}
+}
+
 
 .advancedSearchModal{
-  width:min(940px,96vw);
+  width:min(900px,96vw);
   max-height:90vh;
-  height:min(90vh,840px);
+  height:min(90vh,820px);
   padding:0;
   overflow:hidden;
   display:flex;
@@ -5243,9 +5247,6 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
 .advancedSearchModal .modalActions{
   flex:0 0 auto;
-  position:relative;
-  z-index:5;
-  background:#ffffff;
 }
 
 .advancedSearchHead{
@@ -5256,23 +5257,20 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   padding:20px 22px 14px;
   border-bottom:1px solid #e0eaf3;
   background:linear-gradient(110deg,#ffffff,#f4f9ff);
-  flex:0 0 auto;
 }
 
 .advancedSearchFields{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:12px;
   padding:16px 22px 4px;
-  flex:0 0 auto;
 }
 
 .advancedSearchFields .field{
   margin-bottom:0;
 }
 
-.advancedSearchFields .input,
-.advancedSearchFields .select{
+.advancedSearchFields .input{
   min-height:43px;
 }
 
@@ -5286,7 +5284,6 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   border:1px solid #d6e5ef;
   border-radius:13px;
   background:linear-gradient(180deg,#fafdff,#f3f9fd);
-  flex:0 0 auto;
 }
 
 .advancedSearchContext,
@@ -5323,28 +5320,14 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   box-shadow:0 5px 12px rgba(20,57,105,.16);
 }
 
-.advancedSearchBranchSelect{
-  min-height:34px !important;
-  height:34px;
-  min-width:150px;
-  padding:5px 30px 5px 9px !important;
-  border:1px solid #c9dce9 !important;
-  border-radius:9px !important;
-  background:#ffffff !important;
-  color:#1d5579 !important;
-  font-size:10px !important;
-  font-weight:900 !important;
-}
-
 .advancedSearchStatus{
   min-height:18px;
   margin:7px 22px 0;
-  flex:0 0 auto;
 }
 
 .advancedSearchResults{
-  margin:8px 22px 0;
-  min-height:0;
+  margin:0 22px;
+  max-height:430px;
   overflow:auto;
   border:1px solid #d6e4ee;
   border-radius:14px;
@@ -5465,31 +5448,6 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   line-height:1.45;
 }
 
-
-.advancedSearchModal .modalActions{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:flex-end;
-  padding:12px 22px 16px;
-  border-top:1px solid #e0eaf3;
-  box-shadow:0 -6px 18px rgba(31,72,111,.05);
-}
-
-.advancedSearchModal .modalActions .controlBtn{
-  min-width:120px;
-}
-
-.advancedSearchModal .modalActions .controlBtn.primary{
-  min-width:160px;
-}
-
-@media(max-width:900px){
-  .advancedSearchFields{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-}
-
 @media(max-width:760px){
   .advancedSearchModal{
     width:min(96vw,620px);
@@ -5555,24 +5513,6 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
   .advancedSearchModal .modalActions .controlBtn{
     flex:1 1 auto;
-  }
-}
-@media(max-width:640px){
-  .advancedSearchModal .modalActions{
-    padding:10px 14px 14px;
-    display:grid;
-    grid-template-columns:1fr 1.2fr 1fr;
-  }
-
-  .advancedSearchModal .modalActions .controlBtn,
-  .advancedSearchModal .modalActions .controlBtn.primary{
-    width:100%;
-    min-width:0;
-  }
-
-  .advancedSearchBranchSelect{
-    min-width:0;
-    width:100%;
   }
 }
 </style>
@@ -5791,19 +5731,19 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
       </button>
 
       <button
+        type="button"
+        class="controlBtn advancedSearchBtn"
+        onclick="openAdvancedInventorySearch()"
+        title="Search remaining lens stocks"
+      >
+        ⌕ Search Remaining Lens
+      </button>
+
+      <button
         class="controlBtn primary"
         onclick="runSearch()"
       >
         Search
-      </button>
-
-      <button
-        type="button"
-        class="controlBtn advancedSearchBtn"
-        onclick="openAdvancedInventorySearch()"
-        title="Search remaining available lenses by Lens Code, Lens Type, or Description"
-      >
-        ⌕ Search Remaining Lens
       </button>
 
       <button
@@ -6510,8 +6450,8 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
           Advanced Inventory Search
         </div>
         <div class="modalSub">
-          Search remaining available inventory by Lens Code, Lens Type, or Description.
-          Branch filtering is controlled here.
+          Search available inventory by LensCode, LensType, or Tag Number.
+          The selected branch is used automatically.
         </div>
       </div>
 
@@ -6529,67 +6469,28 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
       <div class="field">
         <label>BRANCH</label>
-        <select
-          id="advancedSearchBranch"
-          class="select advancedSearchBranchSelect"
-        >
+        <select id="advancedSearchBranch" class="select">
           <option value="ALL">ALL BRANCHES</option>
-          <option value="GAI">GAI</option>
-          <option value="CAS">CAS</option>
-          <option value="BAC">BAC</option>
-          <option value="BIN">BIN</option>
-          <option value="BIS">BIS</option>
-          <option value="CAD">CAD</option>
-          <option value="DGT">DGT</option>
-          <option value="KAB">KAB</option>
-          <option value="KAL">KAL</option>
-          <option value="PAS">PAS</option>
-          <option value="POT">POT</option>
-          <option value="SAN">SAN</option>
-          <option value="TAB">TAB</option>
-          <option value="TAN">TAN</option>
-          <option value="TIS">TIS</option>
-          <option value="TOL">TOL</option>
+          <option value="GAI">GAI</option><option value="CAS">CAS</option><option value="BAC">BAC</option><option value="BIN">BIN</option>
+          <option value="BIS">BIS</option><option value="CAD">CAD</option><option value="DGT">DGT</option><option value="KAB">KAB</option>
+          <option value="KAL">KAL</option><option value="PAS">PAS</option><option value="POT">POT</option><option value="SAN">SAN</option>
+          <option value="TAB">TAB</option><option value="TAN">TAN</option><option value="TIS">TIS</option><option value="TOL">TOL</option>
         </select>
       </div>
 
       <div class="field">
         <label>LENS CODE</label>
-        <input
-          id="advancedSearchLensCode"
-          class="input"
-          type="text"
-          inputmode="decimal"
-          pattern="[0-9]*\.?[0-9]*"
-          placeholder="Enter lens code..."
-          autocomplete="off"
-          spellcheck="false"
-          oninput="this.value=this.value.replace(/[^0-9.]/g,'').replace(/\.(?=.*\.)/g,'')"
-        >
+        <input id="advancedSearchLensCode" class="input" type="text" inputmode="decimal" pattern="[0-9]*\.?[0-9]*" placeholder="Enter lens code..." autocomplete="off" spellcheck="false" oninput="this.value=this.value.replace(/[^0-9.]/g,'').replace(/\.(?=.*\.)/g,'')">
       </div>
 
       <div class="field">
         <label>LENS TYPE</label>
-        <input
-          id="advancedSearchLensType"
-          class="input"
-          type="text"
-          placeholder="Enter lens type..."
-          autocomplete="off"
-          spellcheck="false"
-        >
+        <input id="advancedSearchLensType" class="input" type="text" placeholder="Enter lens type..." autocomplete="off" spellcheck="false">
       </div>
 
       <div class="field">
         <label>DESCRIPTION</label>
-        <input
-          id="advancedSearchDescription"
-          class="input"
-          type="text"
-          placeholder="Enter description..."
-          autocomplete="off"
-          spellcheck="false"
-        >
+        <input id="advancedSearchDescription" class="input" type="text" placeholder="Enter description..." autocomplete="off" spellcheck="false">
       </div>
 
     </div>
@@ -17996,510 +17897,100 @@ let advancedSearchGeneration = 0;
 function advancedSearchClean(value){
   return String(value || "").trim().replace(/\s+/g," ");
 }
-
 function advancedSearchEscape(value){
-  return String(value || "")
-    .replace(/\\/g,"\\\\")
-    .replace(/"/g,'\\"')
-    .replace(/\(/g,"\\(")
-    .replace(/\)/g,"\\)")
-    .replace(/,/g,"\\,")
-    .replace(/\*/g,"\\*");
+  return String(value || "").replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\(/g,"\\(").replace(/\)/g,"\\)").replace(/,/g,"\\,").replace(/\*/g,"\\*");
 }
-
-function advancedSearchFieldPattern(value){
-  return "*" + advancedSearchEscape(value) + "*";
-}
-
-function advancedSearchReportTable(branch){
-  return tableName(branch,"stocks");
-}
-
-function advancedSearchGetBranch(){
-  return String(
-    document.getElementById("advancedSearchBranch")?.value || "ALL"
-  ).trim().toUpperCase() || "ALL";
-}
-
-function advancedSearchSetBranchLabel(){
-  const branch=advancedSearchGetBranch();
-  const label=document.getElementById("advancedSearchBranchLabel");
-  if(label){
-    label.textContent=branch === "ALL" ? "ALL BRANCHES" : branch;
-  }
-}
+function advancedSearchFieldPattern(value){ return "*"+advancedSearchEscape(value)+"*"; }
+function advancedSearchGetBranch(){ return String(document.getElementById("advancedSearchBranch")?.value||"ALL").trim().toUpperCase()||"ALL"; }
+function advancedSearchReportTable(branch){ return tableName(branch,"stocks"); }
+function advancedSearchUpdateBranchLabel(){ const b=advancedSearchGetBranch(); const el=document.getElementById("advancedSearchBranchLabel"); if(el)el.textContent=b==="ALL"?"ALL BRANCHES":b; }
 
 function openAdvancedInventorySearch(){
-  if(!sessionId){
-    showStatus("Session expired. Please login again.");
-    return;
-  }
-
-  const modal=document.getElementById("advancedInventorySearchModal");
-  if(!modal) return;
-
-  const popupBranch=document.getElementById("advancedSearchBranch");
-  const mainBranch=String(document.getElementById("branch")?.value || "ALL").trim().toUpperCase();
-  if(popupBranch){
-    popupBranch.value=BRANCHES.includes(mainBranch) ? mainBranch : "ALL";
-  }
-  advancedSearchSetBranchLabel();
-
-  const status=document.getElementById("advancedSearchStatus");
-  if(status) status.textContent="";
-
-  modal.classList.remove("hidden");
-
-  setTimeout(()=>{
-    document.getElementById("advancedSearchLensCode")?.focus();
-  },50);
+  if(!sessionId){showStatus("Session expired. Please login again.");return;}
+  const modal=document.getElementById("advancedInventorySearchModal"); if(!modal)return;
+  const mainBranch=String(document.getElementById("branch")?.value||"ALL").trim().toUpperCase()||"ALL";
+  const select=document.getElementById("advancedSearchBranch");
+  if(select && [...select.options].some(o=>o.value===mainBranch))select.value=mainBranch;
+  else if(select)select.value="ALL";
+  advancedSearchUpdateBranchLabel(); advancedSearchSetStatus(""); modal.classList.remove("hidden");
+  setTimeout(()=>document.getElementById("advancedSearchLensCode")?.focus(),50);
 }
-
-function closeAdvancedInventorySearch(){
-  const modal=document.getElementById("advancedInventorySearchModal");
-  if(modal) modal.classList.add("hidden");
-  advancedSearchGeneration++;
-}
-
+function closeAdvancedInventorySearch(){ const m=document.getElementById("advancedInventorySearchModal"); if(m)m.classList.add("hidden"); advancedSearchGeneration++; }
 function clearAdvancedInventorySearch(){
   advancedSearchGeneration++;
-
-  ["advancedSearchLensCode","advancedSearchLensType","advancedSearchDescription"].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.value="";
-  });
-
-  const mainBranch=String(document.getElementById("branch")?.value || "ALL").trim().toUpperCase();
-  const branch=document.getElementById("advancedSearchBranch");
-  if(branch) branch.value=BRANCHES.includes(mainBranch) ? mainBranch : "ALL";
-  advancedSearchSetBranchLabel();
-
-  const count=document.getElementById("advancedSearchCount");
-  if(count) count.textContent="0";
-
-  advancedSearchSetStatus("");
-
-  const results=document.getElementById("advancedSearchResults");
-  if(results){
-    results.innerHTML=`
-      <div class="advancedSearchEmpty">
-        <div class="emptyIcon">⌕</div>
-        <div class="emptyTitle">Ready to search</div>
-        <div class="emptyText">
-          Enter at least one search field above.
-        </div>
-      </div>
-    `;
-  }
+  ["advancedSearchLensCode","advancedSearchLensType","advancedSearchDescription"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  const c=document.getElementById("advancedSearchCount");if(c)c.textContent="0";
+  const st=document.getElementById("advancedSearchStatus");if(st)st.textContent="";
+  const r=document.getElementById("advancedSearchResults");if(r)r.innerHTML=`<div class="advancedSearchEmpty"><div class="emptyIcon">⌕</div><div class="emptyTitle">Ready to search</div><div class="emptyText">Enter at least one search field above.</div></div>`;
 }
-
-function advancedSearchSetStatus(message){
-  const status=document.getElementById("advancedSearchStatus");
-  if(status) status.textContent=message || "";
-}
-
-async function fetchAdvancedStockRows(branch,lensCode,lensType,description,fullData=false){
-  const params=new URLSearchParams();
-
-  params.set(
-    "select",
-    fullData ? DB_COLUMNS.slice(0,22).join(",") : "BR,LENSTYPE,LENSCODE,DESCRIPTION,DELIVERYDATE,QR"
-  );
-
-  if(lensCode){
-    params.set("LENSCODE","eq." + lensCode);
-  }
-
-  if(lensType){
-    params.set("LENSTYPE","ilike." + advancedSearchFieldPattern(lensType));
-  }
-
-  if(description){
-    params.set("DESCRIPTION","ilike." + advancedSearchFieldPattern(description));
-  }
-
-  params.set("order","LENSCODE.asc.nullslast");
-
-  const all=[];
-  let offset=0;
-  let capped=false;
-
-  while(offset < ADVANCED_SEARCH_MAX_ROWS){
-    params.set("limit",String(SUPABASE_PAGE_SIZE));
-    params.set("offset",String(offset));
-
-    const rows=await supabaseRequest(
-      advancedSearchReportTable(branch) + "?" + params.toString()
-    );
-
-    const batch=Array.isArray(rows) ? rows : [];
-    all.push(...batch);
-
-    if(batch.length < SUPABASE_PAGE_SIZE) break;
-
-    offset += SUPABASE_PAGE_SIZE;
-
-    if(all.length >= ADVANCED_SEARCH_MAX_ROWS){
-      capped=true;
-      break;
-    }
-  }
-
-  return {rows:all.slice(0,ADVANCED_SEARCH_MAX_ROWS),capped};
-}
+function advancedSearchSetStatus(message){const e=document.getElementById("advancedSearchStatus");if(e)e.textContent=message||"";}
 
 async function getAdvancedAvailableRows(branch,lensCode,lensType,description,fullData=false){
-  const [searchResult,soldTags]=await Promise.all([
-    fetchAdvancedStockRows(branch,lensCode,lensType,description,fullData),
-    getSoldTags(branch)
-  ]);
-
-  const rows=searchResult.rows.filter(row=>{
-    const rowTag=String(row?.NTAGN ?? "").trim();
-    return !rowTag || !soldTags.has(rowTag);
-  });
-
-  return {
-    rows:rows.map(row=>({
-      ...row,
-      __BRANCH:String(row?.BR || branch || "").trim().toUpperCase()
-    })),
-    capped:searchResult.capped
-  };
-}
-
-async function collectAdvancedSearchRows(fullData=false){
-  const lensCode=advancedSearchClean(document.getElementById("advancedSearchLensCode")?.value || "");
-  const lensType=advancedSearchClean(document.getElementById("advancedSearchLensType")?.value || "");
-  const description=advancedSearchClean(document.getElementById("advancedSearchDescription")?.value || "");
-  const branch=advancedSearchGetBranch();
-
-  const branches=branch === "ALL" ? BRANCHES : [branch];
-  const branchResults=await Promise.all(
-    branches.map(b=>getAdvancedAvailableRows(b,lensCode,lensType,description,fullData))
-  );
-
-  const combined=[];
-  let capped=false;
-  branchResults.forEach(result=>{
-    if(result?.capped) capped=true;
-    if(Array.isArray(result?.rows)) combined.push(...result.rows);
-  });
-
-  combined.sort((a,b)=>
-    String(a.__BRANCH||"").localeCompare(String(b.__BRANCH||"")) ||
-    String(a.LENSCODE||"").localeCompare(String(b.LENSCODE||""),undefined,{numeric:true}) ||
-    String(a.DESCRIPTION||"").localeCompare(String(b.DESCRIPTION||""))
-  );
-
-  return {rows:combined.slice(0,ADVANCED_SEARCH_MAX_ROWS),capped};
+  const p=new URLSearchParams(); p.set("select","*");
+  if(lensCode)p.set("LENSCODE","eq."+lensCode);
+  if(lensType)p.set("LENSTYPE","ilike."+advancedSearchFieldPattern(lensType));
+  if(description)p.set("DESCRIPTION","ilike."+advancedSearchFieldPattern(description));
+  p.set("order","LENSCODE.asc.nullslast,NTAGN.asc.nullslast");
+  const all=[];let offset=0;const limit=SUPABASE_PAGE_SIZE;const max=fullData?MAX_FETCH_ROWS:ADVANCED_SEARCH_MAX_ROWS;
+  while(offset<max){p.set("limit",String(limit));p.set("offset",String(offset));const rows=await supabaseRequest(advancedSearchReportTable(branch)+"?"+p.toString());const batch=Array.isArray(rows)?rows:[];all.push(...batch);if(batch.length<limit)break;offset+=limit;}
+  return {rows:all.slice(0,max),capped:all.length>=max};
 }
 
 async function runAdvancedInventorySearch(){
-  if(!sessionId){
-    advancedSearchSetStatus("Session expired. Please login again.");
-    return;
-  }
-
-  const lensCode=advancedSearchClean(document.getElementById("advancedSearchLensCode")?.value || "");
-  const lensType=advancedSearchClean(document.getElementById("advancedSearchLensType")?.value || "");
-  const description=advancedSearchClean(document.getElementById("advancedSearchDescription")?.value || "");
-
-  if(!lensCode && !lensType && !description){
-    advancedSearchSetStatus("Enter at least one search value.");
-    return;
-  }
-
-  if(lensCode && !/^\d+(?:\.\d+)?$/.test(lensCode)){
-    advancedSearchSetStatus("Lens Code must contain numbers only, with an optional decimal point.");
-    return;
-  }
-
-  advancedSearchSetBranchLabel();
-
-  const generation=++advancedSearchGeneration;
-  const results=document.getElementById("advancedSearchResults");
-  const count=document.getElementById("advancedSearchCount");
-  const button=document.getElementById("advancedSearchRunBtn");
-
-  if(button) button.disabled=true;
-  if(count) count.textContent="…";
-  advancedSearchSetStatus("Searching remaining available inventory...");
-
-  if(results){
-    results.innerHTML=`<div class="advancedSearchLoading">Searching remaining inventory...</div>`;
-  }
-
+  if(!sessionId){advancedSearchSetStatus("Session expired. Please login again.");return;}
+  const lensCode=advancedSearchClean(document.getElementById("advancedSearchLensCode")?.value||"");
+  const lensType=advancedSearchClean(document.getElementById("advancedSearchLensType")?.value||"");
+  const description=advancedSearchClean(document.getElementById("advancedSearchDescription")?.value||"");
+  if(!lensCode&&!lensType&&!description){advancedSearchSetStatus("Enter at least one search value.");return;}
+  if(lensCode&&!/^\d+(?:\.\d+)?$/.test(lensCode)){advancedSearchSetStatus("Lens Code must contain numbers only, with an optional decimal point.");return;}
+  const branch=advancedSearchGetBranch();advancedSearchUpdateBranchLabel();const gen=++advancedSearchGeneration;
+  const results=document.getElementById("advancedSearchResults"),count=document.getElementById("advancedSearchCount"),button=document.getElementById("advancedSearchRunBtn");
+  if(button)button.disabled=true;if(count)count.textContent="…";advancedSearchSetStatus("Searching remaining lens stocks...");if(results)results.innerHTML=`<div class="advancedSearchLoading">Searching inventory...</div>`;
   try{
-    const result=await collectAdvancedSearchRows(false);
-    if(generation !== advancedSearchGeneration) return;
-
-    const displayRows=result.rows;
-    if(count){
-      count.textContent=String(displayRows.length) + (result.capped ? "+" : "");
-    }
-
-    if(!displayRows.length){
-      if(results){
-        results.innerHTML=`
-          <div class="advancedSearchNoResults">
-            <div style="font-size:24px;margin-bottom:8px;">⌕</div>
-            No matching remaining lens found.
-          </div>
-        `;
-      }
-      advancedSearchSetStatus("No results found.");
-      return;
-    }
-
-    if(results){
-      results.innerHTML=`
-        <table>
-          <thead>
-            <tr>
-              <th>BRANCH</th>
-              <th>LENS TYPE</th>
-              <th>LENS CODE</th>
-              <th>DESCRIPTION</th>
-              <th>DELIVERY DATE</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${displayRows.map(row=>{
-              const branchValue=escapeHtml(row.__BRANCH || "");
-              const lensTypeValue=escapeHtml(row.LENSTYPE || "");
-              const lensCodeValue=escapeHtml(row.LENSCODE || "");
-              const descriptionValue=escapeHtml(row.DESCRIPTION || "");
-              const deliveryDate=escapeHtml(
-                row.DELIVERYDATE
-                  ? (formatDateValue(row.DELIVERYDATE) || String(row.DELIVERYDATE))
-                  : "—"
-              );
-
-              return `
-                <tr>
-                  <td><span class="branchTag">${branchValue || "—"}</span></td>
-                  <td>${lensTypeValue || "—"}</td>
-                  <td><span class="advancedLensCode">${lensCodeValue || "—"}</span></td>
-                  <td>${descriptionValue || "—"}</td>
-                  <td>${deliveryDate}</td>
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
-        </table>
-      `;
-    }
-
-    advancedSearchSetStatus(
-      result.capped
-        ? "Search completed. More than the display limit may match."
-        : displayRows.length + (displayRows.length === 1 ? " result found." : " results found.")
-    );
-
-  }catch(error){
-    console.error("Advanced inventory search failed:",error);
-    if(generation !== advancedSearchGeneration) return;
-    if(count) count.textContent="0";
-    if(results) results.innerHTML=`<div class="advancedSearchNoResults">Unable to load search results.</div>`;
-    advancedSearchSetStatus(error?.message || "Advanced search failed.");
-  }finally{
-    if(generation === advancedSearchGeneration && button) button.disabled=false;
-  }
+    const branches=branch==="ALL"?BRANCHES:[branch];
+    const branchResults=await Promise.all(branches.map(async b=>{
+      const [stock,sold]=await Promise.all([getAdvancedAvailableRows(b,lensCode,lensType,description,false),getSoldTags(b)]);
+      const rows=stock.rows.filter(row=>{const tag=String(row?.NTAGN??"").trim();return !tag||!sold.has(tag);}).map(row=>({...row,__BRANCH:String(row?.BR||b||"").trim().toUpperCase()}));
+      return {rows,capped:stock.capped};
+    }));
+    if(gen!==advancedSearchGeneration)return;const combined=[];let capped=false;branchResults.forEach(r=>{if(r.capped)capped=true;combined.push(...r.rows);});
+    combined.sort((a,b)=>String(a.__BRANCH||"").localeCompare(String(b.__BRANCH||""))||String(a.LENSCODE||"").localeCompare(String(b.LENSCODE||""),undefined,{numeric:true})||String(a.DESCRIPTION||"").localeCompare(String(b.DESCRIPTION||"")));
+    const rows=combined.slice(0,ADVANCED_SEARCH_MAX_ROWS);if(count)count.textContent=String(rows.length)+(capped?"+":"");
+    if(!rows.length){if(results)results.innerHTML=`<div class="advancedSearchNoResults"><div style="font-size:24px;margin-bottom:8px;">⌕</div>No matching remaining lens stock found.</div>`;advancedSearchSetStatus("No results found.");return;}
+    if(results)results.innerHTML=`<table><thead><tr><th>BRANCH</th><th>LENS TYPE</th><th>LENS CODE</th><th>DESCRIPTION</th><th>DELIVERY DATE</th></tr></thead><tbody>${rows.map(row=>{const d=row?.DELIVERYDATE?(formatDateValue(row.DELIVERYDATE)||String(row.DELIVERYDATE)):"—";return `<tr><td><span class="branchTag">${escapeHtml(row.__BRANCH||"")}</span></td><td>${escapeHtml(row.LENSTYPE||"")||"—"}</td><td><span class="advancedLensCode">${escapeHtml(row.LENSCODE||"")||"—"}</span></td><td>${escapeHtml(row.DESCRIPTION||"")||"—"}</td><td>${escapeHtml(d)}</td></tr>`;}).join("")}</tbody></table>`;
+    advancedSearchSetStatus(capped?"Search completed. More results may match.":rows.length+(rows.length===1?" result found.":" results found."));
+  }catch(e){console.error("Advanced inventory search failed:",e);if(gen!==advancedSearchGeneration)return;if(count)count.textContent="0";if(results)results.innerHTML=`<div class="advancedSearchNoResults">Unable to load search results.</div>`;advancedSearchSetStatus(e?.message||"Advanced search failed.");}
+  finally{if(gen===advancedSearchGeneration&&button)button.disabled=false;}
 }
 
 async function downloadAdvancedInventoryExcel(){
-  if(!sessionId){
-    advancedSearchSetStatus("Session expired. Please login again.");
-    return;
-  }
-
-  const lensCode=advancedSearchClean(document.getElementById("advancedSearchLensCode")?.value || "");
-  const lensType=advancedSearchClean(document.getElementById("advancedSearchLensType")?.value || "");
-  const description=advancedSearchClean(document.getElementById("advancedSearchDescription")?.value || "");
-
-  if(!lensCode && !lensType && !description){
-    advancedSearchSetStatus("Search first, or enter at least one search value before downloading.");
-    return;
-  }
-
-  if(lensCode && !/^\d+(?:\.\d+)?$/.test(lensCode)){
-    advancedSearchSetStatus("Lens Code must contain numbers only, with an optional decimal point.");
-    return;
-  }
-
-  const button=document.getElementById("advancedSearchExcelBtn");
-  if(button) button.disabled=true;
-  advancedSearchSetStatus("Preparing Excel file with complete A-V data...");
-
+  if(!sessionId){advancedSearchSetStatus("Session expired. Please login again.");return;}
+  const branch=advancedSearchGetBranch(),button=document.getElementById("advancedSearchExcelBtn");if(button)button.disabled=true;advancedSearchSetStatus("Preparing complete remaining lens stock Excel...");
   try{
-    const result=await collectAdvancedSearchRows(true);
-
-    /* Export only records whose LENSCODE is numeric, as requested. */
-    const exportRows=result.rows.filter(row=>{
-      const code=String(row?.LENSCODE ?? "").trim();
-      return /^\d+(?:\.\d+)?$/.test(code);
-    });
-
-    if(!exportRows.length){
-      throw new Error("No remaining lenses with a numeric LENSCODE were found for export.");
-    }
-
-    const headers=DB_COLUMNS.slice(0,22);
-    const data=exportRows.map(row=>headers.map(col=>row?.[col] ?? ""));
-    const branch=advancedSearchGetBranch();
-
-    const meta=[
-      ["Branch Filter",branch === "ALL" ? "ALL BRANCHES" : branch],
-      ["Lens Code",lensCode || "All numeric LENSCODE"],
-      ["Lens Type",lensType || "All"],
-      ["Description",description || "All"],
-      ["Records",exportRows.length],
-      ["Generated",formatDateValue(new Date().toISOString())]
-    ];
-
+    const branches=branch==="ALL"?BRANCHES:[branch];
+    const branchResults=await Promise.all(branches.map(async b=>{const [stock,sold]=await Promise.all([getAdvancedAvailableRows(b,"","","",true),getSoldTags(b)]);return stock.rows.filter(row=>{const tag=String(row?.NTAGN??"").trim();return !tag||!sold.has(tag);}).map(row=>({...row,__BRANCH:String(row?.BR||b||"").trim().toUpperCase()}));}));
+    let exportRows=branchResults.flat().filter(row=>/^\d+(?:\.\d+)?$/.test(String(row?.LENSCODE??"").trim()));
+    exportRows.sort((a,b)=>String(a.__BRANCH||"").localeCompare(String(b.__BRANCH||""))||String(a.LENSCODE||"").localeCompare(String(b.LENSCODE||""),undefined,{numeric:true})||String(a.DESCRIPTION||"").localeCompare(String(b.DESCRIPTION||"")));
+    if(!exportRows.length)throw new Error("No remaining lens stocks with numeric LENSCODE were found.");
+    const headers=DB_COLUMNS.slice(0,22),data=exportRows.map(row=>headers.map(col=>row?.[col]??"")),label=branch==="ALL"?"ALL BRANCHES":branch;
+    const meta=[["Branch Filter",label],["Export Scope","ENTIRE REMAINING LENS STOCKS WITH NUMERIC LENSCODE"],["Search Filters","NOT APPLIED — COMPLETE REMAINING STOCKS"],["Records",exportRows.length],["Generated",formatDateValue(new Date().toISOString())]];
     const wb=XLSX.utils.book_new();
-
-    const detailWs=aoExcelMakeTitleSheet(
-      "ACEBEDO OPTICAL — REMAINING LENS SEARCH",
-      meta,
-      headers,
-      data,
-      {
-        widths:headers.map(col=>{
-          if(col==="DESCRIPTION") return 34;
-          if(col==="SUPPLIER") return 24;
-          if(col==="USER EMAIL") return 28;
-          if(col==="QR") return 20;
-          return 14;
-        }),
-        moneyCols:[],
-        dateCols:[],
-        centerCols:headers.map((col,i)=>["BR","LENSTYPE","LENSCODE"].includes(col)?i:-1).filter(i=>i>=0)
-      }
-    );
-
-    XLSX.utils.book_append_sheet(wb,detailWs,"REMAINING A-V");
-
-    const grouped=new Map();
-    exportRows.forEach(row=>{
-      const code=String(row?.LENSCODE ?? "").trim();
-      const key=code;
-      const item=grouped.get(key) || {
-        LENSTYPE:row?.LENSTYPE ?? "",
-        DESCRIPTION:row?.DESCRIPTION ?? "",
-        LENSCODE:code,
-        COUNT:0
-      };
-      item.COUNT++;
-      grouped.set(key,item);
-    });
-
-    const summaryRows=Array.from(grouped.values()).sort((a,b)=>
-      String(a.LENSCODE).localeCompare(String(b.LENSCODE),undefined,{numeric:true})
-    );
-
-    const summaryAoa=[
-      ["ACEBEDO OPTICAL — LENSCODE SUMMARY"],
-      ["Branch Filter",branch === "ALL" ? "ALL BRANCHES" : branch],
-      ["Description Filter",description || "All"],
-      ["Records",exportRows.length],
-      ["Unique LENSCODE",summaryRows.length],
-      ["Generated",formatDateValue(new Date().toISOString())],
-      [],
-      ["LENSTYPE","DESCRIPTION","LENSCODE","COUNT"],
-      ...summaryRows.map(x=>[x.LENSTYPE,x.DESCRIPTION,x.LENSCODE,x.COUNT]),
-      ["","","TOTAL",exportRows.length]
-    ];
-
-    const summaryWs=XLSX.utils.aoa_to_sheet(summaryAoa);
-    const range=XLSX.utils.decode_range(summaryWs["!ref"]);
-    summaryWs["!merges"]=[{s:{r:0,c:0},e:{r:0,c:3}}];
-    if(summaryWs.A1){
-      summaryWs.A1.s={
-        fill:{fgColor:{rgb:"0F3D58"}},
-        font:{bold:true,color:{rgb:"FFFFFF"},sz:16},
-        alignment:{horizontal:"left",vertical:"center"}
-      };
-    }
-    for(let r=1;r<7;r++){
-      const cell=summaryWs[XLSX.utils.encode_cell({r,c:0})];
-      if(cell) cell.s={font:{bold:true,color:{rgb:"4B6475"},sz:10},fill:{fgColor:{rgb:"F2F7FB"}}};
-    }
-    for(let c=0;c<4;c++){
-      const h=summaryWs[XLSX.utils.encode_cell({r:7,c})];
-      if(h) h.s={fill:{fgColor:{rgb:"1F4E78"}},font:{bold:true,color:{rgb:"FFFFFF"},sz:11},alignment:{horizontal:"center",vertical:"center",wrapText:true}};
-    }
-    for(let r=8;r<=range.e.r;r++){
-      for(let c=0;c<4;c++){
-        const cell=summaryWs[XLSX.utils.encode_cell({r,c})];
-        if(!cell) continue;
-        cell.s={
-          fill:{fgColor:{rgb:(r%2===0?"F7FBFF":"FFFFFF")}},
-          font:{color:{rgb:"203040"},sz:10},
-          border:{bottom:{style:"hair",color:{rgb:"DCE6F1"}}}
-        };
-      }
-    }
-    for(let c=0;c<4;c++){
-      const cell=summaryWs[XLSX.utils.encode_cell({r:range.e.r,c})];
-      if(cell) cell.s={fill:{fgColor:{rgb:"D9EAF7"}},font:{bold:true,color:{rgb:"0F3D58"},sz:10},border:{top:{style:"thin",color:{rgb:"9FBAD0"}}}};
-    }
-    summaryWs["!cols"]=[{wch:18},{wch:38},{wch:18},{wch:12}];
-    summaryWs["!rows"]=[];
-    summaryWs["!rows"][0]={hpt:24};
-    summaryWs["!rows"][7]={hpt:28};
-    summaryWs["!freeze"]={xSplit:0,ySplit:8};
-    summaryWs["!autofilter"]={ref:XLSX.utils.encode_range({s:{r:7,c:0},e:{r:range.e.r,c:3}})};
-
-    XLSX.utils.book_append_sheet(wb,summaryWs,"SUMMARY");
-
-    const filename="Acebedo_Remaining_Lens_Search_" + formatFileDate() + ".xlsx";
-    XLSX.writeFile(wb,filename);
-    advancedSearchSetStatus("Excel downloaded: " + filename);
-
-  }catch(error){
-    console.error("Advanced inventory Excel failed:",error);
-    advancedSearchSetStatus(error?.message || "Unable to create Advanced Inventory Excel.");
-  }finally{
-    if(button) button.disabled=false;
-  }
+    const ws=aoExcelMakeTitleSheet("ACEBEDO OPTICAL — REMAINING LENS STOCKS",meta,headers,data,{widths:headers.map(col=>col==="DESCRIPTION"?34:col==="SUPPLIER"?24:col==="USER EMAIL"?28:col==="DATE AND TIME"?22:col==="QR"?20:14),moneyCols:headers.includes("SELLINGPRICE")?[headers.indexOf("SELLINGPRICE")]:[],dateCols:[],centerCols:headers.map((col,i)=>["BR","NTAGN","LENSTYPE","LENSCODE","SI NO.","STATUS"].includes(col)?i:-1).filter(i=>i>=0)});
+    XLSX.utils.book_append_sheet(wb,ws,"REMAINING A-V");
+    const grouped=new Map();exportRows.forEach(row=>{const code=String(row?.LENSCODE??"").trim();const item=grouped.get(code)||{LENSTYPE:row?.LENSTYPE??"",DESCRIPTION:row?.DESCRIPTION??"",LENSCODE:code,COUNT:0};item.COUNT++;grouped.set(code,item);});
+    const summaryRows=Array.from(grouped.values()).sort((a,b)=>String(a.LENSCODE).localeCompare(String(b.LENSCODE),undefined,{numeric:true}));
+    const summary=[[
+      "ACEBEDO OPTICAL — LENSCODE SUMMARY"],["Branch Filter",label],["Export Scope","ENTIRE REMAINING LENS STOCKS WITH NUMERIC LENSCODE"],["Records",exportRows.length],["Unique LENSCODE",summaryRows.length],["Generated",formatDateValue(new Date().toISOString())],[],["LENSTYPE","DESCRIPTION","LENSCODE","COUNT"],...summaryRows.map(x=>[x.LENSTYPE,x.DESCRIPTION,x.LENSCODE,x.COUNT]),["","","TOTAL",exportRows.length]];
+    const sws=XLSX.utils.aoa_to_sheet(summary);sws['!cols']=[{wch:18},{wch:40},{wch:18},{wch:12}];sws['!merges']=[{s:{r:0,c:0},e:{r:0,c:3}}];if(sws.A1)sws.A1.s={fill:{fgColor:{rgb:"0F3D58"}},font:{bold:true,color:{rgb:"FFFFFF"},sz:16},alignment:{horizontal:"left",vertical:"center"}};const range=XLSX.utils.decode_range(sws["!ref"]);for(let c=0;c<4;c++){const cell=sws[XLSX.utils.encode_cell({r:7,c})];if(cell)cell.s={fill:{fgColor:{rgb:"1F4E78"}},font:{bold:true,color:{rgb:"FFFFFF"},sz:11},alignment:{horizontal:"center",vertical:"center",wrapText:true}};}XLSX.utils.book_append_sheet(wb,sws,"SUMMARY");
+    XLSX.writeFile(wb,"Acebedo_Remaining_Lens_Stocks_"+branch+"_"+formatFileDate()+".xlsx");advancedSearchSetStatus("Excel downloaded: "+exportRows.length+" remaining numeric LENSCODE stock records.");
+  }catch(e){console.error("Advanced inventory Excel failed:",e);advancedSearchSetStatus(e?.message||"Unable to create Excel file.");}finally{if(button)button.disabled=false;}
 }
 
-function advancedSearchKeydown(event){
-  if(event.key === "Enter"){
-    event.preventDefault();
-    runAdvancedInventorySearch();
-  }
-}
-
+function advancedSearchKeydown(event){if(event.key==="Enter"){event.preventDefault();runAdvancedInventorySearch();}}
 document.addEventListener("DOMContentLoaded",()=>{
-  [
-    "advancedSearchLensCode",
-    "advancedSearchLensType",
-    "advancedSearchDescription"
-  ].forEach(id=>{
-    const input=document.getElementById(id);
-    if(input) input.addEventListener("keydown",advancedSearchKeydown);
-  });
-
-  const branch=document.getElementById("advancedSearchBranch");
-  if(branch){
-    branch.addEventListener("change",()=>{
-      advancedSearchSetBranchLabel();
-      const count=document.getElementById("advancedSearchCount");
-      if(count) count.textContent="0";
-    });
-  }
-
-  const modal=document.getElementById("advancedInventorySearchModal");
-  if(modal){
-    modal.addEventListener("click",event=>{
-      if(event.target === modal){
-        closeAdvancedInventorySearch();
-      }
-    });
-  }
+  ["advancedSearchLensCode","advancedSearchLensType","advancedSearchDescription"].forEach(id=>{const input=document.getElementById(id);if(input)input.addEventListener("keydown",advancedSearchKeydown);});
+  const branch=document.getElementById("advancedSearchBranch");if(branch)branch.addEventListener("change",()=>{advancedSearchUpdateBranchLabel();clearAdvancedInventorySearch();});
+  const modal=document.getElementById("advancedInventorySearchModal");if(modal)modal.addEventListener("click",event=>{if(event.target===modal)closeAdvancedInventorySearch();});
 });
 
 </script>

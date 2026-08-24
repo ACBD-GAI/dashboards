@@ -18091,7 +18091,7 @@ async function downloadAdvancedInventoryExcel(){
     const meta=[["Branch Filter",label],["Export Scope","ENTIRE REMAINING LENS STOCKS WITH NUMERIC LENSCODE"],["Search Filters","NOT APPLIED — COMPLETE REMAINING STOCKS"],["Records",exportRows.length],["Generated",formatDateValue(new Date().toISOString())]];
     const wb=XLSX.utils.book_new();
     const ws=aoExcelMakeTitleSheet("ACEBEDO OPTICAL — REMAINING LENS STOCKS",meta,headers,data,{widths:headers.map(col=>col==="DESCRIPTION"?34:col==="SUPPLIER"?24:col==="USER EMAIL"?28:col==="DATE AND TIME"?22:col==="QR"?20:14),moneyCols:headers.includes("SELLINGPRICE")?[headers.indexOf("SELLINGPRICE")]:[],dateCols:[],centerCols:headers.map((col,i)=>["BR","NTAGN","LENSTYPE","LENSCODE","SI NO.","STATUS"].includes(col)?i:-1).filter(i=>i>=0)});
-    XLSX.utils.book_append_sheet(wb,ws,"REMAINING A-V");
+    XLSX.utils.book_append_sheet(wb,ws,"REMAINING LENS");
     const grouped=new Map();exportRows.forEach(row=>{const code=String(row?.LENSCODE??"").trim();const item=grouped.get(code)||{LENSTYPE:row?.LENSTYPE??"",DESCRIPTION:row?.DESCRIPTION??"",LENSCODE:code,COUNT:0};item.COUNT++;grouped.set(code,item);});
     const summaryRows=Array.from(grouped.values()).sort((a,b)=>String(a.LENSCODE).localeCompare(String(b.LENSCODE),undefined,{numeric:true}));
     const summary=[[

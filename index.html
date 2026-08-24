@@ -5186,6 +5186,15 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
     grid-column:auto;
   }
 }
+
+/* Native option menus render more consistently when left quiet and system-like. */
+#reportedMissingModal #reportedMissingBranchFilter option{
+  color:#294663 !important;
+  background:#fff !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  line-height:1.2;
+}
 </style>
 
 </head>
@@ -15469,17 +15478,11 @@ function updateReportedMissingBranchFilterCounts(){
     if(!b) return;
     const count=counts.get(b)||0;
     option.textContent=b+" ("+formatNumber(count)+")";
-    option.style.color = count > 0 ? "#ffffff" : "#111827";
-    option.style.backgroundColor = count > 0 ? "#dc2626" : "#ffffff";
-    option.style.fontWeight = "950";
   });
 
   if(selected) filter.value=selected;
   const selectedCount = counts.get(selected)||0;
   filter.classList.toggle("has-unresolved", selectedCount > 0);
-  filter.style.color = selectedCount > 0 ? "#ffffff" : "#111827";
-  filter.style.backgroundColor = selectedCount > 0 ? "#dc2626" : "#ffffff";
-  filter.style.borderColor = selectedCount > 0 ? "#dc2626" : "#cbd5e1";
 }
 
 function renderReportedMissingPopup(){

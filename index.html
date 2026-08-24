@@ -8947,6 +8947,9 @@ function branchChanged(){
 
   silentlyClearReport();
 
+  /* Selecting a branch is enough to load the current report. */
+  runSearch();
+
 }
 
 /* =========================================================
@@ -8962,6 +8965,9 @@ function reportChanged(){
   clearAuditFilters();
 
   silentlyClearReport();
+
+  /* Available Stocks, Sold Out, and Audit load immediately on selection. */
+  runSearch();
 
 }
 

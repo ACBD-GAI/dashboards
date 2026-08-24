@@ -5094,6 +5094,100 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .ao-chat-fab:hover{background:linear-gradient(145deg,#20548e,#153b6c);box-shadow:0 10px 23px rgba(16,47,84,.26),inset 0 1px 0 rgba(255,255,255,.15);}
 </style>
 
+<style id="reportedMissingFilterComfort">
+/* Reported Missing: compact, calm filter controls without changing their behavior. */
+#reportedMissingModal .reportedMissingHead{
+  padding:16px 20px 13px;
+}
+
+#reportedMissingModal .reportedMissingControls{
+  grid-template-columns:136px 130px minmax(260px,1fr) 78px;
+  align-items:center;
+  gap:9px;
+  margin-top:12px;
+}
+
+#reportedMissingModal .reportedMissingSelect,
+#reportedMissingModal .reportedMissingInput,
+#reportedMissingModal #reportedMissingSearch,
+#reportedMissingModal .controlBtn[data-reported-refresh="1"]{
+  min-height:38px !important;
+  height:38px !important;
+  border-radius:10px;
+  font-size:11px;
+}
+
+#reportedMissingModal .reportedMissingSelect,
+#reportedMissingModal #reportedMissingSearch{
+  padding:0 11px;
+}
+
+#reportedMissingModal #reportedMissingBranchFilter{
+  border:1px solid #bdd5ec !important;
+  color:#246399 !important;
+  background:#f8fbff !important;
+  font-size:11px !important;
+  font-weight:850 !important;
+  letter-spacing:.015em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 1px 3px rgba(36,91,148,.04);
+}
+
+#reportedMissingModal #reportedMissingBranchFilter.has-unresolved{
+  border-color:#f3b9c5 !important;
+  color:#aa3650 !important;
+  background:#fff7f8 !important;
+}
+
+#reportedMissingModal #reportedMissingStatusFilter{
+  border:1px solid #d4e0ec !important;
+  color:#4d6580 !important;
+  background:#fff !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+}
+
+#reportedMissingModal #reportedMissingSearch{
+  border:1px solid #d4e0ec !important;
+  color:#385674 !important;
+  background:#fff !important;
+  font-size:11px !important;
+  font-weight:650 !important;
+}
+
+#reportedMissingModal .controlBtn[data-reported-refresh="1"]{
+  padding:0 10px;
+  font-size:10px;
+}
+
+#reportedMissingModal .reportedMissingSelect:focus,
+#reportedMissingModal #reportedMissingSearch:focus{
+  border-color:#72b9eb !important;
+  box-shadow:0 0 0 3px rgba(61,155,232,.10) !important;
+}
+
+#reportedMissingModal .reportPdfActions{
+  margin-top:10px;
+}
+
+@media(max-width:760px){
+  #reportedMissingModal .reportedMissingControls{
+    grid-template-columns:1fr 1fr;
+  }
+  #reportedMissingModal #reportedMissingSearch{
+    grid-column:1/-1;
+  }
+}
+
+@media(max-width:480px){
+  #reportedMissingModal .reportedMissingControls{
+    grid-template-columns:1fr;
+  }
+  #reportedMissingModal #reportedMissingSearch{
+    grid-column:auto;
+  }
+}
+</style>
+
 </head>
 
 <body>

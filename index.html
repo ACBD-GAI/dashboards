@@ -18000,8 +18000,10 @@ async function runAdvancedInventorySearch(){
         const code=Number(rawCode);
         if(!Number.isFinite(code)) return false;
 
-        // ALL LENS TYPES = ALL numeric LENSCODE values, regardless of ORD/MC/PHOTOGRAY.
-        if(!lensCode && !showAllLensTypes){
+        // The LENSCODE RANGE is always enforced when a range is selected,
+        // even when an exact Lens Code is also entered. The two filters are ANDed.
+        // Example: ORD + 5001 = 0 results; PHOTOGRAY + 5001 = matching results.
+        if(!showAllLensTypes){
           const range=advancedSearchLensTypeRange(lensType);
           if(!range) return false;
           if(code < Number(range.min) || code > Number(range.max)) return false;

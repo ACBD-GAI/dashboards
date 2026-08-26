@@ -18152,6 +18152,19 @@ async function aoChatCompressImage(file){
   );
 }
 
+function aoChatStorageFileName(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  const ms = String(d.getMilliseconds()).padStart(3,"0");
+  return d.getFullYear() + "-" +
+    pad(d.getMonth() + 1) + "-" +
+    pad(d.getDate()) + "_" +
+    pad(d.getHours()) + "-" +
+    pad(d.getMinutes()) + "-" +
+    pad(d.getSeconds()) + "-" +
+    ms + ".jpg";
+}
+
 async function aoChatUploadImage(file){
 
   if(
@@ -18187,12 +18200,7 @@ async function aoChatUploadImage(file){
       .replace(/[^a-z0-9._-]/gi,"_")
       .slice(0,45) || "admin";
 
-  const fileName =
-    Date.now() + "-" +
-    (crypto.randomUUID
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2)) +
-    ".jpg";
+  const fileName = aoChatStorageFileName();
 
   const path =
     safeBranch + "/" +

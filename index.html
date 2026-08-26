@@ -17835,6 +17835,10 @@ function escapeHtmlAttribute(
 let aoChatOpen = false;
 let aoChatSending = false;
 let aoChatTimer = null;
+
+/* Chat conversation request throttle. */
+let aoChatLastLoadKey = "";
+let aoChatLastLoadAt = 0;
 let aoChatUnreadTotal = 0;
 
 let aoChatNotifications = [];
@@ -18956,7 +18960,7 @@ async function aoChatLoadUnread(){
         "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
         "&sender_type=eq.SCANNER" +
         "&order=created_at.desc" +
-        "&limit=1000"
+        "&limit=200"
       );
 
     const grouped =
@@ -19099,6 +19103,37 @@ async function aoChatLoadUnread(){
 
 async function aoChatLoad(){
 
+  /*
+   * PERFORMANCE:
+   * The chat timer runs frequently, but the conversation
+   * does not need a Supabase request every few seconds.
+   * Cache the currently selected conversation for 5 seconds.
+   * Manual actions such as Send still invalidate the cache.
+   */
+  const now =
+    Date.now();
+
+  const branchForThrottle =
+    aoChatBranch();
+
+  const recipientForThrottle =
+    aoChatRecipient();
+
+  const throttleKey =
+    branchForThrottle +
+    "|" +
+    recipientForThrottle;
+
+  if(
+    aoChatLastLoadKey === throttleKey &&
+    aoChatLastLoadAt &&
+    now - aoChatLastLoadAt < 5000
+  ){
+
+    return;
+
+  }
+
   if(
     !sessionId ||
     !currentEmail
@@ -19202,21 +19237,26 @@ async function aoChatLoad(){
 
   aoChatLoadBusy = true;
 
+  /*
+   * Record the request time only when a real Supabase
+   * conversation load is about to happen.
+   */
+  aoChatLastLoadKey = key;
+  aoChatLastLoadAt = Date.now();
+
   try{
 
-   const rows =
-  await supabaseRequest(
-    "chat_messages" +
-    "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
-    "&branch=eq." +
-    encodeURIComponent(branch) +
-    "&scanner_email=eq." +
-    encodeURIComponent(recipient) +
-    "&order=created_at.desc" +
-    "&limit=80"
-  );
-
-const list = (Array.isArray(rows) ? rows : []).reverse();
+    const rows =
+      await supabaseRequest(
+        "chat_messages" +
+        "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
+        "&branch=eq." +
+        encodeURIComponent(branch) +
+        "&scanner_email=eq." +
+        encodeURIComponent(recipient) +
+        "&order=created_at.desc" +
+        "&limit=100"
+      );
 
     if(
       loadSeq !==
@@ -19228,9 +19268,11 @@ const list = (Array.isArray(rows) ? rows : []).reverse();
     }
 
     const list =
-      Array.isArray(rows)
-        ? rows
-        : [];
+      (
+        Array.isArray(rows)
+          ? rows
+          : []
+      ).reverse();
 
     aoChatConversationCache.set(
       key,
@@ -19245,6 +19287,13 @@ const list = (Array.isArray(rows) ? rows : []).reverse();
     );
 
   }catch(e){
+
+    /*
+     * Do not block the next retry if the request failed.
+     */
+    if(aoChatLastLoadKey === key){
+      aoChatLastLoadAt = 0;
+    }
 
     console.warn(
       "Dashboard chat load failed:",
@@ -19666,6 +19715,10 @@ async function aoChatSend(){
       key
     );
 
+    /* Force the freshly sent message to reload immediately. */
+    aoChatLastLoadKey = "";
+    aoChatLastLoadAt = 0;
+
     await aoChatLoad();
 
     aoChatLoadUnread()
@@ -19999,76 +20052,10 @@ document.addEventListener(
         setInterval(
           () => {
 
-           if(!aoChatTimer){
-
-  aoChatTimer =
-    setInterval(
-      () => {
-
-        if(
-          sessionId &&
-          currentEmail &&
-          aoChatOpen
-        ){
-
-          const now =
-            Date.now();
-
-          /*
-           * Unread messages:
-           * every 10 seconds.
-           */
-
-          if(
-            !window.__aoChatUnreadTick &&
-            (
-              !window.__aoChatLastUnread ||
-              now -
-                window.__aoChatLastUnread >=
-                10000
-            )
-          ){
-
-            window.__aoChatUnreadTick =
-              true;
-
-            window.__aoChatLastUnread =
-              now;
-
-            aoChatLoadUnread()
-              .finally(
-                () => {
-
-                  window.__aoChatUnreadTick =
-                    false;
-
-                }
-              );
-
-          }
-
-          /*
-           * Conversation:
-           * only while chat is open,
-           * and never while another load is running.
-           */
-
-          if(
-            aoChatOpen &&
-            !aoChatLoadBusy
-          ){
-
-            aoChatLoad();
-
-          }
-
-        }
-
-      },
-      3000
-    );
-
-}
+            if(
+              sessionId &&
+              currentEmail
+            ){
 
               const now =
                 Date.now();
@@ -20124,7 +20111,7 @@ document.addEventListener(
             }
 
           },
-          3000
+          5000
         );
 
     }

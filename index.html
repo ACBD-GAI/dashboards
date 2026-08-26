@@ -18677,10 +18677,13 @@ async function aoChatLoadRecipientsFresh(
       .trim()
       .toLowerCase();
 
-    /*
-     * Get active users and previous chat contacts
-     * at the same time.
-     */
+    /* =========================================================
+       RUN ALL CHAT RECIPIENT SOURCES IN PARALLEL
+       1. Active sessions
+       2. Previous chat contacts
+       3. Authorized branch users
+       ========================================================= */
+
     const [
       activeData,
       previousRows
@@ -18707,9 +18710,9 @@ async function aoChatLoadRecipientsFresh(
 
       ]);
 
-    /* =========================================
-       ACTIVE BRANCH USERS
-       ========================================= */
+    /* =========================================================
+       1. ACTIVE USERS
+       ========================================================= */
 
     if(
       activeData &&
@@ -18736,14 +18739,6 @@ async function aoChatLoadRecipientsFresh(
             .trim()
             .toUpperCase();
 
-          /*
-           * IMPORTANT:
-           * Do NOT exclude currentEmail.
-           *
-           * This allows:
-           * Dashboard = same email
-           * Scanner   = same email
-           */
           if(
             email &&
             b === branch
@@ -18758,9 +18753,10 @@ async function aoChatLoadRecipientsFresh(
 
     }
 
-    /* =========================================
-       PREVIOUS CHAT CONTACTS
-       ========================================= */
+    /* =========================================================
+       2. PREVIOUS CHAT CONTACTS
+       This also keeps offline users who already chatted before.
+       ========================================================= */
 
     if(
       Array.isArray(previousRows)
@@ -18776,10 +18772,6 @@ async function aoChatLoadRecipientsFresh(
             .trim()
             .toLowerCase();
 
-          /*
-           * IMPORTANT:
-           * Do NOT exclude currentEmail here either.
-           */
           if(email){
 
             emails.add(email);
@@ -18791,30 +18783,114 @@ async function aoChatLoadRecipientsFresh(
 
     }
 
-    /*
-     * IMPORTANT FALLBACK:
-     *
-     * If the same email is currently logged in
-     * to the Scanner and there is already chat
-     * activity for that branch, keep the same
-     * email selectable.
-     */
+    /* =========================================================
+       3. AUTHORIZED BRANCH USERS
+       IMPORTANT:
+       This is what makes OFFLINE users visible.
+
+       allowedUsersRows is already loaded by the Dashboard's
+       existing Allowed Users function.
+       ========================================================= */
+
     if(
-      current &&
-      Array.isArray(previousRows) &&
-      previousRows.some(
-        row =>
-          String(
-            row?.scanner_email || ""
-          )
-          .trim()
-          .toLowerCase() === current
+      Array.isArray(
+        allowedUsersRows
       )
     ){
 
-      emails.add(current);
+      allowedUsersRows.forEach(
+        user => {
+
+          const email =
+            String(
+              user?.email || ""
+            )
+            .trim()
+            .toLowerCase();
+
+          const userBranch =
+            String(
+              user?.branch || ""
+            )
+            .trim()
+            .toUpperCase();
+
+          const activeValue =
+            user?.active;
+
+          /*
+           * Only include users assigned to this branch.
+           *
+           * Do not require them to be online.
+           */
+          if(
+            email &&
+            userBranch === branch &&
+            activeValue !== false &&
+            String(activeValue).toLowerCase() !== "false"
+          ){
+
+            emails.add(email);
+
+          }
+
+        }
+      );
 
     }
+
+    /* =========================================================
+       4. SAME EMAIL AS DASHBOARD
+       Keep it selectable too.
+       ========================================================= */
+
+    if(current){
+
+      const sameEmailAllowed =
+        Array.isArray(
+          allowedUsersRows
+        ) &&
+        allowedUsersRows.some(
+          user =>
+            String(
+              user?.email || ""
+            )
+            .trim()
+            .toLowerCase() === current &&
+            String(
+              user?.branch || ""
+            )
+            .trim()
+            .toUpperCase() === branch
+        );
+
+      const sameEmailPreviousChat =
+        Array.isArray(
+          previousRows
+        ) &&
+        previousRows.some(
+          row =>
+            String(
+              row?.scanner_email || ""
+            )
+            .trim()
+            .toLowerCase() === current
+        );
+
+      if(
+        sameEmailAllowed ||
+        sameEmailPreviousChat
+      ){
+
+        emails.add(current);
+
+      }
+
+    }
+
+    /* =========================================================
+       FINAL LIST
+       ========================================================= */
 
     const list =
       Array.from(

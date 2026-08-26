@@ -18670,19 +18670,30 @@ async function aoChatLoadRecipientsFresh(
     const emails =
       new Set();
 
-    /* Run both sources at the same time. */
+    const current =
+      String(
+        currentEmail || ""
+      )
+      .trim()
+      .toLowerCase();
+
+    /*
+     * Get active users and previous chat contacts
+     * at the same time.
+     */
     const [
       activeData,
       previousRows
     ] =
       await Promise.all([
+
         loginApiGet(
           "getActiveSessions",
           {
             sessionId:sessionId
           }
         ).catch(
-          e => null
+          () => null
         ),
 
         supabaseRequest(
@@ -18691,11 +18702,15 @@ async function aoChatLoadRecipientsFresh(
           encodeURIComponent(branch) +
           "&limit=1000"
         ).catch(
-          e => []
+          () => []
         )
+
       ]);
 
-    /* Active branch users. */
+    /* =========================================
+       ACTIVE BRANCH USERS
+       ========================================= */
+
     if(
       activeData &&
       activeData.ok === true &&
@@ -18721,15 +18736,17 @@ async function aoChatLoadRecipientsFresh(
             .trim()
             .toUpperCase();
 
+          /*
+           * IMPORTANT:
+           * Do NOT exclude currentEmail.
+           *
+           * This allows:
+           * Dashboard = same email
+           * Scanner   = same email
+           */
           if(
             email &&
-            b === branch &&
-            email !==
-              String(
-                currentEmail || ""
-              )
-              .trim()
-              .toLowerCase()
+            b === branch
           ){
 
             emails.add(email);
@@ -18741,7 +18758,10 @@ async function aoChatLoadRecipientsFresh(
 
     }
 
-    /* Previous chat contacts. */
+    /* =========================================
+       PREVIOUS CHAT CONTACTS
+       ========================================= */
+
     if(
       Array.isArray(previousRows)
     ){
@@ -18756,15 +18776,11 @@ async function aoChatLoadRecipientsFresh(
             .trim()
             .toLowerCase();
 
-          if(
-            email &&
-            email !==
-              String(
-                currentEmail || ""
-              )
-              .trim()
-              .toLowerCase()
-          ){
+          /*
+           * IMPORTANT:
+           * Do NOT exclude currentEmail here either.
+           */
+          if(email){
 
             emails.add(email);
 
@@ -18772,6 +18788,31 @@ async function aoChatLoadRecipientsFresh(
 
         }
       );
+
+    }
+
+    /*
+     * IMPORTANT FALLBACK:
+     *
+     * If the same email is currently logged in
+     * to the Scanner and there is already chat
+     * activity for that branch, keep the same
+     * email selectable.
+     */
+    if(
+      current &&
+      Array.isArray(previousRows) &&
+      previousRows.some(
+        row =>
+          String(
+            row?.scanner_email || ""
+          )
+          .trim()
+          .toLowerCase() === current
+      )
+    ){
+
+      emails.add(current);
 
     }
 
@@ -18813,7 +18854,6 @@ async function aoChatLoadRecipientsFresh(
   }
 
 }
-
 /* =========================================================
    UNREAD
    ========================================================= */

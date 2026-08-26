@@ -3822,121 +3822,531 @@ select:disabled{
 
 <style>
 
-/* ================= PRIVATE ADMIN CHAT ================= */
+<style>
+
+/* =========================================================
+   PRIVATE ADMIN CHAT — CHAT ONLY
+   Branch selector is INSIDE the chatbox.
+   Does NOT modify the Dashboard branch selector.
+   ========================================================= */
+
 .ao-chat-fab{
-  position:fixed;right:22px;bottom:22px;width:58px;height:58px;
-  border:0;border-radius:50%;background:#111827;color:#fff;font-size:25px;
-  cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:99990;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .18s ease,box-shadow .18s ease;
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  width:58px;
+  height:58px;
+  border:0;
+  border-radius:50%;
+  background:linear-gradient(145deg,#173f6f,#0f2d54);
+  color:#fff;
+  font-size:25px;
+  cursor:pointer;
+  box-shadow:
+    0 8px 20px rgba(16,47,84,.22),
+    inset 0 1px 0 rgba(255,255,255,.13);
+  z-index:99990;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
 }
-.ao-chat-fab:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(0,0,0,.30)}
+
+.ao-chat-fab:hover{
+  transform:translateY(-2px);
+  background:linear-gradient(145deg,#20548e,#153b6c);
+  box-shadow:
+    0 10px 23px rgba(16,47,84,.26),
+    inset 0 1px 0 rgba(255,255,255,.15);
+}
+
 .ao-chat-badge{
-  position:absolute;right:-4px;top:-4px;min-width:21px;height:21px;padding:0 6px;
-  border-radius:20px;background:#ef4444;color:#fff;font:bold 11px Arial;
-  display:none;align-items:center;justify-content:center;
-  border:2px solid #fff;box-shadow:0 3px 9px rgba(239,68,68,.35);
+  position:absolute;
+  right:-4px;
+  top:-4px;
+  min-width:21px;
+  height:21px;
+  padding:0 6px;
+  border-radius:20px;
+  background:#ef4444;
+  color:#fff;
+  font:bold 11px Arial;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border:2px solid #fff;
+  box-shadow:0 3px 9px rgba(239,68,68,.35);
 }
+
 .ao-chat-panel{
-  position:fixed;right:22px;bottom:92px;width:min(430px,calc(100vw - 30px));
-  height:min(650px,calc(100vh - 125px));background:#fff;border:1px solid #e5e7eb;
-  border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);z-index:99989;
-  display:none;overflow:hidden;
+  position:fixed;
+  right:22px;
+  bottom:92px;
+  width:min(450px,calc(100vw - 30px));
+  height:min(680px,calc(100vh - 125px));
+  background:#fff;
+  border:1px solid #d1e1ee;
+  border-radius:20px;
+  box-shadow:0 25px 65px rgba(18,61,111,.28);
+  z-index:99989;
+  display:none;
+  overflow:hidden;
 }
-.ao-chat-panel.open{display:flex;flex-direction:column}
+
+.ao-chat-panel.open{
+  display:flex;
+  flex-direction:column;
+}
+
 .ao-chat-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;background:#111827;color:#fff;flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:15px 16px;
+  background:linear-gradient(135deg,#1f5a9a,#3b57b0);
+  color:#fff;
+  flex:none;
 }
-.ao-chat-title{font-weight:800;font-size:15px}
-.ao-chat-sub{font-size:11px;opacity:.75;margin-top:2px}
-.ao-chat-close{border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+
+.ao-chat-title{
+  font-weight:800;
+  font-size:15px;
+}
+
+.ao-chat-sub{
+  font-size:11px;
+  opacity:.78;
+  margin-top:2px;
+}
+
+.ao-chat-close{
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+  padding:4px 7px;
+  border-radius:8px;
+}
+
+.ao-chat-close:hover{
+  background:rgba(255,255,255,.12);
+}
+
+/* =========================
+   CHAT BRANCH SELECTOR
+   ========================= */
+
+.ao-chat-branch{
+  padding:10px 10px 8px;
+  border-bottom:1px solid #e1e9f2;
+  background:#f7fbff;
+  flex:none;
+}
+
+.ao-chat-branch-label{
+  display:block;
+  margin:0 0 5px 2px;
+  color:#49657f;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.ao-chat-branch-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.ao-chat-branch-select{
+  flex:1;
+  min-width:0;
+  width:100%;
+  min-height:40px;
+  padding:0 12px;
+  border:1px solid #d1e0ed;
+  border-radius:11px;
+  outline:none;
+  appearance:auto;
+  background:#fff;
+  color:#294463;
+  font-size:12px;
+  font-weight:800;
+}
+
+.ao-chat-branch-select:focus{
+  border-color:#4088f7;
+  box-shadow:0 0 0 3px rgba(64,136,247,.10);
+}
+
+.ao-chat-refresh-users{
+  flex:0 0 40px;
+  width:40px;
+  min-width:40px;
+  height:40px;
+  min-height:40px;
+  padding:0;
+  border:1px solid #d1e0ed;
+  border-radius:11px;
+  background:#fff;
+  color:#2b6095;
+  cursor:pointer;
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.ao-chat-refresh-users:hover{
+  background:#eff8ff;
+  border-color:#b7dff8;
+}
+
+.ao-chat-refresh-users:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+/* =========================
+   NOTIFICATIONS
+   ========================= */
+
 .ao-chat-notify{
-  display:none;padding:10px;border-bottom:1px solid #e5e7eb;
-  background:#f8fafc;max-height:190px;overflow-y:auto;flex:none;
+  display:none;
+  padding:10px;
+  border-bottom:1px solid #e5ebf2;
+  background:#f7fbff;
+  max-height:190px;
+  overflow-y:auto;
+  flex:none;
 }
-.ao-chat-notify.show{display:block}
+
+.ao-chat-notify.show{
+  display:block;
+}
+
 .ao-chat-notify-head{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:7px;color:#334155;font-size:10px;font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:7px;
+  color:#334155;
+  font-size:10px;
+  font-weight:900;
   letter-spacing:.06em;
 }
+
 .ao-chat-notify-count{
-  color:#dc2626;font-size:10px;font-weight:900;
+  color:#dc2626;
+  font-size:10px;
+  font-weight:900;
 }
+
 .ao-chat-notify-item{
-  width:100%;display:flex;align-items:center;gap:10px;text-align:left;
-  padding:9px 10px;margin:5px 0;border:1px solid #e2e8f0;border-radius:11px;
-  background:#fff;cursor:pointer;transition:background .15s ease,border-color .15s ease;
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  padding:9px 10px;
+  margin:5px 0;
+  border:1px solid #dde7f0;
+  border-radius:11px;
+  background:#fff;
+  cursor:pointer;
+  transition:
+    background .15s ease,
+    border-color .15s ease;
 }
-.ao-chat-notify-item:hover{background:#eff6ff;border-color:#bfdbfe}
+
+.ao-chat-notify-item:hover{
+  background:#eff8ff;
+  border-color:#b7dff8;
+}
+
 .ao-chat-notify-icon{
-  width:30px;height:30px;flex:none;border-radius:9px;background:#fee2e2;
-  color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:13px;
+  width:30px;
+  height:30px;
+  flex:none;
+  border-radius:9px;
+  background:#fee2e2;
+  color:#dc2626;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
 }
-.ao-chat-notify-info{min-width:0;flex:1}
+
+.ao-chat-notify-info{
+  min-width:0;
+  flex:1;
+}
+
 .ao-chat-notify-top{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  color:#0f172a;font-size:11px;font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  color:#254363;
+  font-size:11px;
+  font-weight:900;
 }
+
 .ao-chat-notify-branch{
-  color:#2563eb;font-size:9px;font-weight:900;letter-spacing:.05em;
+  color:#2563eb;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.05em;
   white-space:nowrap;
 }
+
 .ao-chat-notify-email{
-  margin-top:2px;color:#475569;font-size:10px;overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap;
+  margin-top:2px;
+  color:#6f88a4;
+  font-size:10px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
+
 .ao-chat-notify-msg{
-  margin-top:3px;color:#64748b;font-size:9px;overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap;
+  margin-top:3px;
+  color:#6f88a4;
+  font-size:9px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
+
 .ao-chat-notify-number{
-  flex:none;min-width:23px;height:23px;padding:0 6px;border-radius:20px;
-  background:#ef4444;color:#fff;display:flex;align-items:center;
-  justify-content:center;font-size:10px;font-weight:900;
+  flex:none;
+  min-width:23px;
+  height:23px;
+  padding:0 6px;
+  border-radius:20px;
+  background:#ef4444;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  font-weight:900;
 }
-.ao-chat-no-unread{
-  color:#64748b;font-size:10px;text-align:center;padding:8px 4px;
+
+/* =========================
+   RECIPIENT
+   ========================= */
+
+.ao-chat-recipient{
+  padding:10px;
+  border-bottom:1px solid #e1e9f2;
+  background:#fff;
+  flex:none;
 }
-.ao-chat-recipient{padding:10px;border-bottom:1px solid #e5e7eb;background:#f9fafb;flex:none}
+
+.ao-chat-recipient-label{
+  display:block;
+  margin:0 0 5px 2px;
+  color:#49657f;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
 .ao-chat-select{
-  width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;
-  background:#fff;font-size:13px;outline:none;
+  width:100%;
+  min-height:40px;
+  padding:0 12px;
+  border:1px solid #d1e0ed;
+  border-radius:10px;
+  background:#fff;
+  color:#294463;
+  font-size:12px;
+  font-weight:700;
+  outline:none;
 }
-.ao-chat-messages{flex:1;overflow-y:auto;padding:14px;background:#f3f4f6;min-height:0}
-.ao-chat-row{display:flex;justify-content:flex-start;margin:7px 0}.ao-chat-row.mine{justify-content:flex-end}
+
+.ao-chat-select:focus{
+  border-color:#4088f7;
+  box-shadow:0 0 0 3px rgba(64,136,247,.10);
+}
+
+.ao-chat-select:disabled{
+  opacity:.55;
+}
+
+/* =========================
+   MESSAGES
+   ========================= */
+
+.ao-chat-messages{
+  flex:1;
+  overflow-y:auto;
+  padding:14px;
+  background:#f3f8fd;
+  min-height:0;
+  -webkit-overflow-scrolling:touch;
+}
+
+.ao-chat-row{
+  display:flex;
+  justify-content:flex-start;
+  margin:7px 0;
+}
+
+.ao-chat-row.mine{
+  justify-content:flex-end;
+}
+
 .ao-chat-bubble{
-  max-width:82%;padding:9px 11px;border-radius:14px;background:#fff;
-  box-shadow:0 2px 8px rgba(0,0,0,.07);word-break:break-word
+  max-width:82%;
+  padding:9px 11px;
+  border-radius:14px;
+  background:#fff;
+  color:#294463;
+  box-shadow:0 3px 10px rgba(24,65,111,.08);
+  word-break:break-word;
 }
-.ao-chat-row.mine .ao-chat-bubble{background:#111827;color:#fff}
-.ao-chat-name{font-size:10px;font-weight:700;opacity:.65;margin-bottom:4px}
-.ao-chat-text{font-size:13px;line-height:1.4;white-space:pre-wrap}
-.ao-chat-time{font-size:9px;opacity:.55;margin-top:5px}
+
+.ao-chat-row.mine .ao-chat-bubble{
+  background:linear-gradient(135deg,#2a88db,#4358b3);
+  color:#fff;
+}
+
+.ao-chat-name{
+  font-size:10px;
+  font-weight:700;
+  opacity:.65;
+  margin-bottom:4px;
+}
+
+.ao-chat-text{
+  font-size:13px;
+  line-height:1.4;
+  white-space:pre-wrap;
+}
+
+.ao-chat-time{
+  font-size:9px;
+  opacity:.55;
+  margin-top:5px;
+}
+
 .ao-chat-unread-divider{
-  margin:10px 0;padding:6px 9px;border-radius:8px;background:#fee2e2;
-  color:#b91c1c;text-align:center;font-size:9px;font-weight:900;
+  margin:10px 0;
+  padding:6px 9px;
+  border-radius:8px;
+  background:#fee2e2;
+  color:#b91c1c;
+  text-align:center;
+  font-size:9px;
+  font-weight:900;
 }
-.ao-chat-empty{text-align:center;color:#6b7280;font-size:12px;padding:35px 15px}
+
+.ao-chat-empty{
+  text-align:center;
+  color:#6f88a4;
+  font-size:12px;
+  padding:35px 15px;
+}
+
+/* =========================
+   COMPOSER
+   ========================= */
+
 .ao-chat-compose{
-  display:flex;gap:8px;padding:10px;border-top:1px solid #e5e7eb;
-  background:#fff;flex:none;
+  display:flex;
+  gap:8px;
+  padding:10px;
+  border-top:1px solid #e1e9f2;
+  background:#fff;
+  flex:none;
 }
+
 .ao-chat-input{
-  flex:1;min-width:0;padding:10px 12px;border:1px solid #d1d5db;
-  border-radius:12px;outline:none;font-size:13px
+  flex:1;
+  min-width:0;
+  padding:10px 12px;
+  border:1px solid #d1e0ed;
+  border-radius:12px;
+  outline:none;
+  background:#fff;
+  color:#294463;
+  font-size:13px;
 }
+
+.ao-chat-input:focus{
+  border-color:#4088f7;
+  box-shadow:0 0 0 3px rgba(64,136,247,.10);
+}
+
 .ao-chat-send{
-  width:42px;border:0;border-radius:12px;background:#111827;color:#fff;
-  font-size:18px;cursor:pointer
+  width:42px;
+  min-width:42px;
+  border:0;
+  border-radius:12px;
+  background:linear-gradient(145deg,#2d9bed,#4661be);
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
 }
-.ao-chat-send:disabled{opacity:.5;cursor:not-allowed}
-.ao-chat-status{min-height:17px;padding:0 11px 8px;color:#dc2626;font-size:10px;background:#fff}
+
+.ao-chat-send:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.ao-chat-status{
+  min-height:17px;
+  padding:0 11px 8px;
+  color:#dc2626;
+  font-size:10px;
+  background:#fff;
+  flex:none;
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
 @media(max-width:600px){
-  .ao-chat-fab{right:15px;bottom:15px}
-  .ao-chat-panel{right:15px;bottom:82px;width:calc(100vw - 30px);height:calc(100vh - 105px)}
+
+  .ao-chat-fab{
+    right:15px;
+    bottom:15px;
+  }
+
+  .ao-chat-panel{
+    right:15px;
+    bottom:82px;
+    width:calc(100vw - 30px);
+    height:calc(100vh - 105px);
+    border-radius:18px;
+  }
+
+  .ao-chat-branch{
+    padding:9px;
+  }
+
+  .ao-chat-recipient{
+    padding:9px;
+  }
+
+  .ao-chat-messages{
+    padding:11px;
+  }
+
+  .ao-chat-bubble{
+    max-width:88%;
+  }
 }
+
 
 
 /* =========================================================
@@ -17417,479 +17827,2127 @@ function escapeHtmlAttribute(
 })();
 
 
-/* ================= PRIVATE CHAT: ADMIN <-> SELECTED BRANCH ================= */
-let aoChatOpen=false, aoChatSending=false, aoChatTimer=null, aoChatUnreadTotal=0;
-let aoChatNotifications=[];
-const aoChatRecipientCache=new Map();
-const aoChatConversationCache=new Map();
-let aoChatUnreadBusy=false;
-let aoChatLoadBusy=false, aoChatLoadSeq=0;
+/* =========================================================
+   PRIVATE CHAT — ADMIN <-> SELECTED BRANCH
+   CHAT-ONLY BRANCH SELECTION
+   Does NOT touch the Dashboard #branch selector.
+   ========================================================= */
+
+let aoChatOpen = false;
+let aoChatSending = false;
+let aoChatTimer = null;
+let aoChatUnreadTotal = 0;
+
+let aoChatNotifications = [];
+
+const aoChatRecipientCache = new Map();
+const aoChatConversationCache = new Map();
+
+let aoChatUnreadBusy = false;
+let aoChatLoadBusy = false;
+let aoChatLoadSeq = 0;
+
+let aoChatSelectedBranch =
+  String(
+    localStorage.getItem("aoChatSelectedBranch") || ""
+  )
+  .trim()
+  .toUpperCase();
+
+const AO_CHAT_CONTACT_CACHE_MS = 60000;
 
 function aoChatBranch(){
-  const e=document.getElementById("branch");
-  return e?String(e.value||"").trim().toUpperCase():"";
+
+  const select =
+    document.getElementById("aoChatBranch");
+
+  const value =
+    String(
+      select?.value || aoChatSelectedBranch || ""
+    )
+    .trim()
+    .toUpperCase();
+
+  return value;
+
 }
+
 function aoChatRecipient(){
-  const e=document.getElementById("aoChatRecipient");
-  return e?String(e.value||"").trim().toLowerCase():"";
+
+  const e =
+    document.getElementById("aoChatRecipient");
+
+  return e
+    ? String(e.value || "")
+        .trim()
+        .toLowerCase()
+    : "";
+
 }
+
 function aoChatEsc(v){
-  return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+
+  return String(v == null ? "" : v)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
 }
+
 function aoChatTime(v){
-  const d=new Date(v);
-  return Number.isNaN(d.getTime())?"":d.toLocaleString([],
-    {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+
+  const d = new Date(v);
+
+  return Number.isNaN(d.getTime())
+    ? ""
+    : d.toLocaleString(
+        [],
+        {
+          month:"short",
+          day:"numeric",
+          hour:"numeric",
+          minute:"2-digit"
+        }
+      );
+
 }
+
 function aoChatStatus(t){
-  const e=document.getElementById("aoChatStatus");
-  if(e)e.textContent=t||"";
-}
-function aoChatKey(branch,email){
-  return "aoChatRead:ADMIN:"+String(branch||"").toUpperCase()+":"+String(email||"").toLowerCase();
-}
-function aoChatRead(branch,email){
-  return Number(localStorage.getItem(aoChatKey(branch,email))||0);
-}
-function aoChatMark(branch,email,ts){
-  if(ts)localStorage.setItem(aoChatKey(branch,email),String(ts));
-}
-function aoChatBadge(n){
-  aoChatUnreadTotal=Math.max(0,Number(n)||0);
-  const b=document.getElementById("aoChatBadge");
-  if(b){
-    b.textContent=aoChatUnreadTotal>99?"99+":String(aoChatUnreadTotal);
-    b.style.display=aoChatUnreadTotal?"flex":"none";
+
+  const e =
+    document.getElementById("aoChatStatus");
+
+  if(e){
+    e.textContent = t || "";
   }
+
 }
-function aoChatLatestUnreadFor(branch,email){
-  return aoChatNotifications.find(x=>
-    String(x.branch).toUpperCase()===String(branch).toUpperCase() &&
-    String(x.email).toLowerCase()===String(email).toLowerCase()
+
+function aoChatKey(branch,email){
+
+  return (
+    "aoChatRead:ADMIN:" +
+    String(branch || "")
+      .toUpperCase() +
+    ":" +
+    String(email || "")
+      .toLowerCase()
   );
+
 }
+
+function aoChatRead(branch,email){
+
+  return Number(
+    localStorage.getItem(
+      aoChatKey(branch,email)
+    ) || 0
+  );
+
+}
+
+function aoChatMark(branch,email,ts){
+
+  if(ts){
+
+    localStorage.setItem(
+      aoChatKey(branch,email),
+      String(ts)
+    );
+
+  }
+
+}
+
+function aoChatBadge(n){
+
+  aoChatUnreadTotal =
+    Math.max(
+      0,
+      Number(n) || 0
+    );
+
+  const b =
+    document.getElementById("aoChatBadge");
+
+  if(b){
+
+    b.textContent =
+      aoChatUnreadTotal > 99
+        ? "99+"
+        : String(aoChatUnreadTotal);
+
+    b.style.display =
+      aoChatUnreadTotal
+        ? "flex"
+        : "none";
+
+  }
+
+}
+
+function aoChatLatestUnreadFor(
+  branch,
+  email
+){
+
+  return aoChatNotifications.find(
+    x =>
+      String(x.branch).toUpperCase() ===
+        String(branch).toUpperCase() &&
+      String(x.email).toLowerCase() ===
+        String(email).toLowerCase()
+  );
+
+}
+
+/* =========================================================
+   BUILD CHAT BRANCH LIST
+   Uses the existing BRANCHES array.
+   Does NOT touch the main Dashboard branch selector.
+   ========================================================= */
+
+function aoChatBuildBranchList(){
+
+  const select =
+    document.getElementById("aoChatBranch");
+
+  if(!select) return;
+
+  const current =
+    aoChatSelectedBranch ||
+    String(
+      document.getElementById("branch")?.value || ""
+    )
+    .trim()
+    .toUpperCase();
+
+  const list =
+    Array.isArray(BRANCHES)
+      ? BRANCHES.slice()
+      : [];
+
+  select.innerHTML =
+    '<option value="">Select branch...</option>' +
+    list.map(branch => {
+
+      const b =
+        String(branch || "")
+          .trim()
+          .toUpperCase();
+
+      let label = b;
+
+      try{
+
+        if(
+          typeof BRANCH_NAMES !== "undefined" &&
+          BRANCH_NAMES &&
+          BRANCH_NAMES[b]
+        ){
+          label =
+            b +
+            " — " +
+            BRANCH_NAMES[b];
+        }
+
+      }catch(e){}
+
+      return (
+        '<option value="' +
+        aoChatEsc(b) +
+        '">' +
+        aoChatEsc(label) +
+        '</option>'
+      );
+
+    }).join("");
+
+  if(
+    current &&
+    list.includes(current)
+  ){
+
+    aoChatSelectedBranch = current;
+    select.value = current;
+
+    localStorage.setItem(
+      "aoChatSelectedBranch",
+      current
+    );
+
+  }
+
+}
+
+function aoChatSetBranch(
+  branch,
+  options={}
+){
+
+  const b =
+    String(branch || "")
+      .trim()
+      .toUpperCase();
+
+  const select =
+    document.getElementById("aoChatBranch");
+
+  if(
+    !b ||
+    !Array.isArray(BRANCHES) ||
+    !BRANCHES.includes(b)
+  ){
+
+    aoChatSelectedBranch = "";
+    localStorage.removeItem(
+      "aoChatSelectedBranch"
+    );
+
+    if(select){
+      select.value = "";
+    }
+
+    return;
+
+  }
+
+  aoChatSelectedBranch = b;
+
+  localStorage.setItem(
+    "aoChatSelectedBranch",
+    b
+  );
+
+  if(select){
+    select.value = b;
+  }
+
+  if(
+    options.loadUsers !== false
+  ){
+
+    aoChatLoadRecipients(
+      options.preferredEmail || ""
+    );
+
+  }
+
+}
+
+/* =========================================================
+   NOTIFICATIONS
+   ========================================================= */
+
 function aoChatRenderNotifications(){
-  const wrap=document.getElementById("aoChatNotify");
-  const count=document.getElementById("aoChatNotifyCount");
-  if(!wrap)return;
 
-  const list=aoChatNotifications.slice().sort((a,b)=>
-    new Date(b.last_created_at).getTime()-new Date(a.last_created_at).getTime()
-  );
+  const wrap =
+    document.getElementById("aoChatNotify");
 
-  if(count)count.textContent=list.length ? (aoChatUnreadTotal+" unread") : "";
+  const count =
+    document.getElementById("aoChatNotifyCount");
+
+  if(!wrap) return;
+
+  const list =
+    aoChatNotifications
+      .slice()
+      .sort(
+        (a,b) =>
+          new Date(b.last_created_at).getTime() -
+          new Date(a.last_created_at).getTime()
+      );
+
+  if(count){
+
+    count.textContent =
+      list.length
+        ? aoChatUnreadTotal + " unread"
+        : "";
+
+  }
 
   if(!list.length){
+
     wrap.classList.remove("show");
-    wrap.innerHTML="";
+    wrap.innerHTML = "";
+
     return;
+
   }
 
   wrap.classList.add("show");
-  wrap.innerHTML=
-    '<div class="ao-chat-notify-head">'+
-      '<span>NEW / UNREAD MESSAGES</span>'+
-      '<span class="ao-chat-notify-count">'+aoChatEsc(aoChatUnreadTotal)+' TOTAL</span>'+
-    '</div>'+
-    list.map((x,i)=>
-      '<button type="button" class="ao-chat-notify-item" '+
-        'data-notify-index="'+i+'">'+
-        '<span class="ao-chat-notify-icon">✉</span>'+
-        '<span class="ao-chat-notify-info">'+
-          '<span class="ao-chat-notify-top">'+
-            '<span>'+aoChatEsc(x.email)+'</span>'+
-            '<span class="ao-chat-notify-branch">'+aoChatEsc(x.branch)+'</span>'+
-          '</span>'+
-          '<span class="ao-chat-notify-email">'+aoChatEsc(x.email)+'</span>'+
-          '<span class="ao-chat-notify-msg">'+
-            aoChatEsc(x.last_message||"New message")+
-          '</span>'+
-        '</span>'+
-        '<span class="ao-chat-notify-number">'+
-          aoChatEsc(x.count>99?"99+":x.count)+
-        '</span>'+
-      '</button>'
-    ).join("");
 
-  wrap.querySelectorAll(".ao-chat-notify-item").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      const idx=Number(btn.getAttribute("data-notify-index"));
-      const item=list[idx];
-      if(item)aoChatOpenNotification(item.branch,item.email);
-    });
-  });
-}
-async function aoChatOpenNotification(branch,email){
-  const branchSelect=document.getElementById("branch");
-  const targetBranch=String(branch||"").toUpperCase();
-  const targetEmail=String(email||"").trim().toLowerCase();
+  wrap.innerHTML =
+    '<div class="ao-chat-notify-head">' +
+      '<span>NEW / UNREAD MESSAGES</span>' +
+      '<span class="ao-chat-notify-count">' +
+        aoChatEsc(aoChatUnreadTotal) +
+        ' TOTAL</span>' +
+    '</div>' +
 
-  aoChatOpen=true;
+    list.map(
+      (x,i) =>
+        '<button type="button" ' +
+          'class="ao-chat-notify-item" ' +
+          'data-notify-index="' +
+          i +
+          '">' +
 
-  const panel=document.getElementById("aoChatPanel");
-  if(panel){
-    panel.classList.add("open");
-    panel.setAttribute("aria-hidden","false");
-  }
+          '<span class="ao-chat-notify-icon">✉</span>' +
 
-  /*
-   * IMPORTANT:
-   * Do not dispatch the normal branch "change" event here.
-   * That event rebuilds the recipient dropdown and was causing the
-   * notification click to reload the email list.
-   */
-  const currentBranch=String(branchSelect?.value||"").trim().toUpperCase();
+          '<span class="ao-chat-notify-info">' +
 
-  if(branchSelect && targetBranch && currentBranch!==targetBranch){
-    const option=Array.from(branchSelect.options).find(o=>
-      String(o.value||"").trim().toUpperCase()===targetBranch
-    );
+            '<span class="ao-chat-notify-top">' +
+              '<span>' +
+                aoChatEsc(x.email) +
+              '</span>' +
 
-    if(option){
-      branchSelect.value=option.value;
-      const select=document.getElementById("aoChatRecipient");
-      if(select){
-        select.disabled=false;
-        select.innerHTML='<option value="'+aoChatEsc(targetEmail)+'">'+aoChatEsc(targetEmail)+'</option>';
-        select.value=targetEmail;
-      }
-      /* Build the full recipient list in the background; do not make the notification click wait for it. */
-      aoChatLoadRecipients(targetEmail).catch(()=>{});
-    }
-  }else{
-    /*
-     * Same branch: keep the existing dropdown and simply select
-     * the email from the notification. No recipient reload.
-     */
-    const select=document.getElementById("aoChatRecipient");
+              '<span class="ao-chat-notify-branch">' +
+                aoChatEsc(x.branch) +
+              '</span>' +
 
-    if(select){
-      const wanted=Array.from(select.options).find(o=>
-        String(o.value||"").trim().toLowerCase()===targetEmail
+            '</span>' +
+
+            '<span class="ao-chat-notify-email">' +
+              aoChatEsc(x.email) +
+            '</span>' +
+
+            '<span class="ao-chat-notify-msg">' +
+              aoChatEsc(
+                x.last_message || "New message"
+              ) +
+            '</span>' +
+
+          '</span>' +
+
+          '<span class="ao-chat-notify-number">' +
+            aoChatEsc(
+              x.count > 99
+                ? "99+"
+                : x.count
+            ) +
+          '</span>' +
+
+        '</button>'
+    )
+    .join("");
+
+  wrap
+    .querySelectorAll(
+      ".ao-chat-notify-item"
+    )
+    .forEach(btn => {
+
+      btn.addEventListener(
+        "click",
+        () => {
+
+          const idx =
+            Number(
+              btn.getAttribute(
+                "data-notify-index"
+              )
+            );
+
+          const item =
+            list[idx];
+
+          if(item){
+
+            aoChatOpenNotification(
+              item.branch,
+              item.email
+            );
+
+          }
+
+        }
       );
 
-      if(wanted){
-        select.value=wanted.value;
-      }else if(targetEmail){
-        const opt=document.createElement("option");
-        opt.value=targetEmail;
-        opt.textContent=targetEmail;
-        select.appendChild(opt);
-        select.value=targetEmail;
-        select.disabled=false;
-        aoChatLoadRecipients(targetEmail).catch(()=>{});
-      }
-    }
+    });
+
+}
+
+/* =========================================================
+   OPEN NOTIFICATION
+   Branch changes ONLY inside chat.
+   ========================================================= */
+
+async function aoChatOpenNotification(
+  branch,
+  email
+){
+
+  const targetBranch =
+    String(branch || "")
+      .trim()
+      .toUpperCase();
+
+  const targetEmail =
+    String(email || "")
+      .trim()
+      .toLowerCase();
+
+  aoChatOpen = true;
+
+  const panel =
+    document.getElementById(
+      "aoChatPanel"
+    );
+
+  if(panel){
+
+    panel.classList.add("open");
+
+    panel.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
   }
 
-  const select=document.getElementById("aoChatRecipient");
-  if(select && targetEmail){
-    const wanted=Array.from(select.options).find(o=>
-      String(o.value||"").trim().toLowerCase()===targetEmail
+  if(targetBranch){
+
+    aoChatSetBranch(
+      targetBranch,
+      {
+        loadUsers:false
+      }
     );
-    if(wanted)select.value=wanted.value;
+
+  }
+
+  const select =
+    document.getElementById(
+      "aoChatRecipient"
+    );
+
+  if(select && targetEmail){
+
+    const cached =
+      aoChatRecipientCache.get(
+        targetBranch
+      );
+
+    if(
+      Array.isArray(cached) &&
+      cached.includes(targetEmail)
+    ){
+
+      select.value =
+        targetEmail;
+
+    }else{
+
+      select.disabled = false;
+
+      select.innerHTML =
+        '<option value="' +
+        aoChatEsc(targetEmail) +
+        '">' +
+        aoChatEsc(targetEmail) +
+        '</option>';
+
+      select.value =
+        targetEmail;
+
+      aoChatLoadRecipients(
+        targetEmail
+      ).catch(()=>{});
+
+    }
+
   }
 
   await aoChatLoad();
-  setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);
+
+  setTimeout(
+    () =>
+      document
+        .getElementById(
+          "aoChatInput"
+        )
+        ?.focus(),
+    50
+  );
+
 }
-async function aoChatLoadRecipients(preferredEmail=""){
-  if(!sessionId||!currentEmail)return;
-  const select=document.getElementById("aoChatRecipient");
-  if(!select)return;
 
-  const branch=aoChatBranch();
-  if(!branch||branch==="ALL"){
-    select.innerHTML='<option value="">Select a specific branch first</option>';
-    select.disabled=true;
-    return;
-  }
+/* =========================================================
+   RECIPIENT LOADER
+   Faster:
+   - memory cache
+   - localStorage cache
+   - active sessions + chat contacts in parallel
+   ========================================================= */
 
-  const old=String(preferredEmail||select.value||"").toLowerCase();
+function aoChatRecipientStorageKey(
+  branch
+){
 
-  const cached=aoChatRecipientCache.get(branch);
-  if(Array.isArray(cached) && cached.length){
-    select.innerHTML=
-      '<option value="">Select a branch user...</option>'+
-      cached.map(e=>{
-        const n=aoChatNotifications.find(x=>x.branch===branch&&x.email===e)?.count||0;
-        return '<option value="'+aoChatEsc(e)+'">'+aoChatEsc(e)+(n?'  •  '+n+' UNREAD':'')+'</option>';
-      }).join("");
-    if(old&&cached.includes(old))select.value=old;
-    select.disabled=false;
-    return;
-  }
+  return (
+    "aoChatRecipients:" +
+    String(branch || "")
+      .trim()
+      .toUpperCase()
+  );
 
-  select.disabled=true;
-  select.innerHTML='<option value="">Loading branch users...</option>';
+}
+
+function aoChatReadStoredRecipients(
+  branch
+){
 
   try{
-    const emails=new Set();
 
-    try{
-      const data=await loginApiGet("getActiveSessions",{sessionId:sessionId});
-      if(data&&data.ok===true&&Array.isArray(data.users)){
-        data.users.forEach(u=>{
-          const e=String(u?.email||"").trim().toLowerCase();
-          const b=String(u?.branch||"").trim().toUpperCase();
-          if(e&&b===branch&&e!==String(currentEmail||"").trim().toLowerCase())
-            emails.add(e);
-        });
-      }
-    }catch(e){
-      console.warn("Active branch users unavailable:",e);
-    }
-
-    try{
-      const rows=await supabaseRequest(
-        "chat_messages?select=scanner_email&branch=eq."+
-        encodeURIComponent(branch)+"&limit=1000"
+    const raw =
+      localStorage.getItem(
+        aoChatRecipientStorageKey(branch)
       );
-      if(Array.isArray(rows)){
-        rows.forEach(r=>{
-          const e=String(r?.scanner_email||"").trim().toLowerCase();
-          if(e)emails.add(e);
-        });
-      }
-    }catch(e){
-      console.warn("Previous chat contacts unavailable:",e);
+
+    if(!raw) return null;
+
+    const data =
+      JSON.parse(raw);
+
+    if(
+      !data ||
+      !Array.isArray(data.list)
+    ){
+      return null;
     }
 
-    const list=Array.from(emails).sort();
-    aoChatRecipientCache.set(branch,list);
+    const age =
+      Date.now() -
+      Number(data.savedAt || 0);
 
-    if(!list.length){
-      select.innerHTML='<option value="">No branch users found</option>';
-      select.disabled=true;
-      return;
+    if(
+      age >
+      AO_CHAT_CONTACT_CACHE_MS
+    ){
+      return null;
     }
 
-    select.innerHTML=
-      '<option value="">Select a branch user...</option>'+
-      list.map(e=>{
-        const n=aoChatNotifications.find(x=>
-          x.branch===branch && x.email===e
-        )?.count||0;
-        return '<option value="'+aoChatEsc(e)+'">'+
-          aoChatEsc(e)+(n?'  •  '+n+' UNREAD':'')+
-        '</option>';
-      }).join("");
+    return data.list;
 
-    if(old&&list.includes(old))select.value=old;
-    select.disabled=false;
   }catch(e){
-    console.warn("Chat recipient load failed:",e);
-    select.innerHTML='<option value="">Unable to load branch users</option>';
-    select.disabled=true;
+
+    return null;
+
   }
-}
-async function aoChatLoadUnread(){
-  if(!sessionId||!currentEmail||aoChatUnreadBusy)return;
-  aoChatUnreadBusy=true;
-  try{
-    const rows=await supabaseRequest(
-      "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at"+
-      "&sender_type=eq.SCANNER&order=created_at.desc&limit=1000"
-    );
-    const grouped=new Map();
-    (Array.isArray(rows)?rows:[]).forEach(r=>{
-      const branch=String(r.branch||"").trim().toUpperCase();
-      const email=String(r.scanner_email||"").trim().toLowerCase();
-      const ts=new Date(r.created_at).getTime();
-      if(!branch||!email||!Number.isFinite(ts))return;
-      const read=aoChatRead(branch,email);
-      if(ts<=read)return;
-      const key=branch+"|"+email;
-      let g=grouped.get(key);
-      if(!g){g={branch,email,count:0,last_created_at:r.created_at,last_message:String(r.message||"")};grouped.set(key,g);}
-      g.count++;
-      if(ts>=new Date(g.last_created_at).getTime()){g.last_created_at=r.created_at;g.last_message=String(r.message||"");}
-    });
-    aoChatNotifications=Array.from(grouped.values());
-    aoChatBadge(aoChatNotifications.reduce((t,x)=>t+Number(x.count||0),0));
-    aoChatRenderNotifications();
-  }catch(e){console.warn("Unread chat notification load failed:",e);}
-  finally{aoChatUnreadBusy=false;}
-}
-async function aoChatLoad(){
-  if(!sessionId||!currentEmail)return;
-  const loadSeq=++aoChatLoadSeq;
-  const branch=aoChatBranch(), recipient=aoChatRecipient();
-  const box=document.getElementById("aoChatMessages");
-  if(!box)return;
-  if(!branch||branch==="ALL"){box.innerHTML='<div class="ao-chat-empty">Select a specific branch to open a private conversation.</div>';return;}
-  if(!recipient){box.innerHTML='<div class="ao-chat-empty">Select a branch user above to view that private conversation.</div>';const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · Select branch user";return;}
 
-  const key=branch+"|"+recipient;
-  const cached=aoChatConversationCache.get(key);
-  if(Array.isArray(cached))aoChatRenderConversation(cached,branch,recipient,box);
-  else box.innerHTML='<div class="ao-chat-empty">Loading conversation…</div>';
-
-  aoChatLoadBusy=true;
-  try{
-    const rows=await supabaseRequest(
-      "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,message,created_at"+
-      "&branch=eq."+encodeURIComponent(branch)+
-      "&scanner_email=eq."+encodeURIComponent(recipient)+
-      "&order=created_at.asc&limit=300"
-    );
-    if(loadSeq!==aoChatLoadSeq)return;
-    const list=Array.isArray(rows)?rows:[];
-    aoChatConversationCache.set(key,list);
-    aoChatRenderConversation(list,branch,recipient,box);
-  }catch(e){aoChatStatus(e?.message||"Chat temporarily unavailable.");console.warn("Dashboard chat load failed:",e);}
-  finally{aoChatLoadBusy=false;}
 }
-function aoChatRenderConversation(list,branch,recipient,box){
-  const read=aoChatRead(branch,recipient);
-  const incoming=list.filter(r=>String(r.sender_type||"").toUpperCase()==="SCANNER");
-  const unread=incoming.filter(r=>new Date(r.created_at).getTime()>read);
-  const wasBottom=(box.scrollHeight-box.clientHeight-box.scrollTop)<60;
-  if(!list.length){box.innerHTML='<div class="ao-chat-empty">No messages with '+aoChatEsc(recipient)+' yet.</div>';}
-  else{
-    const firstUnread=unread.length?unread[0].id:null;
-    box.innerHTML=list.map(r=>{
-      const mine=String(r.sender_email||"").toLowerCase()===String(currentEmail||"").toLowerCase();
-      const label=String(r.sender_type||"").toUpperCase()==="SCANNER"?"BRANCH":(String(r.sender_type||"").toUpperCase()==="DASHBOARD"?"ADMIN":r.sender_type||"");
-      const sep=firstUnread!==null&&r.id===firstUnread?'<div class="ao-chat-unread-divider">'+unread.length+' UNREAD MESSAGE'+(unread.length===1?'':'S')+' FROM '+aoChatEsc(recipient)+'</div>':'';
-      return sep+'<div class="ao-chat-row '+(mine?'mine':'')+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(label)+' · '+aoChatEsc(r.sender_email||"")+'</div><div class="ao-chat-text">'+aoChatEsc(r.message||"")+'</div><div class="ao-chat-time">'+aoChatEsc(aoChatTime(r.created_at))+'</div></div></div>';
+
+function aoChatStoreRecipients(
+  branch,
+  list
+){
+
+  try{
+
+    localStorage.setItem(
+      aoChatRecipientStorageKey(branch),
+      JSON.stringify({
+        savedAt:Date.now(),
+        list:list
+      })
+    );
+
+  }catch(e){}
+
+}
+
+function aoChatRenderRecipientOptions(
+  branch,
+  list,
+  preferredEmail=""
+){
+
+  const select =
+    document.getElementById(
+      "aoChatRecipient"
+    );
+
+  if(!select) return;
+
+  const old =
+    String(
+      preferredEmail ||
+      select.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
+
+  if(!list.length){
+
+    select.innerHTML =
+      '<option value="">' +
+      'No branch users found' +
+      '</option>';
+
+    select.disabled = true;
+
+    return;
+
+  }
+
+  select.innerHTML =
+    '<option value="">' +
+    'Select a branch user...' +
+    '</option>' +
+
+    list.map(email => {
+
+      const unread =
+        aoChatNotifications.find(
+          x =>
+            String(x.branch).toUpperCase() === branch &&
+            String(x.email).toLowerCase() === email
+        )?.count || 0;
+
+      return (
+        '<option value="' +
+        aoChatEsc(email) +
+        '">' +
+        aoChatEsc(email) +
+        (
+          unread
+            ? " • " + unread + " UNREAD"
+            : ""
+        ) +
+        '</option>'
+      );
+
     }).join("");
-    if(aoChatOpen&&wasBottom)box.scrollTop=box.scrollHeight;
-  }
-  if(aoChatOpen&&incoming.length){
-    const last=new Date(incoming[incoming.length-1].created_at).getTime();
-    if(last)aoChatMark(branch,recipient,last);
-    aoChatNotifications=aoChatNotifications.filter(x=>!(x.branch===branch&&x.email===recipient));
-    aoChatBadge(aoChatNotifications.reduce((t,x)=>t+Number(x.count||0),0));
-    aoChatRenderNotifications();
-  }
-  const sub=document.getElementById("aoChatSub");if(sub)sub.textContent=branch+" · "+recipient;
-}
-function aoChatToggle(){
-  aoChatOpen=!aoChatOpen;
-  const p=document.getElementById("aoChatPanel");
-  if(!p)return;
 
-  p.classList.toggle("open",aoChatOpen);
-  p.setAttribute("aria-hidden",String(!aoChatOpen));
+  if(
+    old &&
+    list.includes(old)
+  ){
+
+    select.value = old;
+
+  }
+
+  select.disabled = false;
+
+}
+
+async function aoChatLoadRecipients(
+  preferredEmail=""
+){
+
+  if(
+    !sessionId ||
+    !currentEmail
+  ){
+    return;
+  }
+
+  const select =
+    document.getElementById(
+      "aoChatRecipient"
+    );
+
+  if(!select) return;
+
+  const branch =
+    aoChatBranch();
+
+  if(
+    !branch ||
+    branch === "ALL"
+  ){
+
+    select.innerHTML =
+      '<option value="">' +
+      'Select a specific branch first' +
+      '</option>';
+
+    select.disabled = true;
+
+    return;
+
+  }
+
+  const old =
+    String(
+      preferredEmail ||
+      select.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
+
+  /* -----------------------------------------
+     1. MEMORY CACHE — INSTANT
+     ----------------------------------------- */
+
+  const memoryCached =
+    aoChatRecipientCache.get(
+      branch
+    );
+
+  if(
+    Array.isArray(memoryCached)
+  ){
+
+    aoChatRenderRecipientOptions(
+      branch,
+      memoryCached,
+      old
+    );
+
+    return;
+
+  }
+
+  /* -----------------------------------------
+     2. LOCAL CACHE — VERY FAST
+     ----------------------------------------- */
+
+  const stored =
+    aoChatReadStoredRecipients(
+      branch
+    );
+
+  if(
+    Array.isArray(stored)
+  ){
+
+    aoChatRecipientCache.set(
+      branch,
+      stored
+    );
+
+    aoChatRenderRecipientOptions(
+      branch,
+      stored,
+      old
+    );
+
+    /* Refresh silently in background. */
+    aoChatLoadRecipientsFresh(
+      branch,
+      old
+    ).catch(()=>{});
+
+    return;
+
+  }
+
+  select.disabled = true;
+
+  select.innerHTML =
+    '<option value="">' +
+    'Loading branch users...' +
+    '</option>';
+
+  await aoChatLoadRecipientsFresh(
+    branch,
+    old
+  );
+
+}
+
+async function aoChatLoadRecipientsFresh(
+  branch,
+  preferredEmail=""
+){
+
+  const select =
+    document.getElementById(
+      "aoChatRecipient"
+    );
+
+  if(!select) return;
+
+  try{
+
+    const emails =
+      new Set();
+
+    /* Run both sources at the same time. */
+    const [
+      activeData,
+      previousRows
+    ] =
+      await Promise.all([
+        loginApiGet(
+          "getActiveSessions",
+          {
+            sessionId:sessionId
+          }
+        ).catch(
+          e => null
+        ),
+
+        supabaseRequest(
+          "chat_messages?select=scanner_email" +
+          "&branch=eq." +
+          encodeURIComponent(branch) +
+          "&limit=1000"
+        ).catch(
+          e => []
+        )
+      ]);
+
+    /* Active branch users. */
+    if(
+      activeData &&
+      activeData.ok === true &&
+      Array.isArray(
+        activeData.users
+      )
+    ){
+
+      activeData.users.forEach(
+        u => {
+
+          const email =
+            String(
+              u?.email || ""
+            )
+            .trim()
+            .toLowerCase();
+
+          const b =
+            String(
+              u?.branch || ""
+            )
+            .trim()
+            .toUpperCase();
+
+          if(
+            email &&
+            b === branch &&
+            email !==
+              String(
+                currentEmail || ""
+              )
+              .trim()
+              .toLowerCase()
+          ){
+
+            emails.add(email);
+
+          }
+
+        }
+      );
+
+    }
+
+    /* Previous chat contacts. */
+    if(
+      Array.isArray(previousRows)
+    ){
+
+      previousRows.forEach(
+        row => {
+
+          const email =
+            String(
+              row?.scanner_email || ""
+            )
+            .trim()
+            .toLowerCase();
+
+          if(
+            email &&
+            email !==
+              String(
+                currentEmail || ""
+              )
+              .trim()
+              .toLowerCase()
+          ){
+
+            emails.add(email);
+
+          }
+
+        }
+      );
+
+    }
+
+    const list =
+      Array.from(
+        emails
+      ).sort();
+
+    aoChatRecipientCache.set(
+      branch,
+      list
+    );
+
+    aoChatStoreRecipients(
+      branch,
+      list
+    );
+
+    aoChatRenderRecipientOptions(
+      branch,
+      list,
+      preferredEmail
+    );
+
+  }catch(e){
+
+    console.warn(
+      "Chat recipient load failed:",
+      e
+    );
+
+    select.innerHTML =
+      '<option value="">' +
+      'Unable to load branch users' +
+      '</option>';
+
+    select.disabled = true;
+
+  }
+
+}
+
+/* =========================================================
+   UNREAD
+   ========================================================= */
+
+async function aoChatLoadUnread(){
+
+  if(
+    !sessionId ||
+    !currentEmail ||
+    aoChatUnreadBusy
+  ){
+
+    return;
+
+  }
+
+  aoChatUnreadBusy = true;
+
+  try{
+
+    const rows =
+      await supabaseRequest(
+        "chat_messages" +
+        "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
+        "&sender_type=eq.SCANNER" +
+        "&order=created_at.desc" +
+        "&limit=1000"
+      );
+
+    const grouped =
+      new Map();
+
+    (
+      Array.isArray(rows)
+        ? rows
+        : []
+    )
+    .forEach(
+      r => {
+
+        const branch =
+          String(
+            r.branch || ""
+          )
+          .trim()
+          .toUpperCase();
+
+        const email =
+          String(
+            r.scanner_email || ""
+          )
+          .trim()
+          .toLowerCase();
+
+        const ts =
+          new Date(
+            r.created_at
+          ).getTime();
+
+        if(
+          !branch ||
+          !email ||
+          !Number.isFinite(ts)
+        ){
+
+          return;
+
+        }
+
+        const read =
+          aoChatRead(
+            branch,
+            email
+          );
+
+        if(ts <= read){
+          return;
+        }
+
+        const key =
+          branch +
+          "|" +
+          email;
+
+        let g =
+          grouped.get(key);
+
+        if(!g){
+
+          g = {
+            branch:branch,
+            email:email,
+            count:0,
+            last_created_at:
+              r.created_at,
+            last_message:
+              String(
+                r.message || ""
+              )
+          };
+
+          grouped.set(
+            key,
+            g
+          );
+
+        }
+
+        g.count++;
+
+        if(
+          ts >=
+          new Date(
+            g.last_created_at
+          ).getTime()
+        ){
+
+          g.last_created_at =
+            r.created_at;
+
+          g.last_message =
+            String(
+              r.message || ""
+            );
+
+        }
+
+      }
+    );
+
+    aoChatNotifications =
+      Array.from(
+        grouped.values()
+      );
+
+    aoChatBadge(
+      aoChatNotifications.reduce(
+        (t,x) =>
+          t +
+          Number(
+            x.count || 0
+          ),
+        0
+      )
+    );
+
+    aoChatRenderNotifications();
+
+  }catch(e){
+
+    console.warn(
+      "Unread chat notification load failed:",
+      e
+    );
+
+  }finally{
+
+    aoChatUnreadBusy = false;
+
+  }
+
+}
+
+/* =========================================================
+   LOAD CONVERSATION
+   ========================================================= */
+
+async function aoChatLoad(){
+
+  if(
+    !sessionId ||
+    !currentEmail
+  ){
+
+    return;
+
+  }
+
+  const loadSeq =
+    ++aoChatLoadSeq;
+
+  const branch =
+    aoChatBranch();
+
+  const recipient =
+    aoChatRecipient();
+
+  const box =
+    document.getElementById(
+      "aoChatMessages"
+    );
+
+  if(!box) return;
+
+  if(
+    !branch ||
+    branch === "ALL"
+  ){
+
+    box.innerHTML =
+      '<div class="ao-chat-empty">' +
+      'Select a branch and branch user to open a private conversation.' +
+      '</div>';
+
+    return;
+
+  }
+
+  if(!recipient){
+
+    box.innerHTML =
+      '<div class="ao-chat-empty">' +
+      'Select a branch user to open a private conversation.' +
+      '</div>';
+
+    const sub =
+      document.getElementById(
+        "aoChatSub"
+      );
+
+    if(sub){
+
+      sub.textContent =
+        branch +
+        " · Select branch user";
+
+    }
+
+    return;
+
+  }
+
+  const key =
+    branch +
+    "|" +
+    recipient;
+
+  const cached =
+    aoChatConversationCache.get(
+      key
+    );
+
+  /* -----------------------------------------
+     SHOW CACHE IMMEDIATELY
+     ----------------------------------------- */
+
+  if(
+    Array.isArray(cached)
+  ){
+
+    aoChatRenderConversation(
+      cached,
+      branch,
+      recipient,
+      box
+    );
+
+  }else{
+
+    box.innerHTML =
+      '<div class="ao-chat-empty">' +
+      'Loading conversation…' +
+      '</div>';
+
+  }
+
+  if(aoChatLoadBusy){
+    return;
+  }
+
+  aoChatLoadBusy = true;
+
+  try{
+
+    const rows =
+      await supabaseRequest(
+        "chat_messages" +
+        "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
+        "&branch=eq." +
+        encodeURIComponent(branch) +
+        "&scanner_email=eq." +
+        encodeURIComponent(recipient) +
+        "&order=created_at.asc" +
+        "&limit=300"
+      );
+
+    if(
+      loadSeq !==
+      aoChatLoadSeq
+    ){
+
+      return;
+
+    }
+
+    const list =
+      Array.isArray(rows)
+        ? rows
+        : [];
+
+    aoChatConversationCache.set(
+      key,
+      list
+    );
+
+    aoChatRenderConversation(
+      list,
+      branch,
+      recipient,
+      box
+    );
+
+  }catch(e){
+
+    console.warn(
+      "Dashboard chat load failed:",
+      e
+    );
+
+    aoChatStatus(
+      e?.message ||
+      "Chat temporarily unavailable."
+    );
+
+  }finally{
+
+    aoChatLoadBusy = false;
+
+  }
+
+}
+
+function aoChatRenderConversation(
+  list,
+  branch,
+  recipient,
+  box
+){
+
+  const read =
+    aoChatRead(
+      branch,
+      recipient
+    );
+
+  const incoming =
+    list.filter(
+      r =>
+        String(
+          r.sender_type || ""
+        ).toUpperCase() ===
+        "SCANNER"
+    );
+
+  const unread =
+    incoming.filter(
+      r =>
+        new Date(
+          r.created_at
+        ).getTime() >
+        read
+    );
+
+  const wasBottom =
+    (
+      box.scrollHeight -
+      box.clientHeight -
+      box.scrollTop
+    ) < 60;
+
+  if(!list.length){
+
+    box.innerHTML =
+      '<div class="ao-chat-empty">' +
+      'No messages with ' +
+      aoChatEsc(recipient) +
+      ' yet.' +
+      '</div>';
+
+  }else{
+
+    const firstUnread =
+      unread.length
+        ? unread[0].id
+        : null;
+
+    box.innerHTML =
+      list.map(
+        r => {
+
+          const mine =
+            String(
+              r.sender_email || ""
+            )
+            .toLowerCase() ===
+            String(
+              currentEmail || ""
+            )
+            .toLowerCase();
+
+          const label =
+            String(
+              r.sender_type || ""
+            ).toUpperCase() ===
+              "SCANNER"
+              ? "BRANCH"
+              :
+              (
+                String(
+                  r.sender_type || ""
+                ).toUpperCase() ===
+                  "DASHBOARD"
+                  ? "ADMIN"
+                  :
+                  (
+                    r.sender_type ||
+                    ""
+                  )
+              );
+
+          const sep =
+            firstUnread !== null &&
+            r.id === firstUnread
+              ? (
+                '<div class="ao-chat-unread-divider">' +
+                unread.length +
+                ' UNREAD MESSAGE' +
+                (
+                  unread.length === 1
+                    ? ""
+                    : "S"
+                ) +
+                ' FROM ' +
+                aoChatEsc(recipient) +
+                '</div>'
+              )
+              : "";
+
+          return (
+            sep +
+            '<div class="ao-chat-row ' +
+            (mine ? "mine" : "") +
+            '">' +
+
+              '<div class="ao-chat-bubble">' +
+
+                '<div class="ao-chat-name">' +
+                  aoChatEsc(label) +
+                  ' · ' +
+                  aoChatEsc(
+                    r.sender_email || ""
+                  ) +
+                '</div>' +
+
+                '<div class="ao-chat-text">' +
+                  aoChatEsc(
+                    r.message || ""
+                  ) +
+                '</div>' +
+
+                '<div class="ao-chat-time">' +
+                  aoChatEsc(
+                    aoChatTime(
+                      r.created_at
+                    )
+                  ) +
+                '</div>' +
+
+              '</div>' +
+
+            '</div>'
+          );
+
+        }
+      )
+      .join("");
+
+    if(
+      aoChatOpen &&
+      wasBottom
+    ){
+
+      box.scrollTop =
+        box.scrollHeight;
+
+    }
+
+  }
+
+  if(
+    aoChatOpen &&
+    incoming.length
+  ){
+
+    const last =
+      new Date(
+        incoming[
+          incoming.length - 1
+        ].created_at
+      ).getTime();
+
+    if(last){
+
+      aoChatMark(
+        branch,
+        recipient,
+        last
+      );
+
+    }
+
+    aoChatNotifications =
+      aoChatNotifications.filter(
+        x =>
+          !(
+            String(x.branch).toUpperCase() ===
+              branch &&
+            String(x.email).toLowerCase() ===
+              recipient
+          )
+      );
+
+    aoChatBadge(
+      aoChatNotifications.reduce(
+        (t,x) =>
+          t +
+          Number(
+            x.count || 0
+          ),
+        0
+      )
+    );
+
+    aoChatRenderNotifications();
+
+  }
+
+  const sub =
+    document.getElementById(
+      "aoChatSub"
+    );
+
+  if(sub){
+
+    sub.textContent =
+      branch +
+      " · " +
+      recipient;
+
+  }
+
+}
+
+/* =========================================================
+   TOGGLE CHAT
+   ========================================================= */
+
+function aoChatToggle(){
+
+  aoChatOpen =
+    !aoChatOpen;
+
+  const p =
+    document.getElementById(
+      "aoChatPanel"
+    );
+
+  if(!p) return;
+
+  p.classList.toggle(
+    "open",
+    aoChatOpen
+  );
+
+  p.setAttribute(
+    "aria-hidden",
+    String(!aoChatOpen)
+  );
 
   if(aoChatOpen){
+
+    aoChatBuildBranchList();
+
     aoChatLoadUnread();
-    /* Load the recipient list ONCE when the chat is opened.
-       Do not reload it on every message poll, otherwise the
-       select resets and the user cannot type/chat reliably. */
-    if(!document.getElementById("aoChatRecipient")?.options.length ||
-       document.getElementById("aoChatRecipient")?.disabled){
-      aoChatLoadRecipients();
+
+    const branch =
+      aoChatBranch();
+
+    const recipient =
+      aoChatRecipient();
+
+    if(branch){
+
+      aoChatLoadRecipients(
+        recipient
+      );
+
     }
+
     aoChatLoad();
-    setTimeout(()=>document.getElementById("aoChatInput")?.focus(),50);
+
+    setTimeout(
+      () =>
+        document
+          .getElementById(
+            "aoChatInput"
+          )
+          ?.focus(),
+      50
+    );
+
   }
+
 }
+
+/* =========================================================
+   SEND MESSAGE
+   ========================================================= */
+
 async function aoChatSend(){
-  if(aoChatSending)return;
 
-  const input=document.getElementById("aoChatInput");
-  const text=String(input?.value||"").trim();
-  const branch=aoChatBranch();
-  const recipient=aoChatRecipient();
-
-  if(!text||!sessionId||!currentEmail){
-    aoChatStatus("Please log in first.");
+  if(aoChatSending){
     return;
   }
-  if(!branch||branch==="ALL"){
-    aoChatStatus("Select a specific branch first.");
+
+  const input =
+    document.getElementById(
+      "aoChatInput"
+    );
+
+  const text =
+    String(
+      input?.value || ""
+    ).trim();
+
+  const branch =
+    aoChatBranch();
+
+  const recipient =
+    aoChatRecipient();
+
+  if(
+    !text ||
+    !sessionId ||
+    !currentEmail
+  ){
+
+    aoChatStatus(
+      "Please log in first."
+    );
+
     return;
+
   }
+
+  if(
+    !branch ||
+    branch === "ALL"
+  ){
+
+    aoChatStatus(
+      "Select a specific branch first."
+    );
+
+    return;
+
+  }
+
   if(!recipient){
-    aoChatStatus("Select a branch user first.");
+
+    aoChatStatus(
+      "Select a branch user first."
+    );
+
     return;
+
   }
 
-  aoChatSending=true;
-  const btn=document.getElementById("aoChatSend");
-  if(btn)btn.disabled=true;
-  aoChatStatus("Sending...");
+  aoChatSending = true;
+
+  const btn =
+    document.getElementById(
+      "aoChatSend"
+    );
+
+  if(btn){
+    btn.disabled = true;
+  }
+
+  aoChatStatus(
+    "Sending..."
+  );
 
   try{
-    await supabaseRequest("chat_messages",{
-      method:"POST",
-      prefer:"return=minimal",
-      body:{
-        branch:branch,
-        scanner_email:recipient,
-        sender_email:String(currentEmail).trim().toLowerCase(),
-        sender_type:"DASHBOARD",
-        message:text
-      }
-    });
 
-    input.value="";
+    await supabaseRequest(
+      "chat_messages",
+      {
+        method:"POST",
+        prefer:"return=minimal",
+        body:{
+          branch:branch,
+          scanner_email:recipient,
+          sender_email:
+            String(
+              currentEmail
+            )
+            .trim()
+            .toLowerCase(),
+          sender_type:"DASHBOARD",
+          message:text
+        }
+      }
+    );
+
+    input.value = "";
+
     aoChatStatus("");
-    aoChatConversationCache.delete(branch+"|"+recipient);
+
+    const key =
+      branch +
+      "|" +
+      recipient;
+
+    /*
+     * Do not wait for a second full page rebuild
+     * when the message is sent.
+     *
+     * Remove cache, then refresh conversation once.
+     */
+    aoChatConversationCache.delete(
+      key
+    );
+
     await aoChatLoad();
-    aoChatLoadUnread().catch(()=>{});
+
+    aoChatLoadUnread()
+      .catch(()=>{});
+
   }catch(e){
-    console.error("Dashboard chat send failed:",e);
-    aoChatStatus(e?.message||"Message could not be sent.");
+
+    console.error(
+      "Dashboard chat send failed:",
+      e
+    );
+
+    aoChatStatus(
+      e?.message ||
+      "Message could not be sent."
+    );
+
   }finally{
-    aoChatSending=false;
-    if(btn)btn.disabled=false;
+
+    aoChatSending = false;
+
+    if(btn){
+      btn.disabled = false;
+    }
+
   }
+
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
-  const input=document.getElementById("aoChatInput");
-  if(input){
-    input.addEventListener("keydown",e=>{
-      if(e.key==="Enter"&&!e.shiftKey){
-        e.preventDefault();
-        aoChatSend();
-      }
-    });
-  }
+/* =========================================================
+   CHAT STARTUP
+   ========================================================= */
 
-  const recipient=document.getElementById("aoChatRecipient");
-  if(recipient)recipient.addEventListener("change",()=>aoChatLoad());
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
 
-  const branch=document.getElementById("branch");
-  if(branch){
-    branch.addEventListener("change",()=>{
-      /*
-       * A real manual branch change should reload the recipient list.
-       * Notification clicks do NOT dispatch this event, so clicking
-       * an unread notification will not cause a second reload.
-       */
-      setTimeout(()=>{
-        aoChatLoadRecipients();
-        aoChatLoadUnread();
-      },100);
-    });
-  }
+    /* Build the branch selector inside the chat. */
+    aoChatBuildBranchList();
 
-  setTimeout(()=>{
-    if(sessionId&&currentEmail){
-      aoChatLoadUnread();
-      aoChatLoadRecipients();
-    }
-  },1500);
+    const input =
+      document.getElementById(
+        "aoChatInput"
+      );
 
-  if(!aoChatTimer){
-    aoChatTimer=setInterval(()=>{
-      if(sessionId&&currentEmail){
-        const now=Date.now();
-        if(!window.__aoChatUnreadTick && (!window.__aoChatLastUnread || now-window.__aoChatLastUnread>=10000)){
-          window.__aoChatUnreadTick=true;
-          window.__aoChatLastUnread=now;
-          aoChatLoadUnread().finally(()=>{window.__aoChatUnreadTick=false;});
+    if(input){
+
+      input.addEventListener(
+        "keydown",
+        e => {
+
+          if(
+            e.key === "Enter" &&
+            !e.shiftKey
+          ){
+
+            e.preventDefault();
+
+            aoChatSend();
+
+          }
+
         }
-        if(aoChatOpen && !aoChatLoadBusy){aoChatLoad();}
-      }
-    },3000);
+      );
+
+    }
+
+    /* -------------------------------
+       CHAT BRANCH SELECT
+       ------------------------------- */
+
+    const branchSelect =
+      document.getElementById(
+        "aoChatBranch"
+      );
+
+    if(branchSelect){
+
+      branchSelect.addEventListener(
+        "change",
+        () => {
+
+          const branch =
+            String(
+              branchSelect.value || ""
+            )
+            .trim()
+            .toUpperCase();
+
+          if(!branch){
+
+            aoChatSelectedBranch = "";
+
+            localStorage.removeItem(
+              "aoChatSelectedBranch"
+            );
+
+            const recipient =
+              document.getElementById(
+                "aoChatRecipient"
+              );
+
+            if(recipient){
+
+              recipient.innerHTML =
+                '<option value="">' +
+                'Select a branch first' +
+                '</option>';
+
+              recipient.disabled = true;
+
+            }
+
+            const messages =
+              document.getElementById(
+                "aoChatMessages"
+              );
+
+            if(messages){
+
+              messages.innerHTML =
+                '<div class="ao-chat-empty">' +
+                'Select a branch and branch user to open a private conversation.' +
+                '</div>';
+
+            }
+
+            return;
+
+          }
+
+          aoChatSelectedBranch =
+            branch;
+
+          localStorage.setItem(
+            "aoChatSelectedBranch",
+            branch
+          );
+
+          /* Reset selected recipient. */
+          const recipient =
+            document.getElementById(
+              "aoChatRecipient"
+            );
+
+          if(recipient){
+
+            recipient.innerHTML =
+              '<option value="">' +
+              'Loading branch users...' +
+              '</option>';
+
+            recipient.disabled = true;
+
+          }
+
+          const messages =
+            document.getElementById(
+              "aoChatMessages"
+            );
+
+          if(messages){
+
+            messages.innerHTML =
+              '<div class="ao-chat-empty">' +
+              'Loading ' +
+              aoChatEsc(branch) +
+              ' branch users...' +
+              '</div>';
+
+          }
+
+          aoChatLoadRecipients();
+
+          aoChatStatus("");
+
+          const sub =
+            document.getElementById(
+              "aoChatSub"
+            );
+
+          if(sub){
+
+            sub.textContent =
+              branch +
+              " · Select branch user";
+
+          }
+
+        }
+      );
+
+    }
+
+    /* -------------------------------
+       RECIPIENT SELECT
+       ------------------------------- */
+
+    const recipient =
+      document.getElementById(
+        "aoChatRecipient"
+      );
+
+    if(recipient){
+
+      recipient.addEventListener(
+        "change",
+        () => {
+
+          const branch =
+            aoChatBranch();
+
+          const email =
+            aoChatRecipient();
+
+          if(
+            !branch ||
+            !email
+          ){
+
+            return;
+
+          }
+
+          aoChatLoad();
+
+        }
+      );
+
+    }
+
+    /* -------------------------------
+       REFRESH USERS BUTTON
+       ------------------------------- */
+
+    const refreshUsers =
+      document.getElementById(
+        "aoChatRefreshUsers"
+      );
+
+    if(refreshUsers){
+
+      refreshUsers.addEventListener(
+        "click",
+        async () => {
+
+          const branch =
+            aoChatBranch();
+
+          if(!branch){
+
+            aoChatStatus(
+              "Select a branch first."
+            );
+
+            return;
+
+          }
+
+          refreshUsers.disabled =
+            true;
+
+          refreshUsers.textContent =
+            "…";
+
+          aoChatRecipientCache.delete(
+            branch
+          );
+
+          try{
+
+            localStorage.removeItem(
+              aoChatRecipientStorageKey(
+                branch
+              )
+            );
+
+            await aoChatLoadRecipients(
+              aoChatRecipient()
+            );
+
+          }finally{
+
+            refreshUsers.disabled =
+              false;
+
+            refreshUsers.textContent =
+              "↻";
+
+          }
+
+        }
+      );
+
+    }
+
+    /* -------------------------------
+       INITIAL CHAT CACHE
+       ------------------------------- */
+
+    setTimeout(
+      () => {
+
+        if(
+          sessionId &&
+          currentEmail
+        ){
+
+          aoChatBuildBranchList();
+
+          /*
+           * Do NOT force-load users immediately.
+           * This prevents chat from slowing dashboard startup.
+           */
+
+          aoChatLoadUnread();
+
+        }
+
+      },
+      1200
+    );
+
+    /* -------------------------------
+       CHAT POLLING
+       ------------------------------- */
+
+    if(!aoChatTimer){
+
+      aoChatTimer =
+        setInterval(
+          () => {
+
+            if(
+              sessionId &&
+              currentEmail
+            ){
+
+              const now =
+                Date.now();
+
+              /*
+               * Unread messages:
+               * every 10 seconds.
+               */
+
+              if(
+                !window.__aoChatUnreadTick &&
+                (
+                  !window.__aoChatLastUnread ||
+                  now -
+                    window.__aoChatLastUnread >=
+                    10000
+                )
+              ){
+
+                window.__aoChatUnreadTick =
+                  true;
+
+                window.__aoChatLastUnread =
+                  now;
+
+                aoChatLoadUnread()
+                  .finally(
+                    () => {
+
+                      window.__aoChatUnreadTick =
+                        false;
+
+                    }
+                  );
+
+              }
+
+              /*
+               * Conversation:
+               * only while chat is open,
+               * and never while another load is running.
+               */
+
+              if(
+                aoChatOpen &&
+                !aoChatLoadBusy
+              ){
+
+                aoChatLoad();
+
+              }
+
+            }
+
+          },
+          3000
+        );
+
+    }
+
   }
-});
+);
 
 /* =========================================================
    ADVANCED INVENTORY SEARCH
@@ -18111,39 +20169,152 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </script>
 <!-- PRIVATE ADMIN CHAT -->
-<button id="aoChatFab" class="ao-chat-fab" type="button" onclick="aoChatToggle()" aria-label="Open chat">
-  💬<span id="aoChatBadge" class="ao-chat-badge" style="display:none">0</span>
+<button
+  id="aoChatFab"
+  class="ao-chat-fab"
+  type="button"
+  onclick="aoChatToggle()"
+  aria-label="Open chat"
+>
+  💬
+  <span
+    id="aoChatBadge"
+    class="ao-chat-badge"
+    style="display:none"
+  >0</span>
 </button>
 
-<div id="aoChatPanel" class="ao-chat-panel" aria-hidden="true">
+<div
+  id="aoChatPanel"
+  class="ao-chat-panel"
+  aria-hidden="true"
+>
+
   <div class="ao-chat-head">
+
     <div>
-      <div class="ao-chat-title">Branch Chat</div>
-      <div id="aoChatSub" class="ao-chat-sub">New and unread messages</div>
+      <div class="ao-chat-title">
+        Branch Chat
+      </div>
+
+      <div
+        id="aoChatSub"
+        class="ao-chat-sub"
+      >
+        Select a branch and branch user
+      </div>
     </div>
-    <button class="ao-chat-close" type="button" onclick="aoChatToggle()">✕</button>
+
+    <button
+      class="ao-chat-close"
+      type="button"
+      onclick="aoChatToggle()"
+      aria-label="Close chat"
+    >
+      ✕
+    </button>
+
   </div>
 
-  <div id="aoChatNotify" class="ao-chat-notify"></div>
+  <!-- CHAT BRANCH SELECTION -->
+  <div class="ao-chat-branch">
 
+    <label
+      class="ao-chat-branch-label"
+      for="aoChatBranch"
+    >
+      CHAT BRANCH
+    </label>
+
+    <div class="ao-chat-branch-row">
+
+      <select
+        id="aoChatBranch"
+        class="ao-chat-branch-select"
+      >
+        <option value="">Select branch...</option>
+      </select>
+
+      <button
+        id="aoChatRefreshUsers"
+        class="ao-chat-refresh-users"
+        type="button"
+        title="Refresh branch users"
+        aria-label="Refresh branch users"
+      >
+        ↻
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- UNREAD NOTIFICATIONS -->
+  <div
+    id="aoChatNotify"
+    class="ao-chat-notify"
+  ></div>
+
+  <!-- BRANCH USER -->
   <div class="ao-chat-recipient">
-    <select id="aoChatRecipient" class="ao-chat-select" disabled>
-      <option value="">Select a branch first</option>
+
+    <label
+      class="ao-chat-recipient-label"
+      for="aoChatRecipient"
+    >
+      BRANCH USER
+    </label>
+
+    <select
+      id="aoChatRecipient"
+      class="ao-chat-select"
+      disabled
+    >
+      <option value="">
+        Select a branch first
+      </option>
     </select>
+
   </div>
 
-  <div id="aoChatMessages" class="ao-chat-messages">
-    <div class="ao-chat-empty">Select a branch and branch user to open a private conversation.</div>
+  <!-- MESSAGES -->
+  <div
+    id="aoChatMessages"
+    class="ao-chat-messages"
+  >
+    <div class="ao-chat-empty">
+      Select a branch and branch user to open a private conversation.
+    </div>
   </div>
 
+  <!-- MESSAGE COMPOSER -->
   <div class="ao-chat-compose">
-    <input id="aoChatInput" class="ao-chat-input" maxlength="500" autocomplete="off"
-      placeholder="Message selected branch user...">
-    <button id="aoChatSend" class="ao-chat-send" type="button" onclick="aoChatSend()">➤</button>
+
+    <input
+      id="aoChatInput"
+      class="ao-chat-input"
+      maxlength="500"
+      autocomplete="off"
+      placeholder="Message selected branch user..."
+    >
+
+    <button
+      id="aoChatSend"
+      class="ao-chat-send"
+      type="button"
+      onclick="aoChatSend()"
+      aria-label="Send message"
+    >
+      ➤
+    </button>
+
   </div>
 
-  <div id="aoChatStatus" class="ao-chat-status"></div>
-</div>
+  <div
+    id="aoChatStatus"
+    class="ao-chat-status"
+  ></div>
+
 </div>
 </body>
 </html>

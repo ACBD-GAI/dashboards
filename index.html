@@ -8,6 +8,7 @@
 <title>Acebedo Optical Inventory</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 
@@ -17835,10 +17836,9 @@ function escapeHtmlAttribute(
 let aoChatOpen = false;
 let aoChatSending = false;
 let aoChatTimer = null;
-
-/* Chat conversation request throttle. */
-let aoChatLastLoadKey = "";
-let aoChatLastLoadAt = 0;
+let aoChatRealtimeChannel = null;
+let aoChatRealtimeReady = false;
+let aoChatRealtimeStarting = false;
 let aoChatUnreadTotal = 0;
 
 let aoChatNotifications = [];
@@ -17925,6 +17925,174 @@ function aoChatStatus(t){
   if(e){
     e.textContent = t || "";
   }
+
+}
+
+/* =========================================================
+   CHAT REALTIME — NOTIFICATION ONLY
+   Uses Supabase Realtime for INSERT events on chat_messages.
+   Existing REST chat functions remain unchanged.
+   ========================================================= */
+
+async function aoChatStartRealtime(){
+
+  if(
+    aoChatRealtimeReady ||
+    aoChatRealtimeStarting
+  ){
+    return;
+  }
+
+  if(
+    !window.supabase ||
+    typeof window.supabase.createClient !== "function"
+  ){
+    console.warn(
+      "Supabase Realtime library unavailable. Chat fallback polling remains active."
+    );
+    return;
+  }
+
+  aoChatRealtimeStarting = true;
+
+  try{
+
+    const realtimeClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+        {
+          realtime:{
+            params:{
+              eventsPerSecond:10
+            }
+          },
+          auth:{
+            persistSession:false,
+            autoRefreshToken:false
+          }
+        }
+      );
+
+    aoChatRealtimeChannel =
+      realtimeClient
+        .channel("ao-dashboard-chat")
+        .on(
+          "postgres_changes",
+          {
+            event:"INSERT",
+            schema:"public",
+            table:"chat_messages"
+          },
+          payload => {
+
+            const row =
+              payload?.new || {};
+
+            if(
+              String(row.sender_type || "")
+                .toUpperCase() !== "SCANNER"
+            ){
+              return;
+            }
+
+            /*
+             * A real INSERT arrived, so update the
+             * unread badge immediately.
+             */
+            aoChatLoadUnread()
+              .catch(() => {});
+
+            /*
+             * If this exact conversation is open,
+             * refresh it immediately.
+             */
+            const rowBranch =
+              String(row.branch || "")
+                .trim()
+                .toUpperCase();
+
+            const rowEmail =
+              String(row.scanner_email || "")
+                .trim()
+                .toLowerCase();
+
+            if(
+              aoChatOpen &&
+              rowBranch &&
+              rowEmail &&
+              rowBranch === aoChatBranch() &&
+              rowEmail === aoChatRecipient()
+            ){
+
+              aoChatLoad()
+                .catch(() => {});
+
+            }
+
+          }
+        )
+        .subscribe(
+          status => {
+
+            if(status === "SUBSCRIBED"){
+
+              aoChatRealtimeReady = true;
+
+              console.log(
+                "Acebedo chat Realtime connected."
+              );
+
+            }
+
+            if(
+              status === "CHANNEL_ERROR" ||
+              status === "TIMED_OUT" ||
+              status === "CLOSED"
+            ){
+
+              aoChatRealtimeReady = false;
+
+              console.warn(
+                "Acebedo chat Realtime unavailable. Using fallback polling."
+              );
+
+            }
+
+          }
+        );
+
+  }catch(error){
+
+    aoChatRealtimeReady = false;
+
+    console.warn(
+      "Acebedo chat Realtime startup failed. Using fallback polling.",
+      error
+    );
+
+  }finally{
+
+    aoChatRealtimeStarting = false;
+
+  }
+
+}
+
+function aoChatStopRealtime(){
+
+  try{
+
+    if(aoChatRealtimeChannel){
+
+      aoChatRealtimeChannel.unsubscribe();
+
+    }
+
+  }catch(e){}
+
+  aoChatRealtimeChannel = null;
+  aoChatRealtimeReady = false;
 
 }
 
@@ -18960,7 +19128,7 @@ async function aoChatLoadUnread(){
         "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
         "&sender_type=eq.SCANNER" +
         "&order=created_at.desc" +
-        "&limit=200"
+        "&limit=1000"
       );
 
     const grouped =
@@ -19103,37 +19271,6 @@ async function aoChatLoadUnread(){
 
 async function aoChatLoad(){
 
-  /*
-   * PERFORMANCE:
-   * The chat timer runs frequently, but the conversation
-   * does not need a Supabase request every few seconds.
-   * Cache the currently selected conversation for 5 seconds.
-   * Manual actions such as Send still invalidate the cache.
-   */
-  const now =
-    Date.now();
-
-  const branchForThrottle =
-    aoChatBranch();
-
-  const recipientForThrottle =
-    aoChatRecipient();
-
-  const throttleKey =
-    branchForThrottle +
-    "|" +
-    recipientForThrottle;
-
-  if(
-    aoChatLastLoadKey === throttleKey &&
-    aoChatLastLoadAt &&
-    now - aoChatLastLoadAt < 5000
-  ){
-
-    return;
-
-  }
-
   if(
     !sessionId ||
     !currentEmail
@@ -19237,13 +19374,6 @@ async function aoChatLoad(){
 
   aoChatLoadBusy = true;
 
-  /*
-   * Record the request time only when a real Supabase
-   * conversation load is about to happen.
-   */
-  aoChatLastLoadKey = key;
-  aoChatLastLoadAt = Date.now();
-
   try{
 
     const rows =
@@ -19254,8 +19384,8 @@ async function aoChatLoad(){
         encodeURIComponent(branch) +
         "&scanner_email=eq." +
         encodeURIComponent(recipient) +
-        "&order=created_at.desc" +
-        "&limit=100"
+        "&order=created_at.asc" +
+        "&limit=300"
       );
 
     if(
@@ -19268,11 +19398,9 @@ async function aoChatLoad(){
     }
 
     const list =
-      (
-        Array.isArray(rows)
-          ? rows
-          : []
-      ).reverse();
+      Array.isArray(rows)
+        ? rows
+        : [];
 
     aoChatConversationCache.set(
       key,
@@ -19287,13 +19415,6 @@ async function aoChatLoad(){
     );
 
   }catch(e){
-
-    /*
-     * Do not block the next retry if the request failed.
-     */
-    if(aoChatLastLoadKey === key){
-      aoChatLastLoadAt = 0;
-    }
 
     console.warn(
       "Dashboard chat load failed:",
@@ -19715,10 +19836,6 @@ async function aoChatSend(){
       key
     );
 
-    /* Force the freshly sent message to reload immediately. */
-    aoChatLastLoadKey = "";
-    aoChatLastLoadAt = 0;
-
     await aoChatLoad();
 
     aoChatLoadUnread()
@@ -19758,6 +19875,12 @@ document.addEventListener(
 
     /* Build the branch selector inside the chat. */
     aoChatBuildBranchList();
+
+    /*
+     * Start Realtime. If it cannot connect, the existing
+     * polling code remains available as a fallback.
+     */
+    aoChatStartRealtime();
 
     const input =
       document.getElementById(
@@ -20057,6 +20180,15 @@ document.addEventListener(
               currentEmail
             ){
 
+              /*
+               * Realtime delivers new chat INSERT events.
+               * When connected, do not make the existing
+               * polling requests.
+               */
+              if(aoChatRealtimeReady){
+                return;
+              }
+
               const now =
                 Date.now();
 
@@ -20111,7 +20243,7 @@ document.addEventListener(
             }
 
           },
-          5000
+          3000
         );
 
     }

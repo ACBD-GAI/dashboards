@@ -5927,6 +5927,69 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 </style>
 
+<style id="aoChatImageStyles">
+.ao-chat-attach{
+  flex:0 0 42px;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  background:#fff;
+  font-size:18px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ao-chat-attach:hover{background:#f1f5f9;}
+.ao-chat-image-preview{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-top:1px solid #e5ebf2;
+  background:#fbfdff;
+  font-size:10px;
+  color:#5f7893;
+}
+.ao-chat-image-preview[hidden]{display:none !important;}
+.ao-chat-image-thumb{
+  width:42px;
+  height:42px;
+  object-fit:cover;
+  border-radius:8px;
+  border:1px solid #d8e2ec;
+}
+.ao-chat-image-remove{
+  margin-left:auto;
+  width:26px;
+  height:26px;
+  border:1px solid #d7e0eb;
+  border-radius:8px;
+  background:#fff;
+  cursor:pointer;
+  color:#64748b;
+}
+.ao-chat-message-image{
+  display:block;
+  width:min(290px,100%);
+  max-height:320px;
+  object-fit:contain;
+  border-radius:10px;
+  margin-top:4px;
+  cursor:pointer;
+  border:1px solid rgba(148,163,184,.22);
+  background:#f8fafc;
+}
+.ao-chat-image-caption{
+  margin-top:5px;
+  color:inherit;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+</style>
+
 <style id="aoChatEmojiStyles">
 .ao-chat-compose{position:relative;}
 .ao-chat-emoji{
@@ -17886,6 +17949,7 @@ function escapeHtmlAttribute(
 
 let aoChatOpen = false;
 let aoChatSending = false;
+let aoChatPendingImage = null;
 let aoChatTimer = null;
 let aoChatRealtimeChannel = null;
 let aoChatRealtimeReady = false;
@@ -17977,6 +18041,189 @@ function aoChatStatus(t){
     e.textContent = t || "";
   }
 
+}
+
+/* =========================================================
+   CHAT IMAGE ATTACHMENTS — SUPABASE STORAGE
+   The image bytes live in Storage. The chat_messages row
+   stores only a small image-reference marker/path.
+   ========================================================= */
+
+const AO_CHAT_IMAGE_BUCKET = "ao-chat-images";
+const AO_CHAT_IMAGE_MAX_INPUT_BYTES = 8 * 1024 * 1024;
+const AO_CHAT_IMAGE_MAX_OUTPUT_BYTES = 1200 * 1024;
+const AO_CHAT_IMAGE_MAX_DIMENSION = 1600;
+
+function aoChatIsImageMessage(message){
+  return String(message || "").includes("[[AO_CHAT_IMAGE]]");
+}
+
+function aoChatImagePath(message){
+  const m = String(message || "").match(/\[\[AO_CHAT_IMAGE\]\]([^\n\r]+)/);
+  return m ? String(m[1] || "").trim() : "";
+}
+
+function aoChatTextPart(message){
+  return String(message || "")
+    .replace(/\n?\[\[AO_CHAT_IMAGE\]\][^\n\r]*/g, "")
+    .trim();
+}
+
+function aoChatPublicImageUrl(path){
+  if(!path) return "";
+  return SUPABASE_URL +
+    "/storage/v1/object/public/" +
+    AO_CHAT_IMAGE_BUCKET +
+    "/" +
+    String(path)
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/");
+}
+
+async function aoChatCompressImage(file){
+
+  if(!(file instanceof File)){
+    throw new Error("Invalid image file.");
+  }
+
+  if(file.size > AO_CHAT_IMAGE_MAX_INPUT_BYTES){
+    throw new Error("Image is too large. Please choose an image under 8 MB.");
+  }
+
+  if(!String(file.type || "").startsWith("image/")){
+    throw new Error("Please select an image file.");
+  }
+
+  const bitmap =
+    await createImageBitmap(file);
+
+  let width = bitmap.width;
+  let height = bitmap.height;
+
+  const scale =
+    Math.min(
+      1,
+      AO_CHAT_IMAGE_MAX_DIMENSION / Math.max(width,height)
+    );
+
+  width = Math.max(1, Math.round(width * scale));
+  height = Math.max(1, Math.round(height * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d", {alpha:false});
+  if(!ctx){
+    bitmap.close?.();
+    throw new Error("Unable to prepare the image.");
+  }
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0,0,width,height);
+  ctx.drawImage(bitmap,0,0,width,height);
+  bitmap.close?.();
+
+  let quality = 0.82;
+  let blob = await new Promise(resolve =>
+    canvas.toBlob(resolve,"image/jpeg",quality)
+  );
+
+  while(
+    blob &&
+    blob.size > AO_CHAT_IMAGE_MAX_OUTPUT_BYTES &&
+    quality > 0.50
+  ){
+    quality -= 0.06;
+    blob = await new Promise(resolve =>
+      canvas.toBlob(resolve,"image/jpeg",quality)
+    );
+  }
+
+  if(!blob){
+    throw new Error("Image compression failed.");
+  }
+
+  return new File(
+    [blob],
+    "chat-image.jpg",
+    {type:"image/jpeg", lastModified:Date.now()}
+  );
+}
+
+async function aoChatUploadImage(file){
+
+  if(
+    !window.supabase ||
+    typeof window.supabase.createClient !== "function"
+  ){
+    throw new Error("Supabase Storage is unavailable.");
+  }
+
+  const client =
+    window.__aoChatStorageClient ||
+    (window.__aoChatStorageClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+        {
+          auth:{
+            persistSession:false,
+            autoRefreshToken:false
+          }
+        }
+      )
+    );
+
+  const safeBranch =
+    String(aoChatBranch() || "ALL")
+      .replace(/[^A-Z0-9_-]/gi,"_")
+      .slice(0,20) || "CHAT";
+
+  const safeEmail =
+    String(currentEmail || "admin")
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]/gi,"_")
+      .slice(0,45) || "admin";
+
+  const fileName =
+    Date.now() + "-" +
+    (crypto.randomUUID
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2)) +
+    ".jpg";
+
+  const path =
+    safeBranch + "/" +
+    safeEmail + "/" +
+    fileName;
+
+  const compressed =
+    await aoChatCompressImage(file);
+
+  const result =
+    await client.storage
+      .from(AO_CHAT_IMAGE_BUCKET)
+      .upload(
+        path,
+        compressed,
+        {
+          contentType:"image/jpeg",
+          cacheControl:"31536000",
+          upsert:false
+        }
+      );
+
+  if(result.error){
+    console.error("Chat image upload failed:", result.error);
+    throw new Error(
+      result.error.message ||
+      "Image upload failed."
+    );
+  }
+
+  return path;
 }
 
 /* =========================================================
@@ -19249,9 +19496,11 @@ async function aoChatLoadUnread(){
             last_created_at:
               r.created_at,
             last_message:
-              String(
-                r.message || ""
-              )
+              aoChatIsImageMessage(r.message)
+                ? "📷 Image"
+                : String(
+                    r.message || ""
+                  )
           };
 
           grouped.set(
@@ -19274,9 +19523,11 @@ async function aoChatLoadUnread(){
             r.created_at;
 
           g.last_message =
-            String(
-              r.message || ""
-            );
+            aoChatIsImageMessage(r.message)
+              ? "📷 Image"
+              : String(
+                  r.message || ""
+                );
 
         }
 
@@ -19591,6 +19842,38 @@ function aoChatRenderConversation(
               )
               : "";
 
+          const rawMessage =
+            String(r.message || "");
+
+          const imagePath =
+            aoChatImagePath(rawMessage);
+
+          const textPart =
+            aoChatTextPart(rawMessage);
+
+          const imageHtml =
+            imagePath
+              ? (
+                '<img class="ao-chat-message-image"' +
+                ' src="' +
+                aoChatEsc(aoChatPublicImageUrl(imagePath)) +
+                '"' +
+                ' alt="Chat image"' +
+                ' loading="lazy"' +
+                ' onclick="window.open(this.src,\'_blank\',\'noopener\')"' +
+                '>'
+              )
+              : "";
+
+          const textHtml =
+            textPart
+              ? (
+                '<div class="ao-chat-image-caption">' +
+                aoChatEsc(textPart) +
+                '</div>'
+              )
+              : "";
+
           return (
             sep +
             '<div class="ao-chat-row ' +
@@ -19607,11 +19890,8 @@ function aoChatRenderConversation(
                   ) +
                 '</div>' +
 
-                '<div class="ao-chat-text">' +
-                  aoChatEsc(
-                    r.message || ""
-                  ) +
-                '</div>' +
+                textHtml +
+                imageHtml +
 
                 '<div class="ao-chat-time">' +
                   aoChatEsc(
@@ -19788,6 +20068,9 @@ async function aoChatSend(){
       input?.value || ""
     ).trim();
 
+  const pendingImage =
+    aoChatPendingImage;
+
   const branch =
     aoChatBranch();
 
@@ -19795,7 +20078,7 @@ async function aoChatSend(){
     aoChatRecipient();
 
   if(
-    !text ||
+    (!text && !pendingImage) ||
     !sessionId ||
     !currentEmail
   ){
@@ -19848,6 +20131,21 @@ async function aoChatSend(){
 
   try{
 
+    let message = text;
+    let uploadedImagePath = "";
+
+    if(pendingImage){
+      aoChatStatus("Uploading image…");
+      uploadedImagePath =
+        await aoChatUploadImage(pendingImage);
+      message +=
+        (message ? "\n" : "") +
+        "[[AO_CHAT_IMAGE]]" +
+        uploadedImagePath;
+    }
+
+    aoChatStatus("Sending...");
+
     await supabaseRequest(
       "chat_messages",
       {
@@ -19863,12 +20161,13 @@ async function aoChatSend(){
             .trim()
             .toLowerCase(),
           sender_type:"DASHBOARD",
-          message:text
+          message:message
         }
       }
     );
 
     input.value = "";
+    aoChatClearPendingImage();
 
     aoChatStatus("");
 
@@ -19898,6 +20197,23 @@ async function aoChatSend(){
       "Dashboard chat send failed:",
       e
     );
+
+    /*
+     * Best-effort cleanup if Storage upload succeeded
+     * but the chat row could not be inserted.
+     */
+    try{
+      if(typeof uploadedImagePath === "string" && uploadedImagePath){
+        const client = window.__aoChatStorageClient;
+        if(client){
+          await client.storage
+            .from(AO_CHAT_IMAGE_BUCKET)
+            .remove([uploadedImagePath]);
+        }
+      }
+    }catch(cleanupError){
+      console.warn("Chat image cleanup failed:", cleanupError);
+    }
 
     aoChatStatus(
       e?.message ||
@@ -20641,7 +20957,44 @@ document.addEventListener("DOMContentLoaded",()=>{
   </div>
 
   <!-- MESSAGE COMPOSER -->
+  <div
+    id="aoChatImagePreview"
+    class="ao-chat-image-preview"
+    hidden
+  >
+    <img
+      id="aoChatImageThumb"
+      class="ao-chat-image-thumb"
+      alt="Selected image"
+    >
+    <span id="aoChatImageName">Image selected</span>
+    <button
+      id="aoChatImageRemove"
+      class="ao-chat-image-remove"
+      type="button"
+      aria-label="Remove image"
+      title="Remove image"
+    >×</button>
+  </div>
+
   <div class="ao-chat-compose">
+
+    <input
+      id="aoChatImageInput"
+      type="file"
+      accept="image/*"
+      hidden
+    >
+
+    <button
+      id="aoChatAttach"
+      class="ao-chat-attach"
+      type="button"
+      aria-label="Attach image"
+      title="Attach image"
+    >
+      📎
+    </button>
 
     <button
       id="aoChatEmoji"
@@ -20744,6 +21097,59 @@ document.addEventListener("DOMContentLoaded",()=>{
     document.addEventListener("click",e=>{
       if(!picker.hidden && !picker.contains(e.target) && e.target!==emojiBtn){
         picker.hidden=true;
+      }
+    });
+
+    const attach=document.getElementById("aoChatAttach");
+    const imageInput=document.getElementById("aoChatImageInput");
+    const preview=document.getElementById("aoChatImagePreview");
+    const thumb=document.getElementById("aoChatImageThumb");
+    const nameEl=document.getElementById("aoChatImageName");
+    const remove=document.getElementById("aoChatImageRemove");
+
+    window.aoChatClearPendingImage=function(){
+      window.aoChatPendingImage = null;
+      if(typeof aoChatPendingImage !== "undefined") aoChatPendingImage=null;
+      if(imageInput) imageInput.value="";
+      if(preview){ preview.hidden=true; }
+      if(thumb){ thumb.removeAttribute("src"); }
+      if(nameEl){ nameEl.textContent="Image selected"; }
+    };
+
+    attach?.addEventListener("click",()=> imageInput?.click());
+
+    imageInput?.addEventListener("change",e=>{
+      const file=e.target.files?.[0];
+      if(!file) return;
+      if(!String(file.type || "").startsWith("image/")){
+        aoChatStatus("Please select an image file.");
+        imageInput.value="";
+        return;
+      }
+      if(file.size > 8*1024*1024){
+        aoChatStatus("Image is too large. Maximum is 8 MB.");
+        imageInput.value="";
+        return;
+      }
+
+      aoChatPendingImage=file;
+      const url=URL.createObjectURL(file);
+      if(thumb){
+        thumb.src=url;
+        thumb.onload=()=>URL.revokeObjectURL(url);
+      }
+      if(nameEl){
+        nameEl.textContent=file.name || "Image selected";
+      }
+      if(preview){
+        preview.hidden=false;
+      }
+      aoChatStatus("");
+    });
+
+    remove?.addEventListener("click",()=>{
+      if(typeof aoChatClearPendingImage === "function"){
+        aoChatClearPendingImage();
       }
     });
   }

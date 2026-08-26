@@ -7019,7 +7019,9 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
       <div class="field">
         <label>DESCRIPTION</label>
-        <input id="advancedSearchDescription" class="input" type="text" placeholder="Enter description..." autocomplete="off" spellcheck="false">
+        <select id="advancedSearchDescription" class="select" aria-label="Description filter">
+          <option value="">ALL DESCRIPTIONS</option>
+        </select>
       </div>
 
     </div>
@@ -20668,6 +20670,30 @@ function clearAdvancedInventorySearch(){
 }
 function advancedSearchSetStatus(message){const e=document.getElementById("advancedSearchStatus");if(e)e.textContent=message||"";}
 
+function advancedSearchPopulateDescriptions(rows){
+  const select=document.getElementById("advancedSearchDescription");
+  if(!select) return;
+  const current=String(select.value||"");
+  const descriptions=[...new Set((Array.isArray(rows)?rows:[])
+    .map(row=>String(row?.DESCRIPTION??"").trim())
+    .filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,undefined,{sensitivity:"base"}));
+
+  select.innerHTML='<option value="">ALL DESCRIPTIONS</option>';
+  descriptions.forEach(description=>{
+    const option=document.createElement("option");
+    option.value=description;
+    option.textContent=description;
+    select.appendChild(option);
+  });
+
+  if(current && descriptions.includes(current)){
+    select.value=current;
+  }else{
+    select.value="";
+  }
+}
+
 function advancedSearchLensTypeRange(lensType){
   /*
    * ADD / EDIT LENSCODE RANGES HERE.
@@ -20786,6 +20812,9 @@ async function runAdvancedInventorySearch(){
     );
 
     const rows=combined.slice(0,ADVANCED_SEARCH_MAX_ROWS);
+    if(!description){
+      advancedSearchPopulateDescriptions(rows);
+    }
     if(count)count.textContent=String(rows.length)+(capped?"+":"");
 
     if(!rows.length){
@@ -20838,9 +20867,11 @@ async function downloadAdvancedInventoryExcel(){
 
 function advancedSearchKeydown(event){if(event.key==="Enter"){event.preventDefault();runAdvancedInventorySearch();}}
 document.addEventListener("DOMContentLoaded",()=>{
-  ["advancedSearchLensCode","advancedSearchLensType","advancedSearchDescription"].forEach(id=>{const input=document.getElementById(id);if(input)input.addEventListener("keydown",advancedSearchKeydown);});
+  ["advancedSearchLensCode"].forEach(id=>{const input=document.getElementById(id);if(input)input.addEventListener("keydown",advancedSearchKeydown);});
+  const description=document.getElementById("advancedSearchDescription");
+  if(description)description.addEventListener("change",()=>runAdvancedInventorySearch());
   const branch=document.getElementById("advancedSearchBranch");if(branch)branch.addEventListener("change",()=>{advancedSearchUpdateBranchLabel();clearAdvancedInventorySearch();});
-  const lensType=document.getElementById("advancedSearchLensType");if(lensType)lensType.addEventListener("change",()=>{runAdvancedInventorySearch();});
+  const lensType=document.getElementById("advancedSearchLensType");if(lensType)lensType.addEventListener("change",()=>{clearAdvancedInventorySearch();runAdvancedInventorySearch();});
   const modal=document.getElementById("advancedInventorySearchModal");if(modal)modal.addEventListener("click",event=>{if(event.target===modal)closeAdvancedInventorySearch();});
 });
 

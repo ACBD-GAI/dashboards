@@ -20719,7 +20719,7 @@ function advancedSearchLensTypeRange(lensType){
 async function getAdvancedAvailableRows(branch,lensCode,lensType,description,fullData=false){
   const p=new URLSearchParams(); p.set("select","*");
   if(lensCode)p.set("LENSCODE","eq."+lensCode);
-  if(description)p.set("DESCRIPTION","ilike."+advancedSearchFieldPattern(description));
+  if(description)p.set("DESCRIPTION","eq."+description);
   p.set("order","LENSCODE.asc.nullslast,NTAGN.asc.nullslast");
   const all=[];let offset=0;const limit=SUPABASE_PAGE_SIZE;const max=fullData?MAX_FETCH_ROWS:ADVANCED_SEARCH_MAX_ROWS;
   while(offset<max){p.set("limit",String(limit));p.set("offset",String(offset));const rows=await supabaseRequest(advancedSearchReportTable(branch)+"?"+p.toString());const batch=Array.isArray(rows)?rows:[];all.push(...batch);if(batch.length<limit)break;offset+=limit;}
@@ -20871,7 +20871,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const description=document.getElementById("advancedSearchDescription");
   if(description)description.addEventListener("change",()=>runAdvancedInventorySearch());
   const branch=document.getElementById("advancedSearchBranch");if(branch)branch.addEventListener("change",()=>{advancedSearchUpdateBranchLabel();clearAdvancedInventorySearch();});
-  const lensType=document.getElementById("advancedSearchLensType");if(lensType)lensType.addEventListener("change",()=>{clearAdvancedInventorySearch();runAdvancedInventorySearch();});
+  const lensType=document.getElementById("advancedSearchLensType");if(lensType)lensType.addEventListener("change",()=>{advancedSearchGeneration++;const description=document.getElementById("advancedSearchDescription");if(description)description.value="";const results=document.getElementById("advancedSearchResults");if(results)results.innerHTML=`<div class="advancedSearchLoading">Searching inventory...</div>`;runAdvancedInventorySearch();});
   const modal=document.getElementById("advancedInventorySearchModal");if(modal)modal.addEventListener("click",event=>{if(event.target===modal)closeAdvancedInventorySearch();});
 });
 

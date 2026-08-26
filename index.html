@@ -19999,10 +19999,76 @@ document.addEventListener(
         setInterval(
           () => {
 
-            if(
-              sessionId &&
-              currentEmail
-            ){
+           if(!aoChatTimer){
+
+  aoChatTimer =
+    setInterval(
+      () => {
+
+        if(
+          sessionId &&
+          currentEmail &&
+          aoChatOpen
+        ){
+
+          const now =
+            Date.now();
+
+          /*
+           * Unread messages:
+           * every 10 seconds.
+           */
+
+          if(
+            !window.__aoChatUnreadTick &&
+            (
+              !window.__aoChatLastUnread ||
+              now -
+                window.__aoChatLastUnread >=
+                10000
+            )
+          ){
+
+            window.__aoChatUnreadTick =
+              true;
+
+            window.__aoChatLastUnread =
+              now;
+
+            aoChatLoadUnread()
+              .finally(
+                () => {
+
+                  window.__aoChatUnreadTick =
+                    false;
+
+                }
+              );
+
+          }
+
+          /*
+           * Conversation:
+           * only while chat is open,
+           * and never while another load is running.
+           */
+
+          if(
+            aoChatOpen &&
+            !aoChatLoadBusy
+          ){
+
+            aoChatLoad();
+
+          }
+
+        }
+
+      },
+      3000
+    );
+
+}
 
               const now =
                 Date.now();

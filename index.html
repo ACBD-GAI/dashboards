@@ -5926,6 +5926,56 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   }
 }
 </style>
+
+<style id="aoChatEmojiStyles">
+.ao-chat-compose{position:relative;}
+.ao-chat-emoji{
+  flex:0 0 42px;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  background:#fff;
+  font-size:21px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ao-chat-emoji:hover{background:#f1f5f9;}
+.ao-chat-emoji-picker{
+  position:absolute;
+  right:8px;
+  bottom:54px;
+  z-index:9999;
+  width:min(320px,calc(100vw - 40px));
+  max-height:260px;
+  overflow-y:auto;
+  padding:10px;
+  border:1px solid #cbd5e1;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 12px 30px rgba(15,23,42,.18);
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:4px;
+}
+.ao-chat-emoji-picker button{
+  border:0;
+  background:transparent;
+  border-radius:8px;
+  width:32px;
+  height:32px;
+  font-size:20px;
+  cursor:pointer;
+}
+.ao-chat-emoji-picker button:hover{background:#e2e8f0;}
+@media(max-width:520px){
+  .ao-chat-emoji-picker{right:4px;width:min(300px,calc(100vw - 28px));}
+  .ao-chat-emoji-picker{grid-template-columns:repeat(7,1fr);}
+}
+</style>
 </head>
 
 <body>
@@ -20592,6 +20642,16 @@ document.addEventListener("DOMContentLoaded",()=>{
   <!-- MESSAGE COMPOSER -->
   <div class="ao-chat-compose">
 
+    <button
+      id="aoChatEmoji"
+      class="ao-chat-emoji"
+      type="button"
+      aria-label="Emoji"
+      title="Emoji"
+    >
+      😊
+    </button>
+
     <input
       id="aoChatInput"
       class="ao-chat-input"
@@ -20618,5 +20678,78 @@ document.addEventListener("DOMContentLoaded",()=>{
   ></div>
 
 </div>
+
+<script id="aoChatEmojiScript">
+(function(){
+  const emojis = [
+    "😀","😃","😄","😁","😆","😅","😂","🤣",
+    "😊","😇","🙂","🙃","😉","😌","😍","🥰",
+    "😘","😗","😙","😚","😋","😛","😝","😜",
+    "🤪","🤨","🧐","🤓","😎","🤩","🥳","😏",
+    "😒","😞","😔","😟","😕","🙁","☹️","😣",
+    "😖","😫","😩","🥺","😢","😭","😤","😠",
+    "😡","🤬","🤯","😳","🥵","🥶","😱","😨",
+    "😰","😥","😓","🤗","🤔","🫡","🤭","🤫",
+    "🤥","😶","😐","😑","😬","🙄","😯","😦",
+    "😧","😮","😲","🥱","😴","🤤","😪","😵",
+    "🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕",
+    "❤️","🧡","💛","💚","💙","💜","🖤","🤍",
+    "💯","🔥","👍","👎","👏","🙌","🙏","👌",
+    "✌️","🤝","💪","🎉","🎊","⭐","✨","💡",
+    "✅","❌","⚠️","❗","❓","💬","📌","🚀"
+  ];
+
+  function init(){
+    const input=document.getElementById("aoChatInput");
+    const emojiBtn=document.getElementById("aoChatEmoji");
+    const compose=document.querySelector(".ao-chat-compose");
+    if(!input || !emojiBtn || !compose) return;
+
+    let picker=document.getElementById("aoChatEmojiPicker");
+    if(!picker){
+      picker=document.createElement("div");
+      picker.id="aoChatEmojiPicker";
+      picker.className="ao-chat-emoji-picker";
+      picker.hidden=true;
+      emojis.forEach(emoji=>{
+        const b=document.createElement("button");
+        b.type="button";
+        b.textContent=emoji;
+        b.title=emoji;
+        b.addEventListener("click",()=>{
+          const start=input.selectionStart ?? input.value.length;
+          const end=input.selectionEnd ?? input.value.length;
+          const next=input.value.slice(0,start)+emoji+input.value.slice(end);
+          if(next.length>500) return;
+          input.value=next;
+          const pos=start+emoji.length;
+          input.focus();
+          input.setSelectionRange(pos,pos);
+          picker.hidden=true;
+        });
+        picker.appendChild(b);
+      });
+      compose.appendChild(picker);
+    }
+
+    if(emojiBtn.dataset.bound) return;
+    emojiBtn.dataset.bound="1";
+    emojiBtn.addEventListener("click",e=>{
+      e.stopPropagation();
+      picker.hidden=!picker.hidden;
+      if(!picker.hidden) input.focus();
+    });
+
+    document.addEventListener("click",e=>{
+      if(!picker.hidden && !picker.contains(e.target) && e.target!==emojiBtn){
+        picker.hidden=true;
+      }
+    });
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init);
+  else init();
+})();
+</script>
 </body>
 </html>

@@ -10948,7 +10948,13 @@ async function fetchStockPageCount(branch, search=""){
       table === table ? SUPABASE_URL + "/rest/v1/" + table + "?" + params.toString() : "",
       {
         method:"GET",
-        headers:Object.assign({}, supabaseHeaders(), {Prefer:"count=exact"}),
+        headers:{
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Prefer": "count=exact"
+        },
         cache:"no-store"
       }
     );

@@ -6116,6 +6116,42 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   }
 </style>
 
+
+<style>
+/* =========================================================
+   PULL OUT ITEMS — ADDITIVE FEATURE ONLY
+========================================================= */
+.pullOutStatCard{cursor:pointer;}
+.pullOutStatCard .statIcon{color:#b45309;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fde68a;}
+.pullOutStatCard:hover{border-color:#fcd34d;}
+.pullOutModal{width:min(1120px,96vw)!important;max-height:90vh;overflow:hidden;}
+.pullOutHead{padding-bottom:12px;}
+.pullOutControls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;}
+.pullOutSelect,.pullOutInput{min-height:40px;padding:0 11px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#173247;font-size:11px;font-weight:750;outline:none;}
+.pullOutSelect{min-width:180px;}
+.pullOutInput{flex:1;min-width:220px;}
+.pullOutSelect:focus,.pullOutInput:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
+.pullOutActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.pullOutList{max-height:58vh;overflow:auto;border:1px solid #d7e5ef;border-radius:12px;background:#fff;}
+.pullOutHeader,.pullOutRow{display:grid;grid-template-columns:minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
+.pullOutHeader{position:sticky;top:0;z-index:2;background:#234e67;color:#fff;font-size:10px;font-weight:900;letter-spacing:.05em;}
+.pullOutHeader>div,.pullOutCell{padding:11px 10px;min-width:0;}
+.pullOutRow{border-top:1px solid #e2e8f0;font-size:11px;color:#203443;}
+.pullOutRow:nth-child(even){background:#f8fbff;}
+.pullOutCell.description{white-space:normal;overflow-wrap:anywhere;}
+.pullOutTag{display:inline-flex;align-items:center;padding:5px 8px;border-radius:8px;background:#eef6ff;color:#1d4ed8;font-weight:900;white-space:nowrap;}
+.pullOutActionsCell{display:flex;gap:7px;flex-wrap:wrap;}
+.pullOutEmpty{padding:28px 16px;text-align:center;color:#64748b;font-size:12px;font-weight:700;}
+.pullOutStatus{margin-top:9px;color:#64748b;font-size:10px;font-weight:750;}
+.pullOutRestoreBtn{border-color:#bbf7d0!important;background:#f0fdf4!important;color:#15803d!important;}
+.pullOutDeleteBtn{border-color:#fecaca!important;background:#fff1f2!important;color:#dc2626!important;}
+@media(max-width:760px){
+  .pullOutModal{width:96vw!important;}
+  .pullOutHeader,.pullOutRow{grid-template-columns:90px minmax(180px,1.8fr) 120px 170px;min-width:560px;}
+  .pullOutList{overflow:auto;}
+}
+</style>
+
 </head>
 
 <body>
@@ -6564,6 +6600,15 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
           <span>SHOWING</span>
           <strong id="showingTotalMini">—</strong>
         </div>
+      </div>
+
+      <div class="statCard auditStatCard pullOutStatCard" id="pullOutStatCard" role="button" tabindex="0" style="display:none;" onclick="openPullOutPopup()" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openPullOutPopup(); }" title="View pull out items">
+        <div class="statTop">
+          <span class="statLabel">PULL OUT ITEMS</span>
+          <span class="statIcon">↗</span>
+        </div>
+        <div id="pullOutTotal" class="statNumber">—</div>
+        <div class="statHint">Click to view pull out items</div>
       </div>
 
     </div>
@@ -9404,6 +9449,14 @@ function updateSoldOnlyColumns(){
       report === "audit" ? "" : "none";
   }
 
+  const pullOutCard =
+    document.getElementById("pullOutStatCard");
+
+  if(pullOutCard){
+    pullOutCard.style.display =
+      report === "audit" ? "" : "none";
+  }
+
   const showingCard =
     document.getElementById("showingStatCard");
 
@@ -11027,6 +11080,7 @@ async function updateStatsDirect(
   let unconfirmed = 0;
   let audit = 0;
   let reportedMissing = 0;
+  let pullOut = 0;
 
   try{
     const reportedRows =
@@ -11040,6 +11094,20 @@ async function updateStatsDirect(
           ).length;
   }catch(error){
     console.warn("Reported missing statistics unavailable:",error);
+  }
+
+  try{
+    const pullOutRows =
+      await fetchAllRowsForStats("pull_out","BR,NTAGN");
+    pullOut =
+      branch === "ALL"
+        ? pullOutRows.length
+        : pullOutRows.filter(row =>
+            String(row?.BR ?? "").trim().toUpperCase() ===
+            String(branch || "").trim().toUpperCase()
+          ).length;
+  }catch(error){
+    console.warn("Pull out statistics unavailable:",error);
   }
 
   await Promise.all(
@@ -11345,6 +11413,20 @@ async function updateStatsDirect(
     loadReportedMissingCount();
   }
 
+  const pullOutEl =
+    document.getElementById("pullOutTotal");
+  if(pullOutEl){
+    pullOutEl.textContent =
+      formatNumber(pullOut);
+  }
+
+  const pullOutCard =
+    document.getElementById("pullOutStatCard");
+  if(pullOutCard){
+    pullOutCard.style.display =
+      document.getElementById("sheet")?.value === "audit" ? "" : "none";
+  }
+
   const reportedMissingEl =
     document.getElementById("reportedMissingTotal");
   if(reportedMissingEl){
@@ -11647,6 +11729,16 @@ function renderTable(
             Add to Sold
           </button>
 
+          <button
+            type="button"
+            class="actionBtn"
+            data-stock-add-pullout="1"
+            data-branch="${escapeHtmlAttribute(row.branch)}"
+            data-tag="${escapeHtmlAttribute(row.tag)}"
+          >
+            ↗ Add to Pull Out
+          </button>
+
         `;
 
       }
@@ -11864,6 +11956,25 @@ function renderTable(
               addStockToSold(
                 button.dataset.branch,
                 button.dataset.tag
+              );
+            }
+          );
+        }
+      );
+
+    body
+      .querySelectorAll(
+        "[data-stock-add-pullout]"
+      )
+      .forEach(
+        button=>{
+          button.addEventListener(
+            "click",
+            ()=>{
+              addStockToPullOut(
+                button.dataset.branch,
+                button.dataset.tag,
+                button
               );
             }
           );
@@ -16927,6 +17038,576 @@ async function deleteReportedMissingUnrecoverableConfirmed(branch,tag){
     if(typeof loadReportedMissingCount === "function") loadReportedMissingCount();
     await refreshDashboard();
   }catch(error){console.error("Delete reported missing failed:",error);showStatus(error?.message||"Unable to delete unrecoverable item.");}
+}
+
+/* =========================================================
+   PULL OUT ITEMS — ADDITIVE FEATURE ONLY
+   Central table: pull_out
+   Does NOT replace or modify existing Sold / Missing / Audit functions.
+========================================================= */
+
+let pullOutPopupRows = [];
+let pullOutPopupLoading = false;
+
+function pullOutRecordFromStock(row, branch, tag){
+  const record = {};
+  DB_COLUMNS.forEach(col=>{
+    record[col] = row?.[col] !== undefined && row?.[col] !== null
+      ? row[col]
+      : null;
+  });
+  record.BR = branch;
+  record.NTAGN = tag;
+  record.STATUS = "PULL OUT";
+  record["DATE AND TIME"] = philippineDateTime();
+  record["USER EMAIL"] = currentEmail || null;
+  return record;
+}
+
+async function addStockToPullOut(branch, tag, button){
+  branch = String(branch || "").trim().toUpperCase();
+  tag = String(tag || "").trim();
+  if(!branch || !tag){
+    showStatus("Missing branch or NTAGN.");
+    return;
+  }
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Adding...";
+  }
+
+  let insertedPullOut = false;
+
+  try{
+    const stockTable = tableName(branch,"stocks");
+    const auditTable = tableName(branch,"audit");
+
+    const params = new URLSearchParams();
+    params.set("BR","eq." + branch);
+    params.set("NTAGN","eq." + tag);
+    params.set("limit","1");
+
+    const stocks = await supabaseRequest(
+      stockTable + "?" + params.toString(),
+      {method:"GET"}
+    );
+
+    if(!Array.isArray(stocks) || !stocks.length){
+      throw new Error("Stock record " + tag + " was not found in " + branch + ".");
+    }
+
+    const existingPullOut = await supabaseRequest(
+      "pull_out?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag) +
+      "&limit=1",
+      {method:"GET"}
+    );
+
+    if(Array.isArray(existingPullOut) && existingPullOut.length){
+      throw new Error(tag + " is already in Pull Out.");
+    }
+
+    await supabaseRequest(
+      "pull_out",
+      {
+        method:"POST",
+        body:[pullOutRecordFromStock(stocks[0],branch,tag)],
+        prefer:"return=minimal"
+      }
+    );
+    insertedPullOut = true;
+
+    const deleteParams =
+      "?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag);
+
+    await Promise.all([
+      supabaseRequest(
+        stockTable + deleteParams,
+        {method:"DELETE",prefer:"return=minimal"}
+      ),
+      supabaseRequest(
+        auditTable + deleteParams,
+        {method:"DELETE",prefer:"return=minimal"}
+      )
+    ]);
+
+    showStatus(tag + " added to Pull Out and removed from Stocks and Audit.");
+    currentPage = 1;
+    await refreshDashboard();
+
+    if(document.getElementById("pullOutModal")){
+      await loadPullOutPopup();
+    }
+
+  }catch(error){
+    console.error("Add to Pull Out failed:",error);
+
+    /* If the move failed after the central record was inserted,
+       remove that Pull Out copy so a half-completed move is not left behind. */
+    if(insertedPullOut){
+      try{
+        await supabaseRequest(
+          "pull_out?BR=eq." + encodeURIComponent(branch) +
+          "&NTAGN=eq." + encodeURIComponent(tag),
+          {method:"DELETE",prefer:"return=minimal"}
+        );
+      }catch(rollbackError){
+        console.error("Pull Out rollback failed:",rollbackError);
+      }
+    }
+
+    showStatus(error?.message || "Unable to add item to Pull Out.");
+
+  }finally{
+    if(button){
+      button.disabled = false;
+      button.textContent = "↗ Add to Pull Out";
+    }
+  }
+}
+
+async function loadPullOutCount(){
+  const counter = document.getElementById("pullOutTotal");
+  const card = document.getElementById("pullOutStatCard");
+  if(!counter || !card) return;
+
+  const report = document.getElementById("sheet")?.value || "";
+  if(report !== "audit"){
+    card.style.display = "none";
+    return;
+  }
+
+  try{
+    const selectedBranch = String(
+      document.getElementById("branch")?.value || "ALL"
+    ).trim().toUpperCase();
+
+    const params = new URLSearchParams();
+    params.set("select","BR,NTAGN");
+
+    if(selectedBranch && selectedBranch !== "ALL"){
+      params.set("BR","eq." + selectedBranch);
+    }
+
+    const rows = await supabaseRequest(
+      "pull_out?" + params.toString(),
+      {method:"GET"}
+    );
+
+    counter.textContent = formatNumber(
+      Array.isArray(rows) ? rows.length : 0
+    );
+    card.style.display = "";
+
+  }catch(error){
+    console.error("Pull Out count failed:",error);
+    counter.textContent = "—";
+  }
+}
+
+async function openPullOutPopup(){
+  const existing = document.getElementById("pullOutModal");
+  if(existing) existing.remove();
+
+  const selectedBranch = String(
+    document.getElementById("branch")?.value || "ALL"
+  ).trim().toUpperCase();
+
+  const modal = document.createElement("div");
+  modal.id = "pullOutModal";
+  modal.className = "modalBackdrop";
+
+  modal.innerHTML = `
+    <div class="modalCard pullOutModal" role="dialog" aria-modal="true" aria-label="Pull Out Items">
+      <div class="pullOutHead">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div>
+            <div class="modalTitle" style="margin:0;">Pull Out Items</div>
+            <div class="modalSub" style="margin-top:4px;">Items removed from Stocks and Audit for pull out.</div>
+          </div>
+          <button type="button" data-pullout-close="1" aria-label="Close" style="width:38px;height:38px;border:1px solid #dbe5ec;border-radius:11px;background:#f8fafc;color:#475569;cursor:pointer;font-size:19px;font-weight:900;">×</button>
+        </div>
+
+        <div class="pullOutControls">
+          <select id="pullOutBranchFilter" class="pullOutSelect" aria-label="Pull Out Branch Filter">
+            <option value="ALL">ALL BRANCHES</option>
+            ${BRANCHES.map(b=>`<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`).join("")}
+          </select>
+          <input id="pullOutSearch" class="pullOutInput" type="search" autocomplete="off" placeholder="🔍 Search by Tag Number">
+          <button type="button" class="controlBtn" data-pullout-refresh="1">♻ Refresh</button>
+        </div>
+
+        <div class="pullOutActions">
+          <button type="button" class="reportPdfBtn primary" data-pullout-pdf="1">↓ DOWNLOAD PDF REPORT</button>
+          <button type="button" class="reportPdfBtn" data-pullout-excel="1">↓ DOWNLOAD EXCEL</button>
+        </div>
+      </div>
+
+      <div class="pullOutHeader">
+        <div>LENS TYPE</div>
+        <div>DESCRIPTION</div>
+        <div>TAG NUMBER</div>
+        <div style="text-align:right;">ACTION</div>
+      </div>
+
+      <div id="pullOutList" class="pullOutList">
+        <div class="pullOutEmpty">⏳ Loading pull out items...</div>
+      </div>
+      <div id="pullOutPopupStatus" class="pullOutStatus"></div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const branchFilter = modal.querySelector("#pullOutBranchFilter");
+  if(branchFilter){
+    branchFilter.value =
+      selectedBranch === "ALL" || !BRANCHES.includes(selectedBranch)
+        ? "ALL"
+        : selectedBranch;
+    branchFilter.addEventListener("change",renderPullOutPopup);
+  }
+
+  modal.querySelector("#pullOutSearch")?.addEventListener("input",renderPullOutPopup);
+  modal.querySelector("[data-pullout-refresh='1']")?.addEventListener("click",loadPullOutPopup);
+  modal.querySelector("[data-pullout-pdf='1']")?.addEventListener("click",downloadPullOutPdf);
+  modal.querySelector("[data-pullout-excel='1']")?.addEventListener("click",downloadPullOutExcel);
+  modal.querySelector("[data-pullout-close='1']")?.addEventListener("click",()=>modal.remove());
+  modal.addEventListener("click",e=>{if(e.target===modal) modal.remove();});
+
+  await loadPullOutPopup();
+}
+
+async function loadPullOutPopup(){
+  const list = document.getElementById("pullOutList");
+  if(!list || pullOutPopupLoading) return;
+
+  pullOutPopupLoading = true;
+  list.innerHTML = '<div class="pullOutEmpty">⏳ Loading pull out items...</div>';
+
+  try{
+    pullOutPopupRows = await fetchAllRowsForStats(
+      "pull_out",
+      DB_COLUMNS.join(",")
+    );
+    renderPullOutPopup();
+    loadPullOutCount();
+  }catch(error){
+    console.error("Pull Out popup load failed:",error);
+    list.innerHTML = '<div class="pullOutEmpty">Unable to load Pull Out items.</div>';
+  }finally{
+    pullOutPopupLoading = false;
+  }
+}
+
+function getPullOutFilteredRows(){
+  const branch = String(
+    document.getElementById("pullOutBranchFilter")?.value || "ALL"
+  ).trim().toUpperCase();
+
+  const search = String(
+    document.getElementById("pullOutSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  return (Array.isArray(pullOutPopupRows) ? pullOutPopupRows : []).filter(row=>{
+    const rb = String(row?.BR || "").trim().toUpperCase();
+    const tag = String(row?.NTAGN || "").trim().toLowerCase();
+
+    if(branch !== "ALL" && rb !== branch) return false;
+    if(search && !tag.includes(search)) return false;
+
+    return true;
+  });
+}
+
+function renderPullOutPopup(){
+  const list = document.getElementById("pullOutList");
+  if(!list) return;
+
+  const rows = getPullOutFilteredRows();
+  const status = document.getElementById("pullOutPopupStatus");
+
+  if(status){
+    status.textContent =
+      rows.length +
+      " pull out item" +
+      (rows.length === 1 ? "" : "s") +
+      " shown.";
+  }
+
+  if(!rows.length){
+    list.innerHTML = '<div class="pullOutEmpty">No Pull Out items found.</div>';
+    return;
+  }
+
+  list.innerHTML = rows.map(row=>{
+    const b = String(row?.BR || "").trim().toUpperCase();
+    const t = String(row?.NTAGN || "").trim();
+    const type = String(row?.LENSTYPE || "—").trim();
+    const description = String(row?.DESCRIPTION || "—").trim();
+
+    return `
+      <div class="pullOutRow">
+        <div class="pullOutCell">${escapeHtml(type || "—")}</div>
+        <div class="pullOutCell description">${escapeHtml(description || "—")}</div>
+        <div class="pullOutCell"><span class="pullOutTag">${escapeHtml(t || "—")}</span></div>
+        <div class="pullOutCell pullOutActionsCell" style="justify-content:flex-end;">
+          <button type="button" class="actionBtn pullOutRestoreBtn" data-pullout-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ ADD TO STOCKS</button>
+          <button type="button" class="actionBtn pullOutDeleteBtn" data-pullout-delete="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">DELETE</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  list.querySelectorAll("[data-pullout-restore]").forEach(btn=>{
+    btn.addEventListener("click",()=>restorePullOutToStocks(
+      btn.dataset.branch,
+      btn.dataset.tag,
+      btn
+    ));
+  });
+
+  list.querySelectorAll("[data-pullout-delete]").forEach(btn=>{
+    btn.addEventListener("click",()=>deletePullOutItem(
+      btn.dataset.branch,
+      btn.dataset.tag,
+      btn
+    ));
+  });
+}
+
+async function restorePullOutToStocks(branch,tag,button){
+  branch = String(branch || "").trim().toUpperCase();
+  tag = String(tag || "").trim();
+  if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
+
+  const confirmed = await inlineConfirm(
+    "Add " + tag + " from " + branch + " back to Stocks and Audit as AUDITED?"
+  );
+  if(!confirmed) return;
+
+  if(button){button.disabled=true;button.textContent="Restoring...";}
+
+  try{
+    const record = await getPullOutRecord(branch,tag);
+    if(!record) throw new Error("Pull Out record was not found.");
+
+    const stockTable = tableName(branch,"stocks");
+    const auditTable = tableName(branch,"audit");
+    const p = new URLSearchParams();
+    p.set("BR","eq." + branch);
+    p.set("NTAGN","eq." + tag);
+    p.set("limit","1");
+
+    const existingStock = await supabaseRequest(
+      stockTable + "?" + p.toString(),
+      {method:"GET"}
+    );
+
+    if(!Array.isArray(existingStock) || !existingStock.length){
+      const stockRecord = {};
+      DB_COLUMNS.slice(0,22).forEach(col=>{
+        stockRecord[col] = record[col] !== undefined && record[col] !== null ? record[col] : null;
+      });
+      await supabaseRequest(
+        stockTable,
+        {method:"POST",body:[stockRecord],prefer:"return=minimal"}
+      );
+    }
+
+    const existingAudit = await supabaseRequest(
+      auditTable + "?" + p.toString(),
+      {method:"GET"}
+    );
+
+    if(Array.isArray(existingAudit) && existingAudit.length){
+      await supabaseRequest(
+        auditTable + "?" + p.toString(),
+        {
+          method:"PATCH",
+          body:{
+            STATUS:"AUDITED",
+            "DATE AND TIME":philippineDateTime(),
+            "USER EMAIL":currentEmail || null
+          },
+          prefer:"return=minimal"
+        }
+      );
+    }else{
+      const auditRecord = {};
+      DB_COLUMNS.forEach(col=>{
+        auditRecord[col] = record[col] !== undefined && record[col] !== null ? record[col] : null;
+      });
+      auditRecord.BR=branch;
+      auditRecord.NTAGN=tag;
+      auditRecord.STATUS="AUDITED";
+      auditRecord["DATE AND TIME"]=philippineDateTime();
+      auditRecord["USER EMAIL"]=currentEmail || null;
+
+      await supabaseRequest(
+        auditTable,
+        {method:"POST",body:[auditRecord],prefer:"return=minimal"}
+      );
+    }
+
+    await supabaseRequest(
+      "pull_out?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag),
+      {method:"DELETE",prefer:"return=minimal"}
+    );
+
+    pullOutPopupRows = pullOutPopupRows.filter(row=>
+      !(String(row?.BR || "").trim().toUpperCase() === branch &&
+        String(row?.NTAGN || "").trim() === tag)
+    );
+
+    renderPullOutPopup();
+    showStatus(tag + " restored to Stocks and Audit as AUDITED.");
+    loadPullOutCount();
+    await refreshDashboard();
+
+  }catch(error){
+    console.error("Restore Pull Out failed:",error);
+    showStatus(error?.message || "Unable to restore Pull Out item.");
+  }finally{
+    if(button){button.disabled=false;button.textContent="↩ ADD TO STOCKS";}
+  }
+}
+
+async function deletePullOutItem(branch,tag,button){
+  branch = String(branch || "").trim().toUpperCase();
+  tag = String(tag || "").trim();
+  if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
+
+  const confirmed = await inlineConfirm(
+    "Permanently delete Pull Out item " + tag + " from " + branch + "? It will NOT be restored to Stocks or Audit."
+  );
+  if(!confirmed) return;
+
+  if(button){button.disabled=true;button.textContent="Deleting...";}
+
+  try{
+    await supabaseRequest(
+      "pull_out?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag),
+      {method:"DELETE",prefer:"return=minimal"}
+    );
+
+    pullOutPopupRows = pullOutPopupRows.filter(row=>
+      !(String(row?.BR || "").trim().toUpperCase() === branch &&
+        String(row?.NTAGN || "").trim() === tag)
+    );
+
+    renderPullOutPopup();
+    showStatus(tag + " deleted from Pull Out.");
+    loadPullOutCount();
+    await refreshDashboard();
+
+  }catch(error){
+    console.error("Delete Pull Out failed:",error);
+    showStatus(error?.message || "Unable to delete Pull Out item.");
+  }finally{
+    if(button){button.disabled=false;button.textContent="DELETE";}
+  }
+}
+
+async function getPullOutRecord(branch,tag){
+  const rows = await supabaseRequest(
+    "pull_out?BR=eq." + encodeURIComponent(String(branch).trim().toUpperCase()) +
+    "&NTAGN=eq." + encodeURIComponent(String(tag).trim()) +
+    "&limit=1",
+    {method:"GET"}
+  );
+  return Array.isArray(rows) && rows.length ? rows[0] : null;
+}
+
+function pullOutExportRows(){
+  return getPullOutFilteredRows().map(row=>({
+    BR:row?.BR,
+    LENSTYPE:row?.LENSTYPE,
+    DESCRIPTION:row?.DESCRIPTION,
+    NTAGN:row?.NTAGN
+  }));
+}
+
+async function downloadPullOutExcel(){
+  const button = document.querySelector("[data-pullout-excel='1']");
+  if(button) button.disabled=true;
+
+  try{
+    const branch = String(
+      document.getElementById("pullOutBranchFilter")?.value || "ALL"
+    ).trim().toUpperCase();
+    const rows = pullOutExportRows();
+    const headers = ["LENS TYPE","DESCRIPTION","TAG NUMBER"];
+    const data = rows.map(row=>[
+      row.LENSTYPE ?? "",
+      row.DESCRIPTION ?? "",
+      row.NTAGN ?? ""
+    ]);
+    const meta = [
+      ["Branch",branch === "ALL" ? "ALL BRANCHES" : aoPdfBranchLabel(branch)],
+      ["Records",rows.length],
+      ["Generated",formatDateValue(new Date().toISOString())]
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = aoExcelMakeTitleSheet(
+      "ACEBEDO OPTICAL — PULL OUT ITEMS",
+      meta,
+      headers,
+      data,
+      {
+        widths:[18,55,28],
+        centerCols:[0,2]
+      }
+    );
+    XLSX.utils.book_append_sheet(wb,ws,"PULL OUT");
+    XLSX.writeFile(
+      wb,
+      "Acebedo_Pull_Out_" + branch + "_" + formatFileDate() + ".xlsx"
+    );
+    showStatus("Pull Out Excel downloaded.");
+  }catch(error){
+    console.error("Pull Out Excel failed:",error);
+    showStatus(error?.message || "Unable to create Pull Out Excel.");
+  }finally{
+    if(button) button.disabled=false;
+  }
+}
+
+async function downloadPullOutPdf(){
+  const button = document.querySelector("[data-pullout-pdf='1']");
+  if(button) button.disabled=true;
+
+  try{
+    const branch = String(
+      document.getElementById("pullOutBranchFilter")?.value || "ALL"
+    ).trim().toUpperCase();
+    const rows = pullOutExportRows();
+
+    const r = await createAcebedoPdfReport({
+      title:"Pull Out Items Report",
+      description:"This report presents inventory items currently recorded as Pull Out for the selected branch.",
+      branch,
+      rows,
+      filename:
+        "Acebedo_Pull_Out_" +
+        branch + "_" +
+        formatFileDate() +
+        ".pdf"
+    });
+
+    aoPdfDownload(r.blob,r.filename);
+    showStatus("Pull Out PDF downloaded.");
+  }catch(error){
+    console.error("Pull Out PDF failed:",error);
+    showStatus(error?.message || "Unable to create Pull Out PDF.");
+  }finally{
+    if(button) button.disabled=false;
+  }
 }
 
 /* =========================================================

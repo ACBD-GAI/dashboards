@@ -6348,6 +6348,210 @@ tbody tr:hover{background:var(--ao-green-soft)!important;}
 .danger,.is-danger{color:var(--ao-red)!important;}
 button:hover{filter:brightness(1.05);}
 </style>
+
+<style id="acebedoScannerInspiredDashboardRedesign">
+/* =========================================================
+   ACEBEDO OPTICAL — SCANNER-INSPIRED PROFESSIONAL DESKTOP
+   VISUAL ONLY: no HTML/JS behavior changed.
+   Flat colors only. No gradients.
+   ========================================================= */
+:root{
+  --ao-navy:#173b63;
+  --ao-navy-2:#214d7d;
+  --ao-blue:#2f6fad;
+  --ao-blue-soft:#eaf3fb;
+  --ao-sky:#4d9bd6;
+  --ao-green:#2f9e64;
+  --ao-green-soft:#eaf7ef;
+  --ao-orange:#e08a2e;
+  --ao-orange-soft:#fff4e6;
+  --ao-red:#d9534f;
+  --ao-red-soft:#fff0ef;
+  --ao-purple:#765ac7;
+  --ao-purple-soft:#f2effc;
+  --ao-pink:#cc5a8e;
+  --ao-pink-soft:#fdf0f6;
+  --ao-yellow:#c89114;
+  --ao-yellow-soft:#fff8df;
+  --ao-text:#243447;
+  --ao-muted:#6b7c8f;
+  --ao-line:#dbe4ec;
+  --ao-line-2:#e9eef3;
+  --ao-bg:#f4f7fa;
+  --ao-white:#ffffff;
+  --ao-shadow:0 8px 24px rgba(27,58,91,.08);
+  --ao-shadow-lg:0 18px 44px rgba(27,58,91,.13);
+  --ao-radius:16px;
+}
+
+html,body{background:var(--ao-bg)!important;color:var(--ao-text)!important;}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;}
+body::before,body::after{display:none!important;background-image:none!important;}
+
+/* Top shell */
+.topbar{
+  background:var(--ao-white)!important;
+  border:1px solid var(--ao-line)!important;
+  box-shadow:0 5px 18px rgba(27,58,91,.07)!important;
+  border-radius:14px!important;
+}
+.brandTitle,.brandTitle strong{color:var(--ao-navy)!important;}
+.brandSub{color:var(--ao-muted)!important;}
+.brandLogo{background:var(--ao-blue-soft)!important;border:1px solid #cfe0ef!important;box-shadow:none!important;}
+.userArea{color:var(--ao-text)!important;}
+.userEmail{color:var(--ao-navy-2)!important;}
+
+/* Main workspace */
+.app{max-width:1780px!important;padding:24px 28px 40px!important;}
+.controls{
+  background:var(--ao-white)!important;
+  border:1px solid var(--ao-line)!important;
+  box-shadow:var(--ao-shadow)!important;
+  border-radius:14px!important;
+}
+.searchWrap{background:var(--ao-white)!important;border:1px solid var(--ao-line)!important;border-radius:12px!important;}
+.searchInput,.select,.soldFilterInput,.soldFilterSelect,input,select{
+  background:var(--ao-white)!important;
+  color:var(--ao-text)!important;
+  border:1px solid #cdd9e4!important;
+  box-shadow:none!important;
+}
+.searchInput:focus,.select:focus,.soldFilterInput:focus,.soldFilterSelect:focus,input:focus,select:focus{
+  border-color:var(--ao-sky)!important;
+  box-shadow:0 0 0 3px rgba(77,155,214,.14)!important;
+}
+
+/* Buttons — flat, clear role colors */
+button,.controlBtn,.primaryBtn,.actionBtn{background-image:none!important;}
+.controlBtn,.primaryBtn,.actionBtn{
+  border-radius:11px!important;
+  font-weight:800!important;
+  box-shadow:0 4px 12px rgba(27,58,91,.08)!important;
+}
+.controlBtn{background:var(--ao-navy)!important;color:#fff!important;border:1px solid var(--ao-navy)!important;}
+.controlBtn:hover{background:#214b78!important;transform:translateY(-1px)!important;}
+.controlBtn.primary,.primaryBtn{background:var(--ao-blue)!important;color:#fff!important;border-color:var(--ao-blue)!important;}
+.controlBtn.primary:hover,.primaryBtn:hover{background:#285f96!important;}
+.controlBtn.danger,.actionBtn.danger{background:var(--ao-red)!important;color:#fff!important;border-color:var(--ao-red)!important;}
+.controlBtn.danger:hover,.actionBtn.danger:hover{background:#c44743!important;}
+.actionBtn{background:var(--ao-green)!important;color:#fff!important;border-color:var(--ao-green)!important;}
+.addToSoldActionBtn{background:var(--ao-green)!important;border-color:var(--ao-green)!important;}
+.reportPdfBtn{background:var(--ao-white)!important;color:var(--ao-navy)!important;border:1px solid #c8d7e4!important;box-shadow:0 4px 12px rgba(27,58,91,.06)!important;}
+.reportPdfBtn.primary{background:var(--ao-blue)!important;color:#fff!important;border-color:var(--ao-blue)!important;}
+
+/* Statistics */
+.cards{gap:14px!important;}
+.statCard{
+  background:var(--ao-white)!important;
+  color:var(--ao-text)!important;
+  border:1px solid var(--ao-line)!important;
+  border-top:4px solid var(--ao-blue)!important;
+  border-radius:15px!important;
+  box-shadow:var(--ao-shadow)!important;
+}
+.statCard:nth-child(2){border-top-color:var(--ao-green)!important;}
+.statCard:nth-child(3){border-top-color:var(--ao-orange)!important;}
+.statCard:nth-child(4){border-top-color:var(--ao-purple)!important;}
+.statCard:nth-child(5){border-top-color:var(--ao-pink)!important;}
+.statCard:nth-child(6){border-top-color:var(--ao-yellow)!important;}
+.statIcon{background:#edf4fa!important;color:var(--ao-navy)!important;border:1px solid #d8e4ee!important;box-shadow:none!important;}
+.statLabel{color:var(--ao-muted)!important;}
+.statNumber{color:var(--ao-navy)!important;}
+.statHint{color:#8191a1!important;}
+.unconfirmedStatCard{background:var(--ao-yellow-soft)!important;border-color:#ead9a5!important;}
+.auditStatCard{background:var(--ao-green-soft)!important;border-color:#c9e8d6!important;}
+.reportedMissingStatCard{background:var(--ao-red-soft)!important;border-color:#efc9c7!important;}
+
+/* Table / results */
+.tableCard{background:var(--ao-white)!important;border:1px solid var(--ao-line)!important;border-radius:15px!important;box-shadow:var(--ao-shadow-lg)!important;overflow:hidden!important;}
+.tableHeader{background:var(--ao-navy)!important;color:#fff!important;border-bottom:0!important;}
+.tableTitle,.tableSub{color:#fff!important;}
+.tableSub{opacity:.78!important;}
+.tableActions{gap:7px!important;}
+.tableScroll{background:var(--ao-white)!important;}
+table{border-collapse:separate!important;border-spacing:0!important;}
+thead th{background:#244f7d!important;color:#fff!important;border-bottom:1px solid #173b63!important;font-weight:850!important;}
+tbody td{background:#fff!important;color:var(--ao-text)!important;border-bottom:1px solid #edf1f5!important;}
+tbody tr:nth-child(even) td{background:#f8fafc!important;}
+tbody tr:hover td{background:#eef6fb!important;}
+.branchTag{background:var(--ao-blue-soft)!important;color:var(--ao-blue)!important;border:1px solid #cfe0ef!important;}
+.tag{color:var(--ao-navy)!important;font-weight:900!important;}
+.pagination{background:var(--ao-white)!important;border-top:1px solid var(--ao-line)!important;}
+.pageInfo{color:var(--ao-muted)!important;}
+.pageBtn{background:#eef3f7!important;color:var(--ao-navy)!important;border:1px solid #d5e0e9!important;}
+.pageBtn.active{background:var(--ao-blue)!important;color:#fff!important;border-color:var(--ao-blue)!important;}
+
+/* Empty / status */
+.empty,.advancedSearchEmpty,.advancedSearchNoResults,.unconfirmedBranchEmpty,.allowedUsersEmpty{
+  background:#f8fafc!important;color:var(--ao-muted)!important;
+}
+.emptyIcon{color:var(--ao-blue)!important;}
+.emptyTitle{color:var(--ao-navy)!important;}
+.emptyText{color:var(--ao-muted)!important;}
+#globalStatus{background:var(--ao-navy)!important;color:#fff!important;border:1px solid #2a557f!important;}
+.queueCard{background:var(--ao-white)!important;border:1px solid var(--ao-line)!important;box-shadow:var(--ao-shadow-lg)!important;}
+.queueTitle{color:var(--ao-navy)!important;}.queueText,.queueBottom{color:var(--ao-muted)!important;}
+.progress{background:#e7edf2!important;}.progressBar{background:var(--ao-green)!important;box-shadow:none!important;}
+.loadingLine{background:var(--ao-sky)!important;box-shadow:none!important;}
+
+/* Modals */
+.modalBackdrop{background:rgba(20,41,63,.48)!important;backdrop-filter:blur(6px)!important;}
+.modalCard{background:var(--ao-white)!important;color:var(--ao-text)!important;border:1px solid var(--ao-line)!important;border-radius:18px!important;box-shadow:0 24px 65px rgba(15,42,68,.20)!important;}
+.modalTitle{color:var(--ao-navy)!important;}.modalSub{color:var(--ao-muted)!important;}
+.modalActions{background:#f8fafc!important;border-top:1px solid var(--ao-line)!important;}
+.allowedUsersHead{background:#f4f8fb!important;border-bottom:1px solid var(--ao-line)!important;}
+.allowedUsersTitle{color:var(--ao-navy)!important;}.allowedUsersSub{color:var(--ao-muted)!important;}
+
+/* Audit / reported missing */
+.auditBulkOption{background:#fff!important;border:1px solid var(--ao-line)!important;border-radius:13px!important;box-shadow:0 3px 10px rgba(27,58,91,.05)!important;}
+.auditBulkOption:hover{background:#f8fbfd!important;border-color:#bfd2e0!important;}
+.auditBulkOption.audited{border-left:5px solid var(--ao-green)!important;}
+.auditBulkOption.missing{border-left:5px solid var(--ao-red)!important;}
+.auditBulkOption.remaining{border-left:5px solid var(--ao-orange)!important;}
+.auditBulkOptionIcon{background:#eef4f8!important;color:var(--ao-navy)!important;}
+.reportedMissingHead{background:#f8fafc!important;border-bottom:1px solid var(--ao-line)!important;}
+.reportedMissingList{background:#f7f9fb!important;}
+.reportedMissingRow{background:#fff!important;border:1px solid var(--ao-line-2)!important;box-shadow:0 2px 8px rgba(27,58,91,.04)!important;}
+.reportedMissingStatus{background:#fff!important;color:var(--ao-muted)!important;border-top:1px solid var(--ao-line-2)!important;}
+.reportedMissingRestoreBtn{color:var(--ao-green)!important;background:var(--ao-green-soft)!important;border-color:#bfe2cc!important;}
+
+/* Advanced Search */
+.advancedSearchModal,.advancedSearchEmpty,.advancedSearchLoading,.advancedSearchNoResults{background:var(--ao-white)!important;}
+.advancedSearchBtn{background:var(--ao-purple)!important;color:#fff!important;border-color:var(--ao-purple)!important;}
+.advancedSearchLoading{color:var(--ao-blue)!important;}
+.advancedSearchNoResults{color:var(--ao-red)!important;}
+
+/* Unconfirmed */
+.unconfirmedBranchHead{background:#f5f8fb!important;border-bottom:1px solid var(--ao-line)!important;}
+.unconfirmedBranchTitle{color:var(--ao-navy)!important;}.unconfirmedBranchName,.unconfirmedSIName{color:var(--ao-text)!important;}
+.unconfirmedBranchCount{background:var(--ao-orange-soft)!important;color:var(--ao-orange)!important;border-color:#efd2a8!important;}
+.unconfirmedSICount{background:var(--ao-blue-soft)!important;color:var(--ao-blue)!important;border-color:#cfe0ef!important;}
+.unconfirmedBackBtn{background:#fff!important;color:var(--ao-navy)!important;border:1px solid #cdd9e4!important;}
+
+/* Chat — same professional language as scanner */
+.ao-chat-fab{background:var(--ao-navy)!important;color:#fff!important;border:0!important;box-shadow:0 8px 20px rgba(23,59,99,.20)!important;}
+.ao-chat-panel{background:#fff!important;border:1px solid var(--ao-line)!important;box-shadow:0 20px 55px rgba(23,59,99,.18)!important;border-radius:16px!important;}
+.ao-chat-head{background:var(--ao-navy)!important;color:#fff!important;}
+.ao-chat-branch,.ao-chat-recipient,.ao-chat-compose,.ao-chat-status{background:#fff!important;border-color:var(--ao-line)!important;}
+.ao-chat-select,.ao-chat-input,.ao-chat-attach,.ao-chat-emoji{background:#fff!important;color:var(--ao-text)!important;border:1px solid #cdd9e4!important;}
+.ao-chat-messages{background:#f4f7fa!important;}
+.ao-chat-bubble{background:#fff!important;color:var(--ao-text)!important;border:1px solid #e2e9ef!important;box-shadow:0 2px 7px rgba(23,59,99,.05)!important;}
+.ao-chat-row.mine .ao-chat-bubble{background:var(--ao-blue)!important;color:#fff!important;border-color:var(--ao-blue)!important;}
+.ao-chat-send{background:var(--ao-green)!important;color:#fff!important;}
+.ao-chat-attach:hover,.ao-chat-emoji:hover{background:#eef5fa!important;}
+.ao-chat-emoji-picker{background:#fff!important;border:1px solid var(--ao-line)!important;box-shadow:0 14px 30px rgba(23,59,99,.16)!important;}
+
+/* Login / branch screens */
+.loginCard,.branch-card{background:#fff!important;border:1px solid var(--ao-line)!important;box-shadow:0 18px 50px rgba(23,59,99,.12)!important;}
+.loginTitle,.branch-card h2{color:var(--ao-navy)!important;}
+.loginSub,.branch-card p{color:var(--ao-muted)!important;}
+.btn-blue{background:var(--ao-blue)!important;color:#fff!important;box-shadow:0 6px 16px rgba(47,111,173,.18)!important;}
+.btn-orange{background:var(--ao-orange)!important;color:#fff!important;box-shadow:0 6px 16px rgba(224,138,46,.16)!important;}
+
+/* Remove leftover decorative shine/gradient effects */
+button::after{display:none!important;}
+[style*="gradient"]{background-image:none!important;}
+</style>
 </head>
 
 <body>

@@ -17290,7 +17290,7 @@ async function loadPullOutPopup(){
   try{
     pullOutPopupRows = await fetchAllRowsForStats(
       "pull_out",
-      DB_COLUMNS.join(",")
+      "BR,NTAGN,LENSTYPE,DESCRIPTION"
     );
     renderPullOutPopup();
     loadPullOutCount();

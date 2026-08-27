@@ -17429,12 +17429,45 @@ function renderPullOutPopup(){
   });
 }
 
+function pullOutInlineConfirm(text, yesLabel = "Confirm"){
+  return new Promise(resolve=>{
+    const panel = document.createElement("div");
+    panel.className = "queueCard pullOutConfirmOverlay";
+    panel.innerHTML = `
+      <div class="pullOutConfirmBox" role="dialog" aria-modal="true">
+        <div class="queueHead">
+          <div class="queueTitle">${escapeHtml(text)}</div>
+          <button type="button" class="queueClose" data-no aria-label="Cancel">×</button>
+        </div>
+        <div class="queueText" style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" class="controlBtn" data-no>Cancel</button>
+          <button type="button" class="controlBtn primary" data-yes>${escapeHtml(yesLabel)}</button>
+        </div>
+      </div>
+    `;
+
+    // IMPORTANT: append directly to BODY so it is above the Pull Out modal's
+    // stacking context. It must never be trapped inside #queuePanel.
+    document.body.appendChild(panel);
+
+    const close = value => {
+      panel.remove();
+      resolve(value);
+    };
+
+    panel.querySelectorAll("[data-no]").forEach(btn=>{
+      btn.onclick = () => close(false);
+    });
+    panel.querySelector("[data-yes]").onclick = () => close(true);
+  });
+}
+
 async function restorePullOutToStocks(branch,tag,button){
   branch = String(branch || "").trim().toUpperCase();
   tag = String(tag || "").trim();
   if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
 
-  const confirmed = await inlineConfirm(
+  const confirmed = await pullOutInlineConfirm(
     "Add " + tag + " from " + branch + " back to Stocks and Audit as AUDITED?",
     "Confirm"
   );
@@ -17533,8 +17566,9 @@ async function deletePullOutItem(branch,tag,button){
   tag = String(tag || "").trim();
   if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
 
-  const confirmed = await inlineConfirm(
-    "Permanently delete Pull Out item " + tag + " from " + branch + "? It will NOT be restored to Stocks or Audit."
+  const confirmed = await pullOutInlineConfirm(
+    "Permanently delete Pull Out item " + tag + " from " + branch + "? It will NOT be restored to Stocks or Audit.",
+    "Delete"
   );
   if(!confirmed) return;
 

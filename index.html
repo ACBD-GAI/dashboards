@@ -3385,43 +3385,51 @@ button,
 
 /* =========================================================
    PULL OUT CONFIRMATION OVERLAY
-   Must always appear above the Pull Out result modal.
+   Rendered INSIDE the Pull Out modal so it is always above
+   the Pull Out result area and receives button clicks.
 ========================================================= */
+.pullOutModal{
+  position:relative !important;
+}
+
 .pullOutConfirmOverlay{
-  position:fixed !important;
+  position:absolute !important;
   inset:0 !important;
-  left:0 !important;
-  top:0 !important;
-  right:0 !important;
-  bottom:0 !important;
-  width:100vw !important;
-  height:100vh !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
   max-width:none !important;
+  max-height:none !important;
   transform:none !important;
   display:flex !important;
   align-items:center !important;
   justify-content:center !important;
   padding:20px !important;
   box-sizing:border-box !important;
-  background:rgba(9,22,42,.52) !important;
-  z-index:2147483647 !important;
+  border-radius:inherit !important;
+  background:rgba(9,22,42,.58) !important;
+  z-index:999999 !important;
   pointer-events:auto !important;
 }
 
-.pullOutConfirmOverlay .queueCard,
-#queuePanel .pullOutConfirmOverlay{
-  z-index:2147483647 !important;
-}
-
 .pullOutConfirmBox{
-  width:min(410px,calc(100vw - 40px));
+  position:relative !important;
+  z-index:1000000 !important;
+  width:min(410px,calc(100% - 40px));
   box-sizing:border-box;
-  padding:14px;
+  padding:16px;
   border:1px solid rgba(205,224,235,.95);
   border-radius:17px;
-  background:rgba(255,255,255,.97);
-  box-shadow:0 20px 55px rgba(15,23,42,.28),0 6px 18px rgba(15,23,42,.12);
+  background:rgba(255,255,255,.99);
+  box-shadow:0 20px 55px rgba(15,23,42,.32),0 6px 18px rgba(15,23,42,.14);
   backdrop-filter:blur(18px);
+  pointer-events:auto !important;
+}
+
+.pullOutConfirmBox button{
+  position:relative !important;
+  z-index:1000001 !important;
+  pointer-events:auto !important;
 }
 
 .pullOutConfirmOverlay .queueTitle{
@@ -17412,36 +17420,44 @@ function renderPullOutPopup(){
     `;
   }).join("");
 
-  /* Use one delegated click handler so the Pull Out action buttons
-     remain reliable after every re-render/filter/refresh. */
-  list.onclick = function(e){
-    const restoreBtn = e.target.closest("[data-pullout-restore]");
-    if(restoreBtn && list.contains(restoreBtn)){
+  /* Direct handlers: reliable after every Pull Out re-render. */
+  list.querySelectorAll("[data-pullout-restore]").forEach(btn=>{
+    btn.onclick = function(e){
       e.preventDefault();
       e.stopPropagation();
-      restorePullOutToStocks(
-        restoreBtn.dataset.branch,
-        restoreBtn.dataset.tag,
-        restoreBtn
+      void restorePullOutToStocks(
+        btn.dataset.branch,
+        btn.dataset.tag,
+        btn
       );
-      return;
-    }
+    };
+  });
 
-    const deleteBtn = e.target.closest("[data-pullout-delete]");
-    if(deleteBtn && list.contains(deleteBtn)){
+  list.querySelectorAll("[data-pullout-delete]").forEach(btn=>{
+    btn.onclick = function(e){
       e.preventDefault();
       e.stopPropagation();
-      deletePullOutItem(
-        deleteBtn.dataset.branch,
-        deleteBtn.dataset.tag,
-        deleteBtn
+      void deletePullOutItem(
+        btn.dataset.branch,
+        btn.dataset.tag,
+        btn
       );
-    }
-  };
+    };
+  });
 }
 
 function pullOutInlineConfirm(text, yesLabel = "Confirm"){
   return new Promise(resolve=>{
+    /* Put the confirmation INSIDE the active Pull Out modal card.
+       This guarantees it is visually in front of the Pull Out results. */
+    const host = document.querySelector("#pullOutModal .pullOutModal") ||
+                 document.getElementById("pullOutModal");
+
+    if(!host){
+      resolve(false);
+      return;
+    }
+
     const panel = document.createElement("div");
     panel.className = "queueCard pullOutConfirmOverlay";
     panel.innerHTML = `
@@ -17457,9 +17473,7 @@ function pullOutInlineConfirm(text, yesLabel = "Confirm"){
       </div>
     `;
 
-    // IMPORTANT: append directly to BODY so it is above the Pull Out modal's
-    // stacking context. It must never be trapped inside #queuePanel.
-    document.body.appendChild(panel);
+    host.appendChild(panel);
 
     const close = value => {
       panel.remove();
@@ -17467,9 +17481,21 @@ function pullOutInlineConfirm(text, yesLabel = "Confirm"){
     };
 
     panel.querySelectorAll("[data-no]").forEach(btn=>{
-      btn.onclick = () => close(false);
+      btn.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        close(false);
+      };
     });
-    panel.querySelector("[data-yes]").onclick = () => close(true);
+
+    const yes = panel.querySelector("[data-yes]");
+    if(yes){
+      yes.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        close(true);
+      };
+    }
   });
 }
 

@@ -5971,6 +5971,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   cursor:pointer;
   color:#64748b;
 }
+.ao-chat-image-download{display:inline-flex!important;align-items:center;justify-content:center;min-height:30px!important;margin-top:8px;padding:6px 10px!important;border:1px solid #c8d8eb!important;border-radius:9px!important;background:#f5f9ff!important;color:#245a9a!important;font-size:10px!important;font-weight:800!important;text-decoration:none!important;cursor:pointer!important;box-shadow:none!important}.ao-chat-image-download:hover{background:#eaf3ff!important;border-color:#9fc2e7!important;transform:none!important}.ao-chat-image-download::after{display:none!important}
 .ao-chat-message-image{
   display:block;
   width:min(290px,100%);
@@ -19656,6 +19657,59 @@ async function aoChatLoadUnread(){
    LOAD CONVERSATION
    ========================================================= */
 
+function aoChatDownloadFileName(branch,user,createdAt){
+  const safe = value => String(value || "unknown")
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g,"_")
+    .replace(/\s+/g,"_")
+    .replace(/_+/g,"_")
+    .slice(0,80) || "unknown";
+
+  const d = new Date(createdAt || Date.now());
+  const valid = Number.isFinite(d.getTime()) ? d : new Date();
+  const pad = n => String(n).padStart(2,"0");
+  const date = valid.getFullYear() + "-" +
+    pad(valid.getMonth()+1) + "-" +
+    pad(valid.getDate()) + "_" +
+    pad(valid.getHours()) + "-" +
+    pad(valid.getMinutes()) + "-" +
+    pad(valid.getSeconds());
+
+  return safe(branch) + "_" + safe(user) + "_" + date + ".jpg";
+}
+
+async function aoChatDownloadImage(url,fileName,button){
+  if(!url) return;
+  const original = button ? button.textContent : "";
+  try{
+    if(button){
+      button.disabled = true;
+      button.textContent = "Downloading...";
+    }
+
+    const res = await fetch(url,{cache:"no-store"});
+    if(!res.ok) throw new Error("Unable to download image.");
+
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = fileName || "chat-image.jpg";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(objectUrl),1500);
+  }catch(e){
+    console.error("Chat image download failed:",e);
+    showStatus(e?.message || "Unable to download chat image.");
+  }finally{
+    if(button){
+      button.disabled = false;
+      button.textContent = original || "↓ Download Image";
+    }
+  }
+}
+
 async function aoChatLoad(){
 
   if(
@@ -19938,16 +19992,29 @@ function aoChatRenderConversation(
 
           const imageHtml =
             imagePath
-              ? (
-                '<img class="ao-chat-message-image"' +
-                ' src="' +
-                aoChatEsc(aoChatPublicImageUrl(imagePath)) +
-                '"' +
-                ' alt="Chat image"' +
-                ' loading="lazy"' +
-                ' onclick="window.open(this.src,\'_blank\',\'noopener\')"' +
-                '>'
-              )
+              ? (()=>{
+                  const imageUrl = aoChatPublicImageUrl(imagePath);
+                  const downloadName = aoChatDownloadFileName(
+                    branch,
+                    recipient,
+                    r.created_at
+                  );
+                  const encodedUrl = encodeURIComponent(imageUrl);
+                  const encodedName = encodeURIComponent(downloadName);
+                  return (
+                    '<img class="ao-chat-message-image"' +
+                    ' src="' +
+                    aoChatEsc(imageUrl) +
+                    '"' +
+                    ' alt="Chat image"' +
+                    ' loading="lazy"' +
+                    ' onclick="window.open(this.src,\'_blank\',\'noopener\')"' +
+                    '>' +
+                    '<button type="button" class="ao-chat-image-download"' +
+                    ' onclick="aoChatDownloadImage(decodeURIComponent(\'' + encodedUrl + '\'),decodeURIComponent(\'' + encodedName + '\'),this);event.stopPropagation();"' +
+                    '>↓ Download Image</button>'
+                  );
+                })()
               : "";
 
           const textHtml =

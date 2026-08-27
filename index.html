@@ -10930,14 +10930,6 @@ async function refreshDashboard(){
 
     }
 
-    /* Keep Stocks and Audit results displayed by ascending Tag Number. */
-    if(report === "stocks" || report === "audit"){
-      combined.sort((a,b)=>
-        String(a.branch||"").localeCompare(String(b.branch||""),undefined,{sensitivity:"base"}) ||
-        String(a.tag||"").localeCompare(String(b.tag||""),undefined,{numeric:true,sensitivity:"base"})
-      );
-    }
-
     currentRows =
       combined;
 
@@ -14500,10 +14492,6 @@ async function importDirect(
   });
   mappedRows = Array.from(unique.values());
 
-  /* Keep imported Stocks/Audit records in ascending NTAGN order.
-     This does not change any import rules; it only normalizes insert order. */
-  mappedRows.sort((a,b)=>String(a["NTAGN"]||"").localeCompare(String(b["NTAGN"]||""),undefined,{numeric:true,sensitivity:"base"}));
-
   /* =======================================================
      SKIP ITEMS ALREADY IN REPORTED MISSING
      Match by BR + NTAGN.
@@ -16999,6 +16987,19 @@ async function startExport(){
       });
 
       totalRemaining += remaining.length;
+
+      /* Keep each exported branch sheet in numeric NTAGN ascending order.
+         This changes only the exported row order; import/data logic is untouched. */
+      remaining.sort((a,b)=>{
+        const aTag=String(a?.NTAGN??"").trim();
+        const bTag=String(b?.NTAGN??"").trim();
+        const aNum=/^\d+(?:\.\d+)?$/.test(aTag)?Number(aTag):NaN;
+        const bNum=/^\d+(?:\.\d+)?$/.test(bTag)?Number(bTag):NaN;
+        if(Number.isFinite(aNum)&&Number.isFinite(bNum)) return aNum-bNum;
+        if(Number.isFinite(aNum)) return -1;
+        if(Number.isFinite(bNum)) return 1;
+        return aTag.localeCompare(bTag,undefined,{numeric:true,sensitivity:"base"});
+      });
 
       const exportHeaders = DB_COLUMNS.filter(col=>
         remaining.some(row=>Object.prototype.hasOwnProperty.call(row,col))

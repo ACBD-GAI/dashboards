@@ -17412,21 +17412,32 @@ function renderPullOutPopup(){
     `;
   }).join("");
 
-  list.querySelectorAll("[data-pullout-restore]").forEach(btn=>{
-    btn.addEventListener("click",()=>restorePullOutToStocks(
-      btn.dataset.branch,
-      btn.dataset.tag,
-      btn
-    ));
-  });
+  /* Use one delegated click handler so the Pull Out action buttons
+     remain reliable after every re-render/filter/refresh. */
+  list.onclick = function(e){
+    const restoreBtn = e.target.closest("[data-pullout-restore]");
+    if(restoreBtn && list.contains(restoreBtn)){
+      e.preventDefault();
+      e.stopPropagation();
+      restorePullOutToStocks(
+        restoreBtn.dataset.branch,
+        restoreBtn.dataset.tag,
+        restoreBtn
+      );
+      return;
+    }
 
-  list.querySelectorAll("[data-pullout-delete]").forEach(btn=>{
-    btn.addEventListener("click",()=>deletePullOutItem(
-      btn.dataset.branch,
-      btn.dataset.tag,
-      btn
-    ));
-  });
+    const deleteBtn = e.target.closest("[data-pullout-delete]");
+    if(deleteBtn && list.contains(deleteBtn)){
+      e.preventDefault();
+      e.stopPropagation();
+      deletePullOutItem(
+        deleteBtn.dataset.branch,
+        deleteBtn.dataset.tag,
+        deleteBtn
+      );
+    }
+  };
 }
 
 function pullOutInlineConfirm(text, yesLabel = "Confirm"){
@@ -17626,13 +17637,32 @@ async function downloadPullOutExcel(){
     const branch = String(
       document.getElementById("pullOutBranchFilter")?.value || "ALL"
     ).trim().toUpperCase();
-    const rows = pullOutExportRows();
-    const headers = ["LENS TYPE","DESCRIPTION","TAG NUMBER"];
-    const data = rows.map(row=>[
-      row.LENSTYPE ?? "",
-      row.DESCRIPTION ?? "",
-      row.NTAGN ?? ""
-    ]);
+    /* Excel must contain the complete A-V inventory data, while the
+       on-screen Pull Out result intentionally shows only 4 columns. */
+    const exportRows = await fetchAllRowsForStats(
+      "pull_out",
+      DB_COLUMNS.slice(0,22).join(",")
+    );
+
+    const branchFiltered = String(
+      document.getElementById("pullOutBranchFilter")?.value || "ALL"
+    ).trim().toUpperCase();
+    const searchFiltered = String(
+      document.getElementById("pullOutSearch")?.value || ""
+    ).trim().toLowerCase();
+
+    const rows = (Array.isArray(exportRows) ? exportRows : []).filter(row=>{
+      const rb = String(row?.BR || "").trim().toUpperCase();
+      const tag = String(row?.NTAGN || "").trim().toLowerCase();
+      if(branchFiltered !== "ALL" && rb !== branchFiltered) return false;
+      if(searchFiltered && !tag.includes(searchFiltered)) return false;
+      return true;
+    });
+
+    const headers = DB_COLUMNS.slice(0,22);
+    const data = rows.map(row=>
+      DB_COLUMNS.slice(0,22).map(col=>row?.[col] ?? "")
+    );
     const meta = [
       ["Branch",branch === "ALL" ? "ALL BRANCHES" : aoPdfBranchLabel(branch)],
       ["Records",rows.length],
@@ -17646,8 +17676,15 @@ async function downloadPullOutExcel(){
       headers,
       data,
       {
-        widths:[18,55,28],
-        centerCols:[0,2]
+        widths:DB_COLUMNS.slice(0,22).map((col,i)=>{
+          if(col === "DESCRIPTION") return 55;
+          if(col === "NTAGN") return 28;
+          if(col === "LENSTYPE") return 18;
+          return 18;
+        }),
+        centerCols:DB_COLUMNS.slice(0,22).map((col,i)=>
+          (col === "BR" || col === "NTAGN" || col === "LENSTYPE") ? i : -1
+        ).filter(i=>i>=0)
       }
     );
     XLSX.utils.book_append_sheet(wb,ws,"PULL OUT");

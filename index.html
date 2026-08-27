@@ -17448,16 +17448,8 @@ function renderPullOutPopup(){
 
 function pullOutInlineConfirm(text, yesLabel = "Confirm"){
   return new Promise(resolve=>{
-    /* Put the confirmation INSIDE the active Pull Out modal card.
-       This guarantees it is visually in front of the Pull Out results. */
-    const host = document.querySelector("#pullOutModal .pullOutModal") ||
-                 document.getElementById("pullOutModal");
-
-    if(!host){
-      resolve(false);
-      return;
-    }
-
+    /* Render at document.body level so the confirmation is always
+       centered in the viewport and above the entire Pull Out modal. */
     const panel = document.createElement("div");
     panel.className = "queueCard pullOutConfirmOverlay";
     panel.innerHTML = `
@@ -17473,7 +17465,7 @@ function pullOutInlineConfirm(text, yesLabel = "Confirm"){
       </div>
     `;
 
-    host.appendChild(panel);
+    document.body.appendChild(panel);
 
     const close = value => {
       panel.remove();

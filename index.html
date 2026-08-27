@@ -10930,6 +10930,14 @@ async function refreshDashboard(){
 
     }
 
+    /* Keep Stocks and Audit results displayed by ascending Tag Number. */
+    if(report === "stocks" || report === "audit"){
+      combined.sort((a,b)=>
+        String(a.branch||"").localeCompare(String(b.branch||""),undefined,{sensitivity:"base"}) ||
+        String(a.tag||"").localeCompare(String(b.tag||""),undefined,{numeric:true,sensitivity:"base"})
+      );
+    }
+
     currentRows =
       combined;
 
@@ -14491,6 +14499,10 @@ async function importDirect(
     if(tag) unique.set(tag, row);
   });
   mappedRows = Array.from(unique.values());
+
+  /* Keep imported Stocks/Audit records in ascending NTAGN order.
+     This does not change any import rules; it only normalizes insert order. */
+  mappedRows.sort((a,b)=>String(a["NTAGN"]||"").localeCompare(String(b["NTAGN"]||""),undefined,{numeric:true,sensitivity:"base"}));
 
   /* =======================================================
      SKIP ITEMS ALREADY IN REPORTED MISSING

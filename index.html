@@ -10930,6 +10930,24 @@ async function refreshDashboard(){
 
     }
 
+    /* Keep Dashboard result order: BRANCH, then numeric NTAGN ascending.
+       This does not change the fetched data or any filtering logic. */
+    combined.sort((a,b)=>{
+      const ab=String(a?.branch ?? "").trim().toUpperCase();
+      const bb=String(b?.branch ?? "").trim().toUpperCase();
+      if(ab!==bb) return ab.localeCompare(bb);
+
+      const at=String(a?.tag ?? a?.NTAGN ?? "").trim();
+      const bt=String(b?.tag ?? b?.NTAGN ?? "").trim();
+      const an=/^\d+(?:\.\d+)?$/.test(at)?Number(at):NaN;
+      const bn=/^\d+(?:\.\d+)?$/.test(bt)?Number(bt):NaN;
+
+      if(Number.isFinite(an) && Number.isFinite(bn)) return an-bn;
+      if(Number.isFinite(an)) return -1;
+      if(Number.isFinite(bn)) return 1;
+      return at.localeCompare(bt,undefined,{numeric:true,sensitivity:"base"});
+    });
+
     currentRows =
       combined;
 

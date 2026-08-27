@@ -6248,6 +6248,75 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   z-index:2147483002 !important;
 }
 </style>
+
+<style id="pullOutConfirmAuthoritativeFinal">
+/* PULL OUT ONLY — confirmation floats INSIDE and CENTER of the Pull Out modal. */
+#pullOutModal .pullOutConfirmOverlay{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  border-radius:inherit !important;
+  background:rgba(9,22,42,.62) !important;
+  z-index:2147483640 !important;
+  pointer-events:auto !important;
+  overflow:hidden !important;
+}
+#pullOutModal .pullOutConfirmBox{
+  display:block !important;
+  position:relative !important;
+  top:auto !important;
+  left:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+  width:min(460px,calc(100% - 48px)) !important;
+  max-width:460px !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:22px 24px 20px !important;
+  box-sizing:border-box !important;
+  border:1px solid #d7e4ee !important;
+  border-radius:18px !important;
+  background:#ffffff !important;
+  box-shadow:0 24px 70px rgba(15,23,42,.36),0 8px 24px rgba(15,23,42,.18) !important;
+  z-index:2147483641 !important;
+  pointer-events:auto !important;
+  color:#173247 !important;
+}
+#pullOutModal .pullOutConfirmBox .queueHead{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:14px !important;
+  margin:0 !important;
+}
+#pullOutModal .pullOutConfirmBox .queueTitle{
+  color:#173247 !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
+  font-weight:800 !important;
+  flex:1 !important;
+}
+#pullOutModal .pullOutConfirmBox .queueText{
+  display:flex !important;
+  justify-content:flex-end !important;
+  gap:9px !important;
+  margin-top:16px !important;
+}
+#pullOutModal .pullOutConfirmBox button{
+  position:relative !important;
+  z-index:2147483642 !important;
+  pointer-events:auto !important;
+}
+</style>
+
 </head>
 
 <body>
@@ -17490,61 +17559,50 @@ function renderPullOutPopup(){
 
 function pullOutInlineConfirm(text, yesLabel = "Confirm"){
   return new Promise(resolve=>{
-    /* Render at document.body level so the confirmation is always
-       centered in the viewport and above the entire Pull Out modal. */
     const panel = document.createElement("div");
-    panel.className = "queueCard pullOutConfirmOverlay";
+    panel.className = "pullOutConfirmOverlay";
     panel.innerHTML = `
       <div class="pullOutConfirmBox" role="dialog" aria-modal="true">
         <div class="queueHead">
           <div class="queueTitle">${escapeHtml(text)}</div>
           <button type="button" class="queueClose" data-no aria-label="Cancel">×</button>
         </div>
-        <div class="queueText" style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end;">
+        <div class="queueText">
           <button type="button" class="controlBtn" data-no>Cancel</button>
           <button type="button" class="controlBtn primary" data-yes>${escapeHtml(yesLabel)}</button>
         </div>
       </div>
     `;
 
-    /* IMPORTANT: keep the Pull Out confirmation INSIDE the Pull Out modal.
-       It overlays the Pull Out result area and is centered within that section. */
-    const pullOutHost =
-      document.querySelector("#pullOutModal .modalCard.pullOutModal") ||
-      document.querySelector("#pullOutModal .pullOutModal") ||
-      document.getElementById("pullOutModal");
-
-    if(pullOutHost){
-      if(getComputedStyle(pullOutHost).position === "static"){
-        pullOutHost.style.position = "relative";
-      }
-      pullOutHost.appendChild(panel);
-    }else{
-      /* Fallback only if the Pull Out modal no longer exists. */
-      document.body.appendChild(panel);
+    /* ONLY the Pull Out modal is used as the host. */
+    const pullOutHost = document.querySelector("#pullOutModal .modalCard.pullOutModal");
+    if(!pullOutHost){
+      resolve(false);
+      return;
     }
 
-    const close = value => {
+    const hostStyle = getComputedStyle(pullOutHost);
+    if(hostStyle.position === "static") pullOutHost.style.position = "relative";
+    pullOutHost.appendChild(panel);
+
+    const close = value=>{
       panel.remove();
       resolve(value);
     };
 
     panel.querySelectorAll("[data-no]").forEach(btn=>{
-      btn.onclick = function(e){
+      btn.onclick=e=>{
         e.preventDefault();
         e.stopPropagation();
         close(false);
       };
     });
 
-    const yes = panel.querySelector("[data-yes]");
-    if(yes){
-      yes.onclick = function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        close(true);
-      };
-    }
+    panel.querySelector("[data-yes]")?.addEventListener("click",e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      close(true);
+    });
   });
 }
 

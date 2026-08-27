@@ -22134,83 +22134,6 @@ async function getAdvancedAvailableRows(branch,lensCode,lensType,description,ful
   return {rows:all.slice(0,max),capped:all.length>=max};
 }
 
-async function getAdvancedFastCandidates(branch,lensCode,lensType,description){
-  const params=new URLSearchParams();
-  params.set("select","BR,LENSTYPE,LENSCODE,DESCRIPTION,DELIVERYDATE,NTAGN");
-  params.set("BR","eq."+encodeURIComponent(String(branch||"").trim().toUpperCase()));
-  params.set("order","LENSCODE.asc.nullslast,NTAGN.asc.nullslast");
-
-  if(lensCode){
-    params.set("LENSCODE","eq."+lensCode);
-  }else if(lensType){
-    const ranges=advancedSearchLensTypeRange(lensType)||[];
-    const values=[];
-    ranges.forEach(range=>{
-      const min=Math.ceil(Number(range.min));
-      const max=Math.floor(Number(range.max));
-      if(!Number.isFinite(min)||!Number.isFinite(max)||max<min)return;
-      for(let n=min;n<=max;n++)values.push(String(n));
-    });
-    if(values.length){
-      params.set("LENSCODE","in.("+values.join(",")+")");
-    }else{
-      return {rows:[],capped:false};
-    }
-  }else{
-    // Keep the existing Advanced Search rule: numeric LENSCODE only.
-    // PostgREST regex filtering keeps non-numeric values out of the browser.
-    params.set("LENSCODE","match.^[0-9]+(?:\\.[0-9]+)?$");
-  }
-
-  if(description){
-    params.set("DESCRIPTION","eq."+description);
-  }
-
-  // A deliberately small candidate window keeps the Advanced Search responsive.
-  // The result is marked capped when this window is filled, so the UI shows "+".
-  const candidateLimit=120;
-  params.set("limit",String(candidateLimit));
-
-  const rows=await supabaseRequest(
-    advancedSearchReportTable(branch)+"?"+params.toString()
-  );
-  const batch=Array.isArray(rows)?rows:[];
-
-  // Only check Sold for the candidate tags instead of downloading every Sold tag
-  // in the branch. This preserves the existing Remaining Stock rule while greatly
-  // reducing the amount of data transferred.
-  const tags=batch
-    .map(row=>String(row?.NTAGN??"").trim())
-    .filter(Boolean);
-
-  let soldTags=new Set();
-  if(tags.length){
-    const soldParams=new URLSearchParams();
-    soldParams.set("select","NTAGN");
-    soldParams.set("BR","eq."+encodeURIComponent(String(branch||"").trim().toUpperCase()));
-    soldParams.set("NTAGN","in.("+tags.map(encodeURIComponent).join(",")+")");
-    soldParams.set("limit",String(tags.length));
-
-    const soldRows=await supabaseRequest(
-      branchTable(branch,"sold")+"?"+soldParams.toString()
-    );
-    (Array.isArray(soldRows)?soldRows:[]).forEach(row=>{
-      const tag=String(row?.NTAGN??"").trim();
-      if(tag)soldTags.add(tag);
-    });
-  }
-
-  const remaining=batch.filter(row=>{
-    const tag=String(row?.NTAGN??"").trim();
-    return !tag || !soldTags.has(tag);
-  });
-
-  return {
-    rows:remaining,
-    capped:batch.length>=candidateLimit
-  };
-}
-
 async function runAdvancedInventorySearch(){
   if(!sessionId){advancedSearchSetStatus("Session expired. Please login again.");return;}
   const lensCode=advancedSearchClean(document.getElementById("advancedSearchLensCode")?.value||"");
@@ -22218,6 +22141,8 @@ async function runAdvancedInventorySearch(){
   const description=advancedSearchClean(document.getElementById("advancedSearchDescription")?.value||"");
   const showAllLensTypes = lensType === "";
 
+  // ALL LENS TYPES is a real filter, not an empty/invalid search.
+  // It means: return every remaining stock whose LENSCODE is numeric.
   if(lensCode&&!/^\d+(?:\.\d+)?$/.test(lensCode)){
     advancedSearchSetStatus("Lens Code must contain numbers only, with an optional decimal point.");
     return;
@@ -22238,32 +22163,45 @@ async function runAdvancedInventorySearch(){
     const branches=branch==="ALL"?BRANCHES:[branch];
 
     const branchResults=await Promise.all(branches.map(async b=>{
-      try{
-        return await getAdvancedFastCandidates(b,lensCode,lensType,description);
-      }catch(error){
-        // Safe fallback: preserve the existing Advanced Search logic if the
-        // optimized PostgREST filter is rejected by the current schema/API.
-        console.warn("Advanced fast query fallback for "+b+":",error);
-        const [stock,sold]=await Promise.all([
-          getAdvancedAvailableRows(b,lensCode,lensType,description,true),
-          getSoldTags(b)
-        ]);
-        const fallbackRows=stock.rows.filter(row=>{
-          const tag=String(row?.NTAGN??"").trim();
-          if(tag&&sold.has(tag))return false;
-          const rawCode=String(row?.LENSCODE??"").trim();
-          if(!/^\d+(?:\.\d+)?$/.test(rawCode))return false;
-          const code=Number(rawCode);
-          if(!Number.isFinite(code))return false;
-          if(!showAllLensTypes){
-            const ranges=advancedSearchLensTypeRange(lensType);
-            if(!Array.isArray(ranges)||!ranges.length)return false;
-            if(!ranges.some(range=>code>=Number(range.min)&&code<=Number(range.max)))return false;
-          }
-          return true;
-        });
-        return {rows:fallbackRows.slice(0,120),capped:stock.capped||fallbackRows.length>120};
-      }
+      // Fetch enough rows to evaluate the numeric-LENSCODE rule locally.
+      // We deliberately do NOT ask Supabase to interpret LENSCODE as numeric because
+      // the existing stocks column can contain values such as W, blank, or other text.
+      const [stock,sold]=await Promise.all([
+        getAdvancedAvailableRows(b,lensCode,lensType,description,true),
+        getSoldTags(b)
+      ]);
+
+      const rows=stock.rows.filter(row=>{
+        const tag=String(row?.NTAGN??"").trim();
+        if(tag && sold.has(tag)) return false;
+
+        // NON-NEGOTIABLE: Advanced Remaining Lens Search only returns numeric LENSCODE.
+        // Therefore W, ABC, blanks, ORD-100, etc. are always excluded.
+        const rawCode=String(row?.LENSCODE??"").trim();
+        if(!/^\d+(?:\.\d+)?$/.test(rawCode)) return false;
+        const code=Number(rawCode);
+        if(!Number.isFinite(code)) return false;
+
+        // The LENSCODE RANGE is always enforced when a range is selected,
+        // even when an exact Lens Code is also entered. The two filters are ANDed.
+        // Example: ORD + 5001 = 0 results; PHOTOGRAY + 5001 = matching results.
+        if(!showAllLensTypes){
+          const ranges=advancedSearchLensTypeRange(lensType);
+          if(!Array.isArray(ranges) || !ranges.length) return false;
+
+          // A LENSCODE is valid when it falls inside ANY configured range.
+          const matchesRange=ranges.some(range=>
+            code >= Number(range.min) &&
+            code <= Number(range.max)
+          );
+
+          if(!matchesRange) return false;
+        }
+
+        return true;
+      }).map(row=>({...row,__BRANCH:String(row?.BR||b||"").trim().toUpperCase()}));
+
+      return {rows,capped:stock.capped};
     }));
 
     if(gen!==advancedSearchGeneration)return;
@@ -22271,8 +22209,8 @@ async function runAdvancedInventorySearch(){
     const combined=[];
     let capped=false;
     branchResults.forEach(r=>{
-      if(r?.capped)capped=true;
-      if(Array.isArray(r?.rows))combined.push(...r.rows.map(row=>({...row,__BRANCH:String(row?.BR||"").trim().toUpperCase()})));
+      if(r.capped)capped=true;
+      combined.push(...r.rows);
     });
 
     combined.sort((a,b)=>
@@ -22282,10 +22220,10 @@ async function runAdvancedInventorySearch(){
     );
 
     const rows=combined.slice(0,ADVANCED_SEARCH_MAX_ROWS);
-    const finalCapped=capped||combined.length>ADVANCED_SEARCH_MAX_ROWS;
-
-    if(!description)advancedSearchPopulateDescriptions(rows);
-    if(count)count.textContent=String(rows.length)+(finalCapped?"+":"");
+    if(!description){
+      advancedSearchPopulateDescriptions(rows);
+    }
+    if(count)count.textContent=String(rows.length)+(capped?"+":"");
 
     if(!rows.length){
       if(results)results.innerHTML=`<div class="advancedSearchNoResults"><div style="font-size:24px;margin-bottom:8px;">⌕</div>No matching remaining lens stock found.</div>`;
@@ -22298,7 +22236,7 @@ async function runAdvancedInventorySearch(){
       return `<tr><td><span class="branchTag">${escapeHtml(row.__BRANCH||"")}</span></td><td>${escapeHtml(row.LENSTYPE||"")||"—"}</td><td><span class="advancedLensCode">${escapeHtml(row.LENSCODE||"")||"—"}</span></td><td>${escapeHtml(row.DESCRIPTION||"")||"—"}</td><td>${escapeHtml(d)}</td></tr>`;
     }).join("")}</tbody></table>`;
 
-    advancedSearchSetStatus(finalCapped
+    advancedSearchSetStatus(capped
       ? "Search completed. More results may match."
       : `${rows.length}${rows.length===1?" result":" results"} found.`);
 
@@ -22312,7 +22250,6 @@ async function runAdvancedInventorySearch(){
     if(gen===advancedSearchGeneration&&button)button.disabled=false;
   }
 }
-
 async function downloadAdvancedInventoryExcel(){
   if(!sessionId){advancedSearchSetStatus("Session expired. Please login again.");return;}
   const branch=advancedSearchGetBranch(),button=document.getElementById("advancedSearchExcelBtn");if(button)button.disabled=true;advancedSearchSetStatus("Preparing complete remaining lens stock Excel...");

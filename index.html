@@ -10905,175 +10905,6 @@ async function deleteSelectedReport(
 
 }
 
-
-/* =========================================================
-   FAST SERVER-SIDE PAGINATION — AVAILABLE STOCKS ONLY
-   Additive performance layer. Existing Sold/Audit result
-   loading remains unchanged.
-========================================================= */
-let serverPageMode = false;
-let serverPageTotal = 0;
-let serverPageCountsCache = new Map();
-let serverPageRequestToken = 0;
-
-function serverPageCacheKey(branch, search){
-  return String(branch || "").trim().toUpperCase() + "|" + cleanSearch(search);
-}
-
-async function fetchStockPageCount(branch, search=""){
-  const key = serverPageCacheKey(branch, search);
-  if(serverPageCountsCache.has(key)) return serverPageCountsCache.get(key);
-
-  const table = tableName(branch, "stocks");
-  const params = buildSearchParams(search);
-  params.set("limit", "1");
-  params.set("offset", "0");
-
-  try{
-    const res = await fetch(
-      table === table ? SUPABASE_URL + "/rest/v1/" + table + "?" + params.toString() : "",
-      {
-        method:"GET",
-        headers:Object.assign({}, supabaseHeaders(), {Prefer:"count=exact"}),
-        cache:"no-store"
-      }
-    );
-    const text = await res.text();
-    if(!res.ok){
-      let data={};
-      try{ data=text ? JSON.parse(text) : {}; }catch(e){}
-      const msg=data?.message || data?.error || data?.details || text;
-      throw new Error("Supabase HTTP " + res.status + (msg ? ": " + msg : ""));
-    }
-
-    const contentRange = res.headers.get("content-range") || "";
-    const match = contentRange.match(/\/(\d+)$/);
-    const count = match ? Number(match[1]) : (text ? JSON.parse(text).length : 0);
-
-    serverPageCountsCache.set(key, Number.isFinite(count) ? count : 0);
-    return Number.isFinite(count) ? count : 0;
-  }catch(error){
-    console.error("Fast stock count failed for " + branch + ":", error);
-    throw error;
-  }
-}
-
-async function fetchStocksPageServer(branch, search, offset, limit){
-  const table = tableName(branch, "stocks");
-  const params = buildSearchParams(search);
-  params.set("limit", String(limit));
-  params.set("offset", String(Math.max(0, offset)));
-
-  return supabaseRequest(
-    table + "?" + params.toString(),
-    {method:"GET"}
-  );
-}
-
-async function getServerStockPagePlan(branch, search, page){
-  const sortedBranches = BRANCHES.slice().sort((a,b)=>a.localeCompare(b));
-  const globalStart = (page - 1) * ROWS_PER_PAGE;
-
-  if(branch !== "ALL"){
-    const total = await fetchStockPageCount(branch, search);
-    return {
-      total,
-      requests:[{
-        branch,
-        offset:globalStart,
-        limit:ROWS_PER_PAGE
-      }]
-    };
-  }
-
-  const counts = await Promise.all(
-    sortedBranches.map(async b=>({branch:b,count:await fetchStockPageCount(b,search)}))
-  );
-
-  const total = counts.reduce((sum,item)=>sum + item.count, 0);
-  const requests=[];
-  let cursor=0;
-  let need=ROWS_PER_PAGE;
-
-  for(const item of counts){
-    if(need <= 0) break;
-    const start=cursor;
-    const end=cursor + item.count;
-    cursor=end;
-
-    if(globalStart >= end) continue;
-    if(globalStart + ROWS_PER_PAGE <= start) break;
-
-    const localOffset=Math.max(0, globalStart - start);
-    const take=Math.min(need, item.count - localOffset);
-    if(take > 0){
-      requests.push({branch:item.branch,offset:localOffset,limit:take});
-      need -= take;
-    }
-  }
-
-  return {total,requests};
-}
-
-async function refreshDashboardServerPagedStocks(){
-  const token = ++serverPageRequestToken;
-  const branch = document.getElementById("branch")?.value || "ALL";
-  const search = cleanSearch(document.getElementById("search")?.value || "");
-  const page = currentPage;
-
-  serverPageMode = true;
-  setLoading(true);
-
-  try{
-    const plan = await getServerStockPagePlan(branch, search, page);
-    if(token !== serverPageRequestToken) return;
-
-    const chunks = await Promise.all(
-      plan.requests.map(req=>fetchStocksPageServer(req.branch, search, req.offset, req.limit))
-    );
-
-    if(token !== serverPageRequestToken) return;
-
-    const combined=[];
-    plan.requests.forEach((req,index)=>{
-      const rows=Array.isArray(chunks[index]) ? chunks[index] : [];
-      rows.forEach(row=>combined.push(mapRow(row,req.branch)));
-    });
-
-    currentRows=combined;
-    serverPageTotal=plan.total;
-    totalRows=plan.total;
-
-    renderTable(combined);
-
-    totalRows=serverPageTotal;
-    const start=(currentPage-1) * ROWS_PER_PAGE;
-    const shownStart = combined.length ? start + 1 : 0;
-    const shownEnd = combined.length ? start + combined.length : 0;
-    const pageInfo=document.getElementById("pageInfo");
-    if(pageInfo){
-      pageInfo.textContent = combined.length
-        ? "Showing " + formatNumber(shownStart) + "–" + formatNumber(shownEnd) + " of " + formatNumber(totalRows)
-        : (totalRows ? "No records on this page" : "No records found");
-    }
-    const showingTotal=document.getElementById("showingTotal");
-    if(showingTotal) showingTotal.textContent=formatNumber(totalRows);
-    const showingMini=document.getElementById("showingTotalMini");
-    if(showingMini) showingMini.textContent=formatNumber(totalRows);
-    updatePagination();
-
-    updateStatsDirect(branch,token).catch(error=>console.error("Statistics error:",error));
-
-  }catch(error){
-    if(token === serverPageRequestToken){
-      console.error("Fast Dashboard stock load failed:",error);
-      renderError(error);
-    }
-  }finally{
-    if(token === serverPageRequestToken) setLoading(false);
-  }
-}
-
 /* =========================================================
    RUN SEARCH
 ========================================================= */
@@ -11089,13 +10920,6 @@ function runSearch(){
 
   currentPage = 1;
 
-  if(document.getElementById("sheet")?.value === "stocks") {
-    serverPageCountsCache.clear();
-    refreshDashboardServerPagedStocks();
-    return;
-  }
-
-  serverPageMode = false;
   refreshDashboard();
 
 }
@@ -11123,10 +10947,6 @@ function searchKey(event){
 ========================================================= */
 
 async function refreshDashboard(){
-
-  if(document.getElementById("sheet")?.value === "stocks" && serverPageMode !== false){
-    return refreshDashboardServerPagedStocks();
-  }
 
   if(!sessionId){
 
@@ -11455,122 +11275,390 @@ async function refreshDashboard(){
    STATISTICS
 ========================================================= */
 
-async function fastExactCount(table, extraParams=""){
-  const query = extraParams ? String(extraParams).replace(/^\?/,"") : "";
-  const url = SUPABASE_URL + "/rest/v1/" + table + (query ? "?" + query : "?limit=0");
-  const response = await fetch(url, {
-    method:"HEAD",
-    headers:{
-      "apikey":SUPABASE_KEY,
-      "Authorization":"Bearer " + SUPABASE_KEY,
-      "Prefer":"count=exact",
-      "Accept":"application/json"
-    },
-    cache:"no-store"
-  });
-  if(!response.ok){
-    throw new Error("Supabase HTTP " + response.status);
-  }
-  const range = response.headers.get("content-range") || "";
-  const match = range.match(/\/(\d+)$/);
-  return match ? Number(match[1]) : 0;
-}
-
 async function updateStatsDirect(
   branch,
   generation
 ){
-  /* =======================================================
-     FAST COUNTERS ONLY
-     Uses HEAD + count=exact. This does not download rows.
-     Existing row/result functions remain unchanged.
-  ======================================================= */
-  const branches = branch === "ALL" ? BRANCHES : [branch];
+
+  const branches =
+    branch === "ALL"
+      ? BRANCHES
+      : [branch];
+
+  let available = 0;
+  let sold = 0;
+  let soldAmount = 0;
+  let unconfirmed = 0;
+  let audit = 0;
+  let reportedMissing = 0;
+  let pullOut = 0;
 
   try{
-    const generalCounts = await Promise.all([
-      fastExactCount("reported_missing", branch === "ALL" ? "select=BR,NTAGN" : "select=BR,NTAGN&BR=eq." + encodeURIComponent(branch)),
-      fastExactCount("pull_out", branch === "ALL" ? "select=BR,NTAGN" : "select=BR,NTAGN&BR=eq." + encodeURIComponent(branch))
-    ]);
+    const reportedRows =
+      await fetchAllRowsForStats("reported_missing","BR,NTAGN");
+    reportedMissing =
+      branch === "ALL"
+        ? reportedRows.length
+        : reportedRows.filter(row =>
+            String(row?.BR ?? "").trim().toUpperCase() ===
+            String(branch || "").trim().toUpperCase()
+          ).length;
+  }catch(error){
+    console.warn("Reported missing statistics unavailable:",error);
+  }
 
-    let reportedMissing = generalCounts[0];
-    let pullOut = generalCounts[1];
+  try{
+    const pullOutRows =
+      await fetchAllRowsForStats("pull_out","BR,NTAGN");
+    pullOut =
+      branch === "ALL"
+        ? pullOutRows.length
+        : pullOutRows.filter(row =>
+            String(row?.BR ?? "").trim().toUpperCase() ===
+            String(branch || "").trim().toUpperCase()
+          ).length;
+  }catch(error){
+    console.warn("Pull out statistics unavailable:",error);
+  }
 
-    const perBranch = await Promise.all(branches.map(async b=>{
-      const stockTable = tableName(b,"stocks");
-      const soldTable = tableName(b,"sold");
-      const auditTable = tableName(b,"audit");
+  await Promise.all(
+    branches.map(
+      async b=>{
 
-      const [stocks,soldMarked,audit] = await Promise.all([
-        fastExactCount(stockTable, "select=NTAGN"),
-        fastExactCount(soldTable, "select=NTAGN&STATUS=eq.MARKED"),
-        fastExactCount(auditTable, "select=NTAGN")
-      ]);
+        const stockPromise =
+          fetchAllRowsForStats(
+            tableName(
+              b,
+              "stocks"
+            ),
+            "NTAGN"
+          );
 
-      return {stocks,soldMarked,audit};
-    }));
+        const soldPromise =
+          fetchAllRowsForStats(
+            tableName(
+              b,
+              "sold"
+            ),
+            "NTAGN,SELLINGPRICE"
+          );
 
-    let available = 0;
-    let sold = 0;
-    let audit = 0;
+        const auditPromise =
+          fetchAllRowsForStats(
+            tableName(
+              b,
+              "audit"
+            ),
+            "NTAGN"
+          );
 
-    perBranch.forEach(x=>{
-      /* Normal workflow removes sold items from Stocks, so the current
-         Stocks table is the remaining-available count. */
-      available += x.stocks;
-      sold += x.soldMarked;
-      audit += x.audit;
+        const [
+          stocks,
+          soldRows,
+          auditRows
+        ] =
+          await Promise.all([
+
+            stockPromise,
+            soldPromise,
+            auditPromise
+
+          ]);
+
+        const soldTags =
+          new Set();
+
+        soldRows.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim();
+
+            if(tag){
+              soldTags.add(tag);
+            }
+
+          }
+        );
+
+        stocks.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim();
+
+            if(
+              !tag ||
+              !soldTags.has(tag)
+            ){
+
+              available++;
+
+            }
+
+          }
+        );
+
+        /*
+         * SOLD TOTAL = MARKED SOLD ITEMS ONLY.
+         * Unmarked SOLD rows must never be included in the
+         * dashboard SOLD total or SOLD amount.
+         */
+        const markedSoldRows =
+          soldRows.filter(row =>
+            String(row?.STATUS ?? "")
+              .trim()
+              .toUpperCase() === "MARKED"
+          );
+
+        sold +=
+          markedSoldRows.length;
+
+        markedSoldRows.forEach(
+          row=>{
+            const value =
+              String(
+                row?.SELLINGPRICE ?? ""
+              )
+                .replace(/,/g,"")
+                .replace(/₱/g,"")
+                .trim();
+
+            const amount =
+              Number(value);
+
+            if(Number.isFinite(amount)){
+              soldAmount += amount;
+            }
+          }
+        );
+
+        /*
+         * AUDIT RESULT TOTAL =
+         * AUDITED + MISSING
+         *
+         * Same BRANCH + NTAGN logic as export.
+         */
+
+        const soldAuditKeys =
+          new Set();
+
+        soldRows.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim().toUpperCase();
+
+            if(tag){
+              soldAuditKeys.add(tag);
+            }
+
+          }
+        );
+
+        const auditedAuditKeys =
+          new Set();
+
+        auditRows.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim().toUpperCase();
+
+            if(
+              tag &&
+              !soldAuditKeys.has(tag)
+            ){
+
+              auditedAuditKeys.add(
+                tag
+              );
+
+            }
+
+          }
+        );
+
+        let missingAuditCount = 0;
+
+        stocks.forEach(
+          row=>{
+
+            const tag =
+              String(
+                row?.NTAGN ?? ""
+              ).trim().toUpperCase();
+
+            if(
+              tag &&
+              !soldAuditKeys.has(tag) &&
+              !auditedAuditKeys.has(tag)
+            ){
+
+              missingAuditCount++;
+
+            }
+
+          }
+        );
+
+        /*
+         * AUDITED CARD = actual audited records only.
+         * MISSING is intentionally NOT included here.
+         */
+        audit +=
+          auditedAuditKeys.size;
+
+      }
+    )
+  );
+
+  if(
+    generation !==
+    searchGeneration
+  ){
+
+    return;
+
+  }
+
+  /*
+   * SOLD OUT statistics follow the CURRENT RESULT,
+   * including search + date + marked/unmarked filters.
+   *
+   * AVAILABLE and AUDITED remain global branch totals.
+   */
+  if(document.getElementById("sheet")?.value === "sold"){
+
+    const visibleSoldRows =
+      getVisibleRows();
+
+    const markedSoldRows =
+      visibleSoldRows.filter(row =>
+        String(row?.raw?.STATUS ?? row?.STATUS ?? "")
+          .trim()
+          .toUpperCase() === "MARKED"
+      );
+
+    sold =
+      markedSoldRows.length;
+
+    soldAmount = 0;
+
+    markedSoldRows.forEach(row=>{
+
+      const value =
+        String(row?.sellingPrice ?? "")
+          .replace(/,/g,"")
+          .replace(/₱/g,"")
+          .trim();
+
+      const amount =
+        Number(value);
+
+      if(Number.isFinite(amount)){
+        soldAmount += amount;
+      }
+
     });
 
-    if(generation !== searchGeneration) return;
-
-    const report = document.getElementById("sheet")?.value || "";
-
-    /* Preserve the existing Sold Out current-result behavior. */
-    let soldAmount = 0;
-    if(report === "sold"){
-      const visibleSoldRows = getVisibleRows();
-      const markedSoldRows = visibleSoldRows.filter(row =>
-        String(row?.raw?.STATUS ?? row?.STATUS ?? "").trim().toUpperCase() === "MARKED"
-      );
-      sold = markedSoldRows.length;
-      markedSoldRows.forEach(row=>{
-        const value = String(row?.sellingPrice ?? "").replace(/,/g,"").replace(/₱/g,"").trim();
-        const amount = Number(value);
-        if(Number.isFinite(amount)) soldAmount += amount;
-      });
-    }
-
-    const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=formatNumber(value);};
-    setText("availableTotal",available);
-    setText("soldTotal",sold);
-
-    const soldAmountEl=document.getElementById("soldAmount");
-    if(soldAmountEl) soldAmountEl.textContent=formatPeso(soldAmount);
-
-    setText("auditTotal",audit);
-    setText("reportedMissingTotal",reportedMissing);
-    setText("pullOutTotal",pullOut);
-
-    const pullOutCard=document.getElementById("pullOutStatCard");
-    if(pullOutCard) pullOutCard.style.display=report === "audit" ? "" : "none";
-
-    const showing=document.getElementById("showingTotal");
-    if(showing) showing.textContent=formatNumber(totalRows);
-    const showingMini=document.getElementById("showingTotalMini");
-    if(showingMini) showingMini.textContent=formatNumber(totalRows);
-
-    loadUnconfirmedOverview(false).catch(e=>console.warn("Unconfirmed overview refresh failed:",e));
-
-    if(typeof serverPageMode !== "undefined" && serverPageMode && report === "stocks"){
-      /* Current server-paged Stocks total is more precise for the visible report. */
-      if(Number.isFinite(serverPageTotal) && serverPageTotal >= 0) available = serverPageTotal;
-      setText("availableTotal",available);
-    }
-
-  }catch(error){
-    console.warn("Fast statistics failed; preserving dashboard without forcing a result reload:",error);
   }
+
+  document
+    .getElementById(
+      "availableTotal"
+    )
+    .textContent =
+      formatNumber(
+        available
+      );
+
+  document
+    .getElementById(
+      "soldTotal"
+    )
+    .textContent =
+      formatNumber(
+        sold
+      );
+
+  const soldAmountEl =
+    document
+      .getElementById(
+        "soldAmount"
+      );
+
+  if(soldAmountEl){
+    soldAmountEl.textContent =
+      formatPeso(
+        soldAmount
+      );
+  }
+
+  /*
+   * UNCONFIRMED is always the overall total across all branches.
+   * The branch popup provides the per-branch breakdown.
+   */
+  loadUnconfirmedOverview(false).catch(error=>{
+    console.error("Unconfirmed overview refresh failed:", error);
+  });
+
+  document
+    .getElementById(
+      "auditTotal"
+    )
+    .textContent =
+      formatNumber(
+        audit
+      );
+
+  if(typeof loadReportedMissingCount === "function"){
+    loadReportedMissingCount();
+  }
+
+  const pullOutEl =
+    document.getElementById("pullOutTotal");
+  if(pullOutEl){
+    pullOutEl.textContent =
+      formatNumber(pullOut);
+  }
+
+  const pullOutCard =
+    document.getElementById("pullOutStatCard");
+  if(pullOutCard){
+    pullOutCard.style.display =
+      document.getElementById("sheet")?.value === "audit" ? "" : "none";
+  }
+
+  const reportedMissingEl =
+    document.getElementById("reportedMissingTotal");
+  if(reportedMissingEl){
+    reportedMissingEl.textContent =
+      formatNumber(reportedMissing);
+  }
+
+  const showingCountEl =
+    document.getElementById("showingTotal");
+  if(showingCountEl){
+    showingCountEl.textContent =
+      formatNumber(totalRows);
+  }
+
+  const showingMiniEl =
+    document.getElementById("showingTotalMini");
+  if(showingMiniEl){
+    showingMiniEl.textContent =
+      formatNumber(totalRows);
+  }
+
 }
 
 /* =========================================================
@@ -12291,16 +12379,15 @@ function updatePagination(){
 
 function previousPage(){
 
-  if(currentPage <= 1){
+  if(
+    currentPage <= 1
+  ){
+
     return;
+
   }
 
   currentPage--;
-
-  if(serverPageMode){
-    refreshDashboardServerPagedStocks();
-    return;
-  }
 
   renderCurrentPage();
 
@@ -12317,16 +12404,16 @@ function nextPage(){
       )
     );
 
-  if(currentPage >= totalPages){
+  if(
+    currentPage >=
+    totalPages
+  ){
+
     return;
+
   }
 
   currentPage++;
-
-  if(serverPageMode){
-    refreshDashboardServerPagedStocks();
-    return;
-  }
 
   renderCurrentPage();
 
@@ -22047,32 +22134,81 @@ async function getAdvancedAvailableRows(branch,lensCode,lensType,description,ful
   return {rows:all.slice(0,max),capped:all.length>=max};
 }
 
-async function getAdvancedAvailableRowsFast(branch,lensCode,lensType,description){
-  const p=new URLSearchParams();
-  /* Only retrieve columns actually needed by the Advanced Search table. */
-  p.set("select","BR,LENSTYPE,LENSCODE,DESCRIPTION,DELIVERYDATE,NTAGN");
-  if(lensCode) p.set("LENSCODE","eq." + encodeURIComponent(lensCode));
-  if(description) p.set("DESCRIPTION","eq." + encodeURIComponent(description));
-  /* Stocks is already the remaining-stock table in the normal workflow. */
-  p.set("LENSCODE","match.^[0-9]+(?:\\.[0-9]+)?$");
-  if(lensCode) p.set("LENSCODE","eq." + encodeURIComponent(lensCode));
-  p.set("order","LENSCODE.asc.nullslast,NTAGN.asc.nullslast");
+async function getAdvancedFastCandidates(branch,lensCode,lensType,description){
+  const params=new URLSearchParams();
+  params.set("select","BR,LENSTYPE,LENSCODE,DESCRIPTION,DELIVERYDATE,NTAGN");
+  params.set("BR","eq."+encodeURIComponent(String(branch||"").trim().toUpperCase()));
+  params.set("order","LENSCODE.asc.nullslast,NTAGN.asc.nullslast");
 
-  const all=[];
-  let offset=0;
-  const limit=1000;
-  const max=ADVANCED_SEARCH_MAX_ROWS;
-
-  while(offset<max){
-    p.set("limit",String(Math.min(limit,max-offset)));
-    p.set("offset",String(offset));
-    const rows=await supabaseRequest(advancedSearchReportTable(branch)+"?"+p.toString());
-    const batch=Array.isArray(rows)?rows:[];
-    all.push(...batch);
-    if(batch.length < limit) break;
-    offset += limit;
+  if(lensCode){
+    params.set("LENSCODE","eq."+lensCode);
+  }else if(lensType){
+    const ranges=advancedSearchLensTypeRange(lensType)||[];
+    const values=[];
+    ranges.forEach(range=>{
+      const min=Math.ceil(Number(range.min));
+      const max=Math.floor(Number(range.max));
+      if(!Number.isFinite(min)||!Number.isFinite(max)||max<min)return;
+      for(let n=min;n<=max;n++)values.push(String(n));
+    });
+    if(values.length){
+      params.set("LENSCODE","in.("+values.join(",")+")");
+    }else{
+      return {rows:[],capped:false};
+    }
+  }else{
+    // Keep the existing Advanced Search rule: numeric LENSCODE only.
+    // PostgREST regex filtering keeps non-numeric values out of the browser.
+    params.set("LENSCODE","match.^[0-9]+(?:\\.[0-9]+)?$");
   }
-  return {rows:all.slice(0,max),capped:all.length>=max};
+
+  if(description){
+    params.set("DESCRIPTION","eq."+description);
+  }
+
+  // A deliberately small candidate window keeps the Advanced Search responsive.
+  // The result is marked capped when this window is filled, so the UI shows "+".
+  const candidateLimit=120;
+  params.set("limit",String(candidateLimit));
+
+  const rows=await supabaseRequest(
+    advancedSearchReportTable(branch)+"?"+params.toString()
+  );
+  const batch=Array.isArray(rows)?rows:[];
+
+  // Only check Sold for the candidate tags instead of downloading every Sold tag
+  // in the branch. This preserves the existing Remaining Stock rule while greatly
+  // reducing the amount of data transferred.
+  const tags=batch
+    .map(row=>String(row?.NTAGN??"").trim())
+    .filter(Boolean);
+
+  let soldTags=new Set();
+  if(tags.length){
+    const soldParams=new URLSearchParams();
+    soldParams.set("select","NTAGN");
+    soldParams.set("BR","eq."+encodeURIComponent(String(branch||"").trim().toUpperCase()));
+    soldParams.set("NTAGN","in.("+tags.map(encodeURIComponent).join(",")+")");
+    soldParams.set("limit",String(tags.length));
+
+    const soldRows=await supabaseRequest(
+      branchTable(branch,"sold")+"?"+soldParams.toString()
+    );
+    (Array.isArray(soldRows)?soldRows:[]).forEach(row=>{
+      const tag=String(row?.NTAGN??"").trim();
+      if(tag)soldTags.add(tag);
+    });
+  }
+
+  const remaining=batch.filter(row=>{
+    const tag=String(row?.NTAGN??"").trim();
+    return !tag || !soldTags.has(tag);
+  });
+
+  return {
+    rows:remaining,
+    capped:batch.length>=candidateLimit
+  };
 }
 
 async function runAdvancedInventorySearch(){
@@ -22100,23 +22236,34 @@ async function runAdvancedInventorySearch(){
 
   try{
     const branches=branch==="ALL"?BRANCHES:[branch];
+
     const branchResults=await Promise.all(branches.map(async b=>{
-      const stock=await getAdvancedAvailableRowsFast(b,lensCode,lensType,description);
-      const rows=stock.rows.filter(row=>{
-        const rawCode=String(row?.LENSCODE??"").trim();
-        if(!/^\d+(?:\.\d+)?$/.test(rawCode)) return false;
-        const code=Number(rawCode);
-        if(!Number.isFinite(code)) return false;
-
-        if(!showAllLensTypes){
-          const ranges=advancedSearchLensTypeRange(lensType);
-          if(!Array.isArray(ranges) || !ranges.length) return false;
-          if(!ranges.some(range=>code>=Number(range.min)&&code<=Number(range.max))) return false;
-        }
-        return true;
-      }).map(row=>({...row,__BRANCH:String(row?.BR||b||"").trim().toUpperCase()}));
-
-      return {rows,capped:stock.capped};
+      try{
+        return await getAdvancedFastCandidates(b,lensCode,lensType,description);
+      }catch(error){
+        // Safe fallback: preserve the existing Advanced Search logic if the
+        // optimized PostgREST filter is rejected by the current schema/API.
+        console.warn("Advanced fast query fallback for "+b+":",error);
+        const [stock,sold]=await Promise.all([
+          getAdvancedAvailableRows(b,lensCode,lensType,description,true),
+          getSoldTags(b)
+        ]);
+        const fallbackRows=stock.rows.filter(row=>{
+          const tag=String(row?.NTAGN??"").trim();
+          if(tag&&sold.has(tag))return false;
+          const rawCode=String(row?.LENSCODE??"").trim();
+          if(!/^\d+(?:\.\d+)?$/.test(rawCode))return false;
+          const code=Number(rawCode);
+          if(!Number.isFinite(code))return false;
+          if(!showAllLensTypes){
+            const ranges=advancedSearchLensTypeRange(lensType);
+            if(!Array.isArray(ranges)||!ranges.length)return false;
+            if(!ranges.some(range=>code>=Number(range.min)&&code<=Number(range.max)))return false;
+          }
+          return true;
+        });
+        return {rows:fallbackRows.slice(0,120),capped:stock.capped||fallbackRows.length>120};
+      }
     }));
 
     if(gen!==advancedSearchGeneration)return;
@@ -22124,8 +22271,8 @@ async function runAdvancedInventorySearch(){
     const combined=[];
     let capped=false;
     branchResults.forEach(r=>{
-      if(r.capped)capped=true;
-      combined.push(...r.rows);
+      if(r?.capped)capped=true;
+      if(Array.isArray(r?.rows))combined.push(...r.rows.map(row=>({...row,__BRANCH:String(row?.BR||"").trim().toUpperCase()})));
     });
 
     combined.sort((a,b)=>
@@ -22135,8 +22282,10 @@ async function runAdvancedInventorySearch(){
     );
 
     const rows=combined.slice(0,ADVANCED_SEARCH_MAX_ROWS);
+    const finalCapped=capped||combined.length>ADVANCED_SEARCH_MAX_ROWS;
+
     if(!description)advancedSearchPopulateDescriptions(rows);
-    if(count)count.textContent=String(rows.length)+(capped?"+":"");
+    if(count)count.textContent=String(rows.length)+(finalCapped?"+":"");
 
     if(!rows.length){
       if(results)results.innerHTML=`<div class="advancedSearchNoResults"><div style="font-size:24px;margin-bottom:8px;">⌕</div>No matching remaining lens stock found.</div>`;
@@ -22149,7 +22298,7 @@ async function runAdvancedInventorySearch(){
       return `<tr><td><span class="branchTag">${escapeHtml(row.__BRANCH||"")}</span></td><td>${escapeHtml(row.LENSTYPE||"")||"—"}</td><td><span class="advancedLensCode">${escapeHtml(row.LENSCODE||"")||"—"}</span></td><td>${escapeHtml(row.DESCRIPTION||"")||"—"}</td><td>${escapeHtml(d)}</td></tr>`;
     }).join("")}</tbody></table>`;
 
-    advancedSearchSetStatus(capped
+    advancedSearchSetStatus(finalCapped
       ? "Search completed. More results may match."
       : `${rows.length}${rows.length===1?" result":" results"} found.`);
 

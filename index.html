@@ -3382,6 +3382,52 @@ button,
 
   }
 
+
+/* =========================================================
+   PULL OUT CONFIRMATION OVERLAY
+   Must always appear above the Pull Out result modal.
+========================================================= */
+.pullOutConfirmOverlay{
+  position:fixed !important;
+  inset:0 !important;
+  left:0 !important;
+  top:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  max-width:none !important;
+  transform:none !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:20px !important;
+  box-sizing:border-box !important;
+  background:rgba(9,22,42,.52) !important;
+  z-index:2147483647 !important;
+  pointer-events:auto !important;
+}
+
+.pullOutConfirmOverlay .queueCard,
+#queuePanel .pullOutConfirmOverlay{
+  z-index:2147483647 !important;
+}
+
+.pullOutConfirmBox{
+  width:min(410px,calc(100vw - 40px));
+  box-sizing:border-box;
+  padding:14px;
+  border:1px solid rgba(205,224,235,.95);
+  border-radius:17px;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 20px 55px rgba(15,23,42,.28),0 6px 18px rgba(15,23,42,.12);
+  backdrop-filter:blur(18px);
+}
+
+.pullOutConfirmOverlay .queueTitle{
+  line-height:1.45;
+}
+
   .tableTitle{
 
     font-size:13px;
@@ -13988,7 +14034,8 @@ async function deleteSoldRow(
 ========================================================= */
 
 function inlineConfirm(
-  text
+  text,
+  yesLabel = "Delete"
 ){
 
   return new Promise(
@@ -14000,43 +14047,47 @@ function inlineConfirm(
         );
 
       panel.className =
-        "queueCard";
+        "queueCard pullOutConfirmOverlay";
 
       panel.innerHTML = `
 
-        <div class="queueHead">
+        <div class="pullOutConfirmBox">
 
-          <div class="queueTitle">
-            ${escapeHtml(text)}
+          <div class="queueHead">
+
+            <div class="queueTitle">
+              ${escapeHtml(text)}
+            </div>
+
+            <button
+              class="queueClose"
+              data-no
+            >
+              ×
+            </button>
+
           </div>
 
-          <button
-            class="queueClose"
-            data-no
+          <div
+            class="queueText"
+            style="margin-top:10px"
           >
-            ×
-          </button>
 
-        </div>
+            <button
+              class="controlBtn"
+              data-no
+            >
+              Cancel
+            </button>
 
-        <div
-          class="queueText"
-          style="margin-top:10px"
-        >
+            <button
+              class="controlBtn primary"
+              data-yes
+            >
+              ${escapeHtml(yesLabel)}
+            </button>
 
-          <button
-            class="controlBtn"
-            data-no
-          >
-            Cancel
-          </button>
-
-          <button
-            class="controlBtn primary"
-            data-yes
-          >
-            Delete
-          </button>
+          </div>
 
         </div>
 
@@ -17384,7 +17435,8 @@ async function restorePullOutToStocks(branch,tag,button){
   if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
 
   const confirmed = await inlineConfirm(
-    "Add " + tag + " from " + branch + " back to Stocks and Audit as AUDITED?"
+    "Add " + tag + " from " + branch + " back to Stocks and Audit as AUDITED?",
+    "Confirm"
   );
   if(!confirmed) return;
 

@@ -9713,6 +9713,9 @@ function setSoldDateRangeToday(){
 
 function clearSoldFilters(){
 
+  soldServerPageMode = false;
+  soldServerCountsCache.clear();
+
   const from = document.getElementById("soldDateFrom");
   const to = document.getElementById("soldDateTo");
   const mark = document.getElementById("soldMarkFilter");
@@ -10244,6 +10247,13 @@ function applySoldFilters(){
     return;
   }
 
+  if(soldServerPageMode){
+    currentPage = 1;
+    soldServerCountsCache.clear();
+    refreshDashboardServerPagedSold();
+    return;
+  }
+
   const visible = getVisibleRows();
 
   totalRows = visible.length;
@@ -10311,6 +10321,10 @@ function resetDashboardDisplay(){
   totalRows = 0;
 
   currentPage = 1;
+
+  serverPageMode = false;
+  soldServerPageMode = false;
+  soldServerCountsCache.clear();
 
   currentSearch = "";
 
@@ -11091,11 +11105,20 @@ function runSearch(){
 
   if(document.getElementById("sheet")?.value === "stocks") {
     serverPageCountsCache.clear();
+    soldServerPageMode = false;
     refreshDashboardServerPagedStocks();
     return;
   }
 
+  if(document.getElementById("sheet")?.value === "sold") {
+    soldServerCountsCache.clear();
+    serverPageMode = false;
+    refreshDashboardServerPagedSold();
+    return;
+  }
+
   serverPageMode = false;
+  soldServerPageMode = false;
   refreshDashboard();
 
 }
@@ -11123,6 +11146,12 @@ function searchKey(event){
 ========================================================= */
 
 async function refreshDashboard(){
+
+  if(window.__skipSoldServerRoute){
+    window.__skipSoldServerRoute = false;
+  }else if(document.getElementById("sheet")?.value === "sold" && soldServerPageMode !== false){
+    return refreshDashboardServerPagedSold();
+  }
 
   if(document.getElementById("sheet")?.value === "stocks" && serverPageMode !== false){
     return refreshDashboardServerPagedStocks();
@@ -12557,6 +12586,274 @@ function updatePagination(){
 
 }
 
+
+/* =========================================================
+   SOLD OUT — SERVER PAGINATION (ADDITIVE PERFORMANCE PATH)
+   Keeps the existing Sold Out rendering/editing functions intact.
+   Only fetches the rows needed for the current page.
+========================================================= */
+let soldServerPageMode = false;
+let soldServerRequestToken = 0;
+const soldServerCountsCache = new Map();
+
+function soldServerFilterState(){
+  return {
+    branch: String(document.getElementById("branch")?.value || "ALL").trim().toUpperCase(),
+    search: cleanSearch(document.getElementById("search")?.value || ""),
+    from: String(document.getElementById("soldDateFrom")?.value || "").trim(),
+    to: String(document.getElementById("soldDateTo")?.value || "").trim(),
+    mark: String(document.getElementById("soldMarkFilter")?.value || "ALL").trim().toUpperCase(),
+    si: String(unconfirmedSelectedSI || "").trim()
+  };
+}
+
+function soldServerCacheKey(branch,state){
+  return [branch,state.search,state.from,state.to,state.mark,state.si].join("|");
+}
+
+function soldServerBuildParams(state){
+  const params = buildSearchParams(state.search);
+  const searchOr = params.get("or");
+  params.delete("select");
+  params.set("select", 'BR,LENSTYPE,DESCRIPTION,NTAGN,"SI NO.",SELLINGPRICE,STATUS,"DATE AND TIME",DELIVERYDATE,QR');
+  params.set("order", "NTAGN.asc.nullslast");
+
+  if(state.si){
+    const siFilter = '"SI NO.".eq.' + state.si;
+    if(searchOr){
+      params.delete("or");
+      params.set("and", '(or' + searchOr.substring(2) + ',"SI NO.".eq.' + state.si + ')');
+    }else{
+      params.set('"SI NO."', "eq." + state.si);
+    }
+  }
+
+  if(state.mark === "MARKED"){
+    if(searchOr || state.si){
+      const searchPart = searchOr ? ('or' + searchOr.substring(2)) : null;
+      if(params.has("and")){
+        const existingAnd = params.get("and");
+        params.set("and", existingAnd.slice(0,-1) + ',STATUS.eq.MARKED)');
+      }else{
+        params.set("and", '(' + (searchPart ? searchPart + ',STATUS.eq.MARKED' : 'STATUS.eq.MARKED') + ')');
+      }
+    }else{
+      params.set("STATUS", "eq.MARKED");
+    }
+  }else if(state.mark === "UNMARKED"){
+    const unmarkedPart = 'or(STATUS.neq.MARKED,STATUS.is.null)';
+    if(params.has("and")){
+      const existingAnd = params.get("and");
+      params.set("and", existingAnd.slice(0,-1) + ',' + unmarkedPart + ')');
+    }else if(searchOr){
+      params.delete("or");
+      params.set("and", '(' + 'or' + searchOr.substring(2) + ',' + unmarkedPart + ')');
+    }else{
+      params.set("or", '(STATUS.neq.MARKED,STATUS.is.null)');
+    }
+  }
+
+  if(state.from){
+    const startDate = new Date(state.from + "T00:00:00");
+    if(!Number.isFinite(startDate.getTime())) throw new Error("Invalid SOLD OUT start date.");
+    params.append('"DATE AND TIME"', "gte." + startDate.toISOString());
+  }
+
+  if(state.to){
+    const endDate = new Date(state.to + "T00:00:00");
+    if(!Number.isFinite(endDate.getTime())) throw new Error("Invalid SOLD OUT end date.");
+    endDate.setDate(endDate.getDate() + 1);
+    params.append('"DATE AND TIME"', "lt." + endDate.toISOString());
+  }
+
+  return params;
+}
+
+async function fetchSoldPageCountServer(branch,state){
+  const key = soldServerCacheKey(branch,state);
+  if(soldServerCountsCache.has(key)) return soldServerCountsCache.get(key);
+
+  const table = tableName(branch,"sold");
+  const params = soldServerBuildParams(state);
+  params.set("limit","1");
+  params.set("offset","0");
+
+  const res = await fetch(
+    SUPABASE_URL + "/rest/v1/" + table + "?" + params.toString(),
+    {
+      method:"GET",
+      headers:Object.assign({}, supabaseHeaders(), {Prefer:"count=exact"}),
+      cache:"no-store"
+    }
+  );
+
+  const text = await res.text();
+  if(!res.ok){
+    let data={};
+    try{data=text ? JSON.parse(text):{};}catch(e){}
+    const msg=data?.message || data?.error || data?.details || text;
+    throw new Error("Supabase HTTP " + res.status + (msg ? ": " + msg : ""));
+  }
+
+  const contentRange = res.headers.get("content-range") || "";
+  const match = contentRange.match(/\/(\d+)$/);
+  let count = match ? Number(match[1]) : NaN;
+  if(!Number.isFinite(count)){
+    try{count = JSON.parse(text).length;}catch(e){count=0;}
+  }
+
+  count = Number.isFinite(count) ? count : 0;
+  soldServerCountsCache.set(key,count);
+  return count;
+}
+
+async function fetchSoldPageServer(branch,state,offset,limit){
+  const table = tableName(branch,"sold");
+  const params = soldServerBuildParams(state);
+  params.set("limit",String(limit));
+  params.set("offset",String(Math.max(0,offset)));
+
+  return supabaseRequest(
+    table + "?" + params.toString(),
+    {method:"GET"}
+  );
+}
+
+async function getSoldServerPagePlan(state,page){
+  const sortedBranches = BRANCHES.slice().sort((a,b)=>a.localeCompare(b));
+  const globalStart = (page - 1) * ROWS_PER_PAGE;
+
+  if(state.branch !== "ALL"){
+    const total = await fetchSoldPageCountServer(state.branch,state);
+    return {
+      total,
+      requests:[{
+        branch:state.branch,
+        offset:globalStart,
+        limit:ROWS_PER_PAGE
+      }]
+    };
+  }
+
+  const counts = await Promise.all(
+    sortedBranches.map(async branch=>({
+      branch,
+      count:await fetchSoldPageCountServer(branch,state)
+    }))
+  );
+
+  const total = counts.reduce((sum,item)=>sum + item.count,0);
+  const requests=[];
+  let cursor=0;
+  let need=ROWS_PER_PAGE;
+
+  for(const item of counts){
+    if(need<=0) break;
+    const start=cursor;
+    const end=cursor + item.count;
+    cursor=end;
+
+    if(globalStart>=end) continue;
+    if(globalStart + ROWS_PER_PAGE<=start) break;
+
+    const localOffset=Math.max(0,globalStart-start);
+    const take=Math.min(need,item.count-localOffset);
+    if(take>0){
+      requests.push({branch:item.branch,offset:localOffset,limit:take});
+      need-=take;
+    }
+  }
+
+  return {total,requests};
+}
+
+async function refreshDashboardServerPagedSold(){
+  const token = ++soldServerRequestToken;
+  const state = soldServerFilterState();
+  const page = currentPage;
+
+  soldServerPageMode = true;
+  serverPageMode = false;
+  setLoading(true);
+
+  try{
+    const plan = await getSoldServerPagePlan(state,page);
+    if(token !== soldServerRequestToken) return;
+
+    const chunks = await Promise.all(
+      plan.requests.map(req=>fetchSoldPageServer(req.branch,state,req.offset,req.limit))
+    );
+    if(token !== soldServerRequestToken) return;
+
+    const combined=[];
+    plan.requests.forEach((req,index)=>{
+      const rows=Array.isArray(chunks[index]) ? chunks[index] : [];
+      rows.forEach(row=>combined.push(mapRow(row,req.branch)));
+    });
+
+    /* Match the existing Dashboard order: BRANCH, then numeric NTAGN. */
+    combined.sort((a,b)=>{
+      const ab=String(a?.branch ?? "").trim().toUpperCase();
+      const bb=String(b?.branch ?? "").trim().toUpperCase();
+      if(ab!==bb) return ab.localeCompare(bb);
+
+      const at=String(a?.tag ?? "").trim();
+      const bt=String(b?.tag ?? "").trim();
+      const an=/^\d+(?:\.\d+)?$/.test(at)?Number(at):NaN;
+      const bn=/^\d+(?:\.\d+)?$/.test(bt)?Number(bt):NaN;
+      if(Number.isFinite(an)&&Number.isFinite(bn)) return an-bn;
+      if(Number.isFinite(an)) return -1;
+      if(Number.isFinite(bn)) return 1;
+      return at.localeCompare(bt,undefined,{numeric:true,sensitivity:"base"});
+    });
+
+    currentRows=combined;
+    totalRows=plan.total;
+    const start=(currentPage-1)*ROWS_PER_PAGE;
+
+    renderTable(combined);
+
+    const pageInfo=document.getElementById("pageInfo");
+    if(pageInfo){
+      pageInfo.textContent = combined.length
+        ? "Showing " + formatNumber(start+1) + "–" + formatNumber(start+combined.length) + " of " + formatNumber(totalRows)
+        : (totalRows ? "No records on this page" : "No records found");
+    }
+
+    const showingTotal=document.getElementById("showingTotal");
+    if(showingTotal) showingTotal.textContent=formatNumber(totalRows);
+    const showingMini=document.getElementById("showingTotalMini");
+    if(showingMini) showingMini.textContent=formatNumber(totalRows);
+
+    updatePagination();
+    updateSoldFilteredCounters();
+
+    updateStatsDirect(state.branch,token).catch(error=>console.error("Statistics error:",error));
+
+  }catch(error){
+    /*
+     * Safety fallback: preserve the original Sold Out loader if the
+     * database column type does not support the timestamp filter.
+     */
+    soldServerPageMode = false;
+    console.warn("Fast Sold Out load unavailable; using original loader:",error);
+    if(token === soldServerRequestToken){
+      serverPageMode = false;
+      refreshDashboardOriginalSoldFallback();
+    }
+    return;
+  }finally{
+    if(token === soldServerRequestToken) setLoading(false);
+  }
+}
+
+/* Holds the original loader temporarily so the fast path can safely fall back. */
+async function refreshDashboardOriginalSoldFallback(){
+  soldServerPageMode = false;
+  window.__skipSoldServerRoute = true;
+  return refreshDashboard();
+}
+
 function previousPage(){
 
   if(currentPage <= 1){
@@ -12567,6 +12864,11 @@ function previousPage(){
 
   if(serverPageMode){
     refreshDashboardServerPagedStocks();
+    return;
+  }
+
+  if(soldServerPageMode){
+    refreshDashboardServerPagedSold();
     return;
   }
 
@@ -12593,6 +12895,11 @@ function nextPage(){
 
   if(serverPageMode){
     refreshDashboardServerPagedStocks();
+    return;
+  }
+
+  if(soldServerPageMode){
+    refreshDashboardServerPagedSold();
     return;
   }
 
@@ -22315,79 +22622,6 @@ async function getAdvancedAvailableRows(branch,lensCode,lensType,description,ful
   return {rows:all.slice(0,max),capped:all.length>=max};
 }
 
-async function getAdvancedSearchCandidateRows(branch,lensCode,lensType,description){
-  const p=new URLSearchParams();
-  p.set("select","BR,LENSTYPE,LENSCODE,DESCRIPTION,DELIVERYDATE,NTAGN");
-
-  const cleanCode=String(lensCode||"").trim();
-  const cleanType=String(lensType||"").trim().toUpperCase();
-  const cleanDescription=String(description||"").trim();
-
-  if(cleanCode){
-    p.set("LENSCODE","eq."+cleanCode);
-  }else{
-    const ranges=advancedSearchLensTypeRange(cleanType)||[];
-    if(cleanType && ranges.length){
-      const values=[];
-      ranges.forEach(range=>{
-        const min=Math.ceil(Number(range.min));
-        const max=Math.floor(Number(range.max));
-        if(Number.isFinite(min)&&Number.isFinite(max)&&max>=min){
-          for(let n=min;n<=max;n++) values.push(String(n));
-        }
-      });
-      if(values.length) p.set("LENSCODE","in.("+values.join(",")+")");
-    }else{
-      // Advanced Remaining Lens Search only permits numeric LENSCODE.
-      // Push that restriction into PostgREST so non-numeric rows are not
-      // downloaded and filtered locally.
-      p.set("LENSCODE","match.^[0-9]+(?:\\\\.[0-9]+)?$");
-    }
-  }
-
-  if(cleanDescription) p.set("DESCRIPTION","eq."+cleanDescription);
-  p.set("order","BR.asc.nullslast,LENSCODE.asc.nullslast,NTAGN.asc.nullslast");
-
-  const all=[];
-  let offset=0;
-  const limit=1000;
-  const max=ADVANCED_SEARCH_MAX_ROWS;
-
-  while(offset<max){
-    p.set("limit",String(Math.min(limit,max-offset)));
-    p.set("offset",String(offset));
-    const rows=await supabaseRequest(advancedSearchReportTable(branch)+"?"+p.toString());
-    const batch=Array.isArray(rows)?rows:[];
-    all.push(...batch);
-    if(batch.length<limit) break;
-    offset+=limit;
-  }
-
-  return {rows:all.slice(0,max),capped:all.length>=max};
-}
-
-async function getAdvancedSoldTagsForCandidates(branch,tags){
-  const result=new Set();
-  const cleanTags=[...new Set((Array.isArray(tags)?tags:[])
-    .map(tag=>String(tag??"").trim())
-    .filter(Boolean))];
-  const chunkSize=200;
-
-  for(let i=0;i<cleanTags.length;i+=chunkSize){
-    const chunk=cleanTags.slice(i,i+chunkSize);
-    const p=new URLSearchParams();
-    p.set("select","NTAGN");
-    p.set("NTAGN","in.("+chunk.join(",")+")");
-    p.set("limit",String(chunkSize));
-    const rows=await supabaseRequest(tableName(branch,"sold")+"?"+p.toString());
-    (Array.isArray(rows)?rows:[]).forEach(row=>{
-      const tag=String(row?.NTAGN??"").trim();
-      if(tag) result.add(tag);
-    });
-  }
-  return result;
-}
-
 async function runAdvancedInventorySearch(){
   if(!sessionId){advancedSearchSetStatus("Session expired. Please login again.");return;}
   const lensCode=advancedSearchClean(document.getElementById("advancedSearchLensCode")?.value||"");
@@ -22420,13 +22654,10 @@ async function runAdvancedInventorySearch(){
       // Fetch enough rows to evaluate the numeric-LENSCODE rule locally.
       // We deliberately do NOT ask Supabase to interpret LENSCODE as numeric because
       // the existing stocks column can contain values such as W, blank, or other text.
-      // FAST SEARCH ONLY: ask Supabase for candidate rows first, using
-      // server-side Lens Code / range / description filters. The existing
-      // getAdvancedAvailableRows() is intentionally left untouched because
-      // the Excel export depends on its full-row behavior.
-      const stock=await getAdvancedSearchCandidateRows(b,lensCode,lensType,description);
-      const candidateTags=stock.rows.map(row=>String(row?.NTAGN??"").trim()).filter(Boolean);
-      const sold=await getAdvancedSoldTagsForCandidates(b,candidateTags);
+      const [stock,sold]=await Promise.all([
+        getAdvancedAvailableRows(b,lensCode,lensType,description,true),
+        getSoldTags(b)
+      ]);
 
       const rows=stock.rows.filter(row=>{
         const tag=String(row?.NTAGN??"").trim();

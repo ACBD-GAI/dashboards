@@ -17790,7 +17790,7 @@ async function restorePullOutToStocks(branch,tag,button){
   }
 }
 
-function getPullOutRecord(branch,tag){
+async function getPullOutRecord(branch,tag){
   const rows = await supabaseRequest(
     "pull_out?BR=eq." + encodeURIComponent(String(branch).trim().toUpperCase()) +
     "&NTAGN=eq." + encodeURIComponent(String(tag).trim()) +

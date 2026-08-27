@@ -6363,6 +6363,143 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 </style>
 
+<style>
+/* =========================================================
+   ACEBEDO OPTICAL — DASHBOARD LOGO MOTION
+   Additive CSS-only animation. Existing HTML / JS unchanged.
+========================================================= */
+.brandLogo{
+  position:relative;
+  overflow:visible !important;
+  isolation:isolate;
+  animation:aoLogoFloat 4.6s ease-in-out infinite;
+  will-change:transform,box-shadow;
+}
+
+/* Rotating energy ring around the logo */
+.brandLogo::before{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border-radius:inherit;
+  background:conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(56,189,248,.08) 45deg,
+    rgba(56,189,248,.95) 90deg,
+    rgba(99,102,241,.95) 145deg,
+    rgba(236,72,153,.82) 205deg,
+    rgba(56,189,248,.12) 270deg,
+    transparent 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  padding:2px;
+  pointer-events:none;
+  z-index:-1;
+  animation:aoLogoRing 2.8s linear infinite;
+  filter:drop-shadow(0 0 7px rgba(56,189,248,.42));
+}
+
+/* Existing outline becomes a soft breathing halo */
+.brandLogo::after{
+  animation:aoLogoHalo 2.4s ease-in-out infinite;
+}
+
+.brandLogo img{
+  transform-origin:center;
+  animation:aoLogoImage 5.2s cubic-bezier(.2,.75,.2,1) infinite;
+  will-change:transform,filter;
+}
+
+/* Small interactive boost */
+.brandLogo:hover{
+  animation:none;
+  transform:translateY(-3px) scale(1.08) rotate(-2deg);
+  box-shadow:
+    0 0 0 5px rgba(56,189,248,.13),
+    0 14px 30px rgba(14,165,233,.23),
+    0 0 30px rgba(99,102,241,.22);
+}
+
+.brandLogo:hover::before{
+  animation-duration:1.15s;
+  filter:drop-shadow(0 0 10px rgba(56,189,248,.7));
+}
+
+.brandLogo:hover img{
+  animation:none;
+  transform:scale(1.045) rotate(2deg);
+  filter:drop-shadow(0 0 9px rgba(56,189,248,.34));
+}
+
+@keyframes aoLogoFloat{
+  0%,100%{
+    transform:translateY(0) rotate(0deg) scale(1);
+    box-shadow:
+      0 0 0 4px rgba(64,178,255,.10),
+      0 9px 24px rgba(0,0,0,.18),
+      0 0 20px rgba(44,170,255,.16);
+  }
+  25%{
+    transform:translateY(-2px) rotate(-1deg) scale(1.015);
+  }
+  50%{
+    transform:translateY(-4px) rotate(0deg) scale(1.035);
+    box-shadow:
+      0 0 0 6px rgba(64,178,255,.12),
+      0 14px 30px rgba(0,0,0,.20),
+      0 0 30px rgba(44,170,255,.25);
+  }
+  75%{
+    transform:translateY(-2px) rotate(1deg) scale(1.015);
+  }
+}
+
+@keyframes aoLogoRing{
+  to{transform:rotate(360deg);}
+}
+
+@keyframes aoLogoHalo{
+  0%,100%{
+    opacity:.58;
+    transform:scale(1);
+    box-shadow:0 0 0 rgba(56,189,248,0);
+  }
+  50%{
+    opacity:1;
+    transform:scale(1.035);
+    box-shadow:0 0 18px rgba(56,189,248,.22);
+  }
+}
+
+@keyframes aoLogoImage{
+  0%,12%{transform:scale(1) rotate(0deg);filter:drop-shadow(0 0 0 rgba(56,189,248,0));}
+  20%{transform:scale(1.025) rotate(-1deg);filter:drop-shadow(0 0 7px rgba(56,189,248,.16));}
+  28%{transform:scale(1.04) rotate(0deg);filter:drop-shadow(0 0 10px rgba(99,102,241,.16));}
+  36%{transform:scale(1.025) rotate(1deg);filter:drop-shadow(0 0 7px rgba(236,72,153,.13));}
+  48%,100%{transform:scale(1) rotate(0deg);filter:drop-shadow(0 0 0 rgba(56,189,248,0));}
+}
+
+@media(max-width:700px){
+  .brandLogo{
+    animation-duration:5s;
+  }
+  .brandLogo::before{
+    inset:-4px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .brandLogo,
+  .brandLogo::before,
+  .brandLogo::after,
+  .brandLogo img{
+    animation:none !important;
+  }
+}
+</style>
 </head>
 
 <body>

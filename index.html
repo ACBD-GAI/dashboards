@@ -6040,6 +6040,32 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   .ao-chat-emoji-picker{grid-template-columns:repeat(7,1fr);}
 }
 </style>
+
+<style id="aoChatViewportRefinement">
+/* Chatbox viewport refinement ONLY. Existing chat logic and other UI remain unchanged. */
+.ao-chat-panel{
+  right:22px !important;
+  bottom:86px !important;
+  width:min(410px,calc(100vw - 40px)) !important;
+  height:min(600px,calc(100vh - 110px)) !important;
+  max-height:calc(100vh - 110px) !important;
+}
+@media(max-width:600px){
+  .ao-chat-panel{
+    right:10px !important;
+    left:auto !important;
+    bottom:74px !important;
+    width:min(390px,calc(100vw - 20px)) !important;
+    height:min(78vh,calc(100vh - 84px)) !important;
+    max-height:calc(100vh - 84px) !important;
+    border-radius:16px !important;
+  }
+  .ao-chat-head{padding:12px 14px !important;}
+  .ao-chat-recipient{padding:8px !important;}
+  .ao-chat-messages{padding:9px !important;}
+  .ao-chat-compose{padding:8px !important;gap:7px !important;}
+}
+</style>
 </head>
 
 <body>

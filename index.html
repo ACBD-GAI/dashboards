@@ -6215,6 +6215,212 @@ tbody tr:hover{background:linear-gradient(90deg,#eef8ff,#fff2fb) !important;tran
 @media(max-width:600px){.header{background:linear-gradient(135deg,#173f70,#0ea5a4,#7c3aed,#db2777) !important;}.statCard{min-height:104px !important;}.controlBtn,.primaryBtn,.reportPdfBtn,.advancedSearchBtn{min-height:44px !important;}.ao-chat-panel{border-radius:18px !important;}}
 
 </style>
+
+<style id="acebedoFlatJollyRedesign">
+/* =========================================================
+   ACEBEDO OPTICAL — FLAT JOLLY REDESIGN
+   CSS ONLY. NO GRADIENTS. NO HTML/JS/BEHAVIOR CHANGES.
+========================================================= */
+:root{
+  --jolly-bg:#f7f4ff;
+  --jolly-surface:#ffffff;
+  --jolly-text:#243047;
+  --jolly-muted:#6e7894;
+  --jolly-line:#dfe3f0;
+  --jolly-blue:#3b82f6;
+  --jolly-cyan:#06b6d4;
+  --jolly-teal:#14b8a6;
+  --jolly-green:#22c55e;
+  --jolly-yellow:#f59e0b;
+  --jolly-orange:#f97316;
+  --jolly-pink:#ec4899;
+  --jolly-purple:#8b5cf6;
+  --jolly-red:#ef4444;
+  --jolly-shadow:0 10px 24px rgba(51,65,85,.10);
+}
+
+/* Flat canvas */
+html,body{background:#f7f4ff !important;color:var(--jolly-text) !important;}
+body{background-image:none !important;}
+
+/* Remove all visible gradients from the redesign surface */
+header,.controls,.statCard,.tableCard,.tableHeader,.controlBtn,.primaryBtn,
+.modalCard,.pagination,.pageBtn,.queueCard,.reportPdfBtn,.ao-chat-panel,
+.ao-chat-head,.ao-chat-bubble,.ao-chat-send,.ao-chat-fab,
+.reportedMissingHead,.reportedMissingRow,.reportedMissingStatCard,
+.ao-chat-notify,.ao-chat-recipient,.ao-chat-compose,.ao-chat-status,
+.ao-chat-notify-item,.ao-chat-select,.ao-chat-input,
+.advancedSearchModal,.allowedUsersModal,.loginCard,
+input,select,textarea,button{
+  background-image:none !important;
+}
+
+/* Header / brand */
+header{
+  background:#3b3b98 !important;
+  border-bottom:4px solid #f59e0b !important;
+  box-shadow:0 8px 22px rgba(59,59,152,.20) !important;
+}
+.brandTitle,.brand h1,.brand h2{color:#ffffff !important;}
+.brandSub{color:#e9e7ff !important;}
+
+/* Main surfaces */
+.controls{
+  background:#ffffff !important;
+  border:2px solid #cfe7ff !important;
+  box-shadow:var(--jolly-shadow) !important;
+}
+.cards{gap:14px !important;}
+.statCard{
+  background:#ffffff !important;
+  border:2px solid #e7e9f4 !important;
+  box-shadow:var(--jolly-shadow) !important;
+}
+.statCard:nth-child(1){border-top:5px solid var(--jolly-blue) !important;}
+.statCard:nth-child(2){border-top:5px solid var(--jolly-green) !important;}
+.statCard:nth-child(3){border-top:5px solid var(--jolly-orange) !important;}
+.statCard:nth-child(4){border-top:5px solid var(--jolly-purple) !important;}
+.statCard:nth-child(5){border-top:5px solid var(--jolly-pink) !important;}
+.statCard:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(51,65,85,.14) !important;}
+.statNumber{color:#243047 !important;}
+.statLabel{color:#66708a !important;}
+.statHint{color:#8a93ab !important;}
+
+/* Controls and buttons */
+.controlBtn{
+  background:#ffffff !important;
+  border:2px solid #cfd7e8 !important;
+  color:#31405f !important;
+  box-shadow:0 4px 10px rgba(51,65,85,.06) !important;
+}
+.controlBtn:hover{transform:translateY(-2px);border-color:#8aa6d8 !important;background:#f7fbff !important;}
+.controlBtn.primary,.primaryBtn,.pageBtn.active{
+  background:#3b82f6 !important;color:#ffffff !important;border-color:#2563eb !important;
+}
+.controlBtn.danger{background:#ef4444 !important;color:#fff !important;border-color:#dc2626 !important;}
+.primaryBtn{box-shadow:0 9px 18px rgba(59,130,246,.22) !important;}
+.primaryBtn:hover{background:#2563eb !important;}
+
+/* Search / inputs */
+.searchWrap,.field{background:#ffffff !important;}
+.input,.select,.searchInput,.soldFilterInput,.soldFilterSelect,
+.advancedSearchModal input,.advancedSearchModal select,
+.allowedUsersModal input,.allowedUsersModal select,
+.ao-chat-select,.ao-chat-input{
+  background:#ffffff !important;
+  color:#25324c !important;
+  border:2px solid #cfd7e8 !important;
+}
+.input:focus,.select:focus,.searchInput:focus,.soldFilterInput:focus,.soldFilterSelect:focus,
+.advancedSearchModal input:focus,.advancedSearchModal select:focus,
+.allowedUsersModal input:focus,.allowedUsersModal select:focus,
+.ao-chat-select:focus,.ao-chat-input:focus{
+  border-color:#3b82f6 !important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.10) !important;
+}
+
+/* Table */
+.tableCard{background:#ffffff !important;border:2px solid #dfe3f0 !important;box-shadow:var(--jolly-shadow) !important;}
+.tableHeader{background:#f1f6ff !important;border-bottom:2px solid #cfe0ff !important;}
+.tableTitle{color:#26395e !important;}
+.tableSub{color:#73809c !important;}
+table thead th{background:#4f46e5 !important;color:#ffffff !important;}
+table tbody tr:nth-child(even){background:#fbfcff !important;}
+table tbody tr:hover{background:#fff8db !important;}
+table td{border-bottom:1px solid #edf0f6 !important;color:#2c3956 !important;}
+
+/* Pagination */
+.pagination{background:#ffffff !important;border-top:2px solid #e5e8f0 !important;}
+.pageBtn{background:#ffffff !important;color:#43506c !important;border:2px solid #d6ddea !important;}
+.pageBtn:hover{background:#eef6ff !important;border-color:#8db9f8 !important;}
+.pageBtn.active{background:#8b5cf6 !important;border-color:#7c3aed !important;}
+
+/* Status / empty */
+.empty{background:#ffffff !important;}
+.emptyIcon{color:#8b5cf6 !important;}
+.emptyTitle{color:#263452 !important;}
+.emptyText{color:#77839d !important;}
+#globalStatus{background:#1d4ed8 !important;color:#fff !important;border-color:#1e40af !important;}
+
+/* Modal family */
+.modalBackdrop{background:rgba(36,48,71,.38) !important;backdrop-filter:blur(6px) !important;}
+.modalCard{background:#ffffff !important;border:2px solid #dfe3f0 !important;box-shadow:0 26px 70px rgba(36,48,71,.20) !important;}
+.modalTitle{color:#31405f !important;}
+.modalSub{color:#76829c !important;}
+.modalActions{background:#fafbff !important;border-top:2px solid #e7eaf2 !important;}
+
+/* Advanced Search */
+.advancedSearchHead{background:#8b5cf6 !important;color:#fff !important;}
+.advancedSearchToolbar{background:#f7f3ff !important;border-bottom:2px solid #e4d8ff !important;}
+.advancedSearchContext{background:#fff8db !important;border:2px solid #fde68a !important;}
+.advancedSearchResults{background:#fbfbff !important;}
+.advancedSearchCount{background:#14b8a6 !important;color:#fff !important;}
+.advancedSearchBtn{background:#8b5cf6 !important;color:#fff !important;border-color:#7c3aed !important;}
+
+/* Allowed Users */
+.allowedUsersHead{background:#06b6d4 !important;color:#fff !important;}
+.allowedUsersToolbar{background:#effcff !important;border-bottom:2px solid #c8f3f7 !important;}
+.allowedUsersCount{background:#f59e0b !important;color:#fff !important;border-color:#d97706 !important;}
+.allowedUsersTable th{background:#0f766e !important;color:#fff !important;}
+.allowedUserBranchTag{background:#ecfeff !important;color:#0f766e !important;border-color:#99e6ed !important;}
+
+/* Reported Missing */
+.reportedMissingHead{background:#fff1f2 !important;border-bottom:2px solid #fecdd3 !important;}
+.reportedMissingList{background:#fff8fa !important;}
+.reportedMissingRow{background:#ffffff !important;border:2px solid #f3d5dc !important;}
+.reportedMissingRow:hover{background:#fff5f7 !important;}
+.reportedMissingRestoreBtn{background:#ecfdf5 !important;color:#15803d !important;border-color:#86efac !important;}
+.reportedMissingStatCard{background:#fff !important;border-color:#f6c9d2 !important;}
+
+/* Queue / progress */
+.queueCard{background:#ffffff !important;border:2px solid #d7deee !important;box-shadow:0 18px 36px rgba(51,65,85,.15) !important;}
+.queueTitle{color:#30405e !important;}
+.queueText,.queueBottom{color:#71809b !important;}
+.progress{background:#edf1f7 !important;}
+.progressBar{background:#14b8a6 !important;box-shadow:none !important;}
+.loadingLine{background:#f59e0b !important;box-shadow:none !important;}
+
+/* Chat */
+.ao-chat-fab{background:#ec4899 !important;border:3px solid #ffffff !important;color:#fff !important;box-shadow:0 10px 24px rgba(236,72,153,.28) !important;}
+.ao-chat-fab:hover{background:#db2777 !important;}
+.ao-chat-panel{background:#ffffff !important;border:2px solid #dfe3f0 !important;box-shadow:0 24px 55px rgba(36,48,71,.20) !important;}
+.ao-chat-head{background:#3b3b98 !important;color:#fff !important;}
+.ao-chat-notify{background:#fff7ed !important;border-color:#fed7aa !important;}
+.ao-chat-notify-item{background:#ffffff !important;border-color:#e6e9f2 !important;}
+.ao-chat-notify-item:hover{background:#fef3c7 !important;border-color:#fcd34d !important;}
+.ao-chat-recipient,.ao-chat-compose,.ao-chat-status{background:#ffffff !important;border-color:#e0e4ee !important;}
+.ao-chat-messages{background:#f8f9fd !important;}
+.ao-chat-bubble{background:#eef2ff !important;color:#2f3a55 !important;box-shadow:0 4px 10px rgba(51,65,85,.07) !important;}
+.ao-chat-row.mine .ao-chat-bubble{background:#dbeafe !important;color:#1e3a8a !important;}
+.ao-chat-send{background:#14b8a6 !important;color:#fff !important;border-color:#0f766e !important;}
+.ao-chat-send:hover{background:#0f9f91 !important;}
+.ao-chat-attach{background:#f59e0b !important;color:#fff !important;border-color:#d97706 !important;}
+.ao-chat-emoji{background:#8b5cf6 !important;color:#fff !important;border-color:#7c3aed !important;}
+.ao-chat-emoji-picker{background:#ffffff !important;border:2px solid #dfe3f0 !important;box-shadow:0 14px 30px rgba(36,48,71,.18) !important;}
+.ao-chat-emoji-picker button:hover{background:#f3f4ff !important;}
+.ao-chat-image-preview{background:#fff8db !important;border:2px solid #fde68a !important;}
+.ao-chat-image-remove{background:#ef4444 !important;color:#fff !important;border-color:#dc2626 !important;}
+
+/* Common colored action semantics */
+.addToSoldActionBtn{background:#22c55e !important;border-color:#16a34a !important;color:#fff !important;}
+.clearReportBtn,.danger{background:#ef4444 !important;color:#fff !important;border-color:#dc2626 !important;}
+.reportPdfBtn{background:#ffffff !important;border:2px solid #cfd7e8 !important;color:#31405f !important;}
+.reportPdfBtn.primary{background:#3b82f6 !important;color:#fff !important;border-color:#2563eb !important;}
+
+/* Mobile */
+@media(max-width:900px){
+  .controls{border-radius:16px !important;}
+  .cards{gap:10px !important;}
+  .statCard{border-radius:16px !important;}
+}
+@media(max-width:600px){
+  .app{padding-left:14px !important;padding-right:14px !important;}
+  .controls{padding:10px !important;}
+  .tableCard{border-radius:16px !important;}
+  .ao-chat-panel{box-shadow:0 18px 40px rgba(36,48,71,.22) !important;}
+}
+</style>
+
 </head>
 
 <body>

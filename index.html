@@ -3382,6 +3382,60 @@ button,
 
   }
 
+
+/* =========================================================
+   PULL OUT CONFIRMATION OVERLAY
+   Rendered INSIDE the Pull Out modal so it is always above
+   the Pull Out result area and receives button clicks.
+========================================================= */
+.pullOutModal{
+  position:relative !important;
+}
+
+.pullOutConfirmOverlay{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  max-width:none !important;
+  max-height:none !important;
+  transform:none !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:20px !important;
+  box-sizing:border-box !important;
+  border-radius:inherit !important;
+  background:rgba(9,22,42,.58) !important;
+  z-index:999999 !important;
+  pointer-events:auto !important;
+}
+
+.pullOutConfirmBox{
+  position:relative !important;
+  z-index:1000000 !important;
+  width:min(410px,calc(100% - 40px));
+  box-sizing:border-box;
+  padding:16px;
+  border:1px solid rgba(205,224,235,.95);
+  border-radius:17px;
+  background:rgba(255,255,255,.99);
+  box-shadow:0 20px 55px rgba(15,23,42,.32),0 6px 18px rgba(15,23,42,.14);
+  backdrop-filter:blur(18px);
+  pointer-events:auto !important;
+}
+
+.pullOutConfirmBox button{
+  position:relative !important;
+  z-index:1000001 !important;
+  pointer-events:auto !important;
+}
+
+.pullOutConfirmOverlay .queueTitle{
+  line-height:1.45;
+}
+
   .tableTitle{
 
     font-size:13px;
@@ -5651,99 +5705,323 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
 .advancedSearchModal .advancedSearchResults{
   flex:1 1 auto;
-  min-height:380px;
+  min-height:260px;
   max-height:none;
 }
 
 .advancedSearchModal .modalActions{
   flex:0 0 auto;
+  padding-top:14px;
+  padding-bottom:16px;
 }
 
 .advancedSearchHead{
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
-  gap:20px;
-  padding:22px 24px 16px;
+  gap:18px;
+  padding:24px 28px 16px;
   border-bottom:1px solid #e0eaf3;
   background:linear-gradient(110deg,#ffffff,#f4f9ff);
 }
 
 .advancedSearchFields{
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);
-  gap:14px;
-  padding:18px 24px 6px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+  padding:20px 28px 6px;
 }
 
-.advancedSearchFields .field{margin-bottom:0;}
+.advancedSearchFields .field{
+  margin-bottom:0;
+}
 
-.advancedSearchFields .field:nth-child(4){grid-column:1 / -1;}
+.advancedSearchFields .field label{
+  margin-bottom:8px;
+  font-size:11px;
+}
 
-.advancedSearchFields .input,.advancedSearchFields .select{
-  min-height:54px;
+.advancedSearchFields .input,
+.advancedSearchFields .select{
+  min-height:52px;
   font-size:13px;
 }
 
-.advancedSearchFields .input{padding-left:15px;padding-right:15px;}
-.advancedSearchFields label{font-size:10px;margin-bottom:8px;}
+.advancedSearchFields .select{
+  padding-left:15px;
+  padding-right:42px;
+}
 
 .advancedSearchToolbar{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  margin:13px 24px 0;padding:12px 14px;
-  border:1px solid #d6e5ef;border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin:14px 28px 0;
+  padding:12px 14px;
+  border:1px solid #d6e5ef;
+  border-radius:14px;
   background:linear-gradient(180deg,#fafdff,#f3f9fd);
 }
 
-.advancedSearchContext,.advancedSearchCount{display:flex;align-items:center;gap:9px;min-width:0;}
-.advancedSearchContext span,.advancedSearchCount span{color:#6b8498;font-size:9px;font-weight:900;letter-spacing:.08em;}
-.advancedSearchContext strong{color:#1d5579;font-size:12px;font-weight:950;}
-.advancedSearchCount strong{min-width:46px;padding:6px 10px;border-radius:9px;text-align:center;color:#fff;background:linear-gradient(135deg,#123560,#245992);font-size:13px;font-weight:950;box-shadow:0 5px 12px rgba(20,57,105,.16);}
-
-.advancedSearchStatus{min-height:18px;margin:8px 24px 0;}
-
-.advancedSearchResults{
-  margin:0 24px;min-height:380px;max-height:none;overflow:auto;
-  border:1px solid #d6e4ee;border-radius:14px;background:#fff;
+.advancedSearchContext span,
+.advancedSearchCount span{
+  font-size:10px;
 }
 
-.advancedSearchResults table{width:100%;min-width:820px;border-collapse:separate;border-spacing:0;}
-.advancedSearchResults thead th{position:sticky;top:0;z-index:2;padding:12px 13px;color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#254c85);border-bottom:1px solid #2d639c;font-size:10px;font-weight:900;letter-spacing:.08em;text-align:left;white-space:nowrap;}
-.advancedSearchResults tbody td{padding:12px 13px;color:#294463;background:#fff;border-bottom:1px solid #e7eef3;font-size:11px;font-weight:650;white-space:nowrap;}
-.advancedSearchResults tbody tr:nth-child(even) td{background:#f8fbfe;}
-.advancedSearchResults tbody tr:hover td{background:#eff8ff;}
-.advancedSearchResults .advancedTag{display:inline-flex;align-items:center;min-height:26px;padding:4px 9px;border:1px solid #cfe0ff;border-radius:8px;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:900;}
-.advancedSearchResults .advancedLensCode{color:#0369a1;font-weight:900;}
-.advancedSearchEmpty{padding:60px 22px;text-align:center;}
-.advancedSearchEmpty .emptyIcon{margin-bottom:10px;}
-.advancedSearchEmpty .emptyTitle{color:#355574;}
-.advancedSearchEmpty .emptyText{color:#7895b2;}
-.advancedSearchLoading{padding:52px 22px;text-align:center;color:#54728d;font-size:12px;font-weight:800;}
-.advancedSearchLoading::before{content:"";display:block;width:34px;height:34px;margin:0 auto 13px;border:3px solid #d8eaf6;border-top-color:#2b94f1;border-radius:50%;animation:advancedSearchSpin .8s linear infinite;}
-@keyframes advancedSearchSpin{to{transform:rotate(360deg);}}
-.advancedSearchNoResults{padding:60px 22px;text-align:center;color:#6f879a;font-size:12px;font-weight:750;}
-.advancedSearchHint{margin:11px 24px 0;color:#7890a0;font-size:9px;line-height:1.45;}
+.advancedSearchContext strong{
+  font-size:12px;
+}
+
+.advancedSearchCount strong{
+  min-width:52px;
+  padding:7px 11px;
+  font-size:13px;
+}
+
+.advancedSearchStatus{
+  min-height:20px;
+  margin:8px 28px 0;
+  font-size:11px;
+}
+
+.advancedSearchContext,
+.advancedSearchCount{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.advancedSearchContext span,
+.advancedSearchCount span{
+  color:#6b8498;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.advancedSearchContext strong{
+  color:#1d5579;
+  font-size:11px;
+  font-weight:950;
+}
+
+.advancedSearchCount strong{
+  min-width:42px;
+  padding:5px 9px;
+  border-radius:9px;
+  text-align:center;
+  color:#ffffff;
+  background:linear-gradient(135deg,#123560,#245992);
+  font-size:12px;
+  font-weight:950;
+  box-shadow:0 5px 12px rgba(20,57,105,.16);
+}
+
+.advancedSearchStatus{
+  min-height:18px;
+  margin:7px 22px 0;
+}
+
+.advancedSearchResults{
+  margin:0 28px;
+  max-height:none;
+  overflow:auto;
+  border:1px solid #d6e4ee;
+  border-radius:15px;
+  background:#ffffff;
+}
+
+.advancedSearchResults table{
+  width:100%;
+  min-width:820px;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+.advancedSearchResults thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:13px 14px;
+  color:#eaf6ff;
+  background:linear-gradient(100deg,#173b68,#205383 56%,#254c85);
+  border-bottom:1px solid #2d639c;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-align:left;
+  white-space:nowrap;
+}
+
+.advancedSearchResults tbody td{
+  padding:13px 14px;
+  color:#294463;
+  background:#ffffff;
+  border-bottom:1px solid #e7eef3;
+  font-size:11px;
+  font-weight:650;
+  white-space:nowrap;
+}
+
+.advancedSearchResults tbody tr:nth-child(even) td{
+  background:#f8fbfe;
+}
+
+.advancedSearchResults tbody tr:hover td{
+  background:#eff8ff;
+}
+
+.advancedSearchResults .advancedTag{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:4px 8px;
+  border:1px solid #cfe0ff;
+  border-radius:8px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-size:10px;
+  font-weight:900;
+}
+
+.advancedSearchResults .advancedLensCode{
+  color:#0369a1;
+  font-weight:900;
+}
+
+.advancedSearchEmpty{
+  padding:45px 20px;
+  text-align:center;
+}
+
+.advancedSearchEmpty .emptyIcon{
+  margin-bottom:10px;
+}
+
+.advancedSearchEmpty .emptyTitle{
+  color:#355574;
+}
+
+.advancedSearchEmpty .emptyText{
+  color:#7895b2;
+}
+
+.advancedSearchLoading{
+  padding:42px 20px;
+  text-align:center;
+  color:#54728d;
+  font-size:11px;
+  font-weight:800;
+}
+
+.advancedSearchLoading::before{
+  content:"";
+  display:block;
+  width:30px;
+  height:30px;
+  margin:0 auto 12px;
+  border:3px solid #d8eaf6;
+  border-top-color:#2b94f1;
+  border-radius:50%;
+  animation:advancedSearchSpin .8s linear infinite;
+}
+
+@keyframes advancedSearchSpin{
+  to{transform:rotate(360deg);}
+}
+
+.advancedSearchNoResults{
+  padding:45px 20px;
+  text-align:center;
+  color:#6f879a;
+  font-size:11px;
+  font-weight:750;
+}
+
+.advancedSearchHint{
+  margin:10px 22px 0;
+  color:#7890a0;
+  font-size:9px;
+  line-height:1.45;
+}
 
 @media(max-width:760px){
-  .advancedSearchModal{width:min(96vw,700px);max-height:94vh;height:94vh;}
-  .advancedSearchFields{grid-template-columns:1fr;gap:10px;}
-  .advancedSearchFields .field:nth-child(4){grid-column:auto;}
-  .advancedSearchResults{min-height:300px;max-height:none;}
-  .advancedSearchToolbar{align-items:flex-start;flex-direction:column;}
-  .advancedSearchContext,.advancedSearchCount{width:100%;justify-content:space-between;}
+  .advancedSearchModal{
+    width:min(96vw,760px);
+    max-height:92vh;
+    height:92vh;
+  }
+
+  .advancedSearchFields{
+    grid-template-columns:1fr;
+    gap:10px;
+    padding:16px 20px 4px;
+  }
+
+  .advancedSearchResults{
+    max-height:none;
+  }
+
+  .advancedSearchToolbar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .advancedSearchContext,
+  .advancedSearchCount{
+    width:100%;
+    justify-content:space-between;
+  }
 }
 
 @media(max-width:480px){
-  .advancedSearchHead{padding:17px 16px 12px;}
-  .advancedSearchFields{padding:13px 16px 2px;}
-  .advancedSearchFields .input,.advancedSearchFields .select{min-height:50px;}
-  .advancedSearchToolbar{margin-left:16px;margin-right:16px;}
-  .advancedSearchStatus{margin-left:16px;margin-right:16px;}
-  .advancedSearchResults{margin-left:16px;margin-right:16px;min-height:260px;}
-  .advancedSearchHint{margin-left:16px;margin-right:16px;}
-  .advancedSearchModal .modalActions{padding-left:16px;padding-right:16px;flex-wrap:wrap;}
-  .advancedSearchModal .modalActions .controlBtn{flex:1 1 auto;}
+  .advancedSearchHead{
+    padding:17px 16px 12px;
+  }
+
+  .advancedSearchFields{
+    padding:13px 16px 2px;
+  }
+
+  .advancedSearchToolbar{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .advancedSearchStatus{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .advancedSearchResults{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .advancedSearchHint{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .advancedSearchModal .modalActions{
+    padding-left:16px;
+    padding-right:16px;
+    flex-wrap:wrap;
+  }
+
+  .advancedSearchModal .modalActions .controlBtn{
+    flex:1 1 auto;
+  }
+
+  .advancedSearchFields .input,
+  .advancedSearchFields .select{
+    min-height:48px;
+    font-size:12px;
+  }
 }
+
 </style>
 
 <style id="aoChatImageStyles">
@@ -5933,6 +6211,155 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
       min-width:38px;
     }
   }
+</style>
+
+
+<style>
+/* =========================================================
+   PULL OUT ITEMS — ADDITIVE FEATURE ONLY
+========================================================= */
+.pullOutStatCard{cursor:pointer;}
+.pullOutStatCard .statIcon{color:#b45309;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fde68a;}
+.pullOutStatCard:hover{border-color:#fcd34d;}
+.pullOutModal{width:min(1120px,96vw)!important;max-height:90vh;overflow:hidden;}
+.pullOutHead{padding-bottom:12px;}
+.pullOutControls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;}
+.pullOutSelect,.pullOutInput{min-height:40px;padding:0 11px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#173247;font-size:11px;font-weight:750;outline:none;}
+.pullOutSelect{min-width:180px;}
+#pullOutStatusFilter{min-width:185px;}
+.pullOutInput{flex:1;min-width:220px;}
+.pullOutSelect:focus,.pullOutInput:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
+.pullOutActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.pullOutList{max-height:58vh;overflow:auto;border:1px solid #d7e5ef;border-radius:12px;background:#fff;}
+.pullOutHeader,.pullOutRow{display:grid;grid-template-columns:minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
+.pullOutHeader{position:sticky;top:0;z-index:2;background:#234e67;color:#fff;font-size:10px;font-weight:900;letter-spacing:.05em;}
+.pullOutHeader>div,.pullOutCell{padding:11px 10px;min-width:0;}
+.pullOutRow{border-top:1px solid #e2e8f0;font-size:11px;color:#203443;}
+.pullOutRow:nth-child(even){background:#f8fbff;}
+.pullOutCell.description{white-space:normal;overflow-wrap:anywhere;}
+.pullOutTag{display:inline-flex;align-items:center;padding:5px 8px;border-radius:8px;background:#eef6ff;color:#1d4ed8;font-weight:900;white-space:nowrap;}
+.pullOutActionsCell{display:flex;gap:7px;flex-wrap:wrap;}
+.pullOutEmpty{padding:28px 16px;text-align:center;color:#64748b;font-size:12px;font-weight:700;}
+.pullOutStatus{margin-top:9px;color:#64748b;font-size:10px;font-weight:750;}
+.pullOutRestoreBtn{border-color:#bbf7d0!important;background:#f0fdf4!important;color:#15803d!important;}
+.pullOutDeleteBtn{border-color:#fecaca!important;background:#fff1f2!important;color:#dc2626!important;}
+.pullOutRetrieveBtn{border-color:#fde68a!important;background:#fffbeb!important;color:#b45309!important;}
+@media(max-width:760px){
+  .pullOutModal{width:96vw!important;}
+  .pullOutHeader,.pullOutRow{grid-template-columns:90px minmax(180px,1.8fr) 120px 170px;min-width:560px;}
+  .pullOutList{overflow:auto;}
+}
+</style>
+
+
+<style id="pullOutConfirmCenterFinal">
+/* PULL OUT ONLY — confirmation must float centered INSIDE the Pull Out modal */
+#pullOutModal .pullOutConfirmOverlay{
+  position:absolute !important;
+  top:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  left:0 !important;
+  width:100% !important;
+  height:100% !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  max-width:none !important;
+  max-height:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+  display:grid !important;
+  place-items:center !important;
+  transform:none !important;
+  border-radius:inherit !important;
+  background:rgba(9,22,42,.58) !important;
+  z-index:2147483000 !important;
+  pointer-events:auto !important;
+}
+#pullOutModal .pullOutConfirmOverlay > .pullOutConfirmBox{
+  position:relative !important;
+  width:min(430px,calc(100% - 40px)) !important;
+  max-width:430px !important;
+  margin:0 !important;
+  align-self:center !important;
+  justify-self:center !important;
+  z-index:2147483001 !important;
+  pointer-events:auto !important;
+}
+#pullOutModal .pullOutConfirmOverlay .pullOutConfirmBox button{
+  pointer-events:auto !important;
+  position:relative !important;
+  z-index:2147483002 !important;
+}
+</style>
+
+<style id="pullOutConfirmAuthoritativeFinal">
+/* PULL OUT ONLY — confirmation floats INSIDE and CENTER of the Pull Out modal. */
+#pullOutModal .pullOutConfirmOverlay{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  border-radius:inherit !important;
+  background:rgba(9,22,42,.62) !important;
+  z-index:2147483640 !important;
+  pointer-events:auto !important;
+  overflow:hidden !important;
+}
+#pullOutModal .pullOutConfirmBox{
+  display:block !important;
+  position:relative !important;
+  top:auto !important;
+  left:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  transform:none !important;
+  width:min(460px,calc(100% - 48px)) !important;
+  max-width:460px !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:22px 24px 20px !important;
+  box-sizing:border-box !important;
+  border:1px solid #d7e4ee !important;
+  border-radius:18px !important;
+  background:#ffffff !important;
+  box-shadow:0 24px 70px rgba(15,23,42,.36),0 8px 24px rgba(15,23,42,.18) !important;
+  z-index:2147483641 !important;
+  pointer-events:auto !important;
+  color:#173247 !important;
+}
+#pullOutModal .pullOutConfirmBox .queueHead{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:14px !important;
+  margin:0 !important;
+}
+#pullOutModal .pullOutConfirmBox .queueTitle{
+  color:#173247 !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
+  font-weight:800 !important;
+  flex:1 !important;
+}
+#pullOutModal .pullOutConfirmBox .queueText{
+  display:flex !important;
+  justify-content:flex-end !important;
+  gap:9px !important;
+  margin-top:16px !important;
+}
+#pullOutModal .pullOutConfirmBox button{
+  position:relative !important;
+  z-index:2147483642 !important;
+  pointer-events:auto !important;
+}
 </style>
 
 </head>
@@ -6383,6 +6810,15 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
           <span>SHOWING</span>
           <strong id="showingTotalMini">—</strong>
         </div>
+      </div>
+
+      <div class="statCard auditStatCard pullOutStatCard" id="pullOutStatCard" role="button" tabindex="0" style="display:none;" onclick="openPullOutPopup()" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openPullOutPopup(); }" title="View pull out items">
+        <div class="statTop">
+          <span class="statLabel">PULL OUT ITEMS</span>
+          <span class="statIcon">↗</span>
+        </div>
+        <div id="pullOutTotal" class="statNumber">—</div>
+        <div class="statHint">Click to view pull out items</div>
       </div>
 
     </div>
@@ -9223,6 +9659,14 @@ function updateSoldOnlyColumns(){
       report === "audit" ? "" : "none";
   }
 
+  const pullOutCard =
+    document.getElementById("pullOutStatCard");
+
+  if(pullOutCard){
+    pullOutCard.style.display =
+      report === "audit" ? "" : "none";
+  }
+
   const showingCard =
     document.getElementById("showingStatCard");
 
@@ -10846,6 +11290,7 @@ async function updateStatsDirect(
   let unconfirmed = 0;
   let audit = 0;
   let reportedMissing = 0;
+  let pullOut = 0;
 
   try{
     const reportedRows =
@@ -10859,6 +11304,20 @@ async function updateStatsDirect(
           ).length;
   }catch(error){
     console.warn("Reported missing statistics unavailable:",error);
+  }
+
+  try{
+    const pullOutRows =
+      await fetchAllRowsForStats("pull_out","BR,NTAGN");
+    pullOut =
+      branch === "ALL"
+        ? pullOutRows.length
+        : pullOutRows.filter(row =>
+            String(row?.BR ?? "").trim().toUpperCase() ===
+            String(branch || "").trim().toUpperCase()
+          ).length;
+  }catch(error){
+    console.warn("Pull out statistics unavailable:",error);
   }
 
   await Promise.all(
@@ -11164,6 +11623,20 @@ async function updateStatsDirect(
     loadReportedMissingCount();
   }
 
+  const pullOutEl =
+    document.getElementById("pullOutTotal");
+  if(pullOutEl){
+    pullOutEl.textContent =
+      formatNumber(pullOut);
+  }
+
+  const pullOutCard =
+    document.getElementById("pullOutStatCard");
+  if(pullOutCard){
+    pullOutCard.style.display =
+      document.getElementById("sheet")?.value === "audit" ? "" : "none";
+  }
+
   const reportedMissingEl =
     document.getElementById("reportedMissingTotal");
   if(reportedMissingEl){
@@ -11466,6 +11939,16 @@ function renderTable(
             Add to Sold
           </button>
 
+          <button
+            type="button"
+            class="actionBtn"
+            data-stock-add-pullout="1"
+            data-branch="${escapeHtmlAttribute(row.branch)}"
+            data-tag="${escapeHtmlAttribute(row.tag)}"
+          >
+            ↗ Add to Pull Out
+          </button>
+
         `;
 
       }
@@ -11683,6 +12166,25 @@ function renderTable(
               addStockToSold(
                 button.dataset.branch,
                 button.dataset.tag
+              );
+            }
+          );
+        }
+      );
+
+    body
+      .querySelectorAll(
+        "[data-stock-add-pullout]"
+      )
+      .forEach(
+        button=>{
+          button.addEventListener(
+            "click",
+            ()=>{
+              addStockToPullOut(
+                button.dataset.branch,
+                button.dataset.tag,
+                button
               );
             }
           );
@@ -13696,7 +14198,8 @@ async function deleteSoldRow(
 ========================================================= */
 
 function inlineConfirm(
-  text
+  text,
+  yesLabel = "Delete"
 ){
 
   return new Promise(
@@ -13708,43 +14211,47 @@ function inlineConfirm(
         );
 
       panel.className =
-        "queueCard";
+        "queueCard pullOutConfirmOverlay";
 
       panel.innerHTML = `
 
-        <div class="queueHead">
+        <div class="pullOutConfirmBox">
 
-          <div class="queueTitle">
-            ${escapeHtml(text)}
+          <div class="queueHead">
+
+            <div class="queueTitle">
+              ${escapeHtml(text)}
+            </div>
+
+            <button
+              class="queueClose"
+              data-no
+            >
+              ×
+            </button>
+
           </div>
 
-          <button
-            class="queueClose"
-            data-no
+          <div
+            class="queueText"
+            style="margin-top:10px"
           >
-            ×
-          </button>
 
-        </div>
+            <button
+              class="controlBtn"
+              data-no
+            >
+              Cancel
+            </button>
 
-        <div
-          class="queueText"
-          style="margin-top:10px"
-        >
+            <button
+              class="controlBtn primary"
+              data-yes
+            >
+              ${escapeHtml(yesLabel)}
+            </button>
 
-          <button
-            class="controlBtn"
-            data-no
-          >
-            Cancel
-          </button>
-
-          <button
-            class="controlBtn primary"
-            data-yes
-          >
-            Delete
-          </button>
+          </div>
 
         </div>
 
@@ -16746,6 +17253,914 @@ async function deleteReportedMissingUnrecoverableConfirmed(branch,tag){
     if(typeof loadReportedMissingCount === "function") loadReportedMissingCount();
     await refreshDashboard();
   }catch(error){console.error("Delete reported missing failed:",error);showStatus(error?.message||"Unable to delete unrecoverable item.");}
+}
+
+/* =========================================================
+   PULL OUT ITEMS — ADDITIVE FEATURE ONLY
+   Central table: pull_out
+   Does NOT replace or modify existing Sold / Missing / Audit functions.
+========================================================= */
+
+let pullOutPopupRows = [];
+let pullOutPopupLoading = false;
+
+function pullOutRecordFromStock(row, branch, tag){
+  const record = {};
+  DB_COLUMNS.forEach(col=>{
+    record[col] = row?.[col] !== undefined && row?.[col] !== null
+      ? row[col]
+      : null;
+  });
+  record.BR = branch;
+  record.NTAGN = tag;
+  record.STATUS = "PULL OUT";
+  record["DATE AND TIME"] = philippineDateTime();
+  record["USER EMAIL"] = currentEmail || null;
+  return record;
+}
+
+async function addStockToPullOut(branch, tag, button){
+  branch = String(branch || "").trim().toUpperCase();
+  tag = String(tag || "").trim();
+  if(!branch || !tag){
+    showStatus("Missing branch or NTAGN.");
+    return;
+  }
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Adding...";
+  }
+
+  let insertedPullOut = false;
+
+  try{
+    const stockTable = tableName(branch,"stocks");
+    const auditTable = tableName(branch,"audit");
+
+    const params = new URLSearchParams();
+    params.set("BR","eq." + branch);
+    params.set("NTAGN","eq." + tag);
+    params.set("limit","1");
+
+    const stocks = await supabaseRequest(
+      stockTable + "?" + params.toString(),
+      {method:"GET"}
+    );
+
+    if(!Array.isArray(stocks) || !stocks.length){
+      throw new Error("Stock record " + tag + " was not found in " + branch + ".");
+    }
+
+    const existingPullOut = await supabaseRequest(
+      "pull_out?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag) +
+      "&limit=1",
+      {method:"GET"}
+    );
+
+    if(Array.isArray(existingPullOut) && existingPullOut.length){
+      throw new Error(tag + " is already in Pull Out.");
+    }
+
+    await supabaseRequest(
+      "pull_out",
+      {
+        method:"POST",
+        body:[pullOutRecordFromStock(stocks[0],branch,tag)],
+        prefer:"return=minimal"
+      }
+    );
+    insertedPullOut = true;
+
+    const deleteParams =
+      "?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag);
+
+    await Promise.all([
+      supabaseRequest(
+        stockTable + deleteParams,
+        {method:"DELETE",prefer:"return=minimal"}
+      ),
+      supabaseRequest(
+        auditTable + deleteParams,
+        {method:"DELETE",prefer:"return=minimal"}
+      )
+    ]);
+
+    showStatus(tag + " added to Pull Out and removed from Stocks and Audit.");
+    currentPage = 1;
+    await refreshDashboard();
+
+    if(document.getElementById("pullOutModal")){
+      await loadPullOutPopup();
+    }
+
+  }catch(error){
+    console.error("Add to Pull Out failed:",error);
+
+    /* If the move failed after the central record was inserted,
+       remove that Pull Out copy so a half-completed move is not left behind. */
+    if(insertedPullOut){
+      try{
+        await supabaseRequest(
+          "pull_out?BR=eq." + encodeURIComponent(branch) +
+          "&NTAGN=eq." + encodeURIComponent(tag),
+          {method:"DELETE",prefer:"return=minimal"}
+        );
+      }catch(rollbackError){
+        console.error("Pull Out rollback failed:",rollbackError);
+      }
+    }
+
+    showStatus(error?.message || "Unable to add item to Pull Out.");
+
+  }finally{
+    if(button){
+      button.disabled = false;
+      button.textContent = "↗ Add to Pull Out";
+    }
+  }
+}
+
+async function loadPullOutCount(){
+  const counter = document.getElementById("pullOutTotal");
+  const card = document.getElementById("pullOutStatCard");
+  if(!counter || !card) return;
+
+  const report = document.getElementById("sheet")?.value || "";
+  if(report !== "audit"){
+    card.style.display = "none";
+    return;
+  }
+
+  try{
+    const selectedBranch = String(
+      document.getElementById("branch")?.value || "ALL"
+    ).trim().toUpperCase();
+
+    const params = new URLSearchParams();
+    params.set("select","BR,NTAGN");
+
+    if(selectedBranch && selectedBranch !== "ALL"){
+      params.set("BR","eq." + selectedBranch);
+    }
+
+    const rows = await supabaseRequest(
+      "pull_out?" + params.toString(),
+      {method:"GET"}
+    );
+
+    counter.textContent = formatNumber(
+      Array.isArray(rows) ? rows.length : 0
+    );
+    card.style.display = "";
+
+  }catch(error){
+    console.error("Pull Out count failed:",error);
+    counter.textContent = "—";
+  }
+}
+
+async function openPullOutPopup(){
+  const existing = document.getElementById("pullOutModal");
+  if(existing) existing.remove();
+
+  const selectedBranch = String(
+    document.getElementById("branch")?.value || "ALL"
+  ).trim().toUpperCase();
+
+  const modal = document.createElement("div");
+  modal.id = "pullOutModal";
+  modal.className = "modalBackdrop";
+
+  modal.innerHTML = `
+    <div class="modalCard pullOutModal" role="dialog" aria-modal="true" aria-label="Pull Out Items">
+      <div class="pullOutHead">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div>
+            <div class="modalTitle" style="margin:0;">Pull Out Items</div>
+            <div class="modalSub" style="margin-top:4px;">Items removed from Stocks and Audit for pull out.</div>
+          </div>
+          <button type="button" data-pullout-close="1" aria-label="Close" style="width:38px;height:38px;border:1px solid #dbe5ec;border-radius:11px;background:#f8fafc;color:#475569;cursor:pointer;font-size:19px;font-weight:900;">×</button>
+        </div>
+
+        <div class="pullOutControls">
+          <select id="pullOutBranchFilter" class="pullOutSelect" aria-label="Pull Out Branch Filter">
+            <option value="ALL">ALL BRANCHES</option>
+            ${BRANCHES.map(b=>`<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`).join("")}
+          </select>
+          <select id="pullOutStatusFilter" class="pullOutSelect" aria-label="Pull Out Status Filter">
+            <option value="ONGOING">ONGOING REQUEST</option>
+            <option value="RETRIEVE">DELETED</option>
+            <option value="ALL">ALL STATUS</option>
+          </select>
+          <input id="pullOutSearch" class="pullOutInput" type="search" autocomplete="off" placeholder="🔍 Search by Tag Number">
+          <button type="button" class="controlBtn" data-pullout-refresh="1">♻ Refresh</button>
+        </div>
+
+        <div class="pullOutActions">
+          <button type="button" class="reportPdfBtn primary" data-pullout-pdf="1">↓ DOWNLOAD PDF REPORT</button>
+          <button type="button" class="reportPdfBtn" data-pullout-excel="1">↓ DOWNLOAD EXCEL</button>
+        </div>
+      </div>
+
+      <div class="pullOutHeader">
+        <div>LENS TYPE</div>
+        <div>DESCRIPTION</div>
+        <div>TAG NUMBER</div>
+        <div style="text-align:right;">ACTION</div>
+      </div>
+
+      <div id="pullOutList" class="pullOutList">
+        <div class="pullOutEmpty">⏳ Loading pull out items...</div>
+      </div>
+      <div id="pullOutPopupStatus" class="pullOutStatus"></div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const branchFilter = modal.querySelector("#pullOutBranchFilter");
+  if(branchFilter){
+    branchFilter.value =
+      selectedBranch === "ALL" || !BRANCHES.includes(selectedBranch)
+        ? "ALL"
+        : selectedBranch;
+    branchFilter.addEventListener("change",renderPullOutPopup);
+  }
+
+  const statusFilter = modal.querySelector("#pullOutStatusFilter");
+  if(statusFilter){
+    statusFilter.value = "ONGOING";
+    statusFilter.addEventListener("change",renderPullOutPopup);
+  }
+
+  modal.querySelector("#pullOutSearch")?.addEventListener("input",renderPullOutPopup);
+  modal.querySelector("[data-pullout-refresh='1']")?.addEventListener("click",loadPullOutPopup);
+  modal.querySelector("[data-pullout-pdf='1']")?.addEventListener("click",downloadPullOutPdf);
+  modal.querySelector("[data-pullout-excel='1']")?.addEventListener("click",downloadPullOutExcel);
+  modal.querySelector("[data-pullout-close='1']")?.addEventListener("click",()=>modal.remove());
+  modal.addEventListener("click",e=>{if(e.target===modal) modal.remove();});
+
+  await loadPullOutPopup();
+}
+
+async function loadPullOutPopup(){
+  const list = document.getElementById("pullOutList");
+  if(!list || pullOutPopupLoading) return;
+
+  pullOutPopupLoading = true;
+  list.innerHTML = '<div class="pullOutEmpty">⏳ Loading pull out items...</div>';
+
+  try{
+    pullOutPopupRows = await fetchAllRowsForStats(
+      "pull_out",
+      "BR,NTAGN,LENSTYPE,DESCRIPTION,STATUS"
+    );
+    renderPullOutPopup();
+    loadPullOutCount();
+  }catch(error){
+    console.error("Pull Out popup load failed:",error);
+    list.innerHTML = '<div class="pullOutEmpty">Unable to load Pull Out items.</div>';
+  }finally{
+    pullOutPopupLoading = false;
+  }
+}
+
+function getPullOutFilteredRows(){
+  const branch = String(
+    document.getElementById("pullOutBranchFilter")?.value || "ALL"
+  ).trim().toUpperCase();
+
+  const search = String(
+    document.getElementById("pullOutSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  const statusFilter = String(
+    document.getElementById("pullOutStatusFilter")?.value || "ONGOING"
+  ).trim().toUpperCase();
+
+  return (Array.isArray(pullOutPopupRows) ? pullOutPopupRows : []).filter(row=>{
+    const rb = String(row?.BR || "").trim().toUpperCase();
+    const tag = String(row?.NTAGN || "").trim().toLowerCase();
+    const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
+
+    if(branch !== "ALL" && rb !== branch) return false;
+    if(search && !tag.includes(search)) return false;
+
+    if(statusFilter === "ONGOING" && state !== "PULL OUT") return false;
+    if(statusFilter === "RETRIEVE" && state !== "RETRIEVE") return false;
+
+    return true;
+  });
+}
+
+function renderPullOutPopup(){
+  const list = document.getElementById("pullOutList");
+  if(!list) return;
+
+  const rows = getPullOutFilteredRows();
+  const status = document.getElementById("pullOutPopupStatus");
+
+  if(status){
+    status.textContent =
+      rows.length +
+      " pull out item" +
+      (rows.length === 1 ? "" : "s") +
+      " shown.";
+  }
+
+  if(!rows.length){
+    list.innerHTML = '<div class="pullOutEmpty">No Pull Out items found.</div>';
+    return;
+  }
+
+  list.innerHTML = rows.map(row=>{
+    const b = String(row?.BR || "").trim().toUpperCase();
+    const t = String(row?.NTAGN || "").trim();
+    const type = String(row?.LENSTYPE || "—").trim();
+    const description = String(row?.DESCRIPTION || "—").trim();
+    const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
+    const isRetrieved = state === "RETRIEVE";
+
+    return `
+      <div class="pullOutRow">
+        <div class="pullOutCell">${escapeHtml(type || "—")}</div>
+        <div class="pullOutCell description">${escapeHtml(description || "—")}</div>
+        <div class="pullOutCell"><span class="pullOutTag">${escapeHtml(t || "—")}</span></div>
+        <div class="pullOutCell pullOutActionsCell" style="justify-content:flex-end;">
+          ${isRetrieved ? "" : `
+            <button type="button" class="actionBtn pullOutRestoreBtn" data-pullout-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ ADD TO STOCKS</button>
+          `}
+          <button type="button" class="actionBtn ${isRetrieved ? "pullOutRetrieveBtn" : "pullOutDeleteBtn"}" data-pullout-toggle="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}" data-state="${isRetrieved ? "RETRIEVE" : "PULL OUT"}">${isRetrieved ? "RETRIEVE" : "DELETE"}</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  /* Direct handlers: reliable after every Pull Out re-render. */
+  list.querySelectorAll("[data-pullout-restore]").forEach(btn=>{
+    btn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      void restorePullOutToStocks(
+        btn.dataset.branch,
+        btn.dataset.tag,
+        btn
+      );
+    };
+  });
+
+  list.querySelectorAll("[data-pullout-toggle]").forEach(btn=>{
+    btn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      void togglePullOutRetrieve(
+        btn.dataset.branch,
+        btn.dataset.tag,
+        btn.dataset.state,
+        btn
+      );
+    };
+  });
+}
+
+async function togglePullOutRetrieve(branch,tag,currentState,button){
+  branch = String(branch || "").trim().toUpperCase();
+  tag = String(tag || "").trim();
+  currentState = String(currentState || "PULL OUT").trim().toUpperCase();
+  if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
+
+  const nextState = currentState === "RETRIEVE" ? "PULL OUT" : "RETRIEVE";
+  const actionText = nextState === "RETRIEVE"
+    ? "Change " + tag + " from PULL OUT to RETRIEVE?"
+    : "Change " + tag + " from RETRIEVE back to PULL OUT?";
+
+  const confirmed = await pullOutInlineConfirm(
+    actionText,
+    "Confirm"
+  );
+  if(!confirmed) return;
+
+  if(button){button.disabled=true;button.textContent="Saving...";}
+
+  try{
+    await supabaseRequest(
+      "pull_out?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag),
+      {
+        method:"PATCH",
+        body:{
+          STATUS:nextState,
+          "DATE AND TIME":philippineDateTime(),
+          "USER EMAIL":currentEmail || null
+        },
+        prefer:"return=minimal"
+      }
+    );
+
+    const row = pullOutPopupRows.find(r=>
+      String(r?.BR || "").trim().toUpperCase() === branch &&
+      String(r?.NTAGN || "").trim() === tag
+    );
+    if(row) row.STATUS = nextState;
+
+    renderPullOutPopup();
+    showStatus(
+      tag + (nextState === "RETRIEVE"
+        ? " changed to RETRIEVE."
+        : " changed back to PULL OUT.")
+    );
+    loadPullOutCount();
+    await refreshDashboard();
+
+  }catch(error){
+    console.error("Pull Out retrieve toggle failed:",error);
+    showStatus(error?.message || "Unable to change Pull Out status.");
+  }finally{
+    if(button){
+      button.disabled=false;
+      button.textContent=nextState === "RETRIEVE" ? "RETRIEVE" : "DELETE";
+    }
+  }
+}
+
+function pullOutInlineConfirm(text, yesLabel = "Confirm"){
+  return new Promise(resolve=>{
+    const panel = document.createElement("div");
+    panel.className = "pullOutConfirmOverlay";
+    panel.innerHTML = `
+      <div class="pullOutConfirmBox" role="dialog" aria-modal="true">
+        <div class="queueHead">
+          <div class="queueTitle">${escapeHtml(text)}</div>
+          <button type="button" class="queueClose" data-no aria-label="Cancel">×</button>
+        </div>
+        <div class="queueText">
+          <button type="button" class="controlBtn" data-no>Cancel</button>
+          <button type="button" class="controlBtn primary" data-yes>${escapeHtml(yesLabel)}</button>
+        </div>
+      </div>
+    `;
+
+    const pullOutHost = document.querySelector("#pullOutModal .modalCard.pullOutModal");
+    if(!pullOutHost){
+      resolve(false);
+      return;
+    }
+
+    const hostStyle = getComputedStyle(pullOutHost);
+    if(hostStyle.position === "static") pullOutHost.style.position = "relative";
+    pullOutHost.appendChild(panel);
+
+    const close = value=>{
+      panel.remove();
+      resolve(value);
+    };
+
+    panel.querySelectorAll("[data-no]").forEach(btn=>{
+      btn.onclick=e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        close(false);
+      };
+    });
+
+    panel.querySelector("[data-yes]")?.addEventListener("click",e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      close(true);
+    });
+  });
+}
+
+async function restorePullOutToStocks(branch,tag,button){
+  branch = String(branch || "").trim().toUpperCase();
+  tag = String(tag || "").trim();
+  if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
+
+  const confirmed = await pullOutInlineConfirm(
+    "Add " + tag + " from " + branch + " back to Stocks and Audit as AUDITED?",
+    "Confirm"
+  );
+  if(!confirmed) return;
+
+  if(button){button.disabled=true;button.textContent="Restoring...";}
+
+  try{
+    const record = await getPullOutRecord(branch,tag);
+    if(!record) throw new Error("Pull Out record was not found.");
+
+    const stockTable = tableName(branch,"stocks");
+    const auditTable = tableName(branch,"audit");
+    const p = new URLSearchParams();
+    p.set("BR","eq." + branch);
+    p.set("NTAGN","eq." + tag);
+    p.set("limit","1");
+
+    const existingStock = await supabaseRequest(
+      stockTable + "?" + p.toString(),
+      {method:"GET"}
+    );
+
+    if(!Array.isArray(existingStock) || !existingStock.length){
+      const stockRecord = {};
+      DB_COLUMNS.slice(0,22).forEach(col=>{
+        stockRecord[col] = record[col] !== undefined && record[col] !== null ? record[col] : null;
+      });
+      await supabaseRequest(
+        stockTable,
+        {method:"POST",body:[stockRecord],prefer:"return=minimal"}
+      );
+    }
+
+    const existingAudit = await supabaseRequest(
+      auditTable + "?" + p.toString(),
+      {method:"GET"}
+    );
+
+    if(Array.isArray(existingAudit) && existingAudit.length){
+      await supabaseRequest(
+        auditTable + "?" + p.toString(),
+        {
+          method:"PATCH",
+          body:{
+            STATUS:"AUDITED",
+            "DATE AND TIME":philippineDateTime(),
+            "USER EMAIL":currentEmail || null
+          },
+          prefer:"return=minimal"
+        }
+      );
+    }else{
+      const auditRecord = {};
+      DB_COLUMNS.forEach(col=>{
+        auditRecord[col] = record[col] !== undefined && record[col] !== null ? record[col] : null;
+      });
+      auditRecord.BR=branch;
+      auditRecord.NTAGN=tag;
+      auditRecord.STATUS="AUDITED";
+      auditRecord["DATE AND TIME"]=philippineDateTime();
+      auditRecord["USER EMAIL"]=currentEmail || null;
+
+      await supabaseRequest(
+        auditTable,
+        {method:"POST",body:[auditRecord],prefer:"return=minimal"}
+      );
+    }
+
+    await supabaseRequest(
+      "pull_out?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag),
+      {method:"DELETE",prefer:"return=minimal"}
+    );
+
+    pullOutPopupRows = pullOutPopupRows.filter(row=>
+      !(String(row?.BR || "").trim().toUpperCase() === branch &&
+        String(row?.NTAGN || "").trim() === tag)
+    );
+
+    renderPullOutPopup();
+    showStatus(tag + " restored to Stocks and Audit as AUDITED.");
+    loadPullOutCount();
+    await refreshDashboard();
+
+  }catch(error){
+    console.error("Restore Pull Out failed:",error);
+    showStatus(error?.message || "Unable to restore Pull Out item.");
+  }finally{
+    if(button){button.disabled=false;button.textContent="↩ ADD TO STOCKS";}
+  }
+}
+
+async function getPullOutRecord(branch,tag){
+  const rows = await supabaseRequest(
+    "pull_out?BR=eq." + encodeURIComponent(String(branch).trim().toUpperCase()) +
+    "&NTAGN=eq." + encodeURIComponent(String(tag).trim()) +
+    "&limit=1",
+    {method:"GET"}
+  );
+  return Array.isArray(rows) && rows.length ? rows[0] : null;
+}
+
+function pullOutExportRows(){
+  const branch = String(
+    document.getElementById("pullOutBranchFilter")?.value || "ALL"
+  ).trim().toUpperCase();
+
+  const search = String(
+    document.getElementById("pullOutSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  return (Array.isArray(pullOutPopupRows) ? pullOutPopupRows : [])
+    .filter(row=>{
+      const rb = String(row?.BR || "").trim().toUpperCase();
+      const tag = String(row?.NTAGN || "").trim().toLowerCase();
+      const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
+
+      if(state !== "PULL OUT") return false;
+      if(branch !== "ALL" && rb !== branch) return false;
+      if(search && !tag.includes(search)) return false;
+
+      return true;
+    })
+    .map(row=>({
+      BR:row?.BR,
+      LENSTYPE:row?.LENSTYPE,
+      DESCRIPTION:row?.DESCRIPTION,
+      NTAGN:row?.NTAGN
+    }));
+}
+
+async function downloadPullOutExcel(){
+  const button = document.querySelector("[data-pullout-excel='1']");
+  if(button) button.disabled=true;
+
+  try{
+    const branch = String(
+      document.getElementById("pullOutBranchFilter")?.value || "ALL"
+    ).trim().toUpperCase();
+
+    /* Pull Out downloads contain ONLY ongoing requests (PULL OUT).
+       RETRIEVE records are excluded from both Excel and PDF.
+       The export remains A-V exactly like the inventory data. */
+    const exportRows = await fetchAllRowsForStats(
+      "pull_out",
+      DB_COLUMNS.slice(0,22).concat(["STATUS"]).join(",")
+    );
+
+    const searchFiltered = String(
+      document.getElementById("pullOutSearch")?.value || ""
+    ).trim().toLowerCase();
+
+    const rows = (Array.isArray(exportRows) ? exportRows : []).filter(row=>{
+      const rb = String(row?.BR || "").trim().toUpperCase();
+      const tag = String(row?.NTAGN || "").trim().toLowerCase();
+      const state = String(row?.STATUS || "").trim().toUpperCase();
+
+      if(state !== "PULL OUT") return false;
+      if(branch !== "ALL" && rb !== branch) return false;
+      if(searchFiltered && !tag.includes(searchFiltered)) return false;
+      return true;
+    });
+
+    const headers = DB_COLUMNS.slice(0,22);
+    const data = rows.map(row=>
+      headers.map(col=>row?.[col] ?? "")
+    );
+
+    const meta = [
+      ["Branch",branch === "ALL" ? "ALL BRANCHES" : aoPdfBranchLabel(branch)],
+      ["Status","ONGOING REQUEST"],
+      ["Records",rows.length],
+      ["Generated",formatDateValue(new Date().toISOString())]
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = aoExcelMakeTitleSheet(
+      "ACEBEDO OPTICAL — PULL OUT ITEMS",
+      meta,
+      headers,
+      data,
+      {
+        widths:DB_COLUMNS.slice(0,22).map(col=>{
+          if(col === "DESCRIPTION") return 55;
+          if(col === "NTAGN") return 28;
+          if(col === "LENSTYPE") return 18;
+          return 18;
+        }),
+        centerCols:DB_COLUMNS.slice(0,22).map((col,i)=>
+          (col === "BR" || col === "NTAGN" || col === "LENSTYPE") ? i : -1
+        ).filter(i=>i>=0)
+      }
+    );
+    XLSX.utils.book_append_sheet(wb,ws,"PULL OUT");
+    XLSX.writeFile(
+      wb,
+      "Acebedo_Pull_Out_" + branch + "_" + formatFileDate() + ".xlsx"
+    );
+    showStatus("Pull Out Excel downloaded.");
+  }catch(error){
+    console.error("Pull Out Excel failed:",error);
+    showStatus(error?.message || "Unable to create Pull Out Excel.");
+  }finally{
+    if(button) button.disabled=false;
+  }
+}
+
+async function downloadPullOutPdf(){
+  const button = document.querySelector("[data-pullout-pdf='1']");
+  if(button) button.disabled = true;
+
+  try{
+    if(!window.jspdf || !window.jspdf.jsPDF){
+      throw new Error("PDF library is not available. Please refresh the Dashboard and try again.");
+    }
+
+    const branch = String(
+      document.getElementById("pullOutBranchFilter")?.value || "ALL"
+    ).trim().toUpperCase();
+
+    /* Pull Out PDF = ONGOING REQUESTS ONLY (STATUS = PULL OUT).
+       Uses the same branch + tag-search filters as the popup. */
+    const rows = pullOutExportRows();
+
+    const doc = new window.jspdf.jsPDF({
+      orientation:"landscape",
+      unit:"mm",
+      format:"a4"
+    });
+
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+    const M = 12;
+
+    /* Header */
+    try{
+      if(typeof ACEBEDO_REPORT_LOGO_DATA !== "undefined" && ACEBEDO_REPORT_LOGO_DATA){
+        doc.addImage(
+          ACEBEDO_REPORT_LOGO_DATA,
+          "JPEG",
+          M,
+          9,
+          24,
+          24,
+          undefined,
+          "FAST"
+        );
+      }
+    }catch(e){
+      console.warn("Pull Out PDF logo could not be added:",e);
+    }
+
+    const textX = M + 31;
+    doc.setTextColor(15,45,63);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(20);
+    doc.text("Acebedo Optical",textX,17);
+
+    doc.setTextColor(37,99,235);
+    doc.setFontSize(13.5);
+    doc.text("Pull Out Items Report",textX,25);
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(71,85,105);
+    doc.text(
+      "Branch: " + (branch === "ALL" ? "ALL BRANCHES" : aoPdfBranchLabel(branch)),
+      textX,
+      32
+    );
+    doc.text(
+      "Generated: " + formatDateValue(new Date().toISOString()),
+      textX,
+      38
+    );
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(71,85,105);
+    doc.text(
+      "This report presents ongoing Pull Out requests only.",
+      M,
+      52
+    );
+
+    /* Summary */
+    let y = 65;
+    doc.setFillColor(239,246,255);
+    doc.setDrawColor(191,219,254);
+    doc.roundedRect(M,y-7,74,17,3,3,"FD");
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(37,99,235);
+    doc.text("TOTAL ITEMS",M+4,y-1);
+    doc.setFontSize(12);
+    doc.setTextColor(15,45,63);
+    doc.text(String(rows.length),M+4,y+6);
+
+    y += 24;
+
+    /* Table: BRANCH / LENS TYPE / DESCRIPTION / TAG NUMBER only. */
+    const C = [
+      {l:"BRANCH",      k:"BR",          w:28},
+      {l:"LENS TYPE",   k:"LENSTYPE",   w:42},
+      {l:"DESCRIPTION", k:"DESCRIPTION",w:105},
+      {l:"TAG NUMBER",  k:"NTAGN",      w:80}
+    ];
+
+    function drawHeader(){
+      let x=M;
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(8);
+      doc.setTextColor(255,255,255);
+      C.forEach(col=>{
+        doc.setFillColor(35,78,103);
+        doc.setDrawColor(35,78,103);
+        doc.rect(x,y-6,col.w,10,"FD");
+        doc.text(col.l,x+2,y+0.4);
+        x += col.w;
+      });
+      y += 10;
+    }
+
+    function drawRow(R){
+      const vals = [
+        aoPdfSafeText(R.BR),
+        aoPdfSafeText(R.LENSTYPE),
+        aoPdfSafeText(R.DESCRIPTION),
+        aoPdfSafeText(R.NTAGN)
+      ];
+
+      const wrapped = vals.map((v,i)=>
+        doc.splitTextToSize(v,C[i].w-5)
+      );
+
+      const rowHeight = Math.max(
+        9,
+        Math.max(...wrapped.map(a=>a.length),1)*4.1 + 4
+      );
+
+      if(y + rowHeight > H - 24){
+        doc.addPage();
+        y = 20;
+        drawHeader();
+      }
+
+      let x=M;
+      wrapped.forEach((lines,i)=>{
+        doc.setFillColor(
+          i % 2 === 0 ? 249 : 255,
+          i % 2 === 0 ? 252 : 255,
+          i % 2 === 0 ? 254 : 255
+        );
+        doc.setDrawColor(218,230,238);
+        doc.rect(x,y-6,C[i].w,rowHeight,"FD");
+        doc.setFont("helvetica","normal");
+        doc.setFontSize(7.7);
+        doc.setTextColor(32,52,67);
+        doc.text(lines,x+2,y+0.1);
+        x += C[i].w;
+      });
+
+      y += rowHeight;
+    }
+
+    drawHeader();
+
+    if(!rows.length){
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100,116,139);
+      doc.text("No ongoing Pull Out requests found.",M,y+8);
+      y += 18;
+    }else{
+      rows.forEach(drawRow);
+    }
+
+    /* Footer */
+    if(y + 20 > H - 10){
+      doc.addPage();
+      y = 20;
+    }
+
+    const footerY = y + 3;
+    const footerW = W - M*2;
+    doc.setFillColor(241,248,252);
+    doc.setDrawColor(191,219,254);
+    doc.roundedRect(M,footerY,footerW,18,3,3,"FD");
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(35,78,103);
+    doc.text("TOTAL RECORDS",M+5,footerY+7);
+    doc.setFontSize(11);
+    doc.setTextColor(15,45,63);
+    doc.text(String(rows.length),M+5,footerY+14);
+
+    const pageCount = doc.getNumberOfPages();
+    for(let page=1;page<=pageCount;page++){
+      doc.setPage(page);
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(7);
+      doc.setTextColor(148,163,184);
+      doc.text("Acebedo Optical • Pull Out Items",M,H-7);
+      doc.text("Page " + page + " of " + pageCount,W-M,H-7,{align:"right"});
+    }
+
+    const filename =
+      "Acebedo_Pull_Out_" +
+      branch + "_" +
+      formatFileDate() +
+      ".pdf";
+
+    doc.save(filename);
+    showStatus("Pull Out PDF downloaded.");
+
+  }catch(error){
+    console.error("Pull Out PDF failed:",error);
+    showStatus(error?.message || "Unable to create Pull Out PDF.");
+  }finally{
+    if(button) button.disabled = false;
+  }
 }
 
 /* =========================================================

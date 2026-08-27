@@ -10905,6 +10905,181 @@ async function deleteSelectedReport(
 
 }
 
+
+/* =========================================================
+   FAST SERVER-SIDE PAGINATION — AVAILABLE STOCKS ONLY
+   Additive performance layer. Existing Sold/Audit result
+   loading remains unchanged.
+========================================================= */
+let serverPageMode = false;
+let serverPageTotal = 0;
+let serverPageCountsCache = new Map();
+let serverPageRequestToken = 0;
+
+function serverPageCacheKey(branch, search){
+  return String(branch || "").trim().toUpperCase() + "|" + cleanSearch(search);
+}
+
+async function fetchStockPageCount(branch, search=""){
+  const key = serverPageCacheKey(branch, search);
+  if(serverPageCountsCache.has(key)) return serverPageCountsCache.get(key);
+
+  const table = tableName(branch, "stocks");
+  const params = buildSearchParams(search);
+  params.set("limit", "1");
+  params.set("offset", "0");
+
+  try{
+    const res = await fetch(
+      table === table ? SUPABASE_URL + "/rest/v1/" + table + "?" + params.toString() : "",
+      {
+        method:"GET",
+        headers:{
+          apikey:SUPABASE_KEY,
+          Authorization:"Bearer " + SUPABASE_KEY,
+          Accept:"application/json",
+          "Content-Type":"application/json",
+          Prefer:"count=exact"
+        },
+        cache:"no-store"
+      }
+    );
+    const text = await res.text();
+    if(!res.ok){
+      let data={};
+      try{ data=text ? JSON.parse(text) : {}; }catch(e){}
+      const msg=data?.message || data?.error || data?.details || text;
+      throw new Error("Supabase HTTP " + res.status + (msg ? ": " + msg : ""));
+    }
+
+    const contentRange = res.headers.get("content-range") || "";
+    const match = contentRange.match(/\/(\d+)$/);
+    const count = match ? Number(match[1]) : (text ? JSON.parse(text).length : 0);
+
+    serverPageCountsCache.set(key, Number.isFinite(count) ? count : 0);
+    return Number.isFinite(count) ? count : 0;
+  }catch(error){
+    console.error("Fast stock count failed for " + branch + ":", error);
+    throw error;
+  }
+}
+
+async function fetchStocksPageServer(branch, search, offset, limit){
+  const table = tableName(branch, "stocks");
+  const params = buildSearchParams(search);
+  params.set("limit", String(limit));
+  params.set("offset", String(Math.max(0, offset)));
+
+  return supabaseRequest(
+    table + "?" + params.toString(),
+    {method:"GET"}
+  );
+}
+
+async function getServerStockPagePlan(branch, search, page){
+  const sortedBranches = BRANCHES.slice().sort((a,b)=>a.localeCompare(b));
+  const globalStart = (page - 1) * ROWS_PER_PAGE;
+
+  if(branch !== "ALL"){
+    const total = await fetchStockPageCount(branch, search);
+    return {
+      total,
+      requests:[{
+        branch,
+        offset:globalStart,
+        limit:ROWS_PER_PAGE
+      }]
+    };
+  }
+
+  const counts = await Promise.all(
+    sortedBranches.map(async b=>({branch:b,count:await fetchStockPageCount(b,search)}))
+  );
+
+  const total = counts.reduce((sum,item)=>sum + item.count, 0);
+  const requests=[];
+  let cursor=0;
+  let need=ROWS_PER_PAGE;
+
+  for(const item of counts){
+    if(need <= 0) break;
+    const start=cursor;
+    const end=cursor + item.count;
+    cursor=end;
+
+    if(globalStart >= end) continue;
+    if(globalStart + ROWS_PER_PAGE <= start) break;
+
+    const localOffset=Math.max(0, globalStart - start);
+    const take=Math.min(need, item.count - localOffset);
+    if(take > 0){
+      requests.push({branch:item.branch,offset:localOffset,limit:take});
+      need -= take;
+    }
+  }
+
+  return {total,requests};
+}
+
+async function refreshDashboardServerPagedStocks(){
+  const token = ++serverPageRequestToken;
+  const branch = document.getElementById("branch")?.value || "ALL";
+  const search = cleanSearch(document.getElementById("search")?.value || "");
+  const page = currentPage;
+
+  serverPageMode = true;
+  setLoading(true);
+
+  try{
+    const plan = await getServerStockPagePlan(branch, search, page);
+    if(token !== serverPageRequestToken) return;
+
+    const chunks = await Promise.all(
+      plan.requests.map(req=>fetchStocksPageServer(req.branch, search, req.offset, req.limit))
+    );
+
+    if(token !== serverPageRequestToken) return;
+
+    const combined=[];
+    plan.requests.forEach((req,index)=>{
+      const rows=Array.isArray(chunks[index]) ? chunks[index] : [];
+      rows.forEach(row=>combined.push(mapRow(row,req.branch)));
+    });
+
+    currentRows=combined;
+    serverPageTotal=plan.total;
+    totalRows=plan.total;
+
+    renderTable(combined);
+
+    totalRows=serverPageTotal;
+    const start=(currentPage-1) * ROWS_PER_PAGE;
+    const shownStart = combined.length ? start + 1 : 0;
+    const shownEnd = combined.length ? start + combined.length : 0;
+    const pageInfo=document.getElementById("pageInfo");
+    if(pageInfo){
+      pageInfo.textContent = combined.length
+        ? "Showing " + formatNumber(shownStart) + "–" + formatNumber(shownEnd) + " of " + formatNumber(totalRows)
+        : (totalRows ? "No records on this page" : "No records found");
+    }
+    const showingTotal=document.getElementById("showingTotal");
+    if(showingTotal) showingTotal.textContent=formatNumber(totalRows);
+    const showingMini=document.getElementById("showingTotalMini");
+    if(showingMini) showingMini.textContent=formatNumber(totalRows);
+    updatePagination();
+
+    updateStatsDirect(branch,token).catch(error=>console.error("Statistics error:",error));
+
+  }catch(error){
+    if(token === serverPageRequestToken){
+      console.error("Fast Dashboard stock load failed:",error);
+      renderError(error);
+    }
+  }finally{
+    if(token === serverPageRequestToken) setLoading(false);
+  }
+}
+
 /* =========================================================
    RUN SEARCH
 ========================================================= */
@@ -10920,6 +11095,13 @@ function runSearch(){
 
   currentPage = 1;
 
+  if(document.getElementById("sheet")?.value === "stocks") {
+    serverPageCountsCache.clear();
+    refreshDashboardServerPagedStocks();
+    return;
+  }
+
+  serverPageMode = false;
   refreshDashboard();
 
 }
@@ -10947,6 +11129,10 @@ function searchKey(event){
 ========================================================= */
 
 async function refreshDashboard(){
+
+  if(document.getElementById("sheet")?.value === "stocks" && serverPageMode !== false){
+    return refreshDashboardServerPagedStocks();
+  }
 
   if(!sessionId){
 
@@ -12379,15 +12565,16 @@ function updatePagination(){
 
 function previousPage(){
 
-  if(
-    currentPage <= 1
-  ){
-
+  if(currentPage <= 1){
     return;
-
   }
 
   currentPage--;
+
+  if(serverPageMode){
+    refreshDashboardServerPagedStocks();
+    return;
+  }
 
   renderCurrentPage();
 
@@ -12404,16 +12591,16 @@ function nextPage(){
       )
     );
 
-  if(
-    currentPage >=
-    totalPages
-  ){
-
+  if(currentPage >= totalPages){
     return;
-
   }
 
   currentPage++;
+
+  if(serverPageMode){
+    refreshDashboardServerPagedStocks();
+    return;
+  }
 
   renderCurrentPage();
 

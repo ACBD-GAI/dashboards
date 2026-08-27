@@ -6183,6 +6183,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .pullOutControls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;}
 .pullOutSelect,.pullOutInput{min-height:40px;padding:0 11px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#173247;font-size:11px;font-weight:750;outline:none;}
 .pullOutSelect{min-width:180px;}
+#pullOutStatusFilter{min-width:185px;}
 .pullOutInput{flex:1;min-width:220px;}
 .pullOutSelect:focus,.pullOutInput:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
 .pullOutActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
@@ -6199,6 +6200,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .pullOutStatus{margin-top:9px;color:#64748b;font-size:10px;font-weight:750;}
 .pullOutRestoreBtn{border-color:#bbf7d0!important;background:#f0fdf4!important;color:#15803d!important;}
 .pullOutDeleteBtn{border-color:#fecaca!important;background:#fff1f2!important;color:#dc2626!important;}
+.pullOutRetrieveBtn{border-color:#fde68a!important;background:#fffbeb!important;color:#b45309!important;}
 @media(max-width:760px){
   .pullOutModal{width:96vw!important;}
   .pullOutHeader,.pullOutRow{grid-template-columns:90px minmax(180px,1.8fr) 120px 170px;min-width:560px;}
@@ -17405,6 +17407,11 @@ async function openPullOutPopup(){
             <option value="ALL">ALL BRANCHES</option>
             ${BRANCHES.map(b=>`<option value="${escapeHtmlAttribute(b)}">${escapeHtml(b)}</option>`).join("")}
           </select>
+          <select id="pullOutStatusFilter" class="pullOutSelect" aria-label="Pull Out Status Filter">
+            <option value="ONGOING">ONGOING REQUEST</option>
+            <option value="RETRIEVE">DELETED</option>
+            <option value="ALL">ALL STATUS</option>
+          </select>
           <input id="pullOutSearch" class="pullOutInput" type="search" autocomplete="off" placeholder="🔍 Search by Tag Number">
           <button type="button" class="controlBtn" data-pullout-refresh="1">♻ Refresh</button>
         </div>
@@ -17440,6 +17447,12 @@ async function openPullOutPopup(){
     branchFilter.addEventListener("change",renderPullOutPopup);
   }
 
+  const statusFilter = modal.querySelector("#pullOutStatusFilter");
+  if(statusFilter){
+    statusFilter.value = "ONGOING";
+    statusFilter.addEventListener("change",renderPullOutPopup);
+  }
+
   modal.querySelector("#pullOutSearch")?.addEventListener("input",renderPullOutPopup);
   modal.querySelector("[data-pullout-refresh='1']")?.addEventListener("click",loadPullOutPopup);
   modal.querySelector("[data-pullout-pdf='1']")?.addEventListener("click",downloadPullOutPdf);
@@ -17460,7 +17473,7 @@ async function loadPullOutPopup(){
   try{
     pullOutPopupRows = await fetchAllRowsForStats(
       "pull_out",
-      "BR,NTAGN,LENSTYPE,DESCRIPTION"
+      "BR,NTAGN,LENSTYPE,DESCRIPTION,STATUS"
     );
     renderPullOutPopup();
     loadPullOutCount();
@@ -17481,12 +17494,20 @@ function getPullOutFilteredRows(){
     document.getElementById("pullOutSearch")?.value || ""
   ).trim().toLowerCase();
 
+  const statusFilter = String(
+    document.getElementById("pullOutStatusFilter")?.value || "ONGOING"
+  ).trim().toUpperCase();
+
   return (Array.isArray(pullOutPopupRows) ? pullOutPopupRows : []).filter(row=>{
     const rb = String(row?.BR || "").trim().toUpperCase();
     const tag = String(row?.NTAGN || "").trim().toLowerCase();
+    const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
 
     if(branch !== "ALL" && rb !== branch) return false;
     if(search && !tag.includes(search)) return false;
+
+    if(statusFilter === "ONGOING" && state !== "PULL OUT") return false;
+    if(statusFilter === "RETRIEVE" && state !== "RETRIEVE") return false;
 
     return true;
   });
@@ -17517,6 +17538,8 @@ function renderPullOutPopup(){
     const t = String(row?.NTAGN || "").trim();
     const type = String(row?.LENSTYPE || "—").trim();
     const description = String(row?.DESCRIPTION || "—").trim();
+    const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
+    const isRetrieved = state === "RETRIEVE";
 
     return `
       <div class="pullOutRow">
@@ -17524,8 +17547,10 @@ function renderPullOutPopup(){
         <div class="pullOutCell description">${escapeHtml(description || "—")}</div>
         <div class="pullOutCell"><span class="pullOutTag">${escapeHtml(t || "—")}</span></div>
         <div class="pullOutCell pullOutActionsCell" style="justify-content:flex-end;">
-          <button type="button" class="actionBtn pullOutRestoreBtn" data-pullout-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ ADD TO STOCKS</button>
-          <button type="button" class="actionBtn pullOutDeleteBtn" data-pullout-delete="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">DELETE</button>
+          ${isRetrieved ? "" : `
+            <button type="button" class="actionBtn pullOutRestoreBtn" data-pullout-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ ADD TO STOCKS</button>
+          `}
+          <button type="button" class="actionBtn ${isRetrieved ? "pullOutRetrieveBtn" : "pullOutDeleteBtn"}" data-pullout-toggle="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}" data-state="${isRetrieved ? "RETRIEVE" : "PULL OUT"}">${isRetrieved ? "RETRIEVE" : "DELETE"}</button>
         </div>
       </div>
     `;
@@ -17544,17 +17569,78 @@ function renderPullOutPopup(){
     };
   });
 
-  list.querySelectorAll("[data-pullout-delete]").forEach(btn=>{
+  list.querySelectorAll("[data-pullout-toggle]").forEach(btn=>{
     btn.onclick = function(e){
       e.preventDefault();
       e.stopPropagation();
-      void deletePullOutItem(
+      void togglePullOutRetrieve(
         btn.dataset.branch,
         btn.dataset.tag,
+        btn.dataset.state,
         btn
       );
     };
   });
+}
+
+async function togglePullOutRetrieve(branch,tag,currentState,button){
+  branch = String(branch || "").trim().toUpperCase();
+  tag = String(tag || "").trim();
+  currentState = String(currentState || "PULL OUT").trim().toUpperCase();
+  if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
+
+  const nextState = currentState === "RETRIEVE" ? "PULL OUT" : "RETRIEVE";
+  const actionText = nextState === "RETRIEVE"
+    ? "Change " + tag + " from PULL OUT to RETRIEVE?"
+    : "Change " + tag + " from RETRIEVE back to PULL OUT?";
+
+  const confirmed = await pullOutInlineConfirm(
+    actionText,
+    "Confirm"
+  );
+  if(!confirmed) return;
+
+  if(button){button.disabled=true;button.textContent="Saving...";}
+
+  try{
+    await supabaseRequest(
+      "pull_out?BR=eq." + encodeURIComponent(branch) +
+      "&NTAGN=eq." + encodeURIComponent(tag),
+      {
+        method:"PATCH",
+        body:{
+          STATUS:nextState,
+          "DATE AND TIME":philippineDateTime(),
+          "USER EMAIL":currentEmail || null
+        },
+        prefer:"return=minimal"
+      }
+    );
+
+    const row = pullOutPopupRows.find(r=>
+      String(r?.BR || "").trim().toUpperCase() === branch &&
+      String(r?.NTAGN || "").trim() === tag
+    );
+    if(row) row.STATUS = nextState;
+
+    renderPullOutPopup();
+    showStatus(
+      tag + (nextState === "RETRIEVE"
+        ? " changed to RETRIEVE."
+        : " changed back to PULL OUT.")
+    );
+    loadPullOutCount();
+    await refreshDashboard();
+
+  }catch(error){
+    console.error("Pull Out retrieve toggle failed:",error);
+    showStatus(error?.message || "Unable to change Pull Out status.");
+  }finally{
+    if(button){
+      button.disabled=false;
+      button.textContent=nextState === "RETRIEVE" ? "RETRIEVE" : "DELETE";
+    }
+  }
 }
 
 function pullOutInlineConfirm(text, yesLabel = "Confirm"){
@@ -17574,7 +17660,6 @@ function pullOutInlineConfirm(text, yesLabel = "Confirm"){
       </div>
     `;
 
-    /* ONLY the Pull Out modal is used as the host. */
     const pullOutHost = document.querySelector("#pullOutModal .modalCard.pullOutModal");
     if(!pullOutHost){
       resolve(false);
@@ -17705,45 +17790,7 @@ async function restorePullOutToStocks(branch,tag,button){
   }
 }
 
-async function deletePullOutItem(branch,tag,button){
-  branch = String(branch || "").trim().toUpperCase();
-  tag = String(tag || "").trim();
-  if(!branch || !tag){showStatus("Missing branch or NTAGN.");return;}
-
-  const confirmed = await pullOutInlineConfirm(
-    "Permanently delete Pull Out item " + tag + " from " + branch + "? It will NOT be restored to Stocks or Audit.",
-    "Delete"
-  );
-  if(!confirmed) return;
-
-  if(button){button.disabled=true;button.textContent="Deleting...";}
-
-  try{
-    await supabaseRequest(
-      "pull_out?BR=eq." + encodeURIComponent(branch) +
-      "&NTAGN=eq." + encodeURIComponent(tag),
-      {method:"DELETE",prefer:"return=minimal"}
-    );
-
-    pullOutPopupRows = pullOutPopupRows.filter(row=>
-      !(String(row?.BR || "").trim().toUpperCase() === branch &&
-        String(row?.NTAGN || "").trim() === tag)
-    );
-
-    renderPullOutPopup();
-    showStatus(tag + " deleted from Pull Out.");
-    loadPullOutCount();
-    await refreshDashboard();
-
-  }catch(error){
-    console.error("Delete Pull Out failed:",error);
-    showStatus(error?.message || "Unable to delete Pull Out item.");
-  }finally{
-    if(button){button.disabled=false;button.textContent="DELETE";}
-  }
-}
-
-async function getPullOutRecord(branch,tag){
+function getPullOutRecord(branch,tag){
   const rows = await supabaseRequest(
     "pull_out?BR=eq." + encodeURIComponent(String(branch).trim().toUpperCase()) +
     "&NTAGN=eq." + encodeURIComponent(String(tag).trim()) +
@@ -17754,12 +17801,32 @@ async function getPullOutRecord(branch,tag){
 }
 
 function pullOutExportRows(){
-  return getPullOutFilteredRows().map(row=>({
-    BR:row?.BR,
-    LENSTYPE:row?.LENSTYPE,
-    DESCRIPTION:row?.DESCRIPTION,
-    NTAGN:row?.NTAGN
-  }));
+  const branch = String(
+    document.getElementById("pullOutBranchFilter")?.value || "ALL"
+  ).trim().toUpperCase();
+
+  const search = String(
+    document.getElementById("pullOutSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  return (Array.isArray(pullOutPopupRows) ? pullOutPopupRows : [])
+    .filter(row=>{
+      const rb = String(row?.BR || "").trim().toUpperCase();
+      const tag = String(row?.NTAGN || "").trim().toLowerCase();
+      const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
+
+      if(state !== "PULL OUT") return false;
+      if(branch !== "ALL" && rb !== branch) return false;
+      if(search && !tag.includes(search)) return false;
+
+      return true;
+    })
+    .map(row=>({
+      BR:row?.BR,
+      LENSTYPE:row?.LENSTYPE,
+      DESCRIPTION:row?.DESCRIPTION,
+      NTAGN:row?.NTAGN
+    }));
 }
 
 async function downloadPullOutExcel(){
@@ -17770,16 +17837,15 @@ async function downloadPullOutExcel(){
     const branch = String(
       document.getElementById("pullOutBranchFilter")?.value || "ALL"
     ).trim().toUpperCase();
-    /* Excel must contain the complete A-V inventory data, while the
-       on-screen Pull Out result intentionally shows only 4 columns. */
+
+    /* Pull Out downloads contain ONLY ongoing requests (PULL OUT).
+       RETRIEVE records are excluded from both Excel and PDF.
+       The export remains A-V exactly like the inventory data. */
     const exportRows = await fetchAllRowsForStats(
       "pull_out",
-      DB_COLUMNS.slice(0,22).join(",")
+      DB_COLUMNS.slice(0,22).concat(["STATUS"]).join(",")
     );
 
-    const branchFiltered = String(
-      document.getElementById("pullOutBranchFilter")?.value || "ALL"
-    ).trim().toUpperCase();
     const searchFiltered = String(
       document.getElementById("pullOutSearch")?.value || ""
     ).trim().toLowerCase();
@@ -17787,17 +17853,22 @@ async function downloadPullOutExcel(){
     const rows = (Array.isArray(exportRows) ? exportRows : []).filter(row=>{
       const rb = String(row?.BR || "").trim().toUpperCase();
       const tag = String(row?.NTAGN || "").trim().toLowerCase();
-      if(branchFiltered !== "ALL" && rb !== branchFiltered) return false;
+      const state = String(row?.STATUS || "").trim().toUpperCase();
+
+      if(state !== "PULL OUT") return false;
+      if(branch !== "ALL" && rb !== branch) return false;
       if(searchFiltered && !tag.includes(searchFiltered)) return false;
       return true;
     });
 
     const headers = DB_COLUMNS.slice(0,22);
     const data = rows.map(row=>
-      DB_COLUMNS.slice(0,22).map(col=>row?.[col] ?? "")
+      headers.map(col=>row?.[col] ?? "")
     );
+
     const meta = [
       ["Branch",branch === "ALL" ? "ALL BRANCHES" : aoPdfBranchLabel(branch)],
+      ["Status","ONGOING REQUEST"],
       ["Records",rows.length],
       ["Generated",formatDateValue(new Date().toISOString())]
     ];
@@ -17809,7 +17880,7 @@ async function downloadPullOutExcel(){
       headers,
       data,
       {
-        widths:DB_COLUMNS.slice(0,22).map((col,i)=>{
+        widths:DB_COLUMNS.slice(0,22).map(col=>{
           if(col === "DESCRIPTION") return 55;
           if(col === "NTAGN") return 28;
           if(col === "LENSTYPE") return 18;
@@ -17832,181 +17903,6 @@ async function downloadPullOutExcel(){
   }finally{
     if(button) button.disabled=false;
   }
-}
-
-async function createPullOutPdfReport(o){
-  if(!window.jspdf || !window.jspdf.jsPDF){
-    throw new Error(
-      "PDF library is not available. Please refresh the Dashboard and try again."
-    );
-  }
-
-  const doc = new window.jspdf.jsPDF({
-    orientation:"landscape",
-    unit:"mm",
-    format:"a4"
-  });
-
-  doc.addFileToVFS("NotoSans-Regular.ttf",ACEBEDO_PDF_FONT_BASE64);
-  doc.addFont("NotoSans-Regular.ttf","NotoSansPeso","normal");
-
-  const W = doc.internal.pageSize.getWidth();
-  const H = doc.internal.pageSize.getHeight();
-  const M = 12;
-
-  const logo = await aoPdfLoadLogo();
-  if(logo){
-    try{
-      doc.addImage(logo,"JPEG",M,9,24,24,undefined,"FAST");
-    }catch(error){
-      console.warn("PDF logo could not be added:",error);
-    }
-  }
-
-  const textX = M + 31;
-  doc.setTextColor(15,45,63);
-  doc.setFont("helvetica","bold");
-  doc.setFontSize(20);
-  doc.text("Acebedo Optical",textX,17);
-
-  doc.setTextColor(37,99,235);
-  doc.setFontSize(13.5);
-  doc.text(o.title,textX,25);
-
-  doc.setFont("helvetica","normal");
-  doc.setFontSize(9.5);
-  doc.setTextColor(71,85,105);
-  doc.text("Branch: " + aoPdfBranchLabel(o.branch),textX,32);
-  doc.text("Generated: " + formatDateValue(new Date().toISOString()),textX,38);
-
-  doc.setFontSize(8.5);
-  doc.setTextColor(71,85,105);
-  const descLines = doc.splitTextToSize(
-    aoPdfSafeText(o.description),
-    W - M*2
-  );
-  doc.text(descLines,M,52);
-
-  const totalItems = Array.isArray(o.rows) ? o.rows.length : 0;
-
-  let y = 65;
-
-  doc.setFillColor(239,246,255);
-  doc.setDrawColor(191,219,254);
-  doc.roundedRect(M,y-7,74,17,3,3,"FD");
-  doc.setFont("helvetica","bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(37,99,235);
-  doc.text("TOTAL ITEMS",M+4,y-1);
-  doc.setFontSize(12);
-  doc.setTextColor(15,45,63);
-  doc.text(String(totalItems),M+4,y+6);
-
-  y += 24;
-
-  const C = [
-    {l:"BRANCH",      k:"BR",          w:30},
-    {l:"LENSTYPE",    k:"LENSTYPE",   w:40},
-    {l:"DESCRIPTION", k:"DESCRIPTION",w:105},
-    {l:"TAG NUMBER",  k:"NTAGN",       w:77}
-  ];
-
-  function drawHeader(){
-    let x = M;
-    doc.setFont("helvetica","bold");
-    doc.setFontSize(8);
-    doc.setTextColor(255,255,255);
-    C.forEach(col=>{
-      doc.setFillColor(35,78,103);
-      doc.setDrawColor(35,78,103);
-      doc.rect(x,y-6,col.w,10,"FD");
-      doc.text(col.l,x+2,y+0.4);
-      x += col.w;
-    });
-    y += 10;
-  }
-
-  function drawRow(R){
-    const vals = [
-      aoPdfSafeText(R.BR),
-      aoPdfSafeText(R.LENSTYPE),
-      aoPdfSafeText(R.DESCRIPTION),
-      aoPdfSafeText(R.NTAGN)
-    ];
-
-    const wrapped = vals.map((v,i)=>doc.splitTextToSize(v,C[i].w-5));
-    const rowHeight = Math.max(9,Math.max(...wrapped.map(a=>a.length),1)*4.1+4);
-
-    if(y + rowHeight > H - 24){
-      doc.addPage();
-      y = 20;
-      drawHeader();
-    }
-
-    let x = M;
-    wrapped.forEach((lines,i)=>{
-      doc.setFillColor(
-        i % 2 === 0 ? 249 : 255,
-        i % 2 === 0 ? 252 : 255,
-        i % 2 === 0 ? 254 : 255
-      );
-      doc.setDrawColor(218,230,238);
-      doc.rect(x,y-6,C[i].w,rowHeight,"FD");
-      doc.setFont("helvetica","normal");
-      doc.setFontSize(7.7);
-      doc.setTextColor(32,52,67);
-      doc.text(lines,x+2,y+0.1);
-      x += C[i].w;
-    });
-
-    y += rowHeight;
-  }
-
-  drawHeader();
-
-  if(!totalItems){
-    doc.setFont("helvetica","normal");
-    doc.setFontSize(9);
-    doc.setTextColor(100,116,139);
-    doc.text("No records found for this report.",M,y+8);
-    y += 18;
-  }else{
-    o.rows.forEach(drawRow);
-  }
-
-  if(y + 18 > H - 10){
-    doc.addPage();
-    y = 20;
-  }
-
-  const footerY = y + 3;
-  const footerW = W - M*2;
-  doc.setFillColor(241,248,252);
-  doc.setDrawColor(191,219,254);
-  doc.roundedRect(M,footerY,footerW,18,3,3,"FD");
-  doc.setFont("helvetica","bold");
-  doc.setFontSize(8.5);
-  doc.setTextColor(35,78,103);
-  doc.text("TOTAL RECORDS",M+5,footerY+7);
-  doc.setFontSize(11);
-  doc.setTextColor(15,45,63);
-  doc.text(String(totalItems),M+5,footerY+14);
-
-  const pageCount = doc.getNumberOfPages();
-  for(let page=1;page<=pageCount;page++){
-    doc.setPage(page);
-    doc.setFont("helvetica","normal");
-    doc.setFontSize(7);
-    doc.setTextColor(148,163,184);
-    doc.text("Acebedo Optical • Pull Out Report",M,H-7);
-    doc.text("Page " + page + " of " + pageCount,W-M,H-7,{align:"right"});
-  }
-
-  const fn = (o.filename || "Acebedo_Pull_Out").endsWith(".pdf")
-    ? o.filename
-    : o.filename + ".pdf";
-
-  return {blob:doc.output("blob"),filename:fn};
 }
 
 async function downloadPullOutPdf(){

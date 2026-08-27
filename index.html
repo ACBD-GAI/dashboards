@@ -17465,7 +17465,22 @@ function pullOutInlineConfirm(text, yesLabel = "Confirm"){
       </div>
     `;
 
-    document.body.appendChild(panel);
+    /* IMPORTANT: keep the Pull Out confirmation INSIDE the Pull Out modal.
+       It overlays the Pull Out result area and is centered within that section. */
+    const pullOutHost =
+      document.querySelector("#pullOutModal .modalCard.pullOutModal") ||
+      document.querySelector("#pullOutModal .pullOutModal") ||
+      document.getElementById("pullOutModal");
+
+    if(pullOutHost){
+      if(getComputedStyle(pullOutHost).position === "static"){
+        pullOutHost.style.position = "relative";
+      }
+      pullOutHost.appendChild(panel);
+    }else{
+      /* Fallback only if the Pull Out modal no longer exists. */
+      document.body.appendChild(panel);
+    }
 
     const close = value => {
       panel.remove();

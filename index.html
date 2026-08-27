@@ -6206,6 +6206,48 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 </style>
 
+
+<style id="pullOutConfirmCenterFinal">
+/* PULL OUT ONLY — confirmation must float centered INSIDE the Pull Out modal */
+#pullOutModal .pullOutConfirmOverlay{
+  position:absolute !important;
+  top:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  left:0 !important;
+  width:100% !important;
+  height:100% !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  max-width:none !important;
+  max-height:none !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+  display:grid !important;
+  place-items:center !important;
+  transform:none !important;
+  border-radius:inherit !important;
+  background:rgba(9,22,42,.58) !important;
+  z-index:2147483000 !important;
+  pointer-events:auto !important;
+}
+#pullOutModal .pullOutConfirmOverlay > .pullOutConfirmBox{
+  position:relative !important;
+  width:min(430px,calc(100% - 40px)) !important;
+  max-width:430px !important;
+  margin:0 !important;
+  align-self:center !important;
+  justify-self:center !important;
+  z-index:2147483001 !important;
+  pointer-events:auto !important;
+}
+#pullOutModal .pullOutConfirmOverlay .pullOutConfirmBox button{
+  pointer-events:auto !important;
+  position:relative !important;
+  z-index:2147483002 !important;
+}
+</style>
 </head>
 
 <body>

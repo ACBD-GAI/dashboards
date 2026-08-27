@@ -17907,33 +17907,216 @@ async function downloadPullOutExcel(){
 
 async function downloadPullOutPdf(){
   const button = document.querySelector("[data-pullout-pdf='1']");
-  if(button) button.disabled=true;
+  if(button) button.disabled = true;
 
   try{
+    if(!window.jspdf || !window.jspdf.jsPDF){
+      throw new Error("PDF library is not available. Please refresh the Dashboard and try again.");
+    }
+
     const branch = String(
       document.getElementById("pullOutBranchFilter")?.value || "ALL"
     ).trim().toUpperCase();
+
+    /* Pull Out PDF = ONGOING REQUESTS ONLY (STATUS = PULL OUT).
+       Uses the same branch + tag-search filters as the popup. */
     const rows = pullOutExportRows();
 
-    const r = await createPullOutPdfReport({
-      title:"Pull Out Items Report",
-      description:"This report presents inventory items currently recorded as Pull Out for the selected branch.",
-      branch,
-      rows,
-      filename:
-        "Acebedo_Pull_Out_" +
-        branch + "_" +
-        formatFileDate() +
-        ".pdf"
+    const doc = new window.jspdf.jsPDF({
+      orientation:"landscape",
+      unit:"mm",
+      format:"a4"
     });
 
-    aoPdfDownload(r.blob,r.filename);
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+    const M = 12;
+
+    /* Header */
+    try{
+      if(typeof ACEBEDO_REPORT_LOGO_DATA !== "undefined" && ACEBEDO_REPORT_LOGO_DATA){
+        doc.addImage(
+          ACEBEDO_REPORT_LOGO_DATA,
+          "JPEG",
+          M,
+          9,
+          24,
+          24,
+          undefined,
+          "FAST"
+        );
+      }
+    }catch(e){
+      console.warn("Pull Out PDF logo could not be added:",e);
+    }
+
+    const textX = M + 31;
+    doc.setTextColor(15,45,63);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(20);
+    doc.text("Acebedo Optical",textX,17);
+
+    doc.setTextColor(37,99,235);
+    doc.setFontSize(13.5);
+    doc.text("Pull Out Items Report",textX,25);
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(71,85,105);
+    doc.text(
+      "Branch: " + (branch === "ALL" ? "ALL BRANCHES" : aoPdfBranchLabel(branch)),
+      textX,
+      32
+    );
+    doc.text(
+      "Generated: " + formatDateValue(new Date().toISOString()),
+      textX,
+      38
+    );
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(71,85,105);
+    doc.text(
+      "This report presents ongoing Pull Out requests only.",
+      M,
+      52
+    );
+
+    /* Summary */
+    let y = 65;
+    doc.setFillColor(239,246,255);
+    doc.setDrawColor(191,219,254);
+    doc.roundedRect(M,y-7,74,17,3,3,"FD");
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(37,99,235);
+    doc.text("TOTAL ITEMS",M+4,y-1);
+    doc.setFontSize(12);
+    doc.setTextColor(15,45,63);
+    doc.text(String(rows.length),M+4,y+6);
+
+    y += 24;
+
+    /* Table: BRANCH / LENS TYPE / DESCRIPTION / TAG NUMBER only. */
+    const C = [
+      {l:"BRANCH",      k:"BR",          w:28},
+      {l:"LENS TYPE",   k:"LENSTYPE",   w:42},
+      {l:"DESCRIPTION", k:"DESCRIPTION",w:105},
+      {l:"TAG NUMBER",  k:"NTAGN",      w:80}
+    ];
+
+    function drawHeader(){
+      let x=M;
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(8);
+      doc.setTextColor(255,255,255);
+      C.forEach(col=>{
+        doc.setFillColor(35,78,103);
+        doc.setDrawColor(35,78,103);
+        doc.rect(x,y-6,col.w,10,"FD");
+        doc.text(col.l,x+2,y+0.4);
+        x += col.w;
+      });
+      y += 10;
+    }
+
+    function drawRow(R){
+      const vals = [
+        aoPdfSafeText(R.BR),
+        aoPdfSafeText(R.LENSTYPE),
+        aoPdfSafeText(R.DESCRIPTION),
+        aoPdfSafeText(R.NTAGN)
+      ];
+
+      const wrapped = vals.map((v,i)=>
+        doc.splitTextToSize(v,C[i].w-5)
+      );
+
+      const rowHeight = Math.max(
+        9,
+        Math.max(...wrapped.map(a=>a.length),1)*4.1 + 4
+      );
+
+      if(y + rowHeight > H - 24){
+        doc.addPage();
+        y = 20;
+        drawHeader();
+      }
+
+      let x=M;
+      wrapped.forEach((lines,i)=>{
+        doc.setFillColor(
+          i % 2 === 0 ? 249 : 255,
+          i % 2 === 0 ? 252 : 255,
+          i % 2 === 0 ? 254 : 255
+        );
+        doc.setDrawColor(218,230,238);
+        doc.rect(x,y-6,C[i].w,rowHeight,"FD");
+        doc.setFont("helvetica","normal");
+        doc.setFontSize(7.7);
+        doc.setTextColor(32,52,67);
+        doc.text(lines,x+2,y+0.1);
+        x += C[i].w;
+      });
+
+      y += rowHeight;
+    }
+
+    drawHeader();
+
+    if(!rows.length){
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100,116,139);
+      doc.text("No ongoing Pull Out requests found.",M,y+8);
+      y += 18;
+    }else{
+      rows.forEach(drawRow);
+    }
+
+    /* Footer */
+    if(y + 20 > H - 10){
+      doc.addPage();
+      y = 20;
+    }
+
+    const footerY = y + 3;
+    const footerW = W - M*2;
+    doc.setFillColor(241,248,252);
+    doc.setDrawColor(191,219,254);
+    doc.roundedRect(M,footerY,footerW,18,3,3,"FD");
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(35,78,103);
+    doc.text("TOTAL RECORDS",M+5,footerY+7);
+    doc.setFontSize(11);
+    doc.setTextColor(15,45,63);
+    doc.text(String(rows.length),M+5,footerY+14);
+
+    const pageCount = doc.getNumberOfPages();
+    for(let page=1;page<=pageCount;page++){
+      doc.setPage(page);
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(7);
+      doc.setTextColor(148,163,184);
+      doc.text("Acebedo Optical • Pull Out Items",M,H-7);
+      doc.text("Page " + page + " of " + pageCount,W-M,H-7,{align:"right"});
+    }
+
+    const filename =
+      "Acebedo_Pull_Out_" +
+      branch + "_" +
+      formatFileDate() +
+      ".pdf";
+
+    doc.save(filename);
     showStatus("Pull Out PDF downloaded.");
+
   }catch(error){
     console.error("Pull Out PDF failed:",error);
     showStatus(error?.message || "Unable to create Pull Out PDF.");
   }finally{
-    if(button) button.disabled=false;
+    if(button) button.disabled = false;
   }
 }
 

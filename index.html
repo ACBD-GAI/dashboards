@@ -6066,6 +6066,55 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   .ao-chat-compose{padding:8px !important;gap:7px !important;}
 }
 </style>
+
+<style id="aoChatBranchUserSideBySide">
+  .ao-chat-branch-pair{
+    display:flex;
+    align-items:flex-end;
+    gap:7px;
+  }
+  .ao-chat-branch-field{
+    flex:1 1 0;
+    min-width:0;
+  }
+  .ao-chat-user-field{
+    flex:1.35 1 0;
+  }
+  .ao-chat-branch-field .ao-chat-branch-label,
+  .ao-chat-branch-field .ao-chat-recipient-label{
+    display:block;
+    margin:0 0 5px 2px;
+    color:#49657f;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .ao-chat-branch-field .ao-chat-branch-select,
+  .ao-chat-branch-field .ao-chat-select{
+    width:100%;
+    min-width:0;
+  }
+  .ao-chat-branch-pair .ao-chat-refresh-users{
+    flex:0 0 40px;
+    width:40px;
+    min-width:40px;
+  }
+  @media(max-width:600px){
+    .ao-chat-branch-pair{
+      gap:6px;
+    }
+    .ao-chat-user-field{
+      flex:1.25 1 0;
+    }
+    .ao-chat-branch-pair .ao-chat-refresh-users{
+      flex-basis:38px;
+      width:38px;
+      min-width:38px;
+    }
+  }
+</style>
+
 </head>
 
 <body>
@@ -20950,24 +20999,45 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   </div>
 
-  <!-- CHAT BRANCH SELECTION -->
+  <!-- CHAT BRANCH + BRANCH USER SELECTION -->
   <div class="ao-chat-branch">
 
-    <label
-      class="ao-chat-branch-label"
-      for="aoChatBranch"
-    >
-      CHAT BRANCH
-    </label>
+    <div class="ao-chat-branch-pair">
 
-    <div class="ao-chat-branch-row">
+      <div class="ao-chat-branch-field">
+        <label
+          class="ao-chat-branch-label"
+          for="aoChatBranch"
+        >
+          CHAT BRANCH
+        </label>
 
-      <select
-        id="aoChatBranch"
-        class="ao-chat-branch-select"
-      >
-        <option value="">Select branch...</option>
-      </select>
+        <select
+          id="aoChatBranch"
+          class="ao-chat-branch-select"
+        >
+          <option value="">Select branch...</option>
+        </select>
+      </div>
+
+      <div class="ao-chat-branch-field ao-chat-user-field">
+        <label
+          class="ao-chat-recipient-label"
+          for="aoChatRecipient"
+        >
+          BRANCH USER
+        </label>
+
+        <select
+          id="aoChatRecipient"
+          class="ao-chat-select"
+          disabled
+        >
+          <option value="">
+            Select a branch first
+          </option>
+        </select>
+      </div>
 
       <button
         id="aoChatRefreshUsers"
@@ -20988,28 +21058,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     id="aoChatNotify"
     class="ao-chat-notify"
   ></div>
-
-  <!-- BRANCH USER -->
-  <div class="ao-chat-recipient">
-
-    <label
-      class="ao-chat-recipient-label"
-      for="aoChatRecipient"
-    >
-      BRANCH USER
-    </label>
-
-    <select
-      id="aoChatRecipient"
-      class="ao-chat-select"
-      disabled
-    >
-      <option value="">
-        Select a branch first
-      </option>
-    </select>
-
-  </div>
 
   <!-- MESSAGES -->
   <div

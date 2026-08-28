@@ -6363,12 +6363,11 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 /* =========================================================
-   ACEBEDO OPTICAL — PREMIUM IMPACT LOGO
+   ACEBEDO OPTICAL — CLEAN HEAVY IMPACT LOGO
    CSS-ONLY ADDITIVE EFFECT
-   - Transparent logo surround (no white padding panel)
+   - Transparent logo surround
    - One dramatic heavy drop / impact / bounce / sink / reset
-   - Circular energy halo with Red -> Blue -> Yellow every 2s
-   - Impact shockwave + ground compression + directional sparks
+   - No color ring / no rotating effects
    ========================================================= */
 .brandLogo{
   position:relative;
@@ -6378,7 +6377,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   border:0 !important;
   background:transparent !important;
   transform-origin:center bottom;
-  animation:aoPremiumImpact 5.8s cubic-bezier(.18,.86,.22,1) infinite;
+  animation:aoCleanImpact 5.8s cubic-bezier(.18,.86,.22,1) infinite;
   box-shadow:none !important;
 }
 
@@ -6392,27 +6391,11 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   background:transparent !important;
   border-radius:inherit;
   transform-origin:center bottom;
-  filter:drop-shadow(0 7px 8px rgba(0,0,0,.23));
-  animation:aoPremiumLogo 5.8s cubic-bezier(.18,.86,.22,1) infinite;
+  filter:drop-shadow(0 7px 8px rgba(0,0,0,.28));
+  animation:aoCleanLogoImpact 5.8s cubic-bezier(.18,.86,.22,1) infinite;
 }
 
-/* Main circular energy halo. */
-.brandLogo::before{
-  content:"";
-  position:absolute;
-  inset:-7px;
-  z-index:1;
-  border-radius:50%;
-  border:2px solid #ef4444;
-  background:conic-gradient(from -18deg,transparent 0 19%,currentColor 22% 31%,transparent 34% 69%,currentColor 72% 79%,transparent 82% 100%);
-  color:#ef4444;
-  opacity:.98;
-  box-shadow:0 0 0 1px rgba(255,255,255,.30),0 0 12px currentColor,0 0 26px color-mix(in srgb,currentColor 42%,transparent);
-  animation:aoPremiumRing 2.35s linear infinite,aoPremiumColor 6s steps(1,end) infinite,aoPremiumRingPulse 5.8s ease-in-out infinite;
-  pointer-events:none;
-}
-
-/* Impact shockwave / light burst. */
+/* Physical impact shadow only — no colored effects. */
 .brandLogo::after{
   content:"";
   position:absolute;
@@ -6423,81 +6406,54 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   z-index:0;
   border-radius:50%;
   background:rgba(15,23,42,.30);
-  box-shadow:
-    0 0 0 0 rgba(15,23,42,0),
-    0 0 0 0 rgba(255,255,255,0);
   transform:translateX(-50%) scale(.25);
   opacity:0;
   pointer-events:none;
-  animation:aoPremiumImpactShock 5.8s cubic-bezier(.2,.8,.2,1) infinite;
+  animation:aoCleanImpactShadow 5.8s cubic-bezier(.2,.8,.2,1) infinite;
 }
 
-/* Hover = small physical lift, not spin. */
+/* Hover: subtle physical lift only. */
 .brandLogo:hover{
   animation-play-state:paused;
   transform:translateY(-2px) scale(1.035);
   transition:transform .18s ease;
 }
-.brandLogo:hover::before{
-  animation-duration:1.3s,.9s,2.8s;
-  filter:saturate(1.35) brightness(1.08);
-}
 .brandLogo:hover img{
   animation-play-state:paused;
-  filter:drop-shadow(0 10px 12px rgba(0,0,0,.28));
+  filter:drop-shadow(0 10px 12px rgba(0,0,0,.32));
 }
 
-@keyframes aoPremiumImpact{
+@keyframes aoCleanImpact{
   0%,72%,100%{transform:translateY(0) scaleX(1) scaleY(1)}
   7%{transform:translateY(-72px) scaleX(.98) scaleY(1.02)}
   14%{transform:translateY(-18px) scaleX(.99) scaleY(1)}
   18%{transform:translateY(0) scaleX(1) scaleY(1)}
-  19.5%{transform:translateY(7px) scaleX(1.08) scaleY(.80)}
+  19.5%{transform:translateY(7px) scaleX(1.10) scaleY(.78)}
   22%{transform:translateY(-5px) scaleX(.97) scaleY(1.07)}
   25%{transform:translateY(2px) scaleX(1.03) scaleY(.94)}
   29%{transform:translateY(0) scaleX(1) scaleY(1)}
 }
 
-@keyframes aoPremiumLogo{
-  0%,72%,100%{transform:scale(1);}
-  7%{transform:scale(.985);}
-  18%{transform:scale(1);}
-  19.5%{transform:scaleX(1.12) scaleY(.79);}
-  22%{transform:scaleX(.96) scaleY(1.08);}
-  25%{transform:scaleX(1.025) scaleY(.94);}
-  29%{transform:scale(1);}
+@keyframes aoCleanLogoImpact{
+  0%,72%,100%{transform:scale(1)}
+  7%{transform:scale(.985)}
+  18%{transform:scale(1)}
+  19.5%{transform:scaleX(1.13) scaleY(.78)}
+  22%{transform:scaleX(.96) scaleY(1.08)}
+  25%{transform:scaleX(1.025) scaleY(.94)}
+  29%{transform:scale(1)}
 }
 
-@keyframes aoPremiumImpactShock{
-  0%,17%{opacity:0;transform:translateX(-50%) scale(.25);box-shadow:0 0 0 0 rgba(15,23,42,0)}
-  18%{opacity:.88;transform:translateX(-50%) scale(.55);box-shadow:0 4px 0 0 rgba(15,23,42,.10)}
-  20%{opacity:.75;transform:translateX(-50%) scale(2.2);box-shadow:0 6px 0 10px rgba(15,23,42,.10)}
-  24%{opacity:0;transform:translateX(-50%) scale(4.3);box-shadow:0 8px 0 19px rgba(15,23,42,0)}
-  100%{opacity:0;transform:translateX(-50%) scale(.25);box-shadow:0 0 0 0 rgba(15,23,42,0)}
-}
-
-@keyframes aoPremiumRing{to{transform:rotate(360deg)}}
-
-@keyframes aoPremiumColor{
-  0%,33.333%{color:#ef4444;border-color:#ef4444;}
-  33.334%,66.666%{color:#2563eb;border-color:#2563eb;}
-  66.667%,100%{color:#facc15;border-color:#facc15;}
-}
-
-@keyframes aoPremiumRingPulse{
-  0%,100%{opacity:.95;transform:scale(1);}
-  12%{opacity:1;transform:scale(1.025);}
-  19.5%{opacity:1;transform:scale(1.08);}
-  28%{opacity:.92;transform:scale(1);}
-}
-
-@media(max-width:700px){
-  .brandLogo{width:45px;height:45px;padding:0 !important;}
-  .brandLogo::before{inset:-6px;}
+@keyframes aoCleanImpactShadow{
+  0%,17%{opacity:0;transform:translateX(-50%) scale(.25)}
+  18%{opacity:.65;transform:translateX(-50%) scale(.55)}
+  20%{opacity:.48;transform:translateX(-50%) scale(2.2)}
+  24%{opacity:0;transform:translateX(-50%) scale(4.0)}
+  100%{opacity:0;transform:translateX(-50%) scale(.25)}
 }
 
 @media(prefers-reduced-motion:reduce){
-  .brandLogo,.brandLogo::before,.brandLogo::after,.brandLogo img{animation:none !important;}
+  .brandLogo,.brandLogo::after,.brandLogo img{animation:none !important;}
 }
 </style>
 

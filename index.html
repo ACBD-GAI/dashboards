@@ -9183,29 +9183,7 @@ function escapePostgrestValue(value){
    SI NO.      = EXACT
 ========================================================= */
 
-
-function updateSoldSearchFieldUI(){
-  const report =
-    document.getElementById("sheet")?.value || "";
-
-  const field =
-    document.getElementById("soldSearchFieldFilter")?.value || "DESCRIPTION";
-
-  const search =
-    document.getElementById("search");
-
-  if(!search || report !== "sold") return;
-
-  if(field === "SI"){
-    search.placeholder = "Search SI No. (exact)";
-  }else if(field === "NTAGN"){
-    search.placeholder = "Search tag number...";
-  }else{
-    search.placeholder = "Search description...";
-  }
-}
-
-function buildSearchParams(
+const buildSearchParamsBase = function(
   search=""
 ){
 
@@ -9235,53 +9213,28 @@ function buildSearchParams(
     const exactSI =
       safe;
 
-    /* SOLD OUT uses the main search box with a selectable search field.
-       All other reports keep the original multi-field search behavior. */
-    const report =
-      document.getElementById("sheet")?.value || "";
-
-    if(report === "sold"){
-      const field =
-        document.getElementById("soldSearchFieldFilter")?.value || "DESCRIPTION";
-
-      if(field === "SI"){
-        params.set(
-          "or",
-          '"SI NO.".eq.' + exactSI
-        );
-      }else if(field === "NTAGN"){
-        params.set(
-          "NTAGN.ilike." + pattern
-        );
-      }else{
-        params.set(
-          "DESCRIPTION.ilike." + pattern
-        );
-      }
-    }else{
-      params.set(
-        "or",
-        "(" +
-        "NTAGN.ilike." +
-        pattern +
-        "," +
-        "DESCRIPTION.ilike." +
-        pattern +
-        "," +
-        "LENSTYPE.ilike." +
-        pattern +
-        "," +
-        "QR.ilike." +
-        pattern +
-        "," +
-        "BR.ilike." +
-        pattern +
-        ',' +
-        '"SI NO.".eq.' +
-        exactSI +
-        ")"
-      );
-    }
+    params.set(
+      "or",
+      "(" +
+      "NTAGN.ilike." +
+      pattern +
+      "," +
+      "DESCRIPTION.ilike." +
+      pattern +
+      "," +
+      "LENSTYPE.ilike." +
+      pattern +
+      "," +
+      "QR.ilike." +
+      pattern +
+      "," +
+      "BR.ilike." +
+      pattern +
+      ',' +
+      '"SI NO.".eq.' +
+      exactSI +
+      ")"
+    );
 
   }
 
@@ -9292,6 +9245,52 @@ function buildSearchParams(
 
   return params;
 
+};
+
+function updateSoldSearchFieldUI(){
+  const report = document.getElementById("sheet")?.value || "";
+  const field = document.getElementById("soldSearchFieldFilter")?.value || "DESCRIPTION";
+  const search = document.getElementById("search");
+  if(!search || report !== "sold") return;
+  if(field === "SI"){
+    search.placeholder = "Search SI No. (exact)";
+  }else if(field === "NTAGN"){
+    search.placeholder = "Search tag number...";
+  }else{
+    search.placeholder = "Search description...";
+  }
+}
+
+function buildSearchParams(search=""){
+  const report = document.getElementById("sheet")?.value || "";
+
+  if(report !== "sold"){
+    return buildSearchParamsBase(search);
+  }
+
+  // SOLD OUT only: the existing main search box searches the selected field.
+  const params = new URLSearchParams();
+  params.set("select","*");
+
+  const clean = cleanSearch(search);
+
+  if(clean){
+    const safe = escapePostgrestValue(clean);
+    const pattern = "*" + safe + "*";
+    const exactSI = safe;
+    const field = document.getElementById("soldSearchFieldFilter")?.value || "DESCRIPTION";
+
+    if(field === "SI"){
+      params.set("or", '"SI NO.".eq.' + exactSI);
+    }else if(field === "NTAGN"){
+      params.set("NTAGN.ilike." + pattern);
+    }else{
+      params.set("DESCRIPTION.ilike." + pattern);
+    }
+  }
+
+  params.set("order","NTAGN.asc.nullslast");
+  return params;
 }
 
 /* =========================================================
@@ -22974,11 +22973,13 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 
-<script id="soldOutSearchByUIOnly">
+<script id="soldOutSearchDropdownUI">
 document.addEventListener("DOMContentLoaded",()=>{
   const sheet=document.getElementById("sheet");
   const field=document.getElementById("soldSearchFieldFilter");
-  const refresh=()=>{ if(typeof updateSoldSearchFieldUI==="function") updateSoldSearchFieldUI(); };
+  const refresh=()=>{
+    if(typeof updateSoldSearchFieldUI==="function") updateSoldSearchFieldUI();
+  };
   sheet?.addEventListener("change",()=>setTimeout(refresh,0));
   field?.addEventListener("change",()=>setTimeout(refresh,0));
   refresh();

@@ -6363,11 +6363,12 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 /* =========================================================
-   ACEBEDO OPTICAL — CLEAN HEAVY IMPACT LOGO
+   ACEBEDO OPTICAL — ONE DROP / HEAVY IMPACT LOGO
    CSS-ONLY ADDITIVE EFFECT
-   - Transparent logo surround
-   - One dramatic heavy drop / impact / bounce / sink / reset
-   - No color ring / no rotating effects
+   - Transparent surround
+   - ONE drop per cycle
+   - Hard impact -> wide squash -> bounce -> sink -> reset
+   - No color / no rotating effects
    ========================================================= */
 .brandLogo{
   position:relative;
@@ -6377,7 +6378,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   border:0 !important;
   background:transparent !important;
   transform-origin:center bottom;
-  animation:aoCleanImpact 5.8s cubic-bezier(.18,.86,.22,1) infinite;
+  animation:aoOneDrop 6.2s cubic-bezier(.18,.86,.22,1) infinite;
   box-shadow:none !important;
 }
 
@@ -6392,64 +6393,51 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   border-radius:inherit;
   transform-origin:center bottom;
   filter:drop-shadow(0 7px 8px rgba(0,0,0,.28));
-  animation:aoCleanLogoImpact 5.8s cubic-bezier(.18,.86,.22,1) infinite;
+  animation:aoOneDropImg 6.2s cubic-bezier(.18,.86,.22,1) infinite;
 }
 
-/* Physical impact shadow only — no colored effects. */
 .brandLogo::after{
   content:"";
   position:absolute;
   left:50%;
   bottom:-7px;
-  width:18px;
+  width:22px;
   height:8px;
   z-index:0;
   border-radius:50%;
-  background:rgba(15,23,42,.30);
-  transform:translateX(-50%) scale(.25);
+  background:rgba(15,23,42,.32);
+  transform:translateX(-50%) scale(.22);
   opacity:0;
   pointer-events:none;
-  animation:aoCleanImpactShadow 5.8s cubic-bezier(.2,.8,.2,1) infinite;
+  animation:aoOneDropShadow 6.2s cubic-bezier(.2,.8,.2,1) infinite;
 }
 
-/* Hover: subtle physical lift only. */
-.brandLogo:hover{
-  animation-play-state:paused;
-  transform:translateY(-2px) scale(1.035);
-  transition:transform .18s ease;
-}
-.brandLogo:hover img{
-  animation-play-state:paused;
-  filter:drop-shadow(0 10px 12px rgba(0,0,0,.32));
-}
-
-@keyframes aoCleanImpact{
-  0%,72%,100%{transform:translateY(0) scaleX(1) scaleY(1)}
-  7%{transform:translateY(-72px) scaleX(.98) scaleY(1.02)}
-  14%{transform:translateY(-18px) scaleX(.99) scaleY(1)}
-  18%{transform:translateY(0) scaleX(1) scaleY(1)}
-  19.5%{transform:translateY(7px) scaleX(1.10) scaleY(.78)}
-  22%{transform:translateY(-5px) scaleX(.97) scaleY(1.07)}
-  25%{transform:translateY(2px) scaleX(1.03) scaleY(.94)}
-  29%{transform:translateY(0) scaleX(1) scaleY(1)}
+@keyframes aoOneDrop{
+  0%,63%,100%{transform:translateY(0) scaleX(1) scaleY(1);}
+  8%{transform:translateY(-78px) scaleX(.985) scaleY(1.015);}
+  17%{transform:translateY(0) scaleX(1) scaleY(1);}
+  18.5%{transform:translateY(9px) scaleX(1.16) scaleY(.74);}
+  21%{transform:translateY(-6px) scaleX(.97) scaleY(1.08);}
+  24%{transform:translateY(2px) scaleX(1.035) scaleY(.95);}
+  28%{transform:translateY(0) scaleX(1) scaleY(1);}
 }
 
-@keyframes aoCleanLogoImpact{
-  0%,72%,100%{transform:scale(1)}
-  7%{transform:scale(.985)}
-  18%{transform:scale(1)}
-  19.5%{transform:scaleX(1.13) scaleY(.78)}
-  22%{transform:scaleX(.96) scaleY(1.08)}
-  25%{transform:scaleX(1.025) scaleY(.94)}
-  29%{transform:scale(1)}
+@keyframes aoOneDropImg{
+  0%,63%,100%{transform:scale(1);}
+  8%{transform:scale(.988);}
+  17%{transform:scale(1);}
+  18.5%{transform:scaleX(1.18) scaleY(.74);}
+  21%{transform:scaleX(.965) scaleY(1.09);}
+  24%{transform:scaleX(1.03) scaleY(.95);}
+  28%{transform:scale(1);}
 }
 
-@keyframes aoCleanImpactShadow{
-  0%,17%{opacity:0;transform:translateX(-50%) scale(.25)}
-  18%{opacity:.65;transform:translateX(-50%) scale(.55)}
-  20%{opacity:.48;transform:translateX(-50%) scale(2.2)}
-  24%{opacity:0;transform:translateX(-50%) scale(4.0)}
-  100%{opacity:0;transform:translateX(-50%) scale(.25)}
+@keyframes aoOneDropShadow{
+  0%,17%{opacity:0;transform:translateX(-50%) scale(.22);}
+  18.5%{opacity:.72;transform:translateX(-50%) scale(.7);}
+  21%{opacity:.48;transform:translateX(-50%) scale(2.5);}
+  26%{opacity:0;transform:translateX(-50%) scale(4.2);}
+  100%{opacity:0;transform:translateX(-50%) scale(.22);}
 }
 
 @media(prefers-reduced-motion:reduce){

@@ -6363,73 +6363,20 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 /* =========================================================
-   ACEBEDO OPTICAL — BRAND LOGO OPTICAL SCANNER
+   ACEBEDO OPTICAL — FALLING LETTER BRAND ANIMATION
    CSS-ONLY ADDITIVE EFFECT
    ========================================================= */
-.brandLogo{
-  position:relative;
-  isolation:isolate;
-  overflow:visible !important;
-  animation:aoLogoFloat 4.8s ease-in-out infinite;
-}
-.brandLogo::before{
-  content:"";
-  position:absolute;
-  inset:-7px;
-  z-index:-2;
-  border-radius:inherit;
-  background:conic-gradient(from 0deg,transparent 0 12%,rgba(56,189,248,.08) 18%,rgba(34,211,238,.85) 25%,rgba(99,102,241,.55) 32%,transparent 40% 58%,rgba(56,189,248,.65) 66%,transparent 76% 100%);
-  filter:blur(.2px);
-  animation:aoScannerOrbit 3.2s linear infinite;
-  opacity:.9;
-}
-.brandLogo::after{
-  content:"";
-  position:absolute;
-  inset:2px;
-  z-index:3;
-  border-radius:inherit;
-  pointer-events:none;
-  background:linear-gradient(110deg,transparent 18%,rgba(255,255,255,.0) 34%,rgba(255,255,255,.78) 46%,rgba(125,211,252,.4) 52%,rgba(255,255,255,0) 67%,transparent 82%);
-  background-size:260% 100%;
-  mix-blend-mode:screen;
-  animation:aoScannerSweep 2.7s ease-in-out infinite;
-}
-.brandLogo img{
-  position:relative;
-  z-index:2;
-  transform-origin:center;
-  animation:aoLogoPulse 3.6s ease-in-out infinite;
-  filter:drop-shadow(0 0 0 rgba(56,189,248,0));
-}
-.brandLogo:hover{
-  animation-play-state:paused;
-  transform:translateY(-2px) scale(1.05);
-}
-.brandLogo:hover::before{animation-duration:1.25s;opacity:1;filter:blur(.6px) saturate(1.2);}
-.brandLogo:hover::after{animation-duration:1.05s;}
-.brandLogo:hover img{animation-duration:1.6s;filter:drop-shadow(0 0 10px rgba(56,189,248,.35));}
-@keyframes aoLogoFloat{
-  0%,100%{transform:translateY(0) rotate(0deg)}
-  25%{transform:translateY(-2px) rotate(-.6deg)}
-  55%{transform:translateY(1px) rotate(.5deg)}
-  78%{transform:translateY(-1px) rotate(-.25deg)}
-}
-@keyframes aoScannerOrbit{to{transform:rotate(360deg)}}
-@keyframes aoScannerSweep{
-  0%,12%{background-position:150% 0;opacity:0}
-  24%{opacity:.15}
-  48%{background-position:0% 0;opacity:1}
-  62%{opacity:.3}
-  100%{background-position:-150% 0;opacity:0}
-}
-@keyframes aoLogoPulse{
-  0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(56,189,248,0))}
-  50%{transform:scale(1.025);filter:drop-shadow(0 0 7px rgba(56,189,248,.18))}
-}
-@media(prefers-reduced-motion:reduce){
-  .brandLogo,.brandLogo::before,.brandLogo::after,.brandLogo img{animation:none !important;}
-}
+.brandLogo{position:relative;isolation:isolate;overflow:visible !important;}
+.aoAcebedoLetters{position:absolute;left:50%;top:50%;z-index:4;display:flex;align-items:center;justify-content:center;gap:1px;width:max-content;transform:translate(-50%,-50%);pointer-events:none;}
+.aoAcebedoLetters span{display:inline-block;min-width:7px;color:#0ea5e9;font-size:7px;line-height:1;font-weight:1000;letter-spacing:.02em;opacity:0;text-shadow:0 0 6px rgba(14,165,233,.8),0 0 13px rgba(56,189,248,.34);transform:translateY(-28px) scale(.65) rotate(-12deg);animation:aoLetterFall 4.8s cubic-bezier(.16,.84,.24,1) infinite;}
+.aoAcebedoLetters span:nth-child(1){animation-delay:0s}.aoAcebedoLetters span:nth-child(2){animation-delay:.08s}.aoAcebedoLetters span:nth-child(3){animation-delay:.16s}.aoAcebedoLetters span:nth-child(4){animation-delay:.24s}.aoAcebedoLetters span:nth-child(5){animation-delay:.32s}.aoAcebedoLetters span:nth-child(6){animation-delay:.40s}.aoAcebedoLetters span:nth-child(7){animation-delay:.48s}
+.brandLogo::after{content:"";position:absolute;left:50%;top:50%;width:calc(100% + 16px);height:calc(100% + 16px);z-index:-1;transform:translate(-50%,-50%);border:1px solid rgba(56,189,248,.48);border-radius:20px;box-shadow:0 0 0 3px rgba(56,189,248,.06),0 0 22px rgba(56,189,248,.14);pointer-events:none;animation:aoAcebedoHalo 4.8s ease-in-out infinite;}
+.brandLogo img{position:relative;z-index:2;transform-origin:center;animation:aoAcebedoLogo 4.8s ease-in-out infinite;}
+.brandLogo:hover .aoAcebedoLetters span{animation-duration:3.2s}.brandLogo:hover::after{box-shadow:0 0 0 4px rgba(56,189,248,.08),0 0 30px rgba(56,189,248,.24)}.brandLogo:hover img{filter:drop-shadow(0 0 7px rgba(56,189,248,.28));}
+@keyframes aoLetterFall{0%,58%{opacity:0;transform:translateY(-28px) scale(.65) rotate(-12deg)}12%{opacity:1}24%{opacity:1;transform:translateY(3px) scale(1.08) rotate(3deg)}30%{opacity:1;transform:translateY(-1px) scale(.98) rotate(-1deg)}36%,48%{opacity:1;transform:translateY(0) scale(1) rotate(0)}52%{opacity:0;transform:translateY(4px) scale(.9)}100%{opacity:0;transform:translateY(4px) scale(.85)}}
+@keyframes aoAcebedoLogo{0%,54%,100%{transform:scale(1);filter:none;opacity:1}18%{transform:scale(1.035)}29%{transform:scale(1.01)}38%{transform:scale(.995);filter:drop-shadow(0 0 6px rgba(56,189,248,.2))}}
+@keyframes aoAcebedoHalo{0%,100%{opacity:.28;transform:translate(-50%,-50%) scale(.96)}18%{opacity:.8;transform:translate(-50%,-50%) scale(1.08)}35%{opacity:.45;transform:translate(-50%,-50%) scale(1.02)}}
+@media(prefers-reduced-motion:reduce){.aoAcebedoLetters span,.brandLogo::after,.brandLogo img{animation:none !important}.aoAcebedoLetters span{opacity:1;transform:none}}
 </style>
 
 </head>
@@ -6537,6 +6484,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
         <div class="brandLogo">
  <img src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200">
+ <span class="aoAcebedoLetters" aria-hidden="true"><span>A</span><span>C</span><span>E</span><span>B</span><span>E</span><span>D</span><span>O</span></span>
 </div>
 
         <div>

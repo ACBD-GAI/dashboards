@@ -6735,11 +6735,9 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
         <option value="UNMARKED">UNMARKED</option>
       </select>
 
-      <select id="soldSearchFieldFilter" class="soldFilterSelect" onchange="updateSoldSearchFieldUI()">
-        <option value="DESCRIPTION">SEARCH BY DESCRIPTION</option>
-        <option value="NTAGN">SEARCH BY TAG NUMBER</option>
-        <option value="SI">SEARCH BY SI NO.</option>
-      </select>
+      <input id="soldDescriptionFilter" class="soldFilterInput" type="text" placeholder="Description" oninput="applySoldFilters()">
+      <input id="soldTagFilter" class="soldFilterInput" type="text" placeholder="Tag Number" oninput="applySoldFilters()">
+      <input id="soldSIFilter" class="soldFilterInput" type="text" placeholder="SI No." oninput="applySoldFilters()">
 
       <button type="button" class="controlBtn" onclick="clearSoldFilters()">Clear Filters</button>
     </div>
@@ -9183,7 +9181,7 @@ function escapePostgrestValue(value){
    SI NO.      = EXACT
 ========================================================= */
 
-const buildSearchParamsBase = function(
+function buildSearchParams(
   search=""
 ){
 
@@ -9245,52 +9243,6 @@ const buildSearchParamsBase = function(
 
   return params;
 
-};
-
-function updateSoldSearchFieldUI(){
-  const report = document.getElementById("sheet")?.value || "";
-  const field = document.getElementById("soldSearchFieldFilter")?.value || "DESCRIPTION";
-  const search = document.getElementById("search");
-  if(!search || report !== "sold") return;
-  if(field === "SI"){
-    search.placeholder = "Search SI No. (exact)";
-  }else if(field === "NTAGN"){
-    search.placeholder = "Search tag number...";
-  }else{
-    search.placeholder = "Search description...";
-  }
-}
-
-function buildSearchParams(search=""){
-  const report = document.getElementById("sheet")?.value || "";
-
-  if(report !== "sold"){
-    return buildSearchParamsBase(search);
-  }
-
-  // SOLD OUT only: the existing main search box searches the selected field.
-  const params = new URLSearchParams();
-  params.set("select","*");
-
-  const clean = cleanSearch(search);
-
-  if(clean){
-    const safe = escapePostgrestValue(clean);
-    const pattern = "*" + safe + "*";
-    const exactSI = safe;
-    const field = document.getElementById("soldSearchFieldFilter")?.value || "DESCRIPTION";
-
-    if(field === "SI"){
-      params.set("or", '"SI NO.".eq.' + exactSI);
-    }else if(field === "NTAGN"){
-      params.set("NTAGN.ilike." + pattern);
-    }else{
-      params.set("DESCRIPTION.ilike." + pattern);
-    }
-  }
-
-  params.set("order","NTAGN.asc.nullslast");
-  return params;
 }
 
 /* =========================================================
@@ -22972,19 +22924,5 @@ document.addEventListener("DOMContentLoaded",()=>{
   else init();
 })();
 </script>
-
-<script id="soldOutSearchDropdownUI">
-document.addEventListener("DOMContentLoaded",()=>{
-  const sheet=document.getElementById("sheet");
-  const field=document.getElementById("soldSearchFieldFilter");
-  const refresh=()=>{
-    if(typeof updateSoldSearchFieldUI==="function") updateSoldSearchFieldUI();
-  };
-  sheet?.addEventListener("change",()=>setTimeout(refresh,0));
-  field?.addEventListener("change",()=>setTimeout(refresh,0));
-  refresh();
-});
-</script>
-
 </body>
 </html>

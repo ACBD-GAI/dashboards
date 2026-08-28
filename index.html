@@ -6363,35 +6363,244 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 /* =========================================================
-   ACEBEDO OPTICAL — ROCK FALL TEXT IMPACT
+   ACEBEDO OPTICAL — REALISTIC ROCK FALL CAPTION
    CSS-ONLY ADDITIVE EFFECT
    ========================================================= */
-.brandLogo{position:relative;isolation:isolate;overflow:visible !important;}
-.brandLogo img{position:relative;z-index:2;}
-.aoAcebedoLetters{position:absolute;left:50%;top:calc(100% + 8px);z-index:8;display:flex;align-items:flex-end;justify-content:center;gap:1px;width:max-content;transform:translateX(-50%);pointer-events:none;white-space:nowrap;}
-.aoAcebedoLetters span{display:inline-block;position:relative;color:#ffd21a;font-family:Impact,Haettenschweiler,"Arial Black",sans-serif;font-size:15px;font-weight:1000;line-height:1;letter-spacing:-.8px;-webkit-text-stroke:1px #111;text-shadow:2px 3px 0 #000,4px 5px 0 rgba(0,0,0,.72),0 1px 0 #000;transform-origin:50% 100%;opacity:0;will-change:transform,opacity;}
-.aoAcebedoLetters span::after{content:"";position:absolute;left:10%;right:5%;bottom:-5px;height:3px;border-radius:50%;background:#000;opacity:.5;filter:blur(1px);}
-.aoAcebedoLetters span:nth-child(1){animation:aoRockA 4s infinite;}
-.aoAcebedoLetters span:nth-child(2){animation:aoRockC 4s infinite;}
-.aoAcebedoLetters span:nth-child(3){animation:aoRockE1 4s infinite;}
-.aoAcebedoLetters span:nth-child(4){animation:aoRockB 4s infinite;}
-.aoAcebedoLetters span:nth-child(5){animation:aoRockE2 4s infinite;}
-.aoAcebedoLetters span:nth-child(6){animation:aoRockD 4s infinite;}
-.aoAcebedoLetters span:nth-child(7){animation:aoRockO 4s infinite;}
-.brandLogo::before{content:"";position:absolute;left:50%;top:calc(100% + 5px);width:74px;height:12px;z-index:3;transform:translateX(-50%) scaleX(.1);opacity:0;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.4),transparent 72%);filter:blur(2px);animation:aoImpactShadow 4s infinite;}
-.brandLogo::after{content:"";position:absolute;left:50%;top:calc(100% + 1px);width:66px;height:12px;z-index:9;pointer-events:none;opacity:0;transform:translateX(-50%) scale(.05);background:linear-gradient(26deg,transparent 45%,#111 46%,#111 51%,transparent 52%) left center/100% 100% no-repeat,linear-gradient(-26deg,transparent 45%,#111 46%,#111 51%,transparent 52%) right center/100% 100% no-repeat,linear-gradient(90deg,transparent 43%,#111 44%,#111 51%,transparent 52%) center/100% 100% no-repeat;animation:aoImpactCracks 4s infinite;}
-@keyframes aoRockA{0%,7%{opacity:0;transform:translateY(-70px) rotate(-24deg) scale(.72)}18%{opacity:1;transform:translateY(4px) rotate(-8deg) scale(1.12)}22%{transform:translateY(-8px) rotate(-3deg) scale(1)}28%,64%{opacity:1;transform:translateY(0) rotate(-2deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
-@keyframes aoRockC{0%,10%{opacity:0;transform:translateY(-82px) rotate(18deg) scale(.68)}21%{opacity:1;transform:translateY(4px) rotate(7deg) scale(1.12)}25%{transform:translateY(-8px) rotate(2deg) scale(1)}31%,64%{opacity:1;transform:translateY(0) rotate(1deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
-@keyframes aoRockE1{0%,13%{opacity:0;transform:translateY(-66px) rotate(-15deg) scale(.7)}24%{opacity:1;transform:translateY(4px) rotate(-5deg) scale(1.1)}28%{transform:translateY(-8px) rotate(-1deg) scale(1)}34%,64%{opacity:1;transform:translateY(0) rotate(0) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
-@keyframes aoRockB{0%,16%{opacity:0;transform:translateY(-88px) rotate(22deg) scale(.68)}27%{opacity:1;transform:translateY(4px) rotate(6deg) scale(1.13)}31%{transform:translateY(-9px) rotate(2deg) scale(1)}37%,64%{opacity:1;transform:translateY(0) rotate(1deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
-@keyframes aoRockE2{0%,19%{opacity:0;transform:translateY(-72px) rotate(-19deg) scale(.7)}30%{opacity:1;transform:translateY(4px) rotate(-6deg) scale(1.11)}34%{transform:translateY(-8px) rotate(-2deg) scale(1)}40%,64%{opacity:1;transform:translateY(0) rotate(0) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
-@keyframes aoRockD{0%,22%{opacity:0;transform:translateY(-84px) rotate(16deg) scale(.68)}33%{opacity:1;transform:translateY(4px) rotate(6deg) scale(1.12)}37%{transform:translateY(-8px) rotate(2deg) scale(1)}43%,64%{opacity:1;transform:translateY(0) rotate(1deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
-@keyframes aoRockO{0%,25%{opacity:0;transform:translateY(-74px) rotate(-20deg) scale(.7)}36%{opacity:1;transform:translateY(4px) rotate(-6deg) scale(1.13)}40%{transform:translateY(-9px) rotate(-2deg) scale(1)}46%,64%{opacity:1;transform:translateY(0) rotate(-1deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
-@keyframes aoImpactShadow{0%,27%{opacity:0;transform:translateX(-50%) scaleX(.1)}34%{opacity:.6;transform:translateX(-50%) scaleX(1.25)}40%{opacity:.2;transform:translateX(-50%) scaleX(1.5)}50%,100%{opacity:0;transform:translateX(-50%) scaleX(.8)}}
-@keyframes aoImpactCracks{0%,31%{opacity:0;transform:translateX(-50%) scale(.05)}35%{opacity:1;transform:translateX(-50%) scale(1)}42%{opacity:.8;transform:translateX(-50%) scale(1.15)}55%,100%{opacity:0;transform:translateX(-50%) scale(1.25)}}
-.brandLogo:hover .aoAcebedoLetters span{animation-duration:2.5s;}
-@media(max-width:700px){.aoAcebedoLetters span{font-size:12px;letter-spacing:-.6px;}}
-@media(prefers-reduced-motion:reduce){.aoAcebedoLetters span,.brandLogo::before,.brandLogo::after{animation:none !important}.aoAcebedoLetters span{opacity:1;transform:none;}}
+.brandLogo{
+  position:relative;
+  isolation:isolate;
+  overflow:visible !important;
+}
+.brandLogo img{
+  position:relative;
+  z-index:2;
+}
+
+/* Caption sits clearly UNDER the logo. */
+.aoAcebedoLetters{
+  position:absolute;
+  left:50%;
+  top:calc(100% + 8px);
+  z-index:8;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:0;
+  width:max-content;
+  height:24px;
+  transform:translateX(-50%);
+  pointer-events:none;
+  white-space:nowrap;
+}
+
+/* Important: target ONLY the actual letter children, not the caption wrapper. */
+.aoAcebedoLetters > span{
+  position:relative;
+  display:inline-block;
+  min-width:.62em;
+  color:#ffd21a;
+  font-family:Impact,Haettenschweiler,"Arial Black",sans-serif;
+  font-size:15px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-.45px;
+  -webkit-text-stroke:1px #171717;
+  text-shadow:
+    2px 3px 0 #000,
+    4px 5px 0 rgba(0,0,0,.72),
+    0 1px 0 #000;
+  transform-origin:50% 100%;
+  opacity:0;
+  will-change:transform,opacity,filter;
+  z-index:2;
+}
+
+/* Each letter creates its own little rock spray on impact. */
+.aoAcebedoLetters > span::before,
+.aoAcebedoLetters > span::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-7px;
+  width:4px;
+  height:4px;
+  border-radius:35% 55% 45% 50%;
+  background:#242424;
+  opacity:0;
+  z-index:-1;
+  box-shadow:
+    7px 1px 0 #303030,
+    -8px 2px 0 #151515,
+    12px 4px 0 #454545,
+    -13px 4px 0 #3a3a3a;
+  will-change:transform,opacity;
+}
+
+.aoAcebedoLetters > span::before{
+  animation:aoRockDebrisLeft 4.8s infinite;
+}
+.aoAcebedoLetters > span::after{
+  width:5px;
+  height:3px;
+  animation:aoRockDebrisRight 4.8s infinite;
+}
+
+/* Impact dust / ground shadow, behind the whole caption. */
+.brandLogo::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:calc(100% + 9px);
+  width:18px;
+  height:8px;
+  z-index:3;
+  pointer-events:none;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(0,0,0,.55),rgba(0,0,0,.18) 48%,transparent 74%);
+  filter:blur(1.5px);
+  opacity:0;
+  transform:translateX(-50%) scale(.2);
+  animation:aoImpactDust 4.8s infinite;
+}
+
+/* Multiple cracks spread from each landing zone. */
+.brandLogo::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:calc(100% + 8px);
+  width:74px;
+  height:20px;
+  z-index:7;
+  pointer-events:none;
+  opacity:0;
+  transform:translateX(-50%) scale(.05);
+  background:
+    linear-gradient(26deg,transparent 43%,#171717 44%,#171717 48%,transparent 49%) left 2px top 1px/32px 16px no-repeat,
+    linear-gradient(-25deg,transparent 43%,#171717 44%,#171717 48%,transparent 49%) right 2px top 2px/32px 16px no-repeat,
+    linear-gradient(8deg,transparent 44%,#171717 45%,#171717 49%,transparent 50%) center bottom/24px 13px no-repeat,
+    linear-gradient(-9deg,transparent 44%,#171717 45%,#171717 49%,transparent 50%) center bottom/22px 13px no-repeat;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.2));
+  animation:aoImpactCracks 4.8s infinite;
+}
+
+/* Heavy falling motion: fast descent, hard squash, bounce, settle, disappear. */
+.aoAcebedoLetters > span:nth-child(1){animation:aoRockA2 4.8s infinite;}
+.aoAcebedoLetters > span:nth-child(2){animation:aoRockC2 4.8s infinite;}
+.aoAcebedoLetters > span:nth-child(3){animation:aoRockE12 4.8s infinite;}
+.aoAcebedoLetters > span:nth-child(4){animation:aoRockB2 4.8s infinite;}
+.aoAcebedoLetters > span:nth-child(5){animation:aoRockE22 4.8s infinite;}
+.aoAcebedoLetters > span:nth-child(6){animation:aoRockD2 4.8s infinite;}
+.aoAcebedoLetters > span:nth-child(7){animation:aoRockO2 4.8s infinite;}
+
+@keyframes aoRockA2{
+  0%,5%{opacity:0;transform:translate(-14px,-110px) rotate(-28deg) scale(.62);filter:blur(1px)}
+  16%{opacity:1;transform:translate(-10px,-54px) rotate(-17deg) scale(.78);filter:blur(.2px)}
+  27%{transform:translate(-6px,5px) rotate(-7deg) scale(1.16,.82);filter:blur(0)}
+  30%{transform:translate(-6px,-7px) rotate(-4deg) scale(.98,1.06)}
+  34%{transform:translate(-6px,1px) rotate(-2deg) scale(1.03,.97)}
+  39%,68%{opacity:1;transform:translate(-6px,0) rotate(-2deg) scale(1)}
+  74%,100%{opacity:0;transform:translate(-6px,5px) rotate(-1deg) scale(.92)}
+}
+@keyframes aoRockC2{
+  0%,9%{opacity:0;transform:translate(-7px,-124px) rotate(23deg) scale(.58);filter:blur(1px)}
+  19%{opacity:1;transform:translate(-5px,-59px) rotate(14deg) scale(.76);filter:blur(.2px)}
+  30%{transform:translate(-3px,5px) rotate(8deg) scale(1.16,.82);filter:blur(0)}
+  33%{transform:translate(-3px,-7px) rotate(4deg) scale(.98,1.06)}
+  37%{transform:translate(-3px,1px) rotate(2deg) scale(1.03,.97)}
+  42%,68%{opacity:1;transform:translate(-3px,0) rotate(1deg) scale(1)}
+  74%,100%{opacity:0;transform:translate(-3px,5px) rotate(1deg) scale(.92)}
+}
+@keyframes aoRockE12{
+  0%,13%{opacity:0;transform:translate(-2px,-102px) rotate(-19deg) scale(.64);filter:blur(1px)}
+  23%{opacity:1;transform:translate(-1px,-47px) rotate(-11deg) scale(.79);filter:blur(.2px)}
+  34%{transform:translate(0,5px) rotate(-5deg) scale(1.15,.83);filter:blur(0)}
+  37%{transform:translate(0,-7px) rotate(-3deg) scale(.98,1.06)}
+  41%{transform:translate(0,1px) rotate(-1deg) scale(1.03,.97)}
+  46%,68%{opacity:1;transform:translate(0,0) rotate(0) scale(1)}
+  74%,100%{opacity:0;transform:translate(0,5px) rotate(0) scale(.92)}
+}
+@keyframes aoRockB2{
+  0%,17%{opacity:0;transform:translate(5px,-132px) rotate(27deg) scale(.57);filter:blur(1px)}
+  27%{opacity:1;transform:translate(7px,-63px) rotate(15deg) scale(.77);filter:blur(.2px)}
+  38%{transform:translate(8px,5px) rotate(7deg) scale(1.18,.80);filter:blur(0)}
+  41%{transform:translate(8px,-8px) rotate(3deg) scale(.98,1.07)}
+  45%{transform:translate(8px,1px) rotate(1deg) scale(1.04,.96)}
+  50%,68%{opacity:1;transform:translate(8px,0) rotate(1deg) scale(1)}
+  74%,100%{opacity:0;transform:translate(8px,5px) rotate(1deg) scale(.92)}
+}
+@keyframes aoRockE22{
+  0%,21%{opacity:0;transform:translate(10px,-114px) rotate(-22deg) scale(.61);filter:blur(1px)}
+  31%{opacity:1;transform:translate(11px,-53px) rotate(-13deg) scale(.79);filter:blur(.2px)}
+  42%{transform:translate(12px,5px) rotate(-6deg) scale(1.16,.82);filter:blur(0)}
+  45%{transform:translate(12px,-7px) rotate(-3deg) scale(.98,1.06)}
+  49%{transform:translate(12px,1px) rotate(-1deg) scale(1.03,.97)}
+  54%,68%{opacity:1;transform:translate(12px,0) rotate(0) scale(1)}
+  74%,100%{opacity:0;transform:translate(12px,5px) rotate(0) scale(.92)}
+}
+@keyframes aoRockD2{
+  0%,25%{opacity:0;transform:translate(17px,-128px) rotate(20deg) scale(.58);filter:blur(1px)}
+  35%{opacity:1;transform:translate(17px,-60px) rotate(12deg) scale(.77);filter:blur(.2px)}
+  46%{transform:translate(16px,5px) rotate(6deg) scale(1.17,.81);filter:blur(0)}
+  49%{transform:translate(16px,-8px) rotate(3deg) scale(.98,1.07)}
+  53%{transform:translate(16px,1px) rotate(1deg) scale(1.03,.96)}
+  58%,68%{opacity:1;transform:translate(16px,0) rotate(1deg) scale(1)}
+  74%,100%{opacity:0;transform:translate(16px,5px) rotate(1deg) scale(.92)}
+}
+@keyframes aoRockO2{
+  0%,29%{opacity:0;transform:translate(23px,-116px) rotate(-25deg) scale(.60);filter:blur(1px)}
+  39%{opacity:1;transform:translate(23px,-55px) rotate(-14deg) scale(.79);filter:blur(.2px)}
+  50%{transform:translate(22px,5px) rotate(-6deg) scale(1.18,.80);filter:blur(0)}
+  53%{transform:translate(22px,-8px) rotate(-3deg) scale(.98,1.07)}
+  57%{transform:translate(22px,1px) rotate(-1deg) scale(1.04,.96)}
+  62%,68%{opacity:1;transform:translate(22px,0) rotate(-1deg) scale(1)}
+  74%,100%{opacity:0;transform:translate(22px,5px) rotate(-1deg) scale(.92)}
+}
+
+@keyframes aoRockDebrisLeft{
+  0%,24%{opacity:0;transform:translate(-50%,0) scale(.2)}
+  28%{opacity:1;transform:translate(-88%,-1px) scale(.8)}
+  36%{opacity:1;transform:translate(-180%,8px) scale(.7)}
+  46%{opacity:0;transform:translate(-260%,15px) scale(.35)}
+  100%{opacity:0}
+}
+@keyframes aoRockDebrisRight{
+  0%,27%{opacity:0;transform:translate(-50%,0) scale(.2)}
+  31%{opacity:1;transform:translate(-6%,-1px) scale(.9)}
+  39%{opacity:1;transform:translate(145%,7px) scale(.72)}
+  49%{opacity:0;transform:translate(240%,16px) scale(.3)}
+  100%{opacity:0}
+}
+@keyframes aoImpactDust{
+  0%,26%{opacity:0;transform:translateX(-50%) scale(.15)}
+  31%{opacity:.75;transform:translateX(-50%) scale(1.25)}
+  36%{opacity:.45;transform:translateX(-50%) scale(2.2)}
+  47%{opacity:0;transform:translateX(-50%) scale(3.3)}
+  100%{opacity:0}
+}
+@keyframes aoImpactCracks{
+  0%,29%{opacity:0;transform:translateX(-50%) scale(.02)}
+  33%{opacity:1;transform:translateX(-50%) scale(.92)}
+  39%{opacity:.95;transform:translateX(-50%) scale(1.18)}
+  52%{opacity:.3;transform:translateX(-50%) scale(1.34)}
+  64%,100%{opacity:0;transform:translateX(-50%) scale(1.42)}
+}
+
+.aoAcebedoLetters > span:hover{filter:brightness(1.08)}
+.brandLogo:hover .aoAcebedoLetters > span{animation-duration:3.0s;}
+
+@media(max-width:700px){
+  .aoAcebedoLetters{top:calc(100% + 6px);height:21px;}
+  .aoAcebedoLetters > span{font-size:12px;letter-spacing:-.3px;-webkit-text-stroke:.8px #171717;}
+}
+@media(prefers-reduced-motion:reduce){
+  .aoAcebedoLetters > span,
+  .aoAcebedoLetters > span::before,
+  .aoAcebedoLetters > span::after,
+  .brandLogo::before,
+  .brandLogo::after{animation:none !important;}
+  .aoAcebedoLetters > span{opacity:1;transform:none;}
+}
 </style>
 
 </head>

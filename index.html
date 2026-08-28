@@ -6363,24 +6363,153 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 /* =========================================================
-   ACEBEDO OPTICAL — ONE DROP / ROCK IMPACT LOGO
-   CSS-ONLY ADDITIVE EFFECT
-   - Transparent surround
-   - ONE direct drop per cycle
-   - Hard wide impact
-   - Ground crack + scattering stone fragments
-   - Quick bounce -> settle -> reset
-   - No color / no rotation
+   ACEBEDO OPTICAL — REALISTIC ONE-DROP ROCK IMPACT
+   CSS-ONLY VISUAL LAYER + DECORATIVE IMPACT MARKUP
+   - one direct drop
+   - hard compression / bounce / settle
+   - ground crack
+   - multiple stone fragments with outward scatter + fade
    ========================================================= */
-.brandLogo{position:relative;isolation:isolate;overflow:visible !important;padding:0 !important;border:0 !important;background:transparent !important;transform-origin:center bottom;animation:aoOneDrop 6.2s linear infinite;box-shadow:none !important;}
-.brandLogo img{position:relative;z-index:4;display:block;width:100%;height:100%;object-fit:contain;background:transparent !important;border-radius:inherit;transform-origin:center bottom;filter:drop-shadow(0 7px 8px rgba(0,0,0,.28));animation:aoOneDropImg 6.2s linear infinite;}
-.brandLogo::before{content:"";position:absolute;left:50%;bottom:-16px;width:118px;height:54px;z-index:1;pointer-events:none;transform:translateX(-50%) scale(.25);opacity:0;background:linear-gradient(90deg,transparent 47%,rgba(35,27,18,.92) 48%,rgba(35,27,18,.92) 51%,transparent 52%) 50% 28%/3px 23px no-repeat,linear-gradient(28deg,transparent 47%,rgba(35,27,18,.90) 48%,rgba(35,27,18,.90) 51%,transparent 52%) 40% 55%/32px 3px no-repeat,linear-gradient(-30deg,transparent 47%,rgba(35,27,18,.90) 48%,rgba(35,27,18,.90) 51%,transparent 52%) 60% 57%/34px 3px no-repeat,linear-gradient(64deg,transparent 47%,rgba(35,27,18,.78) 48%,rgba(35,27,18,.78) 51%,transparent 52%) 27% 67%/23px 3px no-repeat,linear-gradient(-65deg,transparent 47%,rgba(35,27,18,.78) 48%,rgba(35,27,18,.78) 51%,transparent 52%) 73% 68%/23px 3px no-repeat,radial-gradient(circle at 7% 70%,#6b7280 0 3px,transparent 4px),radial-gradient(circle at 18% 42%,#4b5563 0 2.5px,transparent 3.5px),radial-gradient(circle at 29% 82%,#7c6f64 0 3px,transparent 4px),radial-gradient(circle at 76% 78%,#5b6470 0 3px,transparent 4px),radial-gradient(circle at 87% 48%,#7c6f64 0 2.5px,transparent 3.5px),radial-gradient(circle at 96% 72%,#4b5563 0 2.5px,transparent 3.5px);animation:aoRockDebris 6.2s linear infinite;}
-.brandLogo::after{content:"";position:absolute;left:50%;bottom:-7px;width:22px;height:8px;z-index:0;border-radius:50%;background:rgba(15,23,42,.32);transform:translateX(-50%) scale(.22);opacity:0;pointer-events:none;animation:aoOneDropShadow 6.2s linear infinite;}
-@keyframes aoOneDrop{0%,72%,100%{transform:translateY(0) scaleX(1) scaleY(1)}78%{transform:translateY(-92px) scaleX(.985) scaleY(1.015)}81.2%{transform:translateY(-20px) scaleX(.99) scaleY(1.01)}84.5%{transform:translateY(0) scaleX(1.28) scaleY(.68)}87%{transform:translateY(-8px) scaleX(.96) scaleY(1.08)}89.5%{transform:translateY(2px) scaleX(1.035) scaleY(.95)}92%{transform:translateY(0) scaleX(1) scaleY(1)}}
-@keyframes aoOneDropImg{0%,72%,100%{transform:scale(1)}78%{transform:scale(.985)}81.2%{transform:scale(.99)}84.5%{transform:scaleX(1.30) scaleY(.68)}87%{transform:scaleX(.955) scaleY(1.09)}89.5%{transform:scaleX(1.03) scaleY(.95)}92%{transform:scale(1)}}
-@keyframes aoOneDropShadow{0%,83.5%,100%{opacity:0;transform:translateX(-50%) scale(.22)}84.5%{opacity:.78;transform:translateX(-50%) scale(.9)}87%{opacity:.48;transform:translateX(-50%) scale(2.7)}91%{opacity:0;transform:translateX(-50%) scale(4.2)}}
-@keyframes aoRockDebris{0%,83%{opacity:0;transform:translateX(-50%) translateY(-3px) scale(.18)}84.4%{opacity:1;transform:translateX(-50%) translateY(1px) scale(.78)}85.2%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}86.8%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.06)}90%{opacity:.85;transform:translateX(-50%) translateY(1px) scale(1)}95%{opacity:0;transform:translateX(-50%) translateY(2px) scale(.96)}100%{opacity:0;transform:translateX(-50%) translateY(0) scale(.18)}}
-@media(prefers-reduced-motion:reduce){.brandLogo,.brandLogo::before,.brandLogo::after,.brandLogo img{animation:none !important;}}
+.brandLogo{
+  position:relative;
+  isolation:isolate;
+  overflow:visible !important;
+  padding:0 !important;
+  border:0 !important;
+  background:transparent !important;
+  transform-origin:center bottom;
+  animation:aoRealDrop 6.4s linear infinite;
+  box-shadow:none !important;
+}
+.brandLogo img{
+  position:relative;
+  z-index:6;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:transparent !important;
+  border-radius:inherit;
+  transform-origin:center bottom;
+  filter:drop-shadow(0 8px 8px rgba(0,0,0,.30));
+  animation:aoRealLogo 6.4s linear infinite;
+}
+
+/* The ground: cracks + dust flash. */
+.brandLogo::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-18px;
+  width:150px;
+  height:62px;
+  z-index:2;
+  pointer-events:none;
+  opacity:0;
+  transform:translateX(-50%) scale(.2);
+  background:
+    radial-gradient(ellipse at 50% 64%,rgba(58,45,33,.34) 0 18%,rgba(58,45,33,.10) 35%,transparent 67%),
+    linear-gradient(8deg,transparent 47%,rgba(46,36,29,.92) 48%,rgba(46,36,29,.92) 52%,transparent 53%) 20% 56%/46px 4px no-repeat,
+    linear-gradient(-10deg,transparent 47%,rgba(46,36,29,.92) 48%,rgba(46,36,29,.92) 52%,transparent 53%) 80% 56%/48px 4px no-repeat,
+    linear-gradient(53deg,transparent 47%,rgba(46,36,29,.86) 48%,rgba(46,36,29,.86) 52%,transparent 53%) 38% 41%/34px 4px no-repeat,
+    linear-gradient(-52deg,transparent 47%,rgba(46,36,29,.86) 48%,rgba(46,36,29,.86) 52%,transparent 53%) 62% 41%/34px 4px no-repeat,
+    linear-gradient(90deg,transparent 47%,rgba(46,36,29,.9) 48%,rgba(46,36,29,.9) 52%,transparent 53%) 50% 20%/4px 30px no-repeat;
+  animation:aoGroundCrack 6.4s linear infinite;
+}
+
+/* Impact dust / stone field; individual particles are on the child spans. */
+.aoImpactDebris{
+  position:absolute;
+  left:50%;
+  bottom:-11px;
+  width:2px;
+  height:2px;
+  z-index:5;
+  pointer-events:none;
+}
+.aoImpactDebris i{
+  position:absolute;
+  left:0;
+  top:0;
+  width:5px;
+  height:5px;
+  border-radius:35% 50% 45% 40%;
+  background:linear-gradient(135deg,#9a8f84,#5e554d 72%,#3f3a35);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.22),0 1px 2px rgba(0,0,0,.26);
+  opacity:0;
+  transform:translate3d(0,0,0) scale(.2) rotate(0deg);
+  animation:aoStoneScatter 6.4s linear infinite;
+}
+.aoImpactDebris i:nth-child(1){--x:-53px;--y:-17px;--r:-38deg;--d:.00s;--s:.78;}
+.aoImpactDebris i:nth-child(2){--x:-39px;--y:-26px;--r:51deg;--d:.025s;--s:.58;}
+.aoImpactDebris i:nth-child(3){--x:-27px;--y:-34px;--r:74deg;--d:.045s;--s:.72;}
+.aoImpactDebris i:nth-child(4){--x:-13px;--y:-43px;--r:-55deg;--d:.06s;--s:.48;}
+.aoImpactDebris i:nth-child(5){--x:16px;--y:-42px;--r:42deg;--d:.04s;--s:.52;}
+.aoImpactDebris i:nth-child(6){--x:31px;--y:-33px;--r:-77deg;--d:.02s;--s:.74;}
+.aoImpactDebris i:nth-child(7){--x:46px;--y:-24px;--r:35deg;--d:.055s;--s:.60;}
+.aoImpactDebris i:nth-child(8){--x:58px;--y:-13px;--r:-48deg;--d:.075s;--s:.50;}
+.aoImpactDebris i:nth-child(9){--x:-69px;--y:-10px;--r:62deg;--d:.085s;--s:.40;}
+.aoImpactDebris i:nth-child(10){--x:70px;--y:-9px;--r:-23deg;--d:.095s;--s:.43;}
+
+/* Wide impact shadow + dust ring. */
+.brandLogo::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-8px;
+  width:24px;
+  height:9px;
+  z-index:1;
+  border-radius:50%;
+  background:rgba(15,23,42,.34);
+  transform:translateX(-50%) scale(.18);
+  opacity:0;
+  pointer-events:none;
+  animation:aoRealShadow 6.4s linear infinite;
+}
+
+@keyframes aoRealDrop{
+  0%,72%,100%{transform:translateY(0) scaleX(1) scaleY(1);}
+  77%{transform:translateY(-96px) scaleX(.99) scaleY(1.01);}
+  80.8%{transform:translateY(0) scaleX(.99) scaleY(1.01);}
+  81.0%{transform:translateY(6px) scaleX(1.34) scaleY(.64);}
+  83.0%{transform:translateY(-8px) scaleX(.95) scaleY(1.10);}
+  85.2%{transform:translateY(2px) scaleX(1.03) scaleY(.95);}
+  87.3%{transform:translateY(0) scaleX(1) scaleY(1);}
+}
+@keyframes aoRealLogo{
+  0%,72%,100%{transform:scale(1);}
+  77%{transform:scale(.99);}
+  80.8%{transform:scale(.995);}
+  81.0%{transform:scaleX(1.36) scaleY(.64);}
+  83.0%{transform:scaleX(.95) scaleY(1.10);}
+  85.2%{transform:scaleX(1.03) scaleY(.95);}
+  87.3%{transform:scale(1);}
+}
+@keyframes aoGroundCrack{
+  0%,79.7%,100%{opacity:0;transform:translateX(-50%) scale(.2);filter:blur(1px);}
+  80.9%{opacity:.95;transform:translateX(-50%) scale(.78);filter:blur(.2px);}
+  83.4%{opacity:.92;transform:translateX(-50%) scale(1.02);filter:blur(0);}
+  88%{opacity:.35;transform:translateX(-50%) scale(1.08);filter:blur(.15px);}
+  93%{opacity:0;transform:translateX(-50%) scale(1.14);}
+}
+@keyframes aoRealShadow{
+  0%,80%,100%{opacity:0;transform:translateX(-50%) scale(.18);}
+  81%{opacity:.86;transform:translateX(-50%) scale(1);}
+  84%{opacity:.48;transform:translateX(-50%) scale(3.1);}
+  89%{opacity:0;transform:translateX(-50%) scale(4.5);}
+}
+@keyframes aoStoneScatter{
+  0%,80%{opacity:0;transform:translate3d(0,0,0) scale(.2) rotate(0);}
+  81%{opacity:1;transform:translate3d(calc(var(--x)*.22),calc(var(--y)*.18),0) scale(calc(var(--s)*.55)) rotate(calc(var(--r)*.35));}
+  84%{opacity:.95;transform:translate3d(var(--x),var(--y),0) scale(var(--s)) rotate(var(--r));}
+  88%{opacity:.70;transform:translate3d(calc(var(--x)*1.12),calc(var(--y)*.55),0) scale(calc(var(--s)*.88)) rotate(calc(var(--r)*1.4));}
+  94%{opacity:0;transform:translate3d(calc(var(--x)*1.28),calc(var(--y)*.38),0) scale(calc(var(--s)*.56)) rotate(calc(var(--r)*1.8));}
+  100%{opacity:0;transform:translate3d(0,0,0) scale(.2) rotate(0);}
+}
+@media(prefers-reduced-motion:reduce){
+  .brandLogo,.brandLogo img,.brandLogo::before,.brandLogo::after,.aoImpactDebris i{animation:none !important;}
+}
 </style>
 
 </head>
@@ -6488,6 +6617,9 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
         <div class="brandLogo">
  <img src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200">
+ <span class="aoImpactDebris" aria-hidden="true">
+   <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+ </span>
 </div>
 
         <div>

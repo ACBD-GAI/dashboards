@@ -6735,16 +6735,10 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
         <option value="UNMARKED">UNMARKED</option>
       </select>
 
-      <select id="soldDescriptionFilter" class="soldFilterSelect" onchange="applySoldFilters()">
-        <option value="">ALL DESCRIPTIONS</option>
-      </select>
-
-      <select id="soldTagFilter" class="soldFilterSelect" onchange="applySoldFilters()">
-        <option value="">ALL TAG NUMBERS</option>
-      </select>
-
-      <select id="soldSIFilter" class="soldFilterSelect" onchange="applySoldFilters()">
-        <option value="">ALL SI NO.</option>
+      <select id="soldSearchFieldFilter" class="soldFilterSelect" onchange="updateSoldSearchFieldUI()">
+        <option value="DESCRIPTION">SEARCH BY DESCRIPTION</option>
+        <option value="NTAGN">SEARCH BY TAG NUMBER</option>
+        <option value="SI">SEARCH BY SI NO.</option>
       </select>
 
       <button type="button" class="controlBtn" onclick="clearSoldFilters()">Clear Filters</button>
@@ -9189,6 +9183,28 @@ function escapePostgrestValue(value){
    SI NO.      = EXACT
 ========================================================= */
 
+
+function updateSoldSearchFieldUI(){
+  const report =
+    document.getElementById("sheet")?.value || "";
+
+  const field =
+    document.getElementById("soldSearchFieldFilter")?.value || "DESCRIPTION";
+
+  const search =
+    document.getElementById("search");
+
+  if(!search || report !== "sold") return;
+
+  if(field === "SI"){
+    search.placeholder = "Search SI No. (exact)";
+  }else if(field === "NTAGN"){
+    search.placeholder = "Search tag number...";
+  }else{
+    search.placeholder = "Search description...";
+  }
+}
+
 function buildSearchParams(
   search=""
 ){
@@ -9219,28 +9235,53 @@ function buildSearchParams(
     const exactSI =
       safe;
 
-    params.set(
-      "or",
-      "(" +
-      "NTAGN.ilike." +
-      pattern +
-      "," +
-      "DESCRIPTION.ilike." +
-      pattern +
-      "," +
-      "LENSTYPE.ilike." +
-      pattern +
-      "," +
-      "QR.ilike." +
-      pattern +
-      "," +
-      "BR.ilike." +
-      pattern +
-      ',' +
-      '"SI NO.".eq.' +
-      exactSI +
-      ")"
-    );
+    /* SOLD OUT uses the main search box with a selectable search field.
+       All other reports keep the original multi-field search behavior. */
+    const report =
+      document.getElementById("sheet")?.value || "";
+
+    if(report === "sold"){
+      const field =
+        document.getElementById("soldSearchFieldFilter")?.value || "DESCRIPTION";
+
+      if(field === "SI"){
+        params.set(
+          "or",
+          '"SI NO.".eq.' + exactSI
+        );
+      }else if(field === "NTAGN"){
+        params.set(
+          "NTAGN.ilike." + pattern
+        );
+      }else{
+        params.set(
+          "DESCRIPTION.ilike." + pattern
+        );
+      }
+    }else{
+      params.set(
+        "or",
+        "(" +
+        "NTAGN.ilike." +
+        pattern +
+        "," +
+        "DESCRIPTION.ilike." +
+        pattern +
+        "," +
+        "LENSTYPE.ilike." +
+        pattern +
+        "," +
+        "QR.ilike." +
+        pattern +
+        "," +
+        "BR.ilike." +
+        pattern +
+        ',' +
+        '"SI NO.".eq.' +
+        exactSI +
+        ")"
+      );
+    }
 
   }
 
@@ -9851,56 +9892,6 @@ function soldDateKey(value){
 
 }
 
-function populateSoldFilterDropdowns(rows){
-
-  const configs = [
-    {
-      id:"soldDescriptionFilter",
-      allLabel:"ALL DESCRIPTIONS",
-      get:row=>String(row?.description ?? row?.raw?.DESCRIPTION ?? "").trim()
-    },
-    {
-      id:"soldTagFilter",
-      allLabel:"ALL TAG NUMBERS",
-      get:row=>String(row?.tag ?? row?.raw?.NTAGN ?? "").trim()
-    },
-    {
-      id:"soldSIFilter",
-      allLabel:"ALL SI NO.",
-      get:row=>String(row?.si ?? row?.raw?.["SI NO."] ?? "").trim()
-    }
-  ];
-
-  configs.forEach(cfg=>{
-    const select=document.getElementById(cfg.id);
-    if(!select) return;
-
-    const current=String(select.value || "");
-    const values=[...new Set((Array.isArray(rows)?rows:[])
-      .map(cfg.get)
-      .filter(Boolean))]
-      .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"}));
-
-    select.innerHTML =
-      '<option value="">' +
-      escapeHtml(cfg.allLabel) +
-      '</option>' +
-      values.map(value=>
-        '<option value="' +
-        escapeHtmlAttribute(value) +
-        '">' +
-        escapeHtml(value) +
-        '</option>'
-      ).join("");
-
-    if(values.includes(current)){
-      select.value=current;
-    }else{
-      select.value="";
-    }
-  });
-}
-
 function getVisibleRows(){
 
   const report =
@@ -9938,11 +9929,11 @@ function getVisibleRows(){
   const markFilter =
     document.getElementById("soldMarkFilter")?.value || "ALL";
   const descriptionFilter =
-    String(document.getElementById("soldDescriptionFilter")?.value || "").trim();
+    String(document.getElementById("soldDescriptionFilter")?.value || "").trim().toLowerCase();
   const tagFilter =
-    String(document.getElementById("soldTagFilter")?.value || "").trim();
+    String(document.getElementById("soldTagFilter")?.value || "").trim().toLowerCase();
   const siFilter =
-    String(document.getElementById("soldSIFilter")?.value || "").trim();
+    String(document.getElementById("soldSIFilter")?.value || "").trim().toLowerCase();
 
   return currentRows.filter(row=>{
 
@@ -9954,13 +9945,13 @@ function getVisibleRows(){
     if(markFilter === "MARKED" && !row.marked) return false;
     if(markFilter === "UNMARKED" && row.marked) return false;
 
-    const rowDescription = String(row?.description ?? row?.raw?.DESCRIPTION ?? "").trim();
-    const rowTag = String(row?.tag ?? row?.raw?.NTAGN ?? "").trim();
-    const rowSI = String(row?.si ?? row?.raw?.["SI NO."] ?? "").trim();
+    const rowDescription = String(row?.description ?? row?.raw?.DESCRIPTION ?? "").trim().toLowerCase();
+    const rowTag = String(row?.tag ?? row?.raw?.NTAGN ?? "").trim().toLowerCase();
+    const rowSI = String(row?.si ?? row?.raw?.["SI NO."] ?? "").trim().toLowerCase();
 
-    if(descriptionFilter && rowDescription !== descriptionFilter) return false;
-    if(tagFilter && rowTag !== tagFilter) return false;
-    if(siFilter && rowSI !== siFilter) return false;
+    if(descriptionFilter && !rowDescription.includes(descriptionFilter)) return false;
+    if(tagFilter && !rowTag.includes(tagFilter)) return false;
+    if(siFilter && !rowSI.includes(siFilter)) return false;
 
     if(
       unconfirmedSelectedSI &&
@@ -11390,10 +11381,6 @@ async function refreshDashboard(){
 
     currentRows =
       combined;
-
-    if(report === "sold"){
-      populateSoldFilterDropdowns(currentRows);
-    }
 
     currentPage = 1;
 
@@ -22986,5 +22973,17 @@ document.addEventListener("DOMContentLoaded",()=>{
   else init();
 })();
 </script>
+
+<script id="soldOutSearchByUIOnly">
+document.addEventListener("DOMContentLoaded",()=>{
+  const sheet=document.getElementById("sheet");
+  const field=document.getElementById("soldSearchFieldFilter");
+  const refresh=()=>{ if(typeof updateSoldSearchFieldUI==="function") updateSoldSearchFieldUI(); };
+  sheet?.addEventListener("change",()=>setTimeout(refresh,0));
+  field?.addEventListener("change",()=>setTimeout(refresh,0));
+  refresh();
+});
+</script>
+
 </body>
 </html>

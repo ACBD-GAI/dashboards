@@ -6363,20 +6363,35 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 /* =========================================================
-   ACEBEDO OPTICAL — FALLING LETTER BRAND ANIMATION
+   ACEBEDO OPTICAL — ROCK FALL TEXT IMPACT
    CSS-ONLY ADDITIVE EFFECT
    ========================================================= */
 .brandLogo{position:relative;isolation:isolate;overflow:visible !important;}
-.aoAcebedoLetters{position:absolute;left:50%;top:50%;z-index:4;display:flex;align-items:center;justify-content:center;gap:1px;width:max-content;transform:translate(-50%,-50%);pointer-events:none;}
-.aoAcebedoLetters span{display:inline-block;min-width:7px;color:#0ea5e9;font-size:7px;line-height:1;font-weight:1000;letter-spacing:.02em;opacity:0;text-shadow:0 0 6px rgba(14,165,233,.8),0 0 13px rgba(56,189,248,.34);transform:translateY(-28px) scale(.65) rotate(-12deg);animation:aoLetterFall 4.8s cubic-bezier(.16,.84,.24,1) infinite;}
-.aoAcebedoLetters span:nth-child(1){animation-delay:0s}.aoAcebedoLetters span:nth-child(2){animation-delay:.08s}.aoAcebedoLetters span:nth-child(3){animation-delay:.16s}.aoAcebedoLetters span:nth-child(4){animation-delay:.24s}.aoAcebedoLetters span:nth-child(5){animation-delay:.32s}.aoAcebedoLetters span:nth-child(6){animation-delay:.40s}.aoAcebedoLetters span:nth-child(7){animation-delay:.48s}
-.brandLogo::after{content:"";position:absolute;left:50%;top:50%;width:calc(100% + 16px);height:calc(100% + 16px);z-index:-1;transform:translate(-50%,-50%);border:1px solid rgba(56,189,248,.48);border-radius:20px;box-shadow:0 0 0 3px rgba(56,189,248,.06),0 0 22px rgba(56,189,248,.14);pointer-events:none;animation:aoAcebedoHalo 4.8s ease-in-out infinite;}
-.brandLogo img{position:relative;z-index:2;transform-origin:center;animation:aoAcebedoLogo 4.8s ease-in-out infinite;}
-.brandLogo:hover .aoAcebedoLetters span{animation-duration:3.2s}.brandLogo:hover::after{box-shadow:0 0 0 4px rgba(56,189,248,.08),0 0 30px rgba(56,189,248,.24)}.brandLogo:hover img{filter:drop-shadow(0 0 7px rgba(56,189,248,.28));}
-@keyframes aoLetterFall{0%,58%{opacity:0;transform:translateY(-28px) scale(.65) rotate(-12deg)}12%{opacity:1}24%{opacity:1;transform:translateY(3px) scale(1.08) rotate(3deg)}30%{opacity:1;transform:translateY(-1px) scale(.98) rotate(-1deg)}36%,48%{opacity:1;transform:translateY(0) scale(1) rotate(0)}52%{opacity:0;transform:translateY(4px) scale(.9)}100%{opacity:0;transform:translateY(4px) scale(.85)}}
-@keyframes aoAcebedoLogo{0%,54%,100%{transform:scale(1);filter:none;opacity:1}18%{transform:scale(1.035)}29%{transform:scale(1.01)}38%{transform:scale(.995);filter:drop-shadow(0 0 6px rgba(56,189,248,.2))}}
-@keyframes aoAcebedoHalo{0%,100%{opacity:.28;transform:translate(-50%,-50%) scale(.96)}18%{opacity:.8;transform:translate(-50%,-50%) scale(1.08)}35%{opacity:.45;transform:translate(-50%,-50%) scale(1.02)}}
-@media(prefers-reduced-motion:reduce){.aoAcebedoLetters span,.brandLogo::after,.brandLogo img{animation:none !important}.aoAcebedoLetters span{opacity:1;transform:none}}
+.brandLogo img{position:relative;z-index:2;}
+.aoAcebedoLetters{position:absolute;left:50%;top:calc(100% + 8px);z-index:8;display:flex;align-items:flex-end;justify-content:center;gap:1px;width:max-content;transform:translateX(-50%);pointer-events:none;white-space:nowrap;}
+.aoAcebedoLetters span{display:inline-block;position:relative;color:#ffd21a;font-family:Impact,Haettenschweiler,"Arial Black",sans-serif;font-size:15px;font-weight:1000;line-height:1;letter-spacing:-.8px;-webkit-text-stroke:1px #111;text-shadow:2px 3px 0 #000,4px 5px 0 rgba(0,0,0,.72),0 1px 0 #000;transform-origin:50% 100%;opacity:0;will-change:transform,opacity;}
+.aoAcebedoLetters span::after{content:"";position:absolute;left:10%;right:5%;bottom:-5px;height:3px;border-radius:50%;background:#000;opacity:.5;filter:blur(1px);}
+.aoAcebedoLetters span:nth-child(1){animation:aoRockA 4s infinite;}
+.aoAcebedoLetters span:nth-child(2){animation:aoRockC 4s infinite;}
+.aoAcebedoLetters span:nth-child(3){animation:aoRockE1 4s infinite;}
+.aoAcebedoLetters span:nth-child(4){animation:aoRockB 4s infinite;}
+.aoAcebedoLetters span:nth-child(5){animation:aoRockE2 4s infinite;}
+.aoAcebedoLetters span:nth-child(6){animation:aoRockD 4s infinite;}
+.aoAcebedoLetters span:nth-child(7){animation:aoRockO 4s infinite;}
+.brandLogo::before{content:"";position:absolute;left:50%;top:calc(100% + 5px);width:74px;height:12px;z-index:3;transform:translateX(-50%) scaleX(.1);opacity:0;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.4),transparent 72%);filter:blur(2px);animation:aoImpactShadow 4s infinite;}
+.brandLogo::after{content:"";position:absolute;left:50%;top:calc(100% + 1px);width:66px;height:12px;z-index:9;pointer-events:none;opacity:0;transform:translateX(-50%) scale(.05);background:linear-gradient(26deg,transparent 45%,#111 46%,#111 51%,transparent 52%) left center/100% 100% no-repeat,linear-gradient(-26deg,transparent 45%,#111 46%,#111 51%,transparent 52%) right center/100% 100% no-repeat,linear-gradient(90deg,transparent 43%,#111 44%,#111 51%,transparent 52%) center/100% 100% no-repeat;animation:aoImpactCracks 4s infinite;}
+@keyframes aoRockA{0%,7%{opacity:0;transform:translateY(-70px) rotate(-24deg) scale(.72)}18%{opacity:1;transform:translateY(4px) rotate(-8deg) scale(1.12)}22%{transform:translateY(-8px) rotate(-3deg) scale(1)}28%,64%{opacity:1;transform:translateY(0) rotate(-2deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
+@keyframes aoRockC{0%,10%{opacity:0;transform:translateY(-82px) rotate(18deg) scale(.68)}21%{opacity:1;transform:translateY(4px) rotate(7deg) scale(1.12)}25%{transform:translateY(-8px) rotate(2deg) scale(1)}31%,64%{opacity:1;transform:translateY(0) rotate(1deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
+@keyframes aoRockE1{0%,13%{opacity:0;transform:translateY(-66px) rotate(-15deg) scale(.7)}24%{opacity:1;transform:translateY(4px) rotate(-5deg) scale(1.1)}28%{transform:translateY(-8px) rotate(-1deg) scale(1)}34%,64%{opacity:1;transform:translateY(0) rotate(0) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
+@keyframes aoRockB{0%,16%{opacity:0;transform:translateY(-88px) rotate(22deg) scale(.68)}27%{opacity:1;transform:translateY(4px) rotate(6deg) scale(1.13)}31%{transform:translateY(-9px) rotate(2deg) scale(1)}37%,64%{opacity:1;transform:translateY(0) rotate(1deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
+@keyframes aoRockE2{0%,19%{opacity:0;transform:translateY(-72px) rotate(-19deg) scale(.7)}30%{opacity:1;transform:translateY(4px) rotate(-6deg) scale(1.11)}34%{transform:translateY(-8px) rotate(-2deg) scale(1)}40%,64%{opacity:1;transform:translateY(0) rotate(0) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
+@keyframes aoRockD{0%,22%{opacity:0;transform:translateY(-84px) rotate(16deg) scale(.68)}33%{opacity:1;transform:translateY(4px) rotate(6deg) scale(1.12)}37%{transform:translateY(-8px) rotate(2deg) scale(1)}43%,64%{opacity:1;transform:translateY(0) rotate(1deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
+@keyframes aoRockO{0%,25%{opacity:0;transform:translateY(-74px) rotate(-20deg) scale(.7)}36%{opacity:1;transform:translateY(4px) rotate(-6deg) scale(1.13)}40%{transform:translateY(-9px) rotate(-2deg) scale(1)}46%,64%{opacity:1;transform:translateY(0) rotate(-1deg) scale(1)}70%,100%{opacity:0;transform:translateY(6px) scale(.92)}}
+@keyframes aoImpactShadow{0%,27%{opacity:0;transform:translateX(-50%) scaleX(.1)}34%{opacity:.6;transform:translateX(-50%) scaleX(1.25)}40%{opacity:.2;transform:translateX(-50%) scaleX(1.5)}50%,100%{opacity:0;transform:translateX(-50%) scaleX(.8)}}
+@keyframes aoImpactCracks{0%,31%{opacity:0;transform:translateX(-50%) scale(.05)}35%{opacity:1;transform:translateX(-50%) scale(1)}42%{opacity:.8;transform:translateX(-50%) scale(1.15)}55%,100%{opacity:0;transform:translateX(-50%) scale(1.25)}}
+.brandLogo:hover .aoAcebedoLetters span{animation-duration:2.5s;}
+@media(max-width:700px){.aoAcebedoLetters span{font-size:12px;letter-spacing:-.6px;}}
+@media(prefers-reduced-motion:reduce){.aoAcebedoLetters span,.brandLogo::before,.brandLogo::after{animation:none !important}.aoAcebedoLetters span{opacity:1;transform:none;}}
 </style>
 
 </head>

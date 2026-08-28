@@ -14601,61 +14601,163 @@ function normalizeImportRow(
 
   const output = {};
 
-  const inputKeys =
-    Object.keys(
-      input
-    );
+  const inputKeys = Object.keys(input || {});
 
-  DB_COLUMNS.forEach(
-    header=>{
+  /*
+   * IMPORT HEADER ALIASES
+   * Supports both the database-style headers and the
+   * human-readable headers used by the other Excel format.
+   */
+  const HEADER_ALIASES = {
+    SDATE: [
+      "SDATE",
+      "SUPPLIER DELIVERY DATE"
+    ],
+    SUPPLIER: [
+      "SUPPLIER"
+    ],
+    DR: [
+      "DR",
+      "SUPPLIER DELIVERY RECEIPT NUMBER",
+      "SUPPLIER DELIVERY RECEIPT NO",
+      "DELIVERY RECEIPT NUMBER",
+      "DELIVERY RECEIPT NO"
+    ],
+    COST: [
+      "COST"
+    ],
+    ASG: [
+      "ASG"
+    ],
+    CB: [
+      "CB"
+    ],
+    FD: [
+      "FD"
+    ],
+    UNITS: [
+      "UNITS"
+    ],
+    POWER: [
+      "POWER"
+    ],
+    LENSTYPE: [
+      "LENSTYPE",
+      "TYPE OF LENS",
+      "LENS TYPE"
+    ],
+    PUNIT: [
+      "PUNIT"
+    ],
+    BR: [
+      "BR",
+      "BRANCH"
+    ],
+    NTAGN: [
+      "NTAGN",
+      "TAG NUMBER",
+      "TAG NO",
+      "TAG"
+    ],
+    CATEGORY: [
+      "CATEGORY"
+    ],
+    DESCRIPTION: [
+      "DESCRIPTION",
+      "DESC"
+    ],
+    LENSCODE: [
+      "LENSCODE",
+      "LENS CODE"
+    ],
+    SELLINGPRICE: [
+      "SELLINGPRICE",
+      "SELLING PRICE",
+      "SELLING_PRICE"
+    ],
+    DELIVERYDATE: [
+      "DELIVERYDATE",
+      "DELIVERY DATE",
+      "DELIVERY_DATE"
+    ],
+    ORNUMBER: [
+      "ORNUMBER",
+      "OR NUMBER",
+      "OR NO"
+    ],
+    ORDATE: [
+      "ORDATE",
+      "OR DATE"
+    ],
+    REMARKS: [
+      "REMARKS",
+      "REMARK"
+    ],
+    TAGPRICE: [
+      "TAGPRICE",
+      "TAG PRICE",
+      "TAG_PRICE"
+    ],
+    QR: [
+      "QR"
+    ],
+    "SI NO.": [
+      "SI NO.",
+      "SI NO",
+      "SI NUMBER",
+      "SI NUMBER."
+    ],
+    "DATE AND TIME": [
+      "DATE AND TIME",
+      "DATE/TIME",
+      "DATETIME"
+    ],
+    "USER EMAIL": [
+      "USER EMAIL",
+      "EMAIL"
+    ],
+    STATUS: [
+      "STATUS"
+    ]
+  };
 
-      const found =
-        inputKeys.find(
-          key =>
-            normalizeHeader(key) ===
-            normalizeHeader(header)
-        );
+  const normalizedInput = new Map();
+  inputKeys.forEach(key => {
+    const normalized = normalizeHeader(key);
+    if(normalized && !normalizedInput.has(normalized)){
+      normalizedInput.set(normalized, key);
+    }
+  });
 
-      if(
-        found !== undefined
-      ){
+  DB_COLUMNS.forEach(header=>{
+    const aliases = [
+      header,
+      ...(HEADER_ALIASES[header] || [])
+    ];
 
-        output[header] =
-          normalizeCellValue(
-            input[found]
-          );
-
+    let found;
+    for(const alias of aliases){
+      const normalizedAlias = normalizeHeader(alias);
+      if(normalizedInput.has(normalizedAlias)){
+        found = normalizedInput.get(normalizedAlias);
+        break;
       }
-
     }
-  );
 
-  if(
-    output["NTAGN"] === undefined ||
-    output["NTAGN"] === ""
-  ){
+    if(found !== undefined){
+      output[header] = normalizeCellValue(input[found]);
+    }
+  });
 
-    const possible =
-      inputKeys.find(
-        key =>
-          /tag|ntagn/i.test(
-            String(key)
-          )
-      );
-
+  /* Last-resort tag detection for files with an unusual tag header. */
+  if(output["NTAGN"] === undefined || output["NTAGN"] === ""){
+    const possible = inputKeys.find(key => /tag\s*(number|no|#)?|ntagn/i.test(String(key)));
     if(possible){
-
-      output["NTAGN"] =
-        normalizeCellValue(
-          input[possible]
-        );
-
+      output["NTAGN"] = normalizeCellValue(input[possible]);
     }
-
   }
 
   return output;
-
 }
 
 function normalizeHeader(
@@ -14678,25 +14780,19 @@ function normalizeCellValue(
   value
 ){
 
-  /* IMPORT RULE: every Excel cell is converted to TEXT before
-     the existing import pipeline receives it. */
-  if(
-    value === null ||
-    value === undefined
-  ){
+  if(value === null || value === undefined){
     return "";
   }
 
-  if(
-    value instanceof Date
-  ){
+  /* Excel dates are converted to the existing app date format first,
+     then explicitly returned as TEXT. */
+  if(value instanceof Date){
     return String(formatDateValue(value) || "").trim();
   }
 
+  /* Every imported value is stored as text in the normalized payload. */
   return String(value).trim();
-
 }
-
 
 function philippineDateTime(){
 

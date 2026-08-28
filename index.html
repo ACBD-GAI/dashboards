@@ -6367,12 +6367,20 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
    CSS-ONLY ADDITIVE EFFECT
    ========================================================= */
 .brandLogo{position:relative;isolation:isolate;overflow:visible !important;transform-origin:center bottom;animation:aoImpactFall 4.8s cubic-bezier(.22,.8,.25,1) infinite;}
-.brandLogo::before{content:"";position:absolute;inset:-8px;z-index:-2;border-radius:inherit;background:conic-gradient(from 0deg,#ef4444 0deg,#ef4444 120deg,#2563eb 120deg,#2563eb 240deg,#facc15 240deg,#facc15 360deg);animation:aoRgbSpin 2.2s linear infinite;box-shadow:0 0 13px rgba(37,99,235,.22),0 0 18px rgba(239,68,68,.12),0 0 18px rgba(250,204,21,.12);}
-.brandLogo::after{content:"";position:absolute;inset:-3px;z-index:-1;border-radius:inherit;background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.8),0 7px 18px rgba(0,0,0,.16);}
+
+/* Clean circular RGB ring: rotates continuously and changes
+   red -> blue -> yellow, holding each color for 2 seconds. */
+.brandLogo::before{content:"";position:absolute;inset:-8px;z-index:-2;border:3px solid #ef4444;border-radius:50%;box-shadow:0 0 12px rgba(239,68,68,.24),0 0 20px rgba(37,99,235,.10),0 0 20px rgba(250,204,21,.10);animation:aoRgbCircle 2s linear infinite,aoRgbColor 6s steps(1,end) infinite;}
+
+.brandLogo::after{content:"";position:absolute;inset:-2px;z-index:-1;border-radius:inherit;background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.85),0 7px 18px rgba(0,0,0,.16);}
+
 .brandLogo img{position:relative;z-index:2;display:block;transform-origin:center bottom;animation:aoLogoImpact 4.8s cubic-bezier(.22,.8,.25,1) infinite;}
+
 @keyframes aoImpactFall{0%,66%,100%{transform:translateY(0) scaleY(1)}7%{transform:translateY(-46px) scaleY(.98)}18%{transform:translateY(0) scaleY(1)}22%{transform:translateY(7px) scaleY(.84)}26%{transform:translateY(-4px) scaleY(1.05)}31%{transform:translateY(2px) scaleY(.95)}37%{transform:translateY(0) scaleY(1)}}
 @keyframes aoLogoImpact{0%,66%,100%{transform:scale(1)}7%{transform:scale(1.02)}18%{transform:scale(1)}22%{transform:scaleX(1.08) scaleY(.84)}26%{transform:scaleX(.97) scaleY(1.05)}31%{transform:scaleX(1.02) scaleY(.95)}37%{transform:scale(1)}}
-@keyframes aoRgbSpin{to{transform:rotate(360deg)}}
+@keyframes aoRgbCircle{to{transform:rotate(360deg)}}
+@keyframes aoRgbColor{0%,33.333%{border-color:#ef4444;box-shadow:0 0 13px rgba(239,68,68,.34),0 0 22px rgba(239,68,68,.18)}33.334%,66.666%{border-color:#2563eb;box-shadow:0 0 13px rgba(37,99,235,.34),0 0 22px rgba(37,99,235,.18)}66.667%,100%{border-color:#facc15;box-shadow:0 0 13px rgba(250,204,21,.36),0 0 22px rgba(250,204,21,.18)}}
+
 @media(prefers-reduced-motion:reduce){.brandLogo,.brandLogo::before,.brandLogo img{animation:none !important;}}
 </style>>
 
@@ -6481,7 +6489,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
         <div class="brandLogo">
  <img src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w200">
- <span class="aoAcebedoLetters" aria-hidden="true"><span>A</span><span>C</span><span>E</span><span>B</span><span>E</span><span>D</span><span>O</span></span>
+<span>C</span><span>E</span><span>B</span><span>E</span><span>D</span><span>O</span></span>
 </div>
 
         <div>

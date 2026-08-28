@@ -6376,119 +6376,202 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   will-change:transform,box-shadow;
 }
 
-/* Rotating energy ring around the logo */
+/* =========================================================
+   🚀 ULTRA PREMIUM ACEBEDO BRAND LOGO ANIMATION
+   CSS-ONLY — dashboard behavior/functions untouched
+   ========================================================= */
+
+.brandLogo{
+  position:relative;
+  isolation:isolate;
+  overflow:visible;
+  transform-origin:center;
+  animation:aoLogoHero 5.8s cubic-bezier(.2,.78,.2,1) infinite;
+  will-change:transform,box-shadow,filter;
+}
+
+/* Outer rotating energy orbit */
 .brandLogo::before{
   content:"";
   position:absolute;
-  inset:-5px;
+  inset:-7px;
   border-radius:inherit;
-  background:conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(56,189,248,.08) 45deg,
-    rgba(56,189,248,.95) 90deg,
-    rgba(99,102,241,.95) 145deg,
-    rgba(236,72,153,.82) 205deg,
-    rgba(56,189,248,.12) 270deg,
-    transparent 360deg
-  );
+  padding:2px;
+  pointer-events:none;
+  z-index:-2;
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 22deg,
+      rgba(56,189,248,.08) 36deg,
+      rgba(56,189,248,1) 65deg,
+      rgba(34,211,238,.95) 90deg,
+      rgba(99,102,241,1) 125deg,
+      rgba(236,72,153,.95) 165deg,
+      rgba(250,204,21,.82) 205deg,
+      rgba(56,189,248,.10) 250deg,
+      transparent 300deg,
+      transparent 360deg
+    );
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;
   mask-composite:exclude;
-  padding:2px;
-  pointer-events:none;
-  z-index:-1;
-  animation:aoLogoRing 2.8s linear infinite;
-  filter:drop-shadow(0 0 7px rgba(56,189,248,.42));
+  animation:aoLogoOrbit 2.05s linear infinite;
+  filter:
+    drop-shadow(0 0 4px rgba(56,189,248,.65))
+    drop-shadow(0 0 12px rgba(99,102,241,.25));
 }
 
-/* Existing outline becomes a soft breathing halo */
+/* Inner scanning beam / halo */
 .brandLogo::after{
-  animation:aoLogoHalo 2.4s ease-in-out infinite;
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:inherit;
+  pointer-events:none;
+  z-index:2;
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(56,189,248,.18),
+    0 0 0 0 rgba(56,189,248,0);
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 34%,
+      rgba(255,255,255,.0) 40%,
+      rgba(255,255,255,.95) 49%,
+      rgba(56,189,248,.35) 53%,
+      transparent 61%,
+      transparent 100%
+    );
+  background-size:260% 260%;
+  background-position:240% 240%;
+  mix-blend-mode:screen;
+  animation:
+    aoLogoScan 3.25s cubic-bezier(.4,0,.2,1) infinite,
+    aoLogoHalo 2.1s ease-in-out infinite;
 }
 
 .brandLogo img{
+  position:relative;
+  z-index:1;
   transform-origin:center;
-  animation:aoLogoImage 5.2s cubic-bezier(.2,.75,.2,1) infinite;
+  animation:aoLogoCore 5.8s cubic-bezier(.2,.78,.2,1) infinite;
   will-change:transform,filter;
 }
 
-/* Small interactive boost */
+/* Extra glow through the whole logo container */
 .brandLogo:hover{
   animation:none;
-  transform:translateY(-3px) scale(1.08) rotate(-2deg);
+  transform:translateY(-5px) scale(1.11) rotate(-2deg);
+  filter:saturate(1.12);
   box-shadow:
-    0 0 0 5px rgba(56,189,248,.13),
-    0 14px 30px rgba(14,165,233,.23),
-    0 0 30px rgba(99,102,241,.22);
+    0 0 0 5px rgba(56,189,248,.11),
+    0 16px 34px rgba(14,165,233,.22),
+    0 0 22px rgba(56,189,248,.30),
+    0 0 46px rgba(99,102,241,.22);
 }
 
 .brandLogo:hover::before{
+  inset:-9px;
+  animation-duration:.82s;
+  filter:
+    drop-shadow(0 0 7px rgba(56,189,248,.95))
+    drop-shadow(0 0 17px rgba(99,102,241,.48));
+}
+
+.brandLogo:hover::after{
   animation-duration:1.15s;
-  filter:drop-shadow(0 0 10px rgba(56,189,248,.7));
 }
 
 .brandLogo:hover img{
   animation:none;
-  transform:scale(1.045) rotate(2deg);
-  filter:drop-shadow(0 0 9px rgba(56,189,248,.34));
+  transform:scale(1.07) rotate(2deg);
+  filter:
+    saturate(1.16)
+    drop-shadow(0 0 7px rgba(56,189,248,.34))
+    drop-shadow(0 0 16px rgba(99,102,241,.18));
 }
 
-@keyframes aoLogoFloat{
+@keyframes aoLogoHero{
   0%,100%{
     transform:translateY(0) rotate(0deg) scale(1);
     box-shadow:
-      0 0 0 4px rgba(64,178,255,.10),
+      0 0 0 4px rgba(64,178,255,.09),
       0 9px 24px rgba(0,0,0,.18),
-      0 0 20px rgba(44,170,255,.16);
+      0 0 20px rgba(44,170,255,.14);
   }
-  25%{
-    transform:translateY(-2px) rotate(-1deg) scale(1.015);
-  }
-  50%{
-    transform:translateY(-4px) rotate(0deg) scale(1.035);
+  18%{ transform:translateY(-2px) rotate(-1deg) scale(1.012); }
+  36%{
+    transform:translateY(-5px) rotate(.3deg) scale(1.035);
     box-shadow:
-      0 0 0 6px rgba(64,178,255,.12),
-      0 14px 30px rgba(0,0,0,.20),
-      0 0 30px rgba(44,170,255,.25);
+      0 0 0 6px rgba(64,178,255,.13),
+      0 16px 31px rgba(0,0,0,.21),
+      0 0 32px rgba(44,170,255,.27);
   }
-  75%{
-    transform:translateY(-2px) rotate(1deg) scale(1.015);
-  }
+  52%{ transform:translateY(-2px) rotate(1deg) scale(1.018); }
+  70%{ transform:translateY(0) rotate(0deg) scale(1); }
 }
 
-@keyframes aoLogoRing{
-  to{transform:rotate(360deg);}
+@keyframes aoLogoOrbit{
+  0%{ transform:rotate(0deg) scale(1); }
+  45%{ transform:rotate(162deg) scale(1.012); }
+  100%{ transform:rotate(360deg) scale(1); }
+}
+
+@keyframes aoLogoScan{
+  0%,12%{ background-position:240% 240%; opacity:.15; }
+  42%{ background-position:-40% -40%; opacity:1; }
+  58%,100%{ background-position:-90% -90%; opacity:.12; }
 }
 
 @keyframes aoLogoHalo{
   0%,100%{
-    opacity:.58;
-    transform:scale(1);
-    box-shadow:0 0 0 rgba(56,189,248,0);
+    box-shadow:
+      inset 0 0 0 1px rgba(56,189,248,.18),
+      0 0 0 0 rgba(56,189,248,0);
   }
   50%{
-    opacity:1;
-    transform:scale(1.035);
-    box-shadow:0 0 18px rgba(56,189,248,.22);
+    box-shadow:
+      inset 0 0 0 1px rgba(56,189,248,.28),
+      0 0 0 7px rgba(56,189,248,.09),
+      0 0 24px rgba(56,189,248,.20);
   }
 }
 
-@keyframes aoLogoImage{
-  0%,12%{transform:scale(1) rotate(0deg);filter:drop-shadow(0 0 0 rgba(56,189,248,0));}
-  20%{transform:scale(1.025) rotate(-1deg);filter:drop-shadow(0 0 7px rgba(56,189,248,.16));}
-  28%{transform:scale(1.04) rotate(0deg);filter:drop-shadow(0 0 10px rgba(99,102,241,.16));}
-  36%{transform:scale(1.025) rotate(1deg);filter:drop-shadow(0 0 7px rgba(236,72,153,.13));}
-  48%,100%{transform:scale(1) rotate(0deg);filter:drop-shadow(0 0 0 rgba(56,189,248,0));}
+@keyframes aoLogoCore{
+  0%,10%{
+    transform:scale(1) rotate(0deg);
+    filter:drop-shadow(0 0 0 rgba(56,189,248,0));
+  }
+  24%{
+    transform:scale(1.028) rotate(-1.2deg);
+    filter:drop-shadow(0 0 7px rgba(56,189,248,.20));
+  }
+  35%{
+    transform:scale(1.055) rotate(.4deg);
+    filter:
+      drop-shadow(0 0 9px rgba(56,189,248,.24))
+      drop-shadow(0 0 14px rgba(99,102,241,.14));
+  }
+  46%{
+    transform:scale(1.028) rotate(1deg);
+    filter:drop-shadow(0 0 8px rgba(236,72,153,.16));
+  }
+  64%,100%{
+    transform:scale(1) rotate(0deg);
+    filter:drop-shadow(0 0 0 rgba(56,189,248,0));
+  }
 }
 
 @media(max-width:700px){
   .brandLogo{
-    animation-duration:5s;
+    animation-duration:6.2s;
   }
-  .brandLogo::before{
-    inset:-4px;
-  }
+  .brandLogo::before{ inset:-5px; }
+  .brandLogo:hover{ transform:translateY(-3px) scale(1.06) rotate(-1deg); }
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -6499,6 +6582,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
     animation:none !important;
   }
 }
+
 </style>
 </head>
 

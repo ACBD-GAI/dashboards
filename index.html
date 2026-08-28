@@ -6453,61 +6453,6 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 </style>
 
-
-<style id="loginLogoTransparentImpactOnly">
-/* LOGIN LOGO ONLY — transparent surround + falling/impact shadow */
-#loginScreen .logo{
-  background:transparent !important;
-  border:0 !important;
-  box-shadow:none !important;
-  overflow:visible !important;
-  position:relative;
-  transform-origin:center bottom;
-}
-
-#loginScreen .logo img{
-  background:transparent !important;
-  border-radius:inherit;
-  filter:drop-shadow(0 7px 8px rgba(0,0,0,.28));
-  position:relative;
-  z-index:2;
-}
-
-#loginScreen .logo::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-7px;
-  width:24px;
-  height:8px;
-  border-radius:50%;
-  background:rgba(15,23,42,.32);
-  opacity:0;
-  transform:translateX(-50%) scale(.18);
-  pointer-events:none;
-  animation:loginLogoImpactShadow 6.2s linear infinite;
-}
-
-@keyframes loginLogoImpactShadow{
-  0%,83.5%,100%{
-    opacity:0;
-    transform:translateX(-50%) scale(.18);
-  }
-  84.5%{
-    opacity:.76;
-    transform:translateX(-50%) scale(.9);
-  }
-  87%{
-    opacity:.48;
-    transform:translateX(-50%) scale(2.7);
-  }
-  91%{
-    opacity:0;
-    transform:translateX(-50%) scale(4.1);
-  }
-}
-</style>
-
 </head>
 
 <body>

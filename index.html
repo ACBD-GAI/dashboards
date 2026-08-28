@@ -6363,85 +6363,24 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 /* =========================================================
-   ACEBEDO OPTICAL — ONE DROP / HEAVY IMPACT LOGO
+   ACEBEDO OPTICAL — ONE DROP / ROCK IMPACT LOGO
    CSS-ONLY ADDITIVE EFFECT
    - Transparent surround
-   - ONE drop per cycle
-   - Fast direct fall -> hard wide impact -> quick bounce -> reset
-   - No color / no rotating effects
+   - ONE direct drop per cycle
+   - Hard wide impact
+   - Ground crack + scattering stone fragments
+   - Quick bounce -> settle -> reset
+   - No color / no rotation
    ========================================================= */
-.brandLogo{
-  position:relative;
-  isolation:isolate;
-  overflow:visible !important;
-  padding:0 !important;
-  border:0 !important;
-  background:transparent !important;
-  transform-origin:center bottom;
-  animation:aoOneDrop 6.2s linear infinite;
-  box-shadow:none !important;
-}
-
-.brandLogo img{
-  position:relative;
-  z-index:4;
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  background:transparent !important;
-  border-radius:inherit;
-  transform-origin:center bottom;
-  filter:drop-shadow(0 7px 8px rgba(0,0,0,.28));
-  animation:aoOneDropImg 6.2s linear infinite;
-}
-
-.brandLogo::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-7px;
-  width:22px;
-  height:8px;
-  z-index:0;
-  border-radius:50%;
-  background:rgba(15,23,42,.32);
-  transform:translateX(-50%) scale(.22);
-  opacity:0;
-  pointer-events:none;
-  animation:aoOneDropShadow 6.2s linear infinite;
-}
-
-@keyframes aoOneDrop{
-  0%,72%,100%{transform:translateY(0) scaleX(1) scaleY(1);}
-  78%{transform:translateY(-92px) scaleX(.985) scaleY(1.015);}
-  82%{transform:translateY(-92px) scaleX(.985) scaleY(1.015);}
-  84.5%{transform:translateY(0) scaleX(1.28) scaleY(.68);}
-  87%{transform:translateY(-8px) scaleX(.96) scaleY(1.08);}
-  89.5%{transform:translateY(2px) scaleX(1.035) scaleY(.95);}
-  92%{transform:translateY(0) scaleX(1) scaleY(1);}
-}
-
-@keyframes aoOneDropImg{
-  0%,72%,100%{transform:scale(1);}
-  78%{transform:scale(.985);}
-  82%{transform:scale(.985);}
-  84.5%{transform:scaleX(1.30) scaleY(.68);}
-  87%{transform:scaleX(.955) scaleY(1.09);}
-  89.5%{transform:scaleX(1.03) scaleY(.95);}
-  92%{transform:scale(1);}
-}
-
-@keyframes aoOneDropShadow{
-  0%,83.5%,100%{opacity:0;transform:translateX(-50%) scale(.22);}
-  84.5%{opacity:.78;transform:translateX(-50%) scale(.9);}
-  87%{opacity:.48;transform:translateX(-50%) scale(2.7);}
-  91%{opacity:0;transform:translateX(-50%) scale(4.2);}
-}
-
-@media(prefers-reduced-motion:reduce){
-  .brandLogo,.brandLogo::after,.brandLogo img{animation:none !important;}
-}
+.brandLogo{position:relative;isolation:isolate;overflow:visible !important;padding:0 !important;border:0 !important;background:transparent !important;transform-origin:center bottom;animation:aoOneDrop 6.2s linear infinite;box-shadow:none !important;}
+.brandLogo img{position:relative;z-index:4;display:block;width:100%;height:100%;object-fit:contain;background:transparent !important;border-radius:inherit;transform-origin:center bottom;filter:drop-shadow(0 7px 8px rgba(0,0,0,.28));animation:aoOneDropImg 6.2s linear infinite;}
+.brandLogo::before{content:"";position:absolute;left:50%;bottom:-16px;width:118px;height:54px;z-index:1;pointer-events:none;transform:translateX(-50%) scale(.25);opacity:0;background:linear-gradient(90deg,transparent 47%,rgba(35,27,18,.92) 48%,rgba(35,27,18,.92) 51%,transparent 52%) 50% 28%/3px 23px no-repeat,linear-gradient(28deg,transparent 47%,rgba(35,27,18,.90) 48%,rgba(35,27,18,.90) 51%,transparent 52%) 40% 55%/32px 3px no-repeat,linear-gradient(-30deg,transparent 47%,rgba(35,27,18,.90) 48%,rgba(35,27,18,.90) 51%,transparent 52%) 60% 57%/34px 3px no-repeat,linear-gradient(64deg,transparent 47%,rgba(35,27,18,.78) 48%,rgba(35,27,18,.78) 51%,transparent 52%) 27% 67%/23px 3px no-repeat,linear-gradient(-65deg,transparent 47%,rgba(35,27,18,.78) 48%,rgba(35,27,18,.78) 51%,transparent 52%) 73% 68%/23px 3px no-repeat,radial-gradient(circle at 7% 70%,#6b7280 0 3px,transparent 4px),radial-gradient(circle at 18% 42%,#4b5563 0 2.5px,transparent 3.5px),radial-gradient(circle at 29% 82%,#7c6f64 0 3px,transparent 4px),radial-gradient(circle at 76% 78%,#5b6470 0 3px,transparent 4px),radial-gradient(circle at 87% 48%,#7c6f64 0 2.5px,transparent 3.5px),radial-gradient(circle at 96% 72%,#4b5563 0 2.5px,transparent 3.5px);animation:aoRockDebris 6.2s linear infinite;}
+.brandLogo::after{content:"";position:absolute;left:50%;bottom:-7px;width:22px;height:8px;z-index:0;border-radius:50%;background:rgba(15,23,42,.32);transform:translateX(-50%) scale(.22);opacity:0;pointer-events:none;animation:aoOneDropShadow 6.2s linear infinite;}
+@keyframes aoOneDrop{0%,72%,100%{transform:translateY(0) scaleX(1) scaleY(1)}78%{transform:translateY(-92px) scaleX(.985) scaleY(1.015)}81.2%{transform:translateY(-20px) scaleX(.99) scaleY(1.01)}84.5%{transform:translateY(0) scaleX(1.28) scaleY(.68)}87%{transform:translateY(-8px) scaleX(.96) scaleY(1.08)}89.5%{transform:translateY(2px) scaleX(1.035) scaleY(.95)}92%{transform:translateY(0) scaleX(1) scaleY(1)}}
+@keyframes aoOneDropImg{0%,72%,100%{transform:scale(1)}78%{transform:scale(.985)}81.2%{transform:scale(.99)}84.5%{transform:scaleX(1.30) scaleY(.68)}87%{transform:scaleX(.955) scaleY(1.09)}89.5%{transform:scaleX(1.03) scaleY(.95)}92%{transform:scale(1)}}
+@keyframes aoOneDropShadow{0%,83.5%,100%{opacity:0;transform:translateX(-50%) scale(.22)}84.5%{opacity:.78;transform:translateX(-50%) scale(.9)}87%{opacity:.48;transform:translateX(-50%) scale(2.7)}91%{opacity:0;transform:translateX(-50%) scale(4.2)}}
+@keyframes aoRockDebris{0%,83%{opacity:0;transform:translateX(-50%) translateY(-3px) scale(.18)}84.4%{opacity:1;transform:translateX(-50%) translateY(1px) scale(.78)}85.2%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}86.8%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.06)}90%{opacity:.85;transform:translateX(-50%) translateY(1px) scale(1)}95%{opacity:0;transform:translateX(-50%) translateY(2px) scale(.96)}100%{opacity:0;transform:translateX(-50%) translateY(0) scale(.18)}}
+@media(prefers-reduced-motion:reduce){.brandLogo,.brandLogo::before,.brandLogo::after,.brandLogo img{animation:none !important;}}
 </style>
 
 </head>

@@ -14678,28 +14678,22 @@ function normalizeCellValue(
   value
 ){
 
+  /* IMPORT RULE: every Excel cell is converted to TEXT before
+     the existing import pipeline receives it. */
   if(
     value === null ||
     value === undefined
   ){
-
     return "";
-
   }
 
   if(
     value instanceof Date
   ){
-
-    return formatDateValue(
-      value
-    );
-
+    return String(formatDateValue(value) || "").trim();
   }
 
-  return String(
-    value
-  ).trim();
+  return String(value).trim();
 
 }
 

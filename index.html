@@ -14976,6 +14976,68 @@ async function getExistingImportTags(
 }
 
 /* =========================================================
+   GET EXISTING IMPORT TAGS FOR A BRANCH
+   Used by Excel import duplicate checking across all
+   inventory locations. Match is BR + NTAGN.
+========================================================= */
+
+async function getExistingImportBranchTags(
+  table,
+  branch,
+  tags
+){
+
+  const existing = new Set();
+  const tagArray = Array.from(tags);
+  const TAG_QUERY_BATCH = 200;
+
+  for(let i=0; i<tagArray.length; i+=TAG_QUERY_BATCH){
+
+    const batch = tagArray.slice(i, i + TAG_QUERY_BATCH);
+    if(!batch.length) continue;
+
+    const escaped = batch.map(value =>
+      String(value)
+        .replace(/\\/g,"\\\\")
+        .replace(/"/g,'\\"')
+        .replace(/,/g,"\\,")
+        .replace(/\(/g,"\\(")
+        .replace(/\)/g,"\\)")
+    );
+
+    const params = new URLSearchParams();
+    params.set("select","BR,NTAGN");
+    params.set("BR","eq." + String(branch).trim().toUpperCase());
+    params.set("NTAGN","in.(" + escaped.join(",") + ")");
+
+    const rows = await supabaseRequest(
+      table + "?" + params.toString()
+    );
+
+    if(Array.isArray(rows)){
+      rows.forEach(row=>{
+        const rowBranch = String(row?.BR ?? "").trim().toUpperCase();
+        const tag = String(row?.NTAGN ?? "").trim();
+        if(rowBranch === String(branch).trim().toUpperCase() && tag){
+          existing.add(tag);
+        }
+      });
+    }
+
+    updateQueue(
+      "IMPORT",
+      Math.min(i + TAG_QUERY_BATCH, tagArray.length),
+      Math.max(1, tagArray.length),
+      "Checking existing inventory locations..."
+    );
+
+    await yieldToBrowser();
+  }
+
+  return existing;
+}
+
+/* =========================================================
    FAST IMPORT — REPLACE STOCKS COMPLETELY
 
    IMPORTANT:
@@ -15022,64 +15084,48 @@ async function importDirect(
   mappedRows = Array.from(unique.values());
 
   /* =======================================================
-     SKIP ITEMS ALREADY IN REPORTED MISSING
-     Match by BR + NTAGN.
-  ======================================================= */
-  const reportedMissingKeys = new Set();
-  let reportedMissingOffset = 0;
+     CHECK DUPLICATES IN ALL INVENTORY LOCATIONS
 
-  while(true){
-    const params = new URLSearchParams();
-    params.set("select","BR,NTAGN");
-    params.set("BR","eq." + branch);
-    params.set("limit",String(SUPABASE_PAGE_SIZE));
-    params.set("offset",String(reportedMissingOffset));
+     Match is BR + NTAGN across:
+       1. Stocks
+       2. Sold Out / scanresults
+       3. Audit
+       4. Reported Missing
+       5. Pull Out
 
-    const reportedRows = await supabaseRequest(
-      "reported_missing?" + params.toString()
-    );
-
-    const batch = Array.isArray(reportedRows) ? reportedRows : [];
-    batch.forEach(row=>{
-      const rowBranch = String(row?.BR ?? "").trim().toUpperCase();
-      const rowTag = String(row?.NTAGN ?? "").trim().toUpperCase();
-      if(rowBranch && rowTag){
-        reportedMissingKeys.add(rowBranch + "|" + rowTag);
-      }
-    });
-
-    if(batch.length < SUPABASE_PAGE_SIZE) break;
-    reportedMissingOffset += SUPABASE_PAGE_SIZE;
-  }
-
-  const beforeReportedMissingFilter = mappedRows.length;
-  mappedRows = mappedRows.filter(row=>{
-    const rowBranch = String(row?.BR ?? branch).trim().toUpperCase();
-    const rowTag = String(row?.NTAGN ?? "").trim().toUpperCase();
-    return !reportedMissingKeys.has(rowBranch + "|" + rowTag);
-  });
-
-  const skippedReportedMissing =
-    beforeReportedMissingFilter - mappedRows.length;
-
-  /* =======================================================
-     CHECK DUPLICATE NTAGN IN BOTH STOCKS AND AUDIT
-
-     Existing tag in either table = SKIP.
+     Existing in ANY location = SKIP.
      Nothing existing is deleted or replaced.
   ======================================================= */
   const uploadTags = new Set(
     mappedRows.map(row=>String(row?.NTAGN || "").trim()).filter(Boolean)
   );
 
-  const [existingStocks, existingAudit] = await Promise.all([
-    getExistingImportTags(table, uploadTags),
-    getExistingImportTags(auditTable, uploadTags)
+  const soldTable = tableName(branch,"sold");
+
+  const [
+    existingStocks,
+    existingSold,
+    existingAudit,
+    existingReportedMissing,
+    existingPullOut
+  ] = await Promise.all([
+    getExistingImportBranchTags(table, branch, uploadTags),
+    getExistingImportBranchTags(soldTable, branch, uploadTags),
+    getExistingImportBranchTags(auditTable, branch, uploadTags),
+    getExistingImportBranchTags("reported_missing", branch, uploadTags),
+    getExistingImportBranchTags("pull_out", branch, uploadTags)
   ]);
 
   const existingAnywhere = new Set();
-  existingStocks.forEach(tag=>existingAnywhere.add(String(tag).trim()));
-  existingAudit.forEach(tag=>existingAnywhere.add(String(tag).trim()));
+  [
+    existingStocks,
+    existingSold,
+    existingAudit,
+    existingReportedMissing,
+    existingPullOut
+  ].forEach(set=>{
+    set.forEach(tag=>existingAnywhere.add(String(tag).trim()));
+  });
 
   const beforeExistingFilter = mappedRows.length;
   mappedRows = mappedRows.filter(row=>{
@@ -15090,12 +15136,12 @@ async function importDirect(
   const skippedExisting =
     beforeExistingFilter - mappedRows.length;
 
-  const totalSkipped = skippedReportedMissing + skippedExisting;
+  const totalSkipped = skippedExisting;
 
   if(!mappedRows.length){
     throw new Error(
       totalSkipped
-        ? "Import finished: all uploaded items were skipped because they already exist in Stocks, Audit, or Reported Missing."
+        ? "Import finished: all uploaded items were skipped because they already exist in Stocks, Sold Out, Audit, Reported Missing, or Pull Out."
         : "No valid stock records found after processing."
     );
   }

@@ -22204,8 +22204,7 @@ function advancedSearchLensTypeRange(lensType){
    */
   const ranges={
     ORD:[
-      {min:1,max:240},
-      {min:7001,max:7240}
+      {min:1,max:240}
     ],
     MC:[
       {min:1001,max:1240},
@@ -22219,13 +22218,77 @@ function advancedSearchLensTypeRange(lensType){
   return ranges[String(lensType||"").trim().toUpperCase()]||null;
 }
 
-async function getAdvancedAvailableRows(branch,lensCode,lensType,description,fullData=false){
-  const p=new URLSearchParams(); p.set("select","*");
-  if(lensCode)p.set("LENSCODE","eq."+lensCode);
-  if(description)p.set("DESCRIPTION","eq."+description);
+/*
+ * FAST ADVANCED SEARCH HELPER
+ * Keeps the existing numeric/range rules, but lets PostgreSQL reject
+ * non-numeric LENSCODE values before they are sent to the browser.
+ * Leading zeroes and optional decimal parts remain valid, matching the
+ * existing client-side numeric check.
+ */
+function advancedSearchLensCodeRegex(lensType, showAllLensTypes){
+  if(showAllLensTypes){
+    return "^0*[0-9]+(?:\\.[0-9]+)?$";
+  }
+
+  const ranges=advancedSearchLensTypeRange(lensType);
+  if(!Array.isArray(ranges)||!ranges.length) return null;
+
+  const values=[];
+  ranges.forEach(range=>{
+    const min=Math.max(0,Math.ceil(Number(range.min)));
+    const max=Math.max(min,Math.floor(Number(range.max)));
+    for(let n=min;n<=max;n++){
+      values.push(String(n));
+    }
+  });
+
+  if(!values.length) return null;
+
+  return "^0*(?:" + values.join("|") + ")(?:\\.[0-9]+)?$";
+}
+
+async function getAdvancedAvailableRows(branch,lensCode,lensType,description,fullData=false,showAllLensTypes=false){
+  const p=new URLSearchParams();
+
+  /* Search only needs the columns it displays. Excel export still asks
+     for fullData=true, so its existing export behavior is preserved. */
+  p.set(
+    "select",
+    fullData
+      ? "*"
+      : "BR,NTAGN,LENSTYPE,LENSCODE,DESCRIPTION,DELIVERYDATE"
+  );
+
+  if(lensCode){
+    p.set("LENSCODE","eq."+lensCode);
+  }else{
+    const regex=advancedSearchLensCodeRegex(lensType,showAllLensTypes);
+    if(regex) p.set("LENSCODE","match."+regex);
+  }
+
+  if(description) p.set("DESCRIPTION","eq."+description);
   p.set("order","LENSCODE.asc.nullslast,NTAGN.asc.nullslast");
-  const all=[];let offset=0;const limit=SUPABASE_PAGE_SIZE;const max=fullData?MAX_FETCH_ROWS:ADVANCED_SEARCH_MAX_ROWS;
-  while(offset<max){p.set("limit",String(limit));p.set("offset",String(offset));const rows=await supabaseRequest(advancedSearchReportTable(branch)+"?"+p.toString());const batch=Array.isArray(rows)?rows:[];all.push(...batch);if(batch.length<limit)break;offset+=limit;}
+
+  const all=[];
+  let offset=0;
+  const limit=SUPABASE_PAGE_SIZE;
+  const max=fullData?MAX_FETCH_ROWS:ADVANCED_SEARCH_MAX_ROWS;
+
+  while(offset<max){
+    p.set("limit",String(Math.min(limit,max-offset)));
+    p.set("offset",String(offset));
+
+    const rows=await supabaseRequest(
+      advancedSearchReportTable(branch)+"?"+p.toString()
+    );
+
+    const batch=Array.isArray(rows)?rows:[];
+    all.push(...batch);
+
+    if(batch.length<limit || all.length>=max) break;
+    offset+=limit;
+  }
+
   return {rows:all.slice(0,max),capped:all.length>=max};
 }
 
@@ -22258,11 +22321,15 @@ async function runAdvancedInventorySearch(){
     const branches=branch==="ALL"?BRANCHES:[branch];
 
     const branchResults=await Promise.all(branches.map(async b=>{
-      // Fetch enough rows to evaluate the numeric-LENSCODE rule locally.
-      // We deliberately do NOT ask Supabase to interpret LENSCODE as numeric because
-      // the existing stocks column can contain values such as W, blank, or other text.
+      /*
+       * PERFORMANCE:
+       * - Supabase now rejects non-numeric LENSCODE values server-side.
+       * - Search requests only the columns rendered by Advanced Search.
+       * - We use the normal search cap instead of downloading 100,000 rows.
+       * - Sold-tag lookup remains parallel with the stock query.
+       */
       const [stock,sold]=await Promise.all([
-        getAdvancedAvailableRows(b,lensCode,lensType,description,true),
+        getAdvancedAvailableRows(b,lensCode,lensType,description,false,showAllLensTypes),
         getSoldTags(b)
       ]);
 
@@ -22270,8 +22337,8 @@ async function runAdvancedInventorySearch(){
         const tag=String(row?.NTAGN??"").trim();
         if(tag && sold.has(tag)) return false;
 
-        // NON-NEGOTIABLE: Advanced Remaining Lens Search only returns numeric LENSCODE.
-        // Therefore W, ABC, blanks, ORD-100, etc. are always excluded.
+        // Keep the existing final safety check so the result rules do not rely
+        // only on the database-side regex.
         const rawCode=String(row?.LENSCODE??"").trim();
         if(!/^\d+(?:\.\d+)?$/.test(rawCode)) return false;
         const code=Number(rawCode);
@@ -22279,12 +22346,10 @@ async function runAdvancedInventorySearch(){
 
         // The LENSCODE RANGE is always enforced when a range is selected,
         // even when an exact Lens Code is also entered. The two filters are ANDed.
-        // Example: ORD + 5001 = 0 results; PHOTOGRAY + 5001 = matching results.
         if(!showAllLensTypes){
           const ranges=advancedSearchLensTypeRange(lensType);
           if(!Array.isArray(ranges) || !ranges.length) return false;
 
-          // A LENSCODE is valid when it falls inside ANY configured range.
           const matchesRange=ranges.some(range=>
             code >= Number(range.min) &&
             code <= Number(range.max)

@@ -9199,36 +9199,50 @@ function buildSearchParams(
         clean
       );
 
-    const pattern =
-      "*" +
-      safe +
-      "*";
+    const report =
+      document
+        .getElementById("sheet")
+        ?.value;
 
-    const exactSI =
-      safe;
+    /* SOLD OUT SEARCH = SI NO. ONLY.
+       AVAILABLE STOCKS and AUDIT keep the existing multi-field search. */
+    if(report === "sold"){
+      params.set(
+        '"SI NO."',
+        "eq." + safe
+      );
+    }else{
+      const pattern =
+        "*" +
+        safe +
+        "*";
 
-    params.set(
-      "or",
-      "(" +
-      "NTAGN.ilike." +
-      pattern +
-      "," +
-      "DESCRIPTION.ilike." +
-      pattern +
-      "," +
-      "LENSTYPE.ilike." +
-      pattern +
-      "," +
-      "QR.ilike." +
-      pattern +
-      "," +
-      "BR.ilike." +
-      pattern +
-      ',' +
-      '"SI NO.".eq.' +
-      exactSI +
-      ")"
-    );
+      const exactSI =
+        safe;
+
+      params.set(
+        "or",
+        "(" +
+        "NTAGN.ilike." +
+        pattern +
+        "," +
+        "DESCRIPTION.ilike." +
+        pattern +
+        "," +
+        "LENSTYPE.ilike." +
+        pattern +
+        "," +
+        "QR.ilike." +
+        pattern +
+        "," +
+        "BR.ilike." +
+        pattern +
+        ',' +
+        '"SI NO.".eq.' +
+        exactSI +
+        ")"
+      );
+    }
 
   }
 

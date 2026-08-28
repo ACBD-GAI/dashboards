@@ -6735,9 +6735,17 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
         <option value="UNMARKED">UNMARKED</option>
       </select>
 
-      <input id="soldDescriptionFilter" class="soldFilterInput" type="text" placeholder="Description" oninput="applySoldFilters()">
-      <input id="soldTagFilter" class="soldFilterInput" type="text" placeholder="Tag Number" oninput="applySoldFilters()">
-      <input id="soldSIFilter" class="soldFilterInput" type="text" placeholder="SI No." oninput="applySoldFilters()">
+      <select id="soldDescriptionFilter" class="soldFilterSelect" onchange="applySoldFilters()">
+        <option value="">ALL DESCRIPTIONS</option>
+      </select>
+
+      <select id="soldTagFilter" class="soldFilterSelect" onchange="applySoldFilters()">
+        <option value="">ALL TAG NUMBERS</option>
+      </select>
+
+      <select id="soldSIFilter" class="soldFilterSelect" onchange="applySoldFilters()">
+        <option value="">ALL SI NO.</option>
+      </select>
 
       <button type="button" class="controlBtn" onclick="clearSoldFilters()">Clear Filters</button>
     </div>
@@ -9843,6 +9851,56 @@ function soldDateKey(value){
 
 }
 
+function populateSoldFilterDropdowns(rows){
+
+  const configs = [
+    {
+      id:"soldDescriptionFilter",
+      allLabel:"ALL DESCRIPTIONS",
+      get:row=>String(row?.description ?? row?.raw?.DESCRIPTION ?? "").trim()
+    },
+    {
+      id:"soldTagFilter",
+      allLabel:"ALL TAG NUMBERS",
+      get:row=>String(row?.tag ?? row?.raw?.NTAGN ?? "").trim()
+    },
+    {
+      id:"soldSIFilter",
+      allLabel:"ALL SI NO.",
+      get:row=>String(row?.si ?? row?.raw?.["SI NO."] ?? "").trim()
+    }
+  ];
+
+  configs.forEach(cfg=>{
+    const select=document.getElementById(cfg.id);
+    if(!select) return;
+
+    const current=String(select.value || "");
+    const values=[...new Set((Array.isArray(rows)?rows:[])
+      .map(cfg.get)
+      .filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:"base"}));
+
+    select.innerHTML =
+      '<option value="">' +
+      escapeHtml(cfg.allLabel) +
+      '</option>' +
+      values.map(value=>
+        '<option value="' +
+        escapeHtmlAttribute(value) +
+        '">' +
+        escapeHtml(value) +
+        '</option>'
+      ).join("");
+
+    if(values.includes(current)){
+      select.value=current;
+    }else{
+      select.value="";
+    }
+  });
+}
+
 function getVisibleRows(){
 
   const report =
@@ -9880,11 +9938,11 @@ function getVisibleRows(){
   const markFilter =
     document.getElementById("soldMarkFilter")?.value || "ALL";
   const descriptionFilter =
-    String(document.getElementById("soldDescriptionFilter")?.value || "").trim().toLowerCase();
+    String(document.getElementById("soldDescriptionFilter")?.value || "").trim();
   const tagFilter =
-    String(document.getElementById("soldTagFilter")?.value || "").trim().toLowerCase();
+    String(document.getElementById("soldTagFilter")?.value || "").trim();
   const siFilter =
-    String(document.getElementById("soldSIFilter")?.value || "").trim().toLowerCase();
+    String(document.getElementById("soldSIFilter")?.value || "").trim();
 
   return currentRows.filter(row=>{
 
@@ -9896,13 +9954,13 @@ function getVisibleRows(){
     if(markFilter === "MARKED" && !row.marked) return false;
     if(markFilter === "UNMARKED" && row.marked) return false;
 
-    const rowDescription = String(row?.description ?? row?.raw?.DESCRIPTION ?? "").trim().toLowerCase();
-    const rowTag = String(row?.tag ?? row?.raw?.NTAGN ?? "").trim().toLowerCase();
-    const rowSI = String(row?.si ?? row?.raw?.["SI NO."] ?? "").trim().toLowerCase();
+    const rowDescription = String(row?.description ?? row?.raw?.DESCRIPTION ?? "").trim();
+    const rowTag = String(row?.tag ?? row?.raw?.NTAGN ?? "").trim();
+    const rowSI = String(row?.si ?? row?.raw?.["SI NO."] ?? "").trim();
 
-    if(descriptionFilter && !rowDescription.includes(descriptionFilter)) return false;
-    if(tagFilter && !rowTag.includes(tagFilter)) return false;
-    if(siFilter && !rowSI.includes(siFilter)) return false;
+    if(descriptionFilter && rowDescription !== descriptionFilter) return false;
+    if(tagFilter && rowTag !== tagFilter) return false;
+    if(siFilter && rowSI !== siFilter) return false;
 
     if(
       unconfirmedSelectedSI &&
@@ -11332,6 +11390,10 @@ async function refreshDashboard(){
 
     currentRows =
       combined;
+
+    if(report === "sold"){
+      populateSoldFilterDropdowns(currentRows);
+    }
 
     currentPage = 1;
 

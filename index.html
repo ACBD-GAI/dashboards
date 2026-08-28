@@ -6439,8 +6439,17 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   91%{opacity:0;transform:translateX(-50%) scale(4.2);}
 }
 
+/* SAME ONE-DROP IMPACT FOR THE LOGIN LOGO ONLY.
+   This selector targets only the logo image directly inside the login card. */
+#loginScreen .loginCard > img{
+  transform-origin:center bottom;
+  animation:aoOneDrop 6.2s linear infinite;
+  filter:drop-shadow(0 7px 8px rgba(0,0,0,.28));
+}
+
 @media(prefers-reduced-motion:reduce){
-  .brandLogo,.brandLogo::after,.brandLogo img{animation:none !important;}
+  .brandLogo,.brandLogo::after,.brandLogo img,
+  #loginScreen .loginCard > img{animation:none !important;}
 }
 </style>
 

@@ -6405,7 +6405,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   height:8px;
   z-index:0;
   border-radius:50%;
-  background:rgba(15,23,42,.32);
+  background:#000;
   transform:translateX(-50%) scale(.22);
   opacity:0;
   pointer-events:none;
@@ -6433,10 +6433,50 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 @keyframes aoOneDropShadow{
-  0%,83.5%,100%{opacity:0;transform:translateX(-50%) scale(.22);}
-  84.5%{opacity:.78;transform:translateX(-50%) scale(.9);}
-  87%{opacity:.48;transform:translateX(-50%) scale(2.7);}
-  91%{opacity:0;transform:translateX(-50%) scale(4.2);}
+  0%,72%{
+    opacity:.12;
+    transform:translateX(-50%) scale(.35);
+  }
+
+  78%{
+    opacity:.08;
+    transform:translateX(-50%) scale(.20);
+  }
+
+  82%{
+    opacity:.08;
+    transform:translateX(-50%) scale(.20);
+  }
+
+  84%{
+    opacity:.95;
+    transform:translateX(-50%) scale(.55);
+  }
+
+  84.5%{
+    opacity:1;
+    transform:translateX(-50%) scale(1.35);
+  }
+
+  86%{
+    opacity:.95;
+    transform:translateX(-50%) scale(2.8);
+  }
+
+  88%{
+    opacity:.65;
+    transform:translateX(-50%) scale(4.2);
+  }
+
+  91%{
+    opacity:0;
+    transform:translateX(-50%) scale(5.5);
+  }
+
+  100%{
+    opacity:.12;
+    transform:translateX(-50%) scale(.35);
+  }
 }
 
 /* SAME ONE-DROP IMPACT FOR THE LOGIN LOGO ONLY.

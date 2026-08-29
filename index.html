@@ -6364,10 +6364,11 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
 /* =========================================================
    ACEBEDO OPTICAL — ONE DROP / HEAVY IMPACT LOGO
-   DASHBOARD ONLY
-   - Keeps the existing dashboard bounce
-   - Adds a real black ground shadow under the bouncing logo
-   - Login logo is intentionally NOT animated
+   CSS-ONLY ADDITIVE EFFECT
+   - Transparent surround
+   - ONE drop per cycle
+   - Fast direct fall -> hard wide impact -> quick bounce -> reset
+   - No color / no rotating effects
    ========================================================= */
 .brandLogo{
   position:relative;
@@ -6391,7 +6392,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   background:transparent !important;
   border-radius:inherit;
   transform-origin:center bottom;
-  filter:drop-shadow(0 7px 8px rgba(0,0,0,.42));
+  filter:drop-shadow(0 7px 8px rgba(0,0,0,.28));
   animation:aoOneDropImg 6.2s linear infinite;
 }
 
@@ -6400,12 +6401,12 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   position:absolute;
   left:50%;
   bottom:-7px;
-  width:30px;
+  width:22px;
   height:8px;
   z-index:0;
   border-radius:50%;
-  background:#000;
-  transform:translateX(-50%) scale(.18);
+  background:rgba(15,23,42,.32);
+  transform:translateX(-50%) scale(.22);
   opacity:0;
   pointer-events:none;
   animation:aoOneDropShadow 6.2s linear infinite;
@@ -6432,80 +6433,27 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 @keyframes aoOneDropShadow{
-  0%,72%{
-    opacity:.30;
-    transform:translateX(-50%) scale(.48);
-  }
-  78%{
-    opacity:.10;
-    transform:translateX(-50%) scale(.24);
-  }
-  82%{
-    opacity:.10;
-    transform:translateX(-50%) scale(.24);
-  }
-  84%{
-    opacity:.82;
-    transform:translateX(-50%) scale(.75);
-  }
-  84.5%{
-    opacity:1;
-    transform:translateX(-50%) scale(1.55);
-  }
-  86%{
-    opacity:.92;
-    transform:translateX(-50%) scale(3.25);
-  }
-  88%{
-    opacity:.58;
-    transform:translateX(-50%) scale(4.75);
-  }
-  91%{
-    opacity:0;
-    transform:translateX(-50%) scale(6);
-  }
-  100%{
-    opacity:.30;
-    transform:translateX(-50%) scale(.48);
-  }
+  0%,83.5%,100%{opacity:0;transform:translateX(-50%) scale(.22);}
+  84.5%{opacity:.78;transform:translateX(-50%) scale(.9);}
+  87%{opacity:.48;transform:translateX(-50%) scale(2.7);}
+  91%{opacity:0;transform:translateX(-50%) scale(4.2);}
 }
 
-/* LOGIN LOGO — PRESERVE ITS ORIGINAL ENHANCED LOOK.
-   IMPORTANT: no bounce animation is applied here. */
+/* SAME ONE-DROP IMPACT FOR THE LOGIN LOGO ONLY.
+   This selector targets only the logo image directly inside the login card. */
 #loginScreen .loginCard > img{
-  transform:none !important;
-  animation:none !important;
-  padding:8px !important;
-  border:1px solid rgba(104,206,255,.53) !important;
-  border-radius:25px !important;
-  background:linear-gradient(145deg,rgba(230,250,255,.98),rgba(166,215,255,.9)) !important;
-  box-shadow:0 0 0 6px rgba(60,164,255,.10),0 14px 34px rgba(5,16,39,.43),0 0 28px rgba(52,177,255,.27) !important;
-  filter:drop-shadow(0 8px 9px rgba(0,0,0,.30)) !important;
-}
-
-/* Login ground shadow. This is a separate visual element and does not
-   animate or affect the login logo itself. */
-#loginScreen .loginCard{
-  position:relative;
-}
-
-#loginScreen .loginLogoGroundShadow{
-  position:absolute;
-  left:calc(50% - 44px);
-  top:132px;
-  width:88px;
-  height:10px;
-  border-radius:50%;
-  background:#000;
-  opacity:.24;
-  filter:blur(3px);
-  pointer-events:none;
-  z-index:0;
+  transform-origin:center bottom;
+  animation:aoOneDrop 6.2s linear infinite;
+  padding:0 !important;
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  filter:drop-shadow(0 8px 9px rgba(0,0,0,.48));
 }
 
 @media(prefers-reduced-motion:reduce){
-  .brandLogo,.brandLogo::after,.brandLogo img{animation:aoOneDrop 6.2s linear infinite !important;}
-  #loginScreen .loginCard > img{animation:none !important;}
+  .brandLogo,.brandLogo::after,.brandLogo img,
+  #loginScreen .loginCard > img{animation:aoOneDrop 6.2s linear infinite !important;}
 }
 </style>
 
@@ -6522,8 +6470,6 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   <div class="loginCard">
 
     <img src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w100">
-
-    <span class="loginLogoGroundShadow" aria-hidden="true"></span>
 
     <h1 class="loginTitle">
       Acebedo Optical

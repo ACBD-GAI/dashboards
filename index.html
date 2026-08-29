@@ -6497,6 +6497,144 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 </style>
 
+
+<style id="acebedoBouncingLogoGroundShadowFix">
+/* =========================================================
+   BOUNCING LOGO — REAL GROUND SHADOW FIX
+   Additive CSS only. No JavaScript/data/login functions changed.
+   ========================================================= */
+
+/* LOGIN: wrapper gives the logo a real ::after ground shadow. */
+#loginScreen .loginLogoWrap{
+  position:relative;
+  width:88px;
+  height:88px;
+  margin:0 0 25px;
+  display:block;
+  overflow:visible !important;
+  transform-origin:center bottom;
+  animation:aoOneDrop 6.2s linear infinite;
+  z-index:1;
+}
+
+#loginScreen .loginLogoWrap::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-9px;
+  width:30px;
+  height:9px;
+  border-radius:50%;
+  background:#000;
+  box-shadow:0 2px 4px rgba(0,0,0,.55);
+  transform:translateX(-50%) scale(.28);
+  opacity:.18;
+  pointer-events:none;
+  z-index:0;
+  animation:aoLoginGroundShadow 6.2s linear infinite;
+}
+
+#loginScreen .loginLogoWrap > img{
+  position:relative;
+  z-index:2;
+  display:block;
+  width:88px;
+  height:88px;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  object-fit:contain;
+  transform-origin:center bottom;
+  box-shadow:none !important;
+  filter:drop-shadow(0 7px 8px rgba(0,0,0,.45));
+  animation:aoOneDropImg 6.2s linear infinite;
+}
+
+/* Dashboard: restore the shadow pseudo-element that is being overridden
+   by the later visual-theme .brandLogo::after rule. */
+.brandLogo{
+  overflow:visible !important;
+  isolation:isolate;
+}
+
+.brandLogo::after{
+  content:"" !important;
+  position:absolute !important;
+  left:50% !important;
+  bottom:-7px !important;
+  inset:auto auto -7px 50% !important;
+  width:30px !important;
+  height:9px !important;
+  border:0 !important;
+  border-radius:50% !important;
+  background:#000 !important;
+  box-shadow:0 2px 4px rgba(0,0,0,.55) !important;
+  transform:translateX(-50%) scale(.28) !important;
+  opacity:.18 !important;
+  pointer-events:none !important;
+  z-index:0 !important;
+  animation:aoOneDropShadow 6.2s linear infinite !important;
+}
+
+.brandLogo img{
+  filter:drop-shadow(0 7px 8px rgba(0,0,0,.45)) !important;
+}
+
+/* Stronger, solid-black ground shadow at impact. */
+@keyframes aoLoginGroundShadow{
+  0%,72%{
+    opacity:.18;
+    transform:translateX(-50%) scale(.35);
+  }
+  78%{
+    opacity:.10;
+    transform:translateX(-50%) scale(.20);
+  }
+  82%{
+    opacity:.10;
+    transform:translateX(-50%) scale(.20);
+  }
+  84%{
+    opacity:.96;
+    transform:translateX(-50%) scale(.62);
+  }
+  84.5%{
+    opacity:1;
+    transform:translateX(-50%) scale(1.45);
+  }
+  86%{
+    opacity:.96;
+    transform:translateX(-50%) scale(3.05);
+  }
+  88%{
+    opacity:.65;
+    transform:translateX(-50%) scale(4.45);
+  }
+  91%{
+    opacity:0;
+    transform:translateX(-50%) scale(5.6);
+  }
+  100%{
+    opacity:.18;
+    transform:translateX(-50%) scale(.35);
+  }
+}
+
+@media(max-width:700px){
+  #loginScreen .loginLogoWrap{
+    width:75px;
+    height:75px;
+    margin-bottom:21px;
+  }
+  #loginScreen .loginLogoWrap > img{
+    width:75px;
+    height:75px;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -6509,7 +6647,9 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
   <div class="loginCard">
 
-    <img src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w100">
+    <div class="loginLogoWrap">
+      <img src="https://drive.google.com/thumbnail?id=1U9kmQ7qummOCpVppdLtmVaugMuzLYUWQ&sz=w100">
+    </div>
 
     <h1 class="loginTitle">
       Acebedo Optical

@@ -6413,30 +6413,29 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 @keyframes aoOneDrop{
-  0%,72%,100%{transform:translateY(0) scaleX(1) scaleY(1);}
-  78%{transform:translateY(-92px) scaleX(.985) scaleY(1.015);}
-  82%{transform:translateY(-92px) scaleX(.985) scaleY(1.015);}
-  84.5%{transform:translateY(0) scaleX(1.28) scaleY(.68);}
-  87%{transform:translateY(-8px) scaleX(.96) scaleY(1.08);}
-  89.5%{transform:translateY(2px) scaleX(1.035) scaleY(.95);}
-  92%{transform:translateY(0) scaleX(1) scaleY(1);}
+  /* Start above the resting position, then fall DOWN into the impact. */
+  0%,12%{transform:translateY(-92px) scaleX(1) scaleY(1);}
+  18%{transform:translateY(-78px) scaleX(.99) scaleY(1.01);}
+  24%{transform:translateY(0) scaleX(1.28) scaleY(.68);}
+  27%{transform:translateY(-8px) scaleX(.96) scaleY(1.08);}
+  29.5%{transform:translateY(2px) scaleX(1.035) scaleY(.95);}
+  32%,100%{transform:translateY(0) scaleX(1) scaleY(1);}
 }
 
 @keyframes aoOneDropImg{
-  0%,72%,100%{transform:scale(1);}
-  78%{transform:scale(.985);}
-  82%{transform:scale(.985);}
-  84.5%{transform:scaleX(1.30) scaleY(.68);}
-  87%{transform:scaleX(.955) scaleY(1.09);}
-  89.5%{transform:scaleX(1.03) scaleY(.95);}
-  92%{transform:scale(1);}
+  0%,12%{transform:scale(1);}
+  18%{transform:scale(.985);}
+  24%{transform:scaleX(1.30) scaleY(.68);}
+  27%{transform:scaleX(.955) scaleY(1.09);}
+  29.5%{transform:scaleX(1.03) scaleY(.95);}
+  32%,100%{transform:scale(1);}
 }
 
 @keyframes aoOneDropShadow{
-  0%,83.5%,100%{opacity:0;transform:translateX(-50%) scale(.22);}
-  84.5%{opacity:.78;transform:translateX(-50%) scale(.9);}
-  87%{opacity:.48;transform:translateX(-50%) scale(2.7);}
-  91%{opacity:0;transform:translateX(-50%) scale(4.2);}
+  0%,23%,100%{opacity:0;transform:translateX(-50%) scale(.22);}
+  24%{opacity:.78;transform:translateX(-50%) scale(.9);}
+  27%{opacity:.48;transform:translateX(-50%) scale(2.7);}
+  31%{opacity:0;transform:translateX(-50%) scale(4.2);}
 }
 
 /* SAME ONE-DROP IMPACT FOR THE LOGIN LOGO ONLY.
@@ -10242,7 +10241,7 @@ function goToUnconfirmedBranch(branch){
   openUnconfirmedSIPopup(branch);
 }
 
-function goToUnconfirmedSI(branch, si){
+async function goToUnconfirmedSI(branch, si){
 
   branch = String(branch || "").trim().toUpperCase();
   si = String(si || "")
@@ -10265,9 +10264,58 @@ function goToUnconfirmedSI(branch, si){
   if(branchEl) branchEl.value = branch;
   if(sheetEl) sheetEl.value = "sold";
   if(searchEl) searchEl.value = "";
-  if(fromEl) fromEl.value = "";
-  if(toEl) toEl.value = "";
   if(markEl) markEl.value = "UNMARKED";
+
+  /*
+   * UNCONFIRMED SI FIX ONLY:
+   * When an SI NO. is selected from the Unconfirmed popup,
+   * find the actual DATE AND TIME belonging to that SI NO.
+   * and apply that date to the SOLD OUT date filter.
+   *
+   * This keeps the existing SI filter and all other dashboard
+   * functions unchanged.
+   */
+  let siDates = [];
+
+  try{
+    const soldRows = await fetchBranchData(
+      branch,
+      "sold",
+      ""
+    );
+
+    (Array.isArray(soldRows) ? soldRows : []).forEach(row=>{
+      const rowSI = String(row?.["SI NO."] ?? "")
+        .replace(/\s+/g," ")
+        .trim();
+
+      const status = String(row?.STATUS ?? "")
+        .trim()
+        .toUpperCase();
+
+      if(rowSI !== si || status === "MARKED"){
+        return;
+      }
+
+      const rawDate =
+        row?.["DATE AND TIME"] ||
+        row?.DELIVERYDATE ||
+        "";
+
+      const dateKey = soldDateKey(rawDate);
+
+      if(dateKey){
+        siDates.push(dateKey);
+      }
+    });
+  }catch(error){
+    console.warn("Unable to determine unconfirmed SI date:", error);
+  }
+
+  siDates = [...new Set(siDates)].sort();
+
+  if(fromEl) fromEl.value = siDates.length ? siDates[0] : "";
+  if(toEl) toEl.value = siDates.length ? siDates[siDates.length - 1] : "";
 
   unconfirmedSelectedSI = si;
   currentSearch = "";

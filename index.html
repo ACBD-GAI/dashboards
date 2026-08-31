@@ -4783,19 +4783,6 @@ button{font-weight:700;}
 }
 
 /* The login image intentionally stays in the DOM; this gives it the same polished treatment as the dashboard logo. */
-#loginScreen .loginCard > img{
-  display:block;
-  width:82px;
-  height:82px;
-  object-fit:contain;
-  margin:0 0 24px;
-  padding:7px;
-  border:1px solid #d9e4f3;
-  border-radius:22px;
-  background:linear-gradient(145deg,#fff,#edf4ff);
-  box-shadow:0 12px 28px rgba(33,86,168,.16),inset 0 1px 0 #fff;
-}
-
 .loginTitle{color:#14253f;font-size:30px;letter-spacing:-1.15px;}
 .loginSub{margin-bottom:32px;color:#71809a;font-size:13px;letter-spacing:.01em;}
 .field label{color:#52647e;font-size:10px;letter-spacing:.11em;}
@@ -5926,7 +5913,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   border:3px solid #d8eaf6;
   border-top-color:#2b94f1;
   border-radius:50%;
-  animation:advancedSearchSpin .8s linear infinite;
+  
 }
 
 @keyframes advancedSearchSpin{
@@ -6422,18 +6409,14 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   32%,100%{transform:translateY(0) scaleX(1) scaleY(1);}
 }
 
-@keyframes aoOneDropImg{
-  0%,12%{transform:scale(1);}
-  18%{transform:scale(.985);}
+18%{transform:scale(.985);}
   24%{transform:scaleX(1.30) scaleY(.68);}
   27%{transform:scaleX(.955) scaleY(1.09);}
   29.5%{transform:scaleX(1.03) scaleY(.95);}
   32%,100%{transform:scale(1);}
 }
 
-@keyframes aoOneDropShadow{
-  0%,23%,100%{opacity:0;transform:translateX(-50%) scale(.22);}
-  24%{opacity:.78;transform:translateX(-50%) scale(.9);}
+24%{opacity:.78;transform:translateX(-50%) scale(.9);}
   27%{opacity:.48;transform:translateX(-50%) scale(2.7);}
   31%{opacity:0;transform:translateX(-50%) scale(4.2);}
 }

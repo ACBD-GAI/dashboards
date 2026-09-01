@@ -6480,6 +6480,8 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   filter:none !important;
   object-fit:contain !important;
   transform-origin:center bottom;
+  transform-style:preserve-3d;
+  backface-visibility:visible;
   animation:aoLoginLogoCool 3.2s cubic-bezier(.2,.8,.2,1) infinite !important;
   will-change:transform;
 }
@@ -6487,33 +6489,42 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 @keyframes aoLoginLogoCool{
   0%{
     opacity:0;
-    transform:translateY(-34px) scale(.72) rotate(-8deg);
+    transform:perspective(700px) translateY(-34px) scale(.72) rotate(-8deg) rotateY(0deg);
   }
   10%{
     opacity:1;
-    transform:translateY(-34px) scale(.72) rotate(-8deg);
+    transform:perspective(700px) translateY(-34px) scale(.72) rotate(-8deg) rotateY(0deg);
+  }
+  22%{
+    transform:perspective(700px) translateY(-10px) scale(.88) rotate(-3deg) rotateY(55deg);
   }
   28%{
-    transform:translateY(0) scale(1.08) rotate(4deg);
+    transform:perspective(700px) translateY(0) scale(1.08) rotate(4deg) rotateY(95deg);
   }
-  36%{
-    transform:translateY(-10px) scale(.96) rotate(-2deg);
+  34%{
+    transform:perspective(700px) translateY(-8px) scale(.97) rotate(-2deg) rotateY(145deg);
   }
-  44%{
-    transform:translateY(2px) scale(1.02) rotate(1deg);
+  40%{
+    transform:perspective(700px) translateY(1px) scale(1.03) rotate(1deg) rotateY(190deg);
   }
-  52%{
-    transform:translateY(0) scale(1) rotate(0deg);
+  48%{
+    transform:perspective(700px) translateY(-3px) scale(1.01) rotate(0deg) rotateY(245deg);
+  }
+  56%{
+    transform:perspective(700px) translateY(0) scale(1) rotate(0deg) rotateY(300deg);
+  }
+  64%{
+    transform:perspective(700px) translateY(-5px) scale(1.025) rotate(-1deg) rotateY(340deg);
   }
   72%{
-    transform:translateY(-7px) scale(1.035) rotate(-1.5deg);
+    transform:perspective(700px) translateY(-7px) scale(1.035) rotate(-1.5deg) rotateY(360deg);
   }
-  86%{
-    transform:translateY(0) scale(1) rotate(0deg);
+  84%{
+    transform:perspective(700px) translateY(0) scale(1) rotate(0deg) rotateY(360deg);
   }
   100%{
     opacity:1;
-    transform:translateY(-1px) scale(1) rotate(0deg);
+    transform:perspective(700px) translateY(-1px) scale(1) rotate(0deg) rotateY(360deg);
   }
 }
 

@@ -14469,24 +14469,112 @@ async function handleImportFile(
     return;
   }
 
-  const branch =
-    document
-      .getElementById(
-        "branch"
-      )
-      .value;
+  /* =========================================================
+     IMPORT BRANCH SELECTION
+     Choose the branch specifically for this import.
+     The main dashboard branch selector is NOT changed.
+  ========================================================= */
+  const currentBranch =
+    String(
+      document.getElementById("branch")?.value || ""
+    )
+      .trim()
+      .toUpperCase();
 
-  if(
-    branch === "ALL"
-  ){
+  const importBranch =
+    await new Promise(resolve => {
 
-    showStatus(
-      "Select one branch before importing."
-    );
+      const modal =
+        document.createElement("div");
 
+      modal.className =
+        "modalBackdrop";
+
+      const options =
+        BRANCHES.map(branch => `
+          <option value="${branch}" ${
+            branch === currentBranch ? "selected" : ""
+          }>${branch}</option>
+        `).join("");
+
+      modal.innerHTML = `
+        <div class="modalCard" style="width:min(420px,100%);">
+          <div class="modalTitle">
+            Import — Select Branch
+          </div>
+          <div class="modalSub">
+            Select the branch for this import.
+          </div>
+
+          <div class="field" style="margin-top:16px;">
+            <label>BRANCH</label>
+            <select id="importBranchSelect" class="select">
+              <option value="">SELECT BRANCH</option>
+              ${options}
+            </select>
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+            <button type="button" class="controlBtn" id="importBranchCancel">
+              Cancel
+            </button>
+            <button type="button" class="controlBtn primary" id="importBranchContinue">
+              Continue Import
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const select =
+        modal.querySelector("#importBranchSelect");
+
+      const close = value => {
+        modal.remove();
+        resolve(value);
+      };
+
+      modal.querySelector("#importBranchCancel")
+        .onclick = () => close("");
+
+      modal.querySelector("#importBranchContinue")
+        .onclick = () => {
+          const selected =
+            String(select?.value || "")
+              .trim()
+              .toUpperCase();
+
+          if(!selected){
+            if(select){
+              select.focus();
+            }
+            showStatus("Select a branch before importing.");
+            return;
+          }
+
+          close(selected);
+        };
+
+      modal.addEventListener("click", event => {
+        if(event.target === modal){
+          close("");
+        }
+      });
+
+      setTimeout(() => {
+        if(select){
+          select.focus();
+        }
+      }, 0);
+    });
+
+  if(!importBranch){
     return;
-
   }
+
+  const branch =
+    importBranch;
 
   createQueueCard(
     "IMPORT",
@@ -14616,7 +14704,6 @@ if(
     "\n\n" +
     "Nothing was imported."
   );
-
 }
 
 /* =========================================================

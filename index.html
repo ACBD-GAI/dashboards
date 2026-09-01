@@ -9150,6 +9150,67 @@ async function supabaseRequest(
 
   }
 
+  const requestMethod =
+    String(options.method || "GET").toUpperCase();
+
+  const requestTable =
+    String(path || "").split("?")[0].trim().toLowerCase();
+
+  const shouldRecordHistory =
+    requestMethod !== "GET" &&
+    requestMethod !== "HEAD" &&
+    requestTable !== "inventory_history" &&
+    (
+      /^(?:[a-z0-9]+)_(?:stocks|scanresults|audit)$/.test(requestTable) ||
+      requestTable === "pull_out"
+    );
+
+  /*
+   * For PATCH/DELETE, the request body often does not contain
+   * the SI NO. (for example, marking a sold row or deleting it).
+   * Read the matching row BEFORE the mutation so History can
+   * keep the real SI NO. even after the source row is deleted.
+   * This read is History-only and never changes the transaction.
+   */
+  let historyPreMutationData = null;
+
+  if(
+    shouldRecordHistory &&
+    (requestMethod === "PATCH" || requestMethod === "DELETE") &&
+    String(path || "").includes("?")
+  ){
+    try{
+      const historyReadUrl =
+        SUPABASE_URL +
+        "/rest/v1/" +
+        path +
+        "&select=NTAGN,%22SI%20NO.%22,BR";
+
+      const historyReadResponse =
+        await fetch(
+          historyReadUrl,
+          {
+            method:"GET",
+            headers:{
+              "apikey":SUPABASE_KEY,
+              "Authorization":"Bearer " + SUPABASE_KEY,
+              "Accept":"application/json"
+            }
+          }
+        );
+
+      if(historyReadResponse.ok){
+        historyPreMutationData =
+          await historyReadResponse.json();
+      }
+    }catch(historyReadError){
+      console.warn(
+        "History pre-mutation SI lookup failed:",
+        historyReadError
+      );
+    }
+  }
+
   const response =
     await fetch(
       url,
@@ -9227,26 +9288,13 @@ async function supabaseRequest(
    * This is intentionally fire-and-forget so a History
    * failure can NEVER break the original transaction.
    */
-  const requestMethod =
-    String(options.method || "GET").toUpperCase();
-
-  const requestTable =
-    String(path || "").split("?")[0].trim().toLowerCase();
-
-  if(
-    requestMethod !== "GET" &&
-    requestMethod !== "HEAD" &&
-    requestTable !== "inventory_history" &&
-    (
-      /^(?:[a-z0-9]+)_(?:stocks|scanresults|audit)$/.test(requestTable) ||
-      requestTable === "pull_out"
-    )
-  ){
+  if(shouldRecordHistory){
     recordInventoryHistory(
       path,
       requestMethod,
       options.body,
-      data
+      data,
+      historyPreMutationData
     );
   }
 
@@ -9265,7 +9313,8 @@ async function recordInventoryHistory(
   path,
   method,
   requestBody,
-  responseData
+  responseData,
+  preMutationData
 ){
 
   try{
@@ -9289,65 +9338,56 @@ async function recordInventoryHistory(
       rows = [responseData];
     }
 
+    /* For PATCH/DELETE, prefer the exact row captured before the
+       mutation when the request itself does not carry the SI NO. */
+    const preRows =
+      Array.isArray(preMutationData)
+        ? preMutationData
+        : (preMutationData && typeof preMutationData === "object"
+            ? [preMutationData]
+            : []);
+
+    if(preRows.length){
+      rows = preRows.concat(rows);
+    }
+
     const first = rows[0] || {};
 
     const getValue = (...keys)=>{
-      for(const row of rows){
-        for(const key of keys){
-          if(row && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== ""){
-            return String(row[key]).trim();
-          }
+      for(const key of keys){
+        if(first[key] !== undefined && first[key] !== null && String(first[key]).trim() !== ""){
+          return String(first[key]).trim();
         }
       }
       return "";
     };
 
-    /*
-     * SI NO. must come from the actual transaction row.
-     * The Sold dialog writes the value as the database column
-     * "SI NO.".  Do not rely on the REST response because many
-     * transaction requests use Prefer: return=minimal.
-     */
     const tag =
-      getValue("NTAGN","ntagn","TAG","tag") ||
+      getValue("NTAGN","ntagn") ||
       query.get("NTAGN")?.replace(/^eq\./i,"") ||
       query.get("ntagn")?.replace(/^eq\./i,"") ||
       "";
 
     let si =
-      getValue(
-        "SI NO.",
-        "si_no",
-        "SI NO",
-        "SI_NO",
-        "siNo",
-        "sino"
-      );
+      getValue("SI NO.","si_no") ||
+      query.get("SI NO.")?.replace(/^eq\./i,"") ||
+      query.get("si_no")?.replace(/^eq\./i,"") ||
+      "";
 
+    /* Exact database header used by gai_stocks/gai_scanresults.
+       If the first row has no SI, inspect the captured rows. */
     if(!si){
-      for(const [key,value] of Object.entries(first || {})){
-        const normalized = String(key)
-          .replace(/[.\s_-]/g, "")
-          .toLowerCase();
+      for(const candidate of rows){
+        const candidateSI =
+          candidate?.["SI NO."] ??
+          candidate?.["si_no"] ??
+          "";
 
-        if(
-          normalized === "sino" &&
-          value !== undefined &&
-          value !== null &&
-          String(value).trim() !== ""
-        ){
-          si = String(value).trim();
+        if(String(candidateSI).trim() !== ""){
+          si = String(candidateSI).trim();
           break;
         }
       }
-    }
-
-    if(!si){
-      si =
-        query.get("SI NO.")?.replace(/^eq\./i,"") ||
-        query.get("si_no")?.replace(/^eq\./i,"") ||
-        query.get("SI NO")?.replace(/^eq\./i,"") ||
-        "";
     }
 
     const branch =

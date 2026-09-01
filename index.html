@@ -7228,6 +7228,11 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
       </tbody>
     </table>
   </div>
+  <div id="inventoryHistoryPager" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 0 2px;">
+    <button type="button" class="controlBtn" disabled>‹ Previous</button>
+    <span style="padding:8px 12px;font-weight:700;color:#52606d;">Page 1</span>
+    <button type="button" class="controlBtn" disabled>Next ›</button>
+  </div>
 </section>
 
 <!-- =========================================================
@@ -9514,6 +9519,9 @@ async function recordInventoryHistory(
   }
 }
 
+let inventoryHistoryPage = 0;
+const INVENTORY_HISTORY_PAGE_SIZE = 10;
+
 async function loadInventoryHistory(){
 
   const body = document.getElementById("inventoryHistoryBody");
@@ -9523,7 +9531,8 @@ async function loadInventoryHistory(){
     const params = new URLSearchParams();
     params.set("select","*");
     params.set("order","occurred_at.desc");
-    params.set("limit","300");
+    params.set("limit",String(INVENTORY_HISTORY_PAGE_SIZE + 1));
+    params.set("offset",String(inventoryHistoryPage * INVENTORY_HISTORY_PAGE_SIZE));
 
     const branchEl = document.getElementById("branch");
     const branch = String(branchEl?.value || "").trim().toUpperCase();
@@ -9532,12 +9541,19 @@ async function loadInventoryHistory(){
       params.set("branch","eq." + branch);
     }
 
-    const rows = await supabaseRequest(
+    const fetchedRows = await supabaseRequest(
       "inventory_history?" + params.toString(),
       {method:"GET"}
     );
 
-    renderInventoryHistory(Array.isArray(rows) ? rows : []);
+    const list = Array.isArray(fetchedRows) ? fetchedRows : [];
+    const hasNext = list.length > INVENTORY_HISTORY_PAGE_SIZE;
+    const rows = hasNext ? list.slice(0, INVENTORY_HISTORY_PAGE_SIZE) : list;
+
+    renderInventoryHistory(rows, {
+      hasNext,
+      page: inventoryHistoryPage
+    });
 
   }catch(error){
     console.warn("History load failed:", error);
@@ -9548,10 +9564,13 @@ async function loadInventoryHistory(){
   }
 }
 
-function renderInventoryHistory(rows){
+function renderInventoryHistory(rows, pageInfo = {}){
 
   const body = document.getElementById("inventoryHistoryBody");
   const countEl = document.getElementById("inventoryHistoryCount");
+  const pager = document.getElementById("inventoryHistoryPager");
+  const page = Number(pageInfo.page || 0);
+  const hasNext = !!pageInfo.hasNext;
   if(!body) return;
 
   if(!rows.length){
@@ -9560,6 +9579,7 @@ function renderInventoryHistory(rows){
         No transactions recorded yet.
       </td></tr>`;
     if(countEl) countEl.textContent = "0 transactions";
+    if(pager) pager.innerHTML = "";
     return;
   }
 
@@ -9582,8 +9602,26 @@ function renderInventoryHistory(rows){
   }).join("");
 
   if(countEl){
-    countEl.textContent = rows.length + (rows.length === 1 ? " transaction" : " transactions");
+    const start = page * INVENTORY_HISTORY_PAGE_SIZE + 1;
+    const end = page * INVENTORY_HISTORY_PAGE_SIZE + rows.length;
+    countEl.textContent = rows.length
+      ? `Showing ${start}–${end} transactions`
+      : "0 transactions";
   }
+
+  if(pager){
+    pager.innerHTML = `
+      <button type="button" class="controlBtn" onclick="changeInventoryHistoryPage(-1)" ${page <= 0 ? "disabled" : ""}>‹ Previous</button>
+      <span style="padding:8px 12px;font-weight:700;color:#52606d;">Page ${page + 1}</span>
+      <button type="button" class="controlBtn" onclick="changeInventoryHistoryPage(1)" ${hasNext ? "" : "disabled"}>Next ›</button>`;
+  }
+}
+
+function changeInventoryHistoryPage(direction){
+  const nextPage = inventoryHistoryPage + Number(direction || 0);
+  if(nextPage < 0) return;
+  inventoryHistoryPage = nextPage;
+  loadInventoryHistory();
 }
 
 /* =========================================================

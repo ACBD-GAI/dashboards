@@ -9162,6 +9162,7 @@ async function supabaseRequest(
     String(path || "").split("?")[0].trim().toLowerCase();
 
   const shouldRecordHistory =
+    !options.skipHistory &&
     requestMethod !== "GET" &&
     requestMethod !== "HEAD" &&
     requestTable !== "inventory_history" &&
@@ -9521,6 +9522,69 @@ async function recordInventoryHistory(
 
 let inventoryHistoryPage = 0;
 const INVENTORY_HISTORY_PAGE_SIZE = 10;
+
+function recordInventoryHistoryEvent(event = {}){
+
+  try{
+    const branch = String(event.branch || "").trim().toUpperCase();
+    const action = String(event.action || "TRANSACTION").trim();
+    const method = String(event.method || "POST").trim().toUpperCase();
+    const tableName = String(event.tableName || "").trim();
+    const recordCount = Number(event.recordCount || 0);
+    const skippedCount = Number(event.skippedCount || 0);
+
+    const historyRow = {
+      branch: branch,
+      action: action,
+      method: method,
+      table_name: tableName || (branch ? branch + " stocks" : "stocks"),
+      ntagn: "",
+      si_no: "",
+      user_email: typeof currentEmail !== "undefined" ? (currentEmail || "") : "",
+      details: String(event.details || action),
+      payload_summary: {
+        type: "business_transaction",
+        source_table: event.sourceTable || null,
+        audit_table: event.auditTable || null,
+        display_table: tableName || null,
+        record_count: recordCount,
+        skipped_count: skippedCount
+      }
+    };
+
+    fetch(
+      SUPABASE_URL + "/rest/v1/inventory_history",
+      {
+        method:"POST",
+        headers:{
+          "apikey":SUPABASE_KEY,
+          "Authorization":"Bearer " + SUPABASE_KEY,
+          "Content-Type":"application/json",
+          "Prefer":"return=minimal"
+        },
+        body:JSON.stringify(historyRow)
+      }
+    ).then(async response=>{
+      if(!response.ok){
+        console.warn(
+          "Inventory history transaction insert failed:",
+          response.status,
+          await response.text()
+        );
+        return;
+      }
+
+      if(typeof loadInventoryHistory === "function"){
+        loadInventoryHistory();
+      }
+    }).catch(error=>{
+      console.warn("Inventory history transaction insert failed:", error);
+    });
+
+  }catch(error){
+    console.warn("Inventory history transaction preparation failed:", error);
+  }
+}
 
 async function loadInventoryHistory(){
 
@@ -15897,7 +15961,7 @@ async function importDirect(
 
     await supabaseRequest(
       table,
-      { method:"POST", body:chunk, prefer:"return=minimal" }
+      { method:"POST", body:chunk, prefer:"return=minimal", skipHistory:true }
     );
 
     /*
@@ -15915,7 +15979,7 @@ async function importDirect(
 
     await supabaseRequest(
       auditTable,
-      { method:"POST", body:auditChunk, prefer:"return=minimal" }
+      { method:"POST", body:auditChunk, prefer:"return=minimal", skipHistory:true }
     );
 
     inserted += chunk.length;
@@ -15929,6 +15993,24 @@ async function importDirect(
 
     await yieldToBrowser();
   }
+
+  /* One complete import = ONE History transaction.
+     The database writes above may still be chunked at 500 rows for
+     Supabase performance, but those internal chunks are hidden from
+     Transaction History and summarized here as one import event. */
+  recordInventoryHistoryEvent({
+    branch:branch,
+    action:"IMPORT STOCKS",
+    method:"POST",
+    tableName:branch + " stocks",
+    details:"IMPORT STOCKS • " + inserted + " records" +
+      (totalSkipped ? " • " + totalSkipped + " skipped" : "") +
+      (fileName ? " • FILE: " + String(fileName) : ""),
+    recordCount:inserted,
+    skippedCount:totalSkipped,
+    sourceTable:table,
+    auditTable:auditTable
+  });
 
   showStatus(
     "Import complete. " +

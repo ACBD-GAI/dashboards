@@ -7196,6 +7196,41 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 </section>
 
 <!-- =========================================================
+     TRANSACTION HISTORY — BOTTOM OF DASHBOARD
+========================================================= -->
+<section class="tableCard" style="margin-top:24px;">
+  <div class="tableHeader">
+    <div>
+      <div class="tableTitle">Transaction History</div>
+      <div id="inventoryHistoryCount" class="tableSub">Every transaction</div>
+    </div>
+    <div class="tableActions">
+      <button type="button" class="controlBtn" onclick="loadInventoryHistory()">↻ Refresh History</button>
+    </div>
+  </div>
+
+  <div class="tableScroll" style="max-height:600px;">
+    <table>
+      <thead>
+        <tr>
+          <th>DATE / TIME</th>
+          <th>ACTION</th>
+          <th>BRANCH</th>
+          <th>TAG</th>
+          <th>SI NO.</th>
+          <th>USER</th>
+          <th>TABLE</th>
+          <th>DETAILS</th>
+        </tr>
+      </thead>
+      <tbody id="inventoryHistoryBody">
+        <tr><td colspan="8" style="text-align:center;padding:28px;color:#7890a0;">Loading transaction history...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- =========================================================
      ADD ALLOWED USER MODAL
 ========================================================= -->
 
@@ -8545,6 +8580,8 @@ function showDashboard(){
 
   resetDashboardDisplay();
 
+  loadInventoryHistory();
+
   startSessionMonitor();
 
 }
@@ -9185,8 +9222,267 @@ async function supabaseRequest(
 
   }
 
+  /*
+   * Record only real inventory mutations.
+   * This is intentionally fire-and-forget so a History
+   * failure can NEVER break the original transaction.
+   */
+  const requestMethod =
+    String(options.method || "GET").toUpperCase();
+
+  const requestTable =
+    String(path || "").split("?")[0].trim().toLowerCase();
+
+  if(
+    requestMethod !== "GET" &&
+    requestMethod !== "HEAD" &&
+    requestTable !== "inventory_history" &&
+    (
+      /^(?:[a-z0-9]+)_(?:stocks|scanresults|audit)$/.test(requestTable) ||
+      requestTable === "pull_out"
+    )
+  ){
+    recordInventoryHistory(
+      path,
+      requestMethod,
+      options.body,
+      data
+    );
+  }
+
   return data;
 
+}
+
+/* =========================================================
+   INVENTORY HISTORY
+
+   Hooks into successful Supabase mutations only.
+   It never changes the original inventory operation.
+========================================================= */
+
+async function recordInventoryHistory(
+  path,
+  method,
+  requestBody,
+  responseData
+){
+
+  try{
+
+    const rawPath = String(path || "");
+    const parts = rawPath.split("?");
+    const table = parts[0].trim();
+    const query = new URLSearchParams(parts[1] || "");
+
+    let rows = [];
+
+    if(Array.isArray(requestBody)){
+      rows = requestBody;
+    }else if(requestBody && typeof requestBody === "object"){
+      rows = [requestBody];
+    }
+
+    if(!rows.length && Array.isArray(responseData)){
+      rows = responseData;
+    }else if(!rows.length && responseData && typeof responseData === "object"){
+      rows = [responseData];
+    }
+
+    const first = rows[0] || {};
+
+    const getValue = (...keys)=>{
+      for(const key of keys){
+        if(first[key] !== undefined && first[key] !== null && String(first[key]).trim() !== ""){
+          return String(first[key]).trim();
+        }
+      }
+      return "";
+    };
+
+    const tag =
+      getValue("NTAGN","ntagn") ||
+      query.get("NTAGN")?.replace(/^eq\./i,"") ||
+      query.get("ntagn")?.replace(/^eq\./i,"") ||
+      "";
+
+    const si =
+      getValue("SI NO.","si_no") ||
+      query.get("SI NO.")?.replace(/^eq\./i,"") ||
+      query.get("si_no")?.replace(/^eq\./i,"") ||
+      "";
+
+    const branch =
+      getValue("BR","branch") ||
+      query.get("BR")?.replace(/^eq\./i,"") ||
+      query.get("branch")?.replace(/^eq\./i,"") ||
+      (table === "pull_out" ? "" : (table.match(/^([a-z0-9]+)_(?:stocks|scanresults|audit)$/i)?.[1] || ""));
+
+    let action = "";
+
+    if(method === "POST"){
+      if(/_scanresults$/i.test(table)) action = "SOLD / TRANSACTION";
+      else if(/_audit$/i.test(table)) action = "AUDIT RECORD";
+      else if(table === "pull_out") action = "PULL OUT";
+      else action = "STOCK ADD / IMPORT";
+    }else if(method === "PATCH"){
+      if(/_scanresults$/i.test(table)) action = "UPDATE SOLD TRANSACTION";
+      else if(/_audit$/i.test(table)) action = "UPDATE AUDIT";
+      else if(table === "pull_out") action = "UPDATE PULL OUT";
+      else action = "UPDATE STOCK";
+    }else if(method === "DELETE"){
+      if(/_scanresults$/i.test(table)) action = "DELETE SOLD TRANSACTION";
+      else if(/_audit$/i.test(table)) action = "DELETE AUDIT";
+      else if(table === "pull_out") action = "DELETE PULL OUT";
+      else action = "DELETE STOCK";
+    }else{
+      return;
+    }
+
+    const count =
+      rows.length ||
+      (method === "DELETE" ? 1 : 0);
+
+    let details = action;
+
+    if(count > 1){
+      details += " • " + count + " records";
+    }
+
+    if(tag){
+      details += " • TAG: " + tag;
+    }
+
+    if(si){
+      details += " • SI NO.: " + si;
+    }
+
+    const payloadSummary = {
+      path: rawPath,
+      method: method,
+      record_count: count
+    };
+
+    /* Keep History small. Never copy a complete bulk-import payload. */
+    if(first.DESCRIPTION) payloadSummary.description = String(first.DESCRIPTION).slice(0,200);
+    if(first.STATUS) payloadSummary.status = String(first.STATUS).slice(0,100);
+
+    const historyRow = {
+      branch: branch ? branch.toUpperCase() : "",
+      action: action,
+      method: method,
+      table_name: table,
+      ntagn: tag,
+      si_no: si,
+      user_email: typeof currentEmail !== "undefined" ? (currentEmail || "") : "",
+      details: details,
+      payload_summary: payloadSummary
+    };
+
+    fetch(
+      SUPABASE_URL + "/rest/v1/inventory_history",
+      {
+        method: "POST",
+        headers:{
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify(historyRow)
+      }
+    ).then(async response=>{
+      if(!response.ok){
+        console.warn(
+          "Inventory history insert failed:",
+          response.status,
+          await response.text()
+        );
+        return;
+      }
+
+      if(typeof loadInventoryHistory === "function"){
+        loadInventoryHistory();
+      }
+    }).catch(error=>{
+      console.warn("Inventory history insert failed:", error);
+    });
+
+  }catch(error){
+    console.warn("Inventory history preparation failed:", error);
+  }
+}
+
+async function loadInventoryHistory(){
+
+  const body = document.getElementById("inventoryHistoryBody");
+  if(!body) return;
+
+  try{
+    const params = new URLSearchParams();
+    params.set("select","*");
+    params.set("order","occurred_at.desc");
+    params.set("limit","300");
+
+    const branchEl = document.getElementById("branch");
+    const branch = String(branchEl?.value || "").trim().toUpperCase();
+
+    if(branch && branch !== "ALL"){
+      params.set("branch","eq." + branch);
+    }
+
+    const rows = await supabaseRequest(
+      "inventory_history?" + params.toString(),
+      {method:"GET"}
+    );
+
+    renderInventoryHistory(Array.isArray(rows) ? rows : []);
+
+  }catch(error){
+    console.warn("History load failed:", error);
+    body.innerHTML = `
+      <tr><td colspan="8" style="text-align:center;padding:24px;color:#b91c1c;">
+        Unable to load transaction history.
+      </td></tr>`;
+  }
+}
+
+function renderInventoryHistory(rows){
+
+  const body = document.getElementById("inventoryHistoryBody");
+  const countEl = document.getElementById("inventoryHistoryCount");
+  if(!body) return;
+
+  if(!rows.length){
+    body.innerHTML = `
+      <tr><td colspan="8" style="text-align:center;padding:28px;color:#7890a0;">
+        No transactions recorded yet.
+      </td></tr>`;
+    if(countEl) countEl.textContent = "0 transactions";
+    return;
+  }
+
+  body.innerHTML = rows.map(row=>{
+    const date = row.occurred_at
+      ? new Date(row.occurred_at).toLocaleString("en-PH",{timeZone:"Asia/Manila"})
+      : "—";
+
+    return `
+      <tr>
+        <td>${escapeHtml(date)}</td>
+        <td><strong>${escapeHtml(row.action || "—")}</strong></td>
+        <td>${escapeHtml(row.branch || "—")}</td>
+        <td>${escapeHtml(row.ntagn || "—")}</td>
+        <td>${escapeHtml(row.si_no || "—")}</td>
+        <td>${escapeHtml(row.user_email || "—")}</td>
+        <td>${escapeHtml(row.table_name || "—")}</td>
+        <td>${escapeHtml(row.details || "—")}</td>
+      </tr>`;
+  }).join("");
+
+  if(countEl){
+    countEl.textContent = rows.length + (rows.length === 1 ? " transaction" : " transactions");
+  }
 }
 
 /* =========================================================
@@ -10577,6 +10873,7 @@ function branchChanged(){
 
   /* Selecting a branch is enough to load the current report. */
   runSearch();
+  loadInventoryHistory();
 
 }
 

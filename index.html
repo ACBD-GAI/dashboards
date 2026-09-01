@@ -6437,47 +6437,30 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   .brandLogo,.brandLogo::after,.brandLogo img,
   #loginScreen .loginCard > img{animation:aoOneDrop 6.2s linear infinite !important;}
 }
-<
 
 /* =========================================================
    LOGIN LOGO — CSS-ONLY ANIMATION
-   Scoped ONLY to #loginScreen. Dashboard logo is untouched.
+   Targets ONLY the login image. Dashboard logo is untouched.
 ========================================================= */
-#loginScreen .logo{
-  animation:aoLoginLogoFloat 3.8s ease-in-out infinite;
-  will-change:transform,box-shadow;
-}
-
-#loginScreen .logo img{
-  animation:aoLoginLogoGlow 3.8s ease-in-out infinite;
+#loginScreen .loginCard > img{
+  transform-origin:center center;
+  animation:aoLoginLogoFloat 3.6s ease-in-out infinite;
   will-change:transform,filter;
 }
 
 @keyframes aoLoginLogoFloat{
   0%,100%{
     transform:translateY(0) scale(1);
-    box-shadow:0 12px 28px rgba(14,165,233,.18),inset 0 1px 0 #fff;
+    filter:drop-shadow(0 5px 8px rgba(14,165,233,.18));
   }
   50%{
-    transform:translateY(-5px) scale(1.025);
-    box-shadow:0 18px 34px rgba(14,165,233,.24),inset 0 1px 0 #fff;
-  }
-}
-
-@keyframes aoLoginLogoGlow{
-  0%,100%{
-    transform:scale(1);
-    filter:drop-shadow(0 2px 4px rgba(14,165,233,.10));
-  }
-  50%{
-    transform:scale(1.035);
-    filter:drop-shadow(0 7px 10px rgba(14,165,233,.20));
+    transform:translateY(-7px) scale(1.04);
+    filter:drop-shadow(0 12px 16px rgba(14,165,233,.30));
   }
 }
 
 @media(prefers-reduced-motion:reduce){
-  #loginScreen .logo,
-  #loginScreen .logo img{
+  #loginScreen .loginCard > img{
     animation:none !important;
   }
 }

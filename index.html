@@ -9292,25 +9292,63 @@ async function recordInventoryHistory(
     const first = rows[0] || {};
 
     const getValue = (...keys)=>{
-      for(const key of keys){
-        if(first[key] !== undefined && first[key] !== null && String(first[key]).trim() !== ""){
-          return String(first[key]).trim();
+      for(const row of rows){
+        for(const key of keys){
+          if(row && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== ""){
+            return String(row[key]).trim();
+          }
         }
       }
       return "";
     };
 
+    /*
+     * SI NO. must come from the actual transaction row.
+     * The Sold dialog writes the value as the database column
+     * "SI NO.".  Do not rely on the REST response because many
+     * transaction requests use Prefer: return=minimal.
+     */
     const tag =
-      getValue("NTAGN","ntagn") ||
+      getValue("NTAGN","ntagn","TAG","tag") ||
       query.get("NTAGN")?.replace(/^eq\./i,"") ||
       query.get("ntagn")?.replace(/^eq\./i,"") ||
       "";
 
-    const si =
-      getValue("SI NO.","si_no") ||
-      query.get("SI NO.")?.replace(/^eq\./i,"") ||
-      query.get("si_no")?.replace(/^eq\./i,"") ||
-      "";
+    let si =
+      getValue(
+        "SI NO.",
+        "si_no",
+        "SI NO",
+        "SI_NO",
+        "siNo",
+        "sino"
+      );
+
+    if(!si){
+      for(const [key,value] of Object.entries(first || {})){
+        const normalized = String(key)
+          .replace(/[.\s_-]/g, "")
+          .toLowerCase();
+
+        if(
+          normalized === "sino" &&
+          value !== undefined &&
+          value !== null &&
+          String(value).trim() !== ""
+        ){
+          si = String(value).trim();
+          break;
+        }
+      }
+    }
+
+    if(!si){
+      si =
+        query.get("SI NO.")?.replace(/^eq\./i,"") ||
+        query.get("si_no")?.replace(/^eq\./i,"") ||
+        query.get("SI NO")?.replace(/^eq\./i,"") ||
+        "";
+    }
 
     const branch =
       getValue("BR","branch") ||

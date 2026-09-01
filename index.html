@@ -9800,9 +9800,8 @@ function clearSoldFilters(){
   const tag = document.getElementById("soldTagFilter");
   const si = document.getElementById("soldSIFilter");
 
-  /* Keep SOLD OUT defaulted to TODAY - TODAY. */
-  setSoldDateRangeToday();
-
+  if(from) from.value = "";
+  if(to) to.value = "";
   if(mark) mark.value = "ALL";
   if(description) description.value = "";
   if(tag) tag.value = "";

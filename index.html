@@ -18550,10 +18550,114 @@ async function downloadPullOutPdf(){
 
 async function startExport(){
 
+  /* =========================================================
+     EXPORT BRANCH SELECTION
+     Choose the branch specifically for this export.
+     The main dashboard branch selector is NOT changed.
+  ========================================================= */
+  const currentBranch =
+    String(
+      document.getElementById("branch")?.value || ""
+    )
+      .trim()
+      .toUpperCase();
+
+  const exportBranch =
+    await new Promise(resolve => {
+
+      const modal =
+        document.createElement("div");
+
+      modal.className =
+        "modalBackdrop";
+
+      const options =
+        ["ALL", ...(Array.isArray(BRANCHES) ? BRANCHES : [])]
+          .filter((value, index, list) => list.indexOf(value) === index)
+          .map(branch => `
+            <option value="${branch}" ${
+              branch === currentBranch ? "selected" : ""
+            }>${branch === "ALL" ? "ALL BRANCHES" : branch}</option>
+          `).join("");
+
+      modal.innerHTML = `
+        <div class="modalCard" style="width:min(420px,100%);">
+          <div class="modalTitle">
+            Export — Select Branch
+          </div>
+          <div class="modalSub">
+            Select the branch for this export.
+          </div>
+
+          <div class="field" style="margin-top:16px;">
+            <label>BRANCH</label>
+            <select id="exportBranchSelect" class="select">
+              <option value="">SELECT BRANCH</option>
+              ${options}
+            </select>
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+            <button type="button" class="controlBtn" id="exportBranchCancel">
+              Cancel
+            </button>
+            <button type="button" class="controlBtn primary" id="exportBranchContinue">
+              Continue Export
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const select =
+        modal.querySelector("#exportBranchSelect");
+
+      const close = value => {
+        modal.remove();
+        resolve(value);
+      };
+
+      modal.querySelector("#exportBranchCancel")
+        .onclick = () => close("");
+
+      modal.querySelector("#exportBranchContinue")
+        .onclick = () => {
+          const selected =
+            String(select?.value || "")
+              .trim()
+              .toUpperCase();
+
+          if(!selected){
+            if(select){
+              select.focus();
+            }
+            showStatus("Select a branch before exporting.");
+            return;
+          }
+
+          close(selected);
+        };
+
+      modal.addEventListener("click", event => {
+        if(event.target === modal){
+          close("");
+        }
+      });
+
+      setTimeout(() => {
+        if(select){
+          select.focus();
+        }
+      }, 0);
+    });
+
+  if(!exportBranch){
+    return;
+  }
+
   const branch =
-    document
-      .getElementById("branch")
-      .value;
+    exportBranch;
 
   createQueueCard(
     "EXPORT",

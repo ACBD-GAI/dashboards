@@ -9162,7 +9162,8 @@ async function supabaseRequest(
     requestTable !== "inventory_history" &&
     (
       /^(?:[a-z0-9]+)_(?:stocks|scanresults|audit)$/.test(requestTable) ||
-      requestTable === "pull_out"
+      requestTable === "pull_out" ||
+      requestTable === "reported_missing"
     );
 
   /*
@@ -9394,7 +9395,7 @@ async function recordInventoryHistory(
       getValue("BR","branch") ||
       query.get("BR")?.replace(/^eq\./i,"") ||
       query.get("branch")?.replace(/^eq\./i,"") ||
-      (table === "pull_out" ? "" : (table.match(/^([a-z0-9]+)_(?:stocks|scanresults|audit)$/i)?.[1] || ""));
+      (table.match(/^([a-z0-9]+)_(?:stocks|scanresults|audit)$/i)?.[1] || "");
 
     let action = "";
 
@@ -9402,16 +9403,19 @@ async function recordInventoryHistory(
       if(/_scanresults$/i.test(table)) action = "SOLD / TRANSACTION";
       else if(/_audit$/i.test(table)) action = "AUDIT RECORD";
       else if(table === "pull_out") action = "PULL OUT";
+      else if(table === "reported_missing") action = "REPORTED MISSING";
       else action = "STOCK ADD / IMPORT";
     }else if(method === "PATCH"){
       if(/_scanresults$/i.test(table)) action = "UPDATE SOLD TRANSACTION";
       else if(/_audit$/i.test(table)) action = "UPDATE AUDIT";
       else if(table === "pull_out") action = "UPDATE PULL OUT";
+      else if(table === "reported_missing") action = "UPDATE REPORTED MISSING";
       else action = "UPDATE STOCK";
     }else if(method === "DELETE"){
       if(/_scanresults$/i.test(table)) action = "DELETE SOLD TRANSACTION";
       else if(/_audit$/i.test(table)) action = "DELETE AUDIT";
       else if(table === "pull_out") action = "DELETE PULL OUT";
+      else if(table === "reported_missing") action = "DELETE REPORTED MISSING";
       else action = "DELETE STOCK";
     }else{
       return;
@@ -9435,9 +9439,28 @@ async function recordInventoryHistory(
       details += " • SI NO.: " + si;
     }
 
+    /* Human-readable table label. Keep the database table names out of
+       the History display while preserving the real source in payload_summary. */
+    let historyTableLabel = table;
+    const tableBranch = (branch || "").toUpperCase();
+
+    if(/_stocks$/i.test(table)){
+      historyTableLabel = tableBranch + " stocks";
+    }else if(/_audit$/i.test(table)){
+      historyTableLabel = tableBranch + " audit";
+    }else if(/_scanresults$/i.test(table)){
+      historyTableLabel = tableBranch + " sold";
+    }else if(table === "pull_out"){
+      historyTableLabel = tableBranch ? tableBranch + " pull out" : "Pull out";
+    }else if(table === "reported_missing"){
+      historyTableLabel = tableBranch ? tableBranch + " reported missing" : "Reported missing";
+    }
+
     const payloadSummary = {
       path: rawPath,
       method: method,
+      source_table: table,
+      display_table: historyTableLabel,
       record_count: count
     };
 
@@ -9449,7 +9472,7 @@ async function recordInventoryHistory(
       branch: branch ? branch.toUpperCase() : "",
       action: action,
       method: method,
-      table_name: table,
+      table_name: historyTableLabel,
       ntagn: tag,
       si_no: si,
       user_email: typeof currentEmail !== "undefined" ? (currentEmail || "") : "",

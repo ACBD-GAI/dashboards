@@ -6439,29 +6439,139 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 }
 
 /* =========================================================
-   LOGIN LOGO — CSS-ONLY ANIMATION
-   Targets ONLY the login image. Dashboard logo is untouched.
+   LOGIN LOGO — COOLER CSS-ONLY ANIMATION
+   Targets ONLY the login logo. No HTML / JS changes.
+   Dashboard logo and all other functions remain untouched.
 ========================================================= */
 #loginScreen .loginCard > img{
   transform-origin:center center;
-  animation:aoLoginLogoFloat 3.6s ease-in-out infinite;
+  animation:aoLoginLogoCool 4.2s cubic-bezier(.22,.8,.2,1) infinite;
   will-change:transform,filter;
 }
 
-@keyframes aoLoginLogoFloat{
-  0%,100%{
-    transform:translateY(0) scale(1);
-    filter:drop-shadow(0 5px 8px rgba(14,165,233,.18));
+@keyframes aoLoginLogoCool{
+  /* quick power-up entrance */
+  0%{
+    opacity:0;
+    transform:
+      translateY(-42px)
+      scale(.72)
+      rotate(-16deg);
+    filter:
+      blur(5px)
+      brightness(.85)
+      drop-shadow(0 0 0 rgba(0,0,0,0));
   }
+
+  10%{
+    opacity:1;
+    transform:
+      translateY(5px)
+      scale(1.10,.88)
+      rotate(5deg);
+    filter:
+      blur(0)
+      brightness(1.08)
+      drop-shadow(0 14px 18px rgba(0,0,0,.38))
+      drop-shadow(0 0 14px rgba(56,189,248,.32));
+  }
+
+  16%{
+    transform:
+      translateY(-7px)
+      scale(.96,1.06)
+      rotate(-2deg);
+  }
+
+  23%{
+    transform:
+      translateY(0)
+      scale(1.03,.98)
+      rotate(0deg);
+    filter:
+      blur(0)
+      brightness(1)
+      drop-shadow(0 8px 10px rgba(0,0,0,.42))
+      drop-shadow(0 0 10px rgba(56,189,248,.22));
+  }
+
+  /* subtle floating / breathing section */
+  38%{
+    transform:
+      translateY(-5px)
+      scale(1.035)
+      rotate(0deg);
+    filter:
+      blur(0)
+      brightness(1.03)
+      drop-shadow(0 12px 14px rgba(0,0,0,.38))
+      drop-shadow(0 0 15px rgba(56,189,248,.30));
+  }
+
   50%{
-    transform:translateY(-7px) scale(1.04);
-    filter:drop-shadow(0 12px 16px rgba(14,165,233,.30));
+    transform:
+      translateY(0)
+      scale(1)
+      rotate(0deg);
+    filter:
+      blur(0)
+      brightness(1)
+      drop-shadow(0 8px 10px rgba(0,0,0,.42))
+      drop-shadow(0 0 9px rgba(56,189,248,.18));
+  }
+
+  63%{
+    transform:
+      translateY(-5px)
+      scale(1.035)
+      rotate(0deg);
+    filter:
+      blur(0)
+      brightness(1.04)
+      drop-shadow(0 12px 15px rgba(0,0,0,.38))
+      drop-shadow(0 0 16px rgba(56,189,248,.30));
+  }
+
+  /* little finishing snap */
+  76%{
+    transform:
+      translateY(0)
+      scale(.98)
+      rotate(0deg);
+  }
+
+  82%{
+    transform:
+      translateY(0)
+      scale(1.025)
+      rotate(0deg);
+    filter:
+      blur(0)
+      brightness(1.06)
+      drop-shadow(0 11px 14px rgba(0,0,0,.40))
+      drop-shadow(0 0 14px rgba(56,189,248,.26));
+  }
+
+  100%{
+    opacity:1;
+    transform:
+      translateY(0)
+      scale(1)
+      rotate(0deg);
+    filter:
+      blur(0)
+      brightness(1)
+      drop-shadow(0 8px 10px rgba(0,0,0,.42))
+      drop-shadow(0 0 9px rgba(56,189,248,.18));
   }
 }
 
 @media(prefers-reduced-motion:reduce){
   #loginScreen .loginCard > img{
     animation:none !important;
+    opacity:1 !important;
+    transform:none !important;
+    filter:drop-shadow(0 8px 10px rgba(0,0,0,.42)) !important;
   }
 }
 </style>

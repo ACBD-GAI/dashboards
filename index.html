@@ -6217,7 +6217,9 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 #pullOutStatusFilter{min-width:185px;}
 .pullOutInput{flex:1;min-width:220px;}
 .pullOutSelect:focus,.pullOutInput:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
-.pullOutActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.pullOutActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.pullOutActions > .controlBtn[data-pullout-bulk-delete="1"],
+.pullOutActions > .controlBtn[data-pullout-bulk-retrieve="1"]{display:inline-flex;align-items:center;justify-content:center;line-height:1;}
 .pullOutList{max-height:58vh;overflow:auto;border:1px solid #d7e5ef;border-radius:12px;background:#fff;}
 .pullOutHeader,.pullOutRow{display:grid;grid-template-columns:minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
 .pullOutHeader{position:sticky;top:0;z-index:2;background:#234e67;color:#fff;font-size:10px;font-weight:900;letter-spacing:.05em;}

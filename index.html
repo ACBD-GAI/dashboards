@@ -6219,7 +6219,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .pullOutSelect:focus,.pullOutInput:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
 .pullOutActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
 .pullOutList{max-height:58vh;overflow:auto;border:1px solid #d7e5ef;border-radius:12px;background:#fff;}
-.pullOutHeader,.pullOutRow{display:grid;grid-template-columns:minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
+.pullOutHeader,.pullOutRow{display:grid;grid-template-columns:44px minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
 .pullOutHeader{position:sticky;top:0;z-index:2;background:#234e67;color:#fff;font-size:10px;font-weight:900;letter-spacing:.05em;}
 .pullOutHeader>div,.pullOutCell{padding:11px 10px;min-width:0;}
 .pullOutRow{border-top:1px solid #e2e8f0;font-size:11px;color:#203443;}
@@ -6234,7 +6234,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .pullOutRetrieveBtn{border-color:#fde68a!important;background:#fffbeb!important;color:#b45309!important;}
 @media(max-width:760px){
   .pullOutModal{width:96vw!important;}
-  .pullOutHeader,.pullOutRow{grid-template-columns:90px minmax(180px,1.8fr) 120px 170px;min-width:560px;}
+  .pullOutHeader,.pullOutRow{grid-template-columns:44px 90px minmax(180px,1.8fr) 120px 170px;min-width:604px;}
   .pullOutList{overflow:auto;}
 }
 </style>
@@ -18623,7 +18623,7 @@ function renderPullOutPopup(){
       rows.length +
       " pull out item" +
       (rows.length === 1 ? "" : "s") +
-      " shown. <span id="pullOutSelectedCount">0 selected.</span>";
+      ' shown. <span id="pullOutSelectedCount">0 selected.</span>';
   }
 
   if(!rows.length){

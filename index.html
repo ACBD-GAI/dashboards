@@ -11782,6 +11782,20 @@ async function refreshDashboard(){
   currentSearch =
     search;
 
+  /* Start statistics immediately so all counters load in parallel
+     with the main inventory report. Counting formulas are unchanged. */
+  updateStatsDirect(
+    branch,
+    generation
+  ).catch(
+    error=>{
+      console.error(
+        "Statistics error:",
+        error
+      );
+    }
+  );
+
   setLoading(true);
 
   try{
@@ -12020,25 +12034,6 @@ async function refreshDashboard(){
 
     applySoldFilters();
 
-    /*
-     * Statistics are loaded separately.
-     * They don't block report rendering.
-     */
-
-    updateStatsDirect(
-      branch,
-      generation
-    ).catch(
-      error=>{
-
-        console.error(
-          "Statistics error:",
-          error
-        );
-
-      }
-    );
-
   }catch(error){
 
     console.error(
@@ -12094,9 +12089,26 @@ async function updateStatsDirect(
   let reportedMissing = 0;
   let pullOut = 0;
 
-  try{
-    const reportedRows =
-      await fetchAllRowsForStats("reported_missing","BR,NTAGN");
+  /*
+   * Start the two central counter queries together.
+   * This keeps the exact same counting rules but removes the
+   * unnecessary wait between Reported Missing and Pull Out.
+   */
+  const reportedRowsPromise = fetchAllRowsForStats("reported_missing","BR,NTAGN")
+    .then(reportedRows => ({ok:true, rows:reportedRows}))
+    .catch(error => ({ok:false, error}));
+
+  const pullOutRowsPromise = fetchAllRowsForStats("pull_out","BR,NTAGN")
+    .then(pullOutRows => ({ok:true, rows:pullOutRows}))
+    .catch(error => ({ok:false, error}));
+
+  const [reportedResult,pullOutResult] = await Promise.all([
+    reportedRowsPromise,
+    pullOutRowsPromise
+  ]);
+
+  if(reportedResult.ok){
+    const reportedRows = Array.isArray(reportedResult.rows) ? reportedResult.rows : [];
     reportedMissing =
       branch === "ALL"
         ? reportedRows.length
@@ -12104,13 +12116,12 @@ async function updateStatsDirect(
             String(row?.BR ?? "").trim().toUpperCase() ===
             String(branch || "").trim().toUpperCase()
           ).length;
-  }catch(error){
-    console.warn("Reported missing statistics unavailable:",error);
+  }else{
+    console.warn("Reported missing statistics unavailable:",reportedResult.error);
   }
 
-  try{
-    const pullOutRows =
-      await fetchAllRowsForStats("pull_out","BR,NTAGN");
+  if(pullOutResult.ok){
+    const pullOutRows = Array.isArray(pullOutResult.rows) ? pullOutResult.rows : [];
     pullOut =
       branch === "ALL"
         ? pullOutRows.length
@@ -12118,8 +12129,8 @@ async function updateStatsDirect(
             String(row?.BR ?? "").trim().toUpperCase() ===
             String(branch || "").trim().toUpperCase()
           ).length;
-  }catch(error){
-    console.warn("Pull out statistics unavailable:",error);
+  }else{
+    console.warn("Pull out statistics unavailable:",pullOutResult.error);
   }
 
   await Promise.all(

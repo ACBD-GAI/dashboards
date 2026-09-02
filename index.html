@@ -6219,7 +6219,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .pullOutSelect:focus,.pullOutInput:focus{border-color:#38aee2;box-shadow:0 0 0 3px rgba(56,189,248,.10);}
 .pullOutActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
 .pullOutList{max-height:58vh;overflow:auto;border:1px solid #d7e5ef;border-radius:12px;background:#fff;}
-.pullOutHeader,.pullOutRow{display:grid;grid-template-columns:44px minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
+.pullOutHeader,.pullOutRow{display:grid;grid-template-columns:minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
 .pullOutHeader{position:sticky;top:0;z-index:2;background:#234e67;color:#fff;font-size:10px;font-weight:900;letter-spacing:.05em;}
 .pullOutHeader>div,.pullOutCell{padding:11px 10px;min-width:0;}
 .pullOutRow{border-top:1px solid #e2e8f0;font-size:11px;color:#203443;}
@@ -6234,7 +6234,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .pullOutRetrieveBtn{border-color:#fde68a!important;background:#fffbeb!important;color:#b45309!important;}
 @media(max-width:760px){
   .pullOutModal{width:96vw!important;}
-  .pullOutHeader,.pullOutRow{grid-template-columns:44px 90px minmax(180px,1.8fr) 120px 170px;min-width:604px;}
+  .pullOutHeader,.pullOutRow{grid-template-columns:90px minmax(180px,1.8fr) 120px 170px;min-width:604px;}
   .pullOutList{overflow:auto;}
 }
 </style>
@@ -18510,15 +18510,14 @@ async function openPullOutPopup(){
         </div>
 
         <div class="pullOutActions">
-          <button type="button" class="controlBtn" data-pullout-bulk-delete="1">DELETE SELECTED</button>
-          <button type="button" class="controlBtn" data-pullout-bulk-retrieve="1">RETRIEVE SELECTED</button>
+          <button type="button" class="controlBtn" data-pullout-bulk-delete="1">DELETE ALL</button>
+          <button type="button" class="controlBtn" data-pullout-bulk-retrieve="1">RETRIEVE ALL</button>
           <button type="button" class="reportPdfBtn primary" data-pullout-pdf="1">↓ DOWNLOAD PDF REPORT</button>
           <button type="button" class="reportPdfBtn" data-pullout-excel="1">↓ DOWNLOAD EXCEL</button>
         </div>
       </div>
 
       <div class="pullOutHeader">
-        <div style="width:44px;text-align:center;">SELECT</div>
         <div>LENS TYPE</div>
         <div>DESCRIPTION</div>
         <div>TAG NUMBER</div>
@@ -18611,9 +18610,27 @@ function getPullOutFilteredRows(){
   });
 }
 
+function updatePullOutBulkButtons(){
+  const statusFilter = String(
+    document.getElementById("pullOutStatusFilter")?.value || "ONGOING"
+  ).trim().toUpperCase();
+
+  const deleteBtn = document.querySelector("[data-pullout-bulk-delete='1']");
+  const retrieveBtn = document.querySelector("[data-pullout-bulk-retrieve='1']");
+
+  if(deleteBtn){
+    deleteBtn.style.display = (statusFilter === "RETRIEVE") ? "none" : "inline-flex";
+  }
+  if(retrieveBtn){
+    retrieveBtn.style.display = (statusFilter === "ONGOING") ? "none" : "inline-flex";
+  }
+}
+
 function renderPullOutPopup(){
   const list = document.getElementById("pullOutList");
   if(!list) return;
+
+  updatePullOutBulkButtons();
 
   const rows = getPullOutFilteredRows();
   const status = document.getElementById("pullOutPopupStatus");
@@ -18639,13 +18656,8 @@ function renderPullOutPopup(){
     const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
     const isRetrieved = state === "RETRIEVE";
 
-    const rowKey = encodeURIComponent(b + "||" + t);
-
     return `
       <div class="pullOutRow">
-        <div class="pullOutCell" style="width:44px;justify-content:center;">
-          <input type="checkbox" class="pullOutSelectBox" data-pullout-select="1" data-key="${escapeHtmlAttribute(rowKey)}" aria-label="Select ${escapeHtmlAttribute(t || "item")}">
-        </div>
         <div class="pullOutCell">${escapeHtml(type || "—")}</div>
         <div class="pullOutCell description">${escapeHtml(description || "—")}</div>
         <div class="pullOutCell"><span class="pullOutTag">${escapeHtml(t || "—")}</span></div>
@@ -18685,49 +18697,35 @@ function renderPullOutPopup(){
     };
   });
 
-  list.querySelectorAll("[data-pullout-select]").forEach(box=>{
-    box.addEventListener("change",updatePullOutSelectedCount);
-  });
-  updatePullOutSelectedCount();
-}
-
-function getSelectedPullOutItems(){
-  return Array.from(document.querySelectorAll("#pullOutList [data-pullout-select]:checked"))
-    .map(box=>{
-      const raw = decodeURIComponent(String(box.dataset.key || ""));
-      const parts = raw.split("||");
-      return {
-        branch:String(parts[0] || "").trim().toUpperCase(),
-        tag:String(parts.slice(1).join("||") || "").trim()
-      };
-    })
-    .filter(item=>item.branch && item.tag);
-}
-
-function updatePullOutSelectedCount(){
-  const count = document.querySelectorAll("#pullOutList [data-pullout-select]:checked").length;
-  const el = document.getElementById("pullOutSelectedCount");
-  if(el) el.textContent = count + " selected.";
-
-  const deleteBtn = document.querySelector("[data-pullout-bulk-delete='1']");
-  const retrieveBtn = document.querySelector("[data-pullout-bulk-retrieve='1']");
-  if(deleteBtn) deleteBtn.disabled = count === 0;
-  if(retrieveBtn) retrieveBtn.disabled = count === 0;
 }
 
 async function bulkSetPullOutStatus(targetState){
   targetState = String(targetState || "").trim().toUpperCase();
   if(targetState !== "PULL OUT" && targetState !== "RETRIEVE") return;
 
-  const items = getSelectedPullOutItems();
+  const visibleRows = getPullOutFilteredRows();
+  const sourceState = targetState === "RETRIEVE" ? "PULL OUT" : "RETRIEVE";
+  const items = visibleRows
+    .filter(row=>String(row?.STATUS || "PULL OUT").trim().toUpperCase() === sourceState)
+    .map(row=>({
+      branch:String(row?.BR || "").trim().toUpperCase(),
+      tag:String(row?.NTAGN || "").trim()
+    }))
+    .filter(item=>item.branch && item.tag);
+
   if(!items.length){
-    showStatus("Select at least one Pull Out item.");
+    showStatus(
+      targetState === "RETRIEVE"
+        ? "No ongoing Pull Out items match the current filters."
+        : "No deleted Pull Out items match the current filters."
+    );
     return;
   }
 
   const actionLabel = targetState === "RETRIEVE" ? "DELETE" : "RETRIEVE";
+  const filterLabel = targetState === "RETRIEVE" ? "ongoing" : "deleted";
   const confirmed = await pullOutInlineConfirm(
-    actionLabel + " " + items.length + " selected Pull Out item" + (items.length === 1 ? "" : "s") + "?",
+    actionLabel + " all " + items.length + " " + filterLabel + " Pull Out item" + (items.length === 1 ? "" : "s") + " matching the current filters?",
     actionLabel
   );
   if(!confirmed) return;
@@ -18761,12 +18759,12 @@ async function bulkSetPullOutStatus(targetState){
       );
     }
 
-    const selectedKeys = new Set(items.map(item=>item.branch + "||" + item.tag));
+    const changedKeys = new Set(items.map(item=>item.branch + "||" + item.tag));
     pullOutPopupRows.forEach(row=>{
       const key =
         String(row?.BR || "").trim().toUpperCase() + "||" +
         String(row?.NTAGN || "").trim();
-      if(selectedKeys.has(key)) row.STATUS = targetState;
+      if(changedKeys.has(key)) row.STATUS = targetState;
     });
 
     renderPullOutPopup();
@@ -18778,12 +18776,11 @@ async function bulkSetPullOutStatus(targetState){
     await refreshDashboard();
   }catch(error){
     console.error("Bulk Pull Out status update failed:",error);
-    showStatus(error?.message || "Unable to update selected Pull Out items.");
+    showStatus(error?.message || "Unable to update Pull Out items.");
   }finally{
     if(bulkBtn){
       bulkBtn.disabled=false;
-      bulkBtn.textContent = targetState === "RETRIEVE" ? "DELETE SELECTED" : "RETRIEVE SELECTED";
-      updatePullOutSelectedCount();
+      bulkBtn.textContent = targetState === "RETRIEVE" ? "DELETE ALL" : "RETRIEVE ALL";
     }
   }
 }

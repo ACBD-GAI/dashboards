@@ -1904,15 +1904,30 @@ button{
   }
   42%{
     transform:scale(.94);
-    filter:brightness(1.03);
+    filter:brightness(1.06);
   }
   62%{
     transform:scale(1.035);
-    filter:brightness(1.06);
+    filter:brightness(1.12);
   }
   78%{
     transform:scale(.99);
   }
+}
+
+@keyframes aoUnconfirmedCardColor{
+  0%,100%{background:#fffaf0;border-color:#f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.12),0 12px 28px rgba(245,158,11,.12),inset 0 1px 0 #fff;}
+  50%{background:#fff1c7;border-color:#d97706;box-shadow:0 0 0 3px rgba(245,158,11,.22),0 18px 38px rgba(245,158,11,.26),inset 0 1px 0 #fff;}
+}
+
+@keyframes aoReportedMissingCardColor{
+  0%,100%{background:#fff5f5;border-color:#ef4444;box-shadow:0 0 0 2px rgba(239,68,68,.12),0 12px 28px rgba(239,68,68,.12),inset 0 1px 0 #fff;}
+  50%{background:#ffdede;border-color:#dc2626;box-shadow:0 0 0 3px rgba(239,68,68,.22),0 18px 38px rgba(239,68,68,.28),inset 0 1px 0 #fff;}
+}
+
+@keyframes aoPullOutCardColor{
+  0%,100%{background:#faf7ff;border-color:#8b5cf6;box-shadow:0 0 0 2px rgba(139,92,246,.12),0 12px 28px rgba(139,92,246,.12),inset 0 1px 0 #fff;}
+  50%{background:#eadcff;border-color:#7c3aed;box-shadow:0 0 0 3px rgba(139,92,246,.22),0 18px 38px rgba(139,92,246,.28),inset 0 1px 0 #fff;}
 }
 
 .counterAlertActive{
@@ -1920,22 +1935,19 @@ button{
   transform-origin:center center;
   position:relative;
   z-index:2;
-  will-change:transform,filter,box-shadow;
+  will-change:transform,filter,box-shadow,background-color,border-color;
 }
 
 .unconfirmedStatCard.counterAlertActive{
-  border-color:#f59e0b !important;
-  box-shadow:0 0 0 2px rgba(245,158,11,.16),0 16px 34px rgba(245,158,11,.20),inset 0 1px 0 #fff !important;
+  animation:aoCounterCardPulse 1.15s ease-in-out infinite,aoUnconfirmedCardColor 1.15s ease-in-out infinite !important;
 }
 
 .reportedMissingStatCard.counterAlertActive{
-  border-color:#ef4444 !important;
-  box-shadow:0 0 0 2px rgba(239,68,68,.15),0 16px 34px rgba(239,68,68,.20),inset 0 1px 0 #fff !important;
+  animation:aoCounterCardPulse 1.15s ease-in-out infinite,aoReportedMissingCardColor 1.15s ease-in-out infinite !important;
 }
 
 .pullOutStatCard.counterAlertActive{
-  border-color:#8b5cf6 !important;
-  box-shadow:0 0 0 2px rgba(139,92,246,.15),0 16px 34px rgba(139,92,246,.20),inset 0 1px 0 #fff !important;
+  animation:aoCounterCardPulse 1.15s ease-in-out infinite,aoPullOutCardColor 1.15s ease-in-out infinite !important;
 }
 
 @media(prefers-reduced-motion:reduce){

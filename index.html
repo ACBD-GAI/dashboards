@@ -1894,38 +1894,48 @@ button{
 
 
 /* =========================================================
-   ALERT COUNTERS — PULSE WHEN NON-ZERO
+   ALERT COUNTER CARDS — SHRINK / GROW WHEN NON-ZERO
 ========================================================= */
-@keyframes aoCounterPulse{
+@keyframes aoCounterCardPulse{
   0%,100%{
     transform:scale(1);
     filter:brightness(1);
+    box-shadow:0 11px 26px rgba(34,80,132,.08),inset 0 1px 0 #fff;
   }
-  45%{
-    transform:scale(.92);
-    filter:brightness(1.05);
+  42%{
+    transform:scale(.94);
+    filter:brightness(1.03);
   }
-  68%{
-    transform:scale(1.06);
-    filter:brightness(1.12);
+  62%{
+    transform:scale(1.035);
+    filter:brightness(1.06);
+  }
+  78%{
+    transform:scale(.99);
   }
 }
 
 .counterAlertActive{
-  animation:aoCounterPulse 1.15s ease-in-out infinite;
-  transform-origin:center;
+  animation:aoCounterCardPulse 1.15s ease-in-out infinite;
+  transform-origin:center center;
+  position:relative;
+  z-index:2;
+  will-change:transform,filter,box-shadow;
 }
 
-#unconfirmedTotal.counterAlertActive{
-  color:#d97706 !important;
+.unconfirmedStatCard.counterAlertActive{
+  border-color:#f59e0b !important;
+  box-shadow:0 0 0 2px rgba(245,158,11,.16),0 16px 34px rgba(245,158,11,.20),inset 0 1px 0 #fff !important;
 }
 
-#reportedMissingTotal.counterAlertActive{
-  color:#dc2626 !important;
+.reportedMissingStatCard.counterAlertActive{
+  border-color:#ef4444 !important;
+  box-shadow:0 0 0 2px rgba(239,68,68,.15),0 16px 34px rgba(239,68,68,.20),inset 0 1px 0 #fff !important;
 }
 
-#pullOutTotal.counterAlertActive{
-  color:#7c3aed !important;
+.pullOutStatCard.counterAlertActive{
+  border-color:#8b5cf6 !important;
+  box-shadow:0 0 0 2px rgba(139,92,246,.15),0 16px 34px rgba(139,92,246,.20),inset 0 1px 0 #fff !important;
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -10635,9 +10645,20 @@ function clearAuditFilters(){
 
 function setCounterAlertState(element, value){
   if(!element) return;
+
   const numeric = Number(value);
   const active = Number.isFinite(numeric) && numeric > 0;
-  element.classList.toggle("counterAlertActive", active);
+
+  const cardMap = {
+    unconfirmedTotal: "unconfirmedStatCard",
+    reportedMissingTotal: "reportedMissingStatCard",
+    pullOutTotal: "pullOutStatCard"
+  };
+
+  const card = document.getElementById(cardMap[element.id] || "");
+  const target = card || element;
+
+  target.classList.toggle("counterAlertActive", active);
 }
 
 async function loadUnconfirmedOverview(force = false){

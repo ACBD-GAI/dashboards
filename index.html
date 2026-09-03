@@ -1892,6 +1892,48 @@ button{
 
 }
 
+
+/* =========================================================
+   ALERT COUNTERS — PULSE WHEN NON-ZERO
+========================================================= */
+@keyframes aoCounterPulse{
+  0%,100%{
+    transform:scale(1);
+    filter:brightness(1);
+  }
+  45%{
+    transform:scale(.92);
+    filter:brightness(1.05);
+  }
+  68%{
+    transform:scale(1.06);
+    filter:brightness(1.12);
+  }
+}
+
+.counterAlertActive{
+  animation:aoCounterPulse 1.15s ease-in-out infinite;
+  transform-origin:center;
+}
+
+#unconfirmedTotal.counterAlertActive{
+  color:#d97706 !important;
+}
+
+#reportedMissingTotal.counterAlertActive{
+  color:#dc2626 !important;
+}
+
+#pullOutTotal.counterAlertActive{
+  color:#7c3aed !important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .counterAlertActive{
+    animation:none !important;
+  }
+}
+
 .statHint{
 
   position:relative;
@@ -10590,6 +10632,14 @@ function clearAuditFilters(){
 
 }
 
+
+function setCounterAlertState(element, value){
+  if(!element) return;
+  const numeric = Number(value);
+  const active = Number.isFinite(numeric) && numeric > 0;
+  element.classList.toggle("counterAlertActive", active);
+}
+
 async function loadUnconfirmedOverview(force = false){
 
   const now = Date.now();
@@ -10708,13 +10758,14 @@ function updateUnconfirmedCounterDisplay(){
     selectedBranch !== "ALL" &&
     Object.prototype.hasOwnProperty.call(unconfirmedBranchCounts, selectedBranch)
   ){
-    el.textContent = formatNumber(
-      Number(unconfirmedBranchCounts[selectedBranch] || 0)
-    );
+    const value = Number(unconfirmedBranchCounts[selectedBranch] || 0);
+    el.textContent = formatNumber(value);
+    setCounterAlertState(el, value);
     return;
   }
 
   el.textContent = formatNumber(unconfirmedOverallTotal);
+  setCounterAlertState(el, unconfirmedOverallTotal);
 
 }
 
@@ -13446,14 +13497,18 @@ async function addStockToSoldConfirmed(branch,tag,siNo){
   deleteAuditParams.set("NTAGN","eq." + tag);
   deleteAuditParams.set("BR","eq." + branch);
 
+  /* The Sold action is one business transaction.
+     The Stock and Audit deletes are internal cleanup and should not
+     create two extra History records of their own. The SOLD POST above
+     already records the single user transaction with its TAG and SI NO. */
   await Promise.all([
     supabaseRequest(
       stockTable + "?" + deleteStockParams.toString(),
-      {method:"DELETE", prefer:"return=minimal"}
+      {method:"DELETE", prefer:"return=minimal", skipHistory:true}
     ),
     supabaseRequest(
       auditTable + "?" + deleteAuditParams.toString(),
-      {method:"DELETE", prefer:"return=minimal"}
+      {method:"DELETE", prefer:"return=minimal", skipHistory:true}
     )
   ]);
 
@@ -17909,11 +17964,13 @@ async function loadReportedMissingCount(){
       ? rows.filter(row => normalizeReportedMissingStatus(row?.STATUS) === "UNRESOLVED").length
       : 0;
     counter.textContent = formatNumber(count);
+    setCounterAlertState(counter, count);
     card.style.display = "block";
 
   }catch(error){
     console.error("Reported missing count failed:",error);
     counter.textContent = "—";
+    setCounterAlertState(counter, 0);
   }
 }
 
@@ -18474,14 +18531,15 @@ async function loadPullOutCount(){
       {method:"GET"}
     );
 
-    counter.textContent = formatNumber(
-      Array.isArray(rows) ? rows.length : 0
-    );
+    const count = Array.isArray(rows) ? rows.length : 0;
+    counter.textContent = formatNumber(count);
+    setCounterAlertState(counter, count);
     card.style.display = "";
 
   }catch(error){
     console.error("Pull Out count failed:",error);
     counter.textContent = "—";
+    setCounterAlertState(counter, 0);
   }
 }
 

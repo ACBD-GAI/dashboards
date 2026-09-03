@@ -12513,6 +12513,7 @@ async function updateStatsDirect(
   if(pullOutEl){
     pullOutEl.textContent =
       formatNumber(pullOut);
+    setCounterAlertState(pullOutEl, pullOut);
   }
 
   const pullOutCard =

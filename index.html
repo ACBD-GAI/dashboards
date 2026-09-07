@@ -14558,35 +14558,66 @@ async function saveSoldDate(input){
     params.set("STATUS","eq.MARKED");
 
     /*
-     * Date changes are grouped by SI No.
-     * Only MARKED rows are touched.
+     * Do NOT filter directly on the "SI NO." column in the
+     * Supabase URL because that column name contains a period,
+     * which PostgREST can interpret as a tree-path separator.
+     *
+     * Instead, fetch the MARKED Sold Out rows for this branch,
+     * find the matching SI No. in JavaScript, then PATCH each
+     * affected row by NTAGN. Only MARKED rows are touched.
      */
+    let rowsToUpdate = [];
+
     if(siNo){
-      params.set("SI NO.","eq." + siNo);
+      const markedParams = new URLSearchParams();
+      markedParams.set("STATUS","eq.MARKED");
+
+      const markedRows = await supabaseRequest(
+        table + "?" + markedParams.toString(),
+        {method:"GET"}
+      );
+
+      rowsToUpdate = (Array.isArray(markedRows) ? markedRows : [])
+        .filter(r => String(r?.["SI NO."] ?? "").trim() === siNo)
+        .map(r => String(r?.NTAGN ?? "").trim())
+        .filter(Boolean);
     }else{
       /* No SI No. means fall back to this exact marked tag only. */
-      params.set("NTAGN","eq." + tag);
+      rowsToUpdate = [tag];
     }
 
-    await supabaseRequest(
-      table + "?" + params.toString(),
-      {
-        method:"PATCH",
-        body:{
-          "DATE AND TIME":isoValue
-        },
-        prefer:"return=minimal"
-      }
+    rowsToUpdate = [...new Set(rowsToUpdate)];
+
+    await Promise.all(
+      rowsToUpdate.map(rowTag=>{
+        const rowParams = new URLSearchParams();
+        rowParams.set("NTAGN","eq." + rowTag);
+        rowParams.set("STATUS","eq.MARKED");
+
+        return supabaseRequest(
+          table + "?" + rowParams.toString(),
+          {
+            method:"PATCH",
+            body:{
+              "DATE AND TIME":isoValue
+            },
+            prefer:"return=minimal"
+          }
+        );
+      })
     );
 
     /* Keep every affected marked row in the current client state synchronized. */
+    const affectedTags = new Set(rowsToUpdate);
     currentRows.forEach(r=>{
       const sameBranch =
         String(r.branch).trim() === branch;
       const sameSI = siNo
         ? String(r.si ?? "").trim() === siNo
         : String(r.tag ?? "").trim() === tag;
-      if(sameBranch && sameSI && r.marked){
+      const markedTag = affectedTags.has(String(r.tag ?? "").trim());
+
+      if(sameBranch && sameSI && r.marked && markedTag){
         r.date = isoValue;
         if(r.raw){
           r.raw["DATE AND TIME"] = isoValue;

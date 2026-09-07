@@ -2499,6 +2499,11 @@ tbody tr:last-child td{
 .soldDateInput:disabled{
   opacity:.6;
 }
+.soldDateEditWrap{display:flex;align-items:center;gap:6px;min-width:220px;}
+.soldDateDisplay{display:inline-flex;align-items:center;min-height:30px;padding:5px 8px;border:1px solid transparent;border-radius:8px;color:#203443;font-size:11px;font-weight:800;cursor:pointer;}
+.soldDateDisplay:hover{border-color:#cadce7;background:#f6fbfe;}
+.soldDateEditBtn{width:30px;min-height:30px;padding:0;border:1px solid #cadce7;border-radius:8px;background:#fff;color:#294254;cursor:pointer;font-size:13px;font-weight:900;}
+.soldDateEditBtn:hover{border-color:#8ebbd1;background:#f6fbfe;}
 
 
 /* =========================================================
@@ -12912,20 +12917,37 @@ function renderTable(
             : "—"
         );
 
-      /* SOLD OUT DATE EDIT: only MARKED rows may edit the date/time. */
+      /* SOLD OUT DATE EDIT: always display the date; only MARKED rows can edit it. */
       const soldDateEditor =
         canEdit && row.marked
           ? `
-              <input
-                class="soldDateInput"
-                type="datetime-local"
-                value="${escapeHtmlAttribute(soldDateTimeLocalValue(row.date))}"
-                data-tag="${escapeHtmlAttribute(row.tag)}"
-                data-branch="${escapeHtmlAttribute(row.branch)}"
-                data-marked="1"
-                onchange="saveSoldDate(this)"
-                title="Edit sold date/time"
-              >
+              <div class="soldDateEditWrap">
+                <span
+                  class="soldDateDisplay"
+                  data-sold-date-display="1"
+                  data-tag="${escapeHtmlAttribute(row.tag)}"
+                  data-branch="${escapeHtmlAttribute(row.branch)}"
+                  onclick="editSoldDate(this)"
+                  title="Click the date to edit"
+                >${date || "—"}</span>
+                <input
+                  class="soldDateInput hidden"
+                  type="datetime-local"
+                  value="${escapeHtmlAttribute(soldDateTimeLocalValue(row.date))}"
+                  data-tag="${escapeHtmlAttribute(row.tag)}"
+                  data-branch="${escapeHtmlAttribute(row.branch)}"
+                  data-marked="1"
+                  onchange="saveSoldDate(this)"
+                  onblur="cancelSoldDateEdit(this)"
+                  title="Edit sold date/time"
+                >
+                <button
+                  type="button"
+                  class="soldDateEditBtn"
+                  onclick="editSoldDate(this.previousElementSibling.previousElementSibling)"
+                  title="Edit sold date/time"
+                >✎</button>
+              </div>
             `
           : date || "—";
 
@@ -14420,6 +14442,49 @@ async function saveSoldSellingPrice(
 
   }
 
+}
+
+/* =========================================================
+   SOLD DATE DISPLAY / EDIT HELPERS
+========================================================= */
+
+function editSoldDate(displayEl){
+  if(!displayEl) return;
+  const wrap=displayEl.parentElement;
+  const input=wrap?.querySelector('.soldDateInput');
+  if(!input) return;
+  const row=currentRows.find(r=>
+    String(r.branch).trim()===String(input.dataset.branch||'').trim() &&
+    String(r.tag).trim()===String(input.dataset.tag||'').trim()
+  );
+  if(!row || !row.marked){
+    showStatus('Only marked Sold Out items can edit the date.');
+    return;
+  }
+  input.value=soldDateTimeLocalValue(row.date);
+  displayEl.classList.add('hidden');
+  input.classList.remove('hidden');
+  const btn=wrap.querySelector('.soldDateEditBtn');
+  if(btn) btn.classList.add('hidden');
+  input.focus();
+}
+
+function cancelSoldDateEdit(input){
+  if(!input) return;
+  const wrap=input.parentElement;
+  if(!wrap) return;
+  const display=wrap.querySelector('[data-sold-date-display]');
+  const btn=wrap.querySelector('.soldDateEditBtn');
+  const row=currentRows.find(r=>
+    String(r.branch).trim()===String(input.dataset.branch||'').trim() &&
+    String(r.tag).trim()===String(input.dataset.tag||'').trim()
+  );
+  if(display){
+    display.textContent=row?.date ? (formatDateValue(row.date)||String(row.date)) : '—';
+    display.classList.remove('hidden');
+  }
+  input.classList.add('hidden');
+  if(btn) btn.classList.remove('hidden');
 }
 
 /* =========================================================

@@ -2479,6 +2479,27 @@ tbody tr:last-child td{
   opacity:.6;
 }
 
+.soldDateInput{
+  min-width:190px;
+  min-height:30px;
+  padding:5px 8px;
+  border:1px solid #cadce7;
+  border-radius:8px;
+  outline:none;
+  background:#ffffff;
+  color:#173247;
+  font-size:11px;
+  font-weight:800;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.soldDateInput:focus{
+  border-color:#38aee2;
+  box-shadow:0 0 0 3px rgba(56,189,248,.09);
+}
+.soldDateInput:disabled{
+  opacity:.6;
+}
+
 
 /* =========================================================
    UNCONFIRMED CLICKABLE COUNTER
@@ -12891,6 +12912,23 @@ function renderTable(
             : "—"
         );
 
+      /* SOLD OUT DATE EDIT: only MARKED rows may edit the date/time. */
+      const soldDateEditor =
+        canEdit && row.marked
+          ? `
+              <input
+                class="soldDateInput"
+                type="datetime-local"
+                value="${escapeHtmlAttribute(soldDateTimeLocalValue(row.date))}"
+                data-tag="${escapeHtmlAttribute(row.tag)}"
+                data-branch="${escapeHtmlAttribute(row.branch)}"
+                data-marked="1"
+                onchange="saveSoldDate(this)"
+                title="Edit sold date/time"
+              >
+            `
+          : date || "—";
+
       /*
        * Default:
        *
@@ -13096,7 +13134,7 @@ function renderTable(
         </td>
 
         <td>
-          ${date || "—"}
+          ${soldDateEditor}
         </td>
 
         <td>
@@ -14382,6 +14420,111 @@ async function saveSoldSellingPrice(
 
   }
 
+}
+
+/* =========================================================
+   SAVE SOLD DATE/TIME — SOLD ONLY
+   Date/time can be edited ONLY while STATUS = MARKED.
+========================================================= */
+
+async function saveSoldDate(input){
+
+  const branch =
+    String(input.dataset.branch || "").trim();
+
+  const tag =
+    String(input.dataset.tag || "").trim();
+
+  const row = currentRows.find(r =>
+    String(r.branch).trim() === branch &&
+    String(r.tag).trim() === tag
+  );
+
+  const isMarked =
+    row
+      ? !!row.marked
+      : input.dataset.marked === "1";
+
+  if(!branch){
+    showStatus("Missing branch.");
+    return;
+  }
+
+  if(!tag){
+    showStatus("Missing NTAGN.");
+    return;
+  }
+
+  /* Hard guard: the Date field is editable only for MARKED rows. */
+  if(!isMarked){
+    if(row?.date){
+      input.value = soldDateTimeLocalValue(row.date);
+    }
+    showStatus("Only marked Sold Out items can edit the date.");
+    return;
+  }
+
+  const value = String(input.value || "").trim();
+  if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)){
+    if(row?.date){
+      input.value = soldDateTimeLocalValue(row.date);
+    }
+    showStatus("Enter a valid date and time.");
+    return;
+  }
+
+  /* The input is displayed in Philippine time (UTC+8). */
+  const isoValue = new Date(value + ":00+08:00").toISOString();
+  const oldValue = row?.date || "";
+
+  input.disabled = true;
+
+  try{
+
+    const table = tableName(branch,"sold");
+    const params = new URLSearchParams();
+    params.set("NTAGN","eq." + tag);
+    params.set("STATUS","eq.MARKED");
+
+    await supabaseRequest(
+      table + "?" + params.toString(),
+      {
+        method:"PATCH",
+        body:{
+          "DATE AND TIME":isoValue
+        },
+        prefer:"return=minimal"
+      }
+    );
+
+    if(row){
+      row.date = isoValue;
+      if(row.raw){
+        row.raw["DATE AND TIME"] = isoValue;
+      }
+    }
+
+    showStatus("Sold date/time saved.");
+
+    /* Re-render only the current Sold Out view so the display stays synchronized. */
+    applySoldFilters();
+
+  }catch(error){
+
+    console.error("Sold date update failed:",error);
+
+    if(row?.date){
+      input.value = soldDateTimeLocalValue(oldValue);
+    }
+
+    showStatus(
+      error?.message ||
+      "Unable to save sold date/time."
+    );
+
+  }finally{
+    input.disabled = false;
+  }
 }
 
 /* =========================================================
@@ -15851,6 +15994,35 @@ function formatDateValue(date){
     second:"2-digit",
     hour12:false
   }).format(parsed);
+}
+
+/* Convert the stored timestamp into a value accepted by datetime-local. */
+function soldDateTimeLocalValue(value){
+
+  const parsed = new Date(String(value || "").trim());
+  if(!Number.isFinite(parsed.getTime())){
+    return "";
+  }
+
+  const parts = new Intl.DateTimeFormat("en-CA",{
+    timeZone:"Asia/Manila",
+    year:"numeric",
+    month:"2-digit",
+    day:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit",
+    hour12:false
+  }).formatToParts(parsed);
+
+  const get = type =>
+    parts.find(p => p.type === type)?.value || "00";
+
+  return
+    get("year") + "-" +
+    get("month") + "-" +
+    get("day") + "T" +
+    get("hour") + ":" +
+    get("minute");
 }
 
 /* =========================================================

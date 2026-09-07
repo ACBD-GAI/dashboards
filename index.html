@@ -14505,6 +14505,13 @@ async function saveSoldDate(input){
     String(r.tag).trim() === tag
   );
 
+  /* The SI No. is the group key for date updates.
+     Changing a marked row's date also changes every MARKED
+     Sold Out row with the same SI No. in this branch. */
+  const siNo = row
+    ? String(row.si ?? "").trim()
+    : "";
+
   const isMarked =
     row
       ? !!row.marked
@@ -14548,8 +14555,18 @@ async function saveSoldDate(input){
 
     const table = tableName(branch,"sold");
     const params = new URLSearchParams();
-    params.set("NTAGN","eq." + tag);
     params.set("STATUS","eq.MARKED");
+
+    /*
+     * Date changes are grouped by SI No.
+     * Only MARKED rows are touched.
+     */
+    if(siNo){
+      params.set("SI NO.","eq." + siNo);
+    }else{
+      /* No SI No. means fall back to this exact marked tag only. */
+      params.set("NTAGN","eq." + tag);
+    }
 
     await supabaseRequest(
       table + "?" + params.toString(),
@@ -14562,12 +14579,20 @@ async function saveSoldDate(input){
       }
     );
 
-    if(row){
-      row.date = isoValue;
-      if(row.raw){
-        row.raw["DATE AND TIME"] = isoValue;
+    /* Keep every affected marked row in the current client state synchronized. */
+    currentRows.forEach(r=>{
+      const sameBranch =
+        String(r.branch).trim() === branch;
+      const sameSI = siNo
+        ? String(r.si ?? "").trim() === siNo
+        : String(r.tag ?? "").trim() === tag;
+      if(sameBranch && sameSI && r.marked){
+        r.date = isoValue;
+        if(r.raw){
+          r.raw["DATE AND TIME"] = isoValue;
+        }
       }
-    }
+    });
 
     showStatus("Sold date/time saved.");
 

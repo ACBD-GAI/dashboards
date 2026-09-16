@@ -12313,7 +12313,7 @@ async function updateStatsDirect(
     .then(reportedRows => ({ok:true, rows:reportedRows}))
     .catch(error => ({ok:false, error}));
 
-  const pullOutRowsPromise = fetchAllRowsForStats("pull_out","BR,NTAGN")
+  const pullOutRowsPromise = fetchAllRowsForStats("pull_out","BR,NTAGN,STATUS")
     .then(pullOutRows => ({ok:true, rows:pullOutRows}))
     .catch(error => ({ok:false, error}));
 
@@ -12336,7 +12336,10 @@ async function updateStatsDirect(
   }
 
   if(pullOutResult.ok){
-    const pullOutRows = Array.isArray(pullOutResult.rows) ? pullOutResult.rows : [];
+    const pullOutRows = (Array.isArray(pullOutResult.rows) ? pullOutResult.rows : [])
+      .filter(row =>
+        String(row?.STATUS ?? "").trim().toUpperCase() === "PULL OUT"
+      );
     pullOut =
       branch === "ALL"
         ? pullOutRows.length
@@ -18951,7 +18954,8 @@ async function loadPullOutCount(){
     ).trim().toUpperCase();
 
     const params = new URLSearchParams();
-    params.set("select","BR,NTAGN");
+    params.set("select","BR,NTAGN,STATUS");
+    params.set("STATUS","eq.PULL OUT");
 
     if(selectedBranch && selectedBranch !== "ALL"){
       params.set("BR","eq." + selectedBranch);
@@ -18962,7 +18966,12 @@ async function loadPullOutCount(){
       {method:"GET"}
     );
 
-    const count = Array.isArray(rows) ? rows.length : 0;
+    const ongoingRows = (Array.isArray(rows) ? rows : [])
+      .filter(row =>
+        String(row?.STATUS ?? "").trim().toUpperCase() === "PULL OUT"
+      );
+
+    const count = ongoingRows.length;
     counter.textContent = formatNumber(count);
     setCounterAlertState(counter, count);
     card.style.display = "";

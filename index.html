@@ -13818,7 +13818,6 @@ function openStockEditModal(
     String(raw[key]).trim() !== "";
 
   const fieldHtml = editFields
-    .filter(([letter,key]) => hasValue(key))
     .map(([letter,key]) => {
       const inputId = "stockEdit_" + letter;
       const numberInput =
@@ -13857,13 +13856,13 @@ function openStockEditModal(
         <div>
           <div style="font-size:20px;font-weight:800;color:#0f172a;">Edit Stock</div>
           <div style="font-size:13px;color:#64748b;margin-top:4px;">${escapeHtml(String(branch))} • ${escapeHtml(String(tag))}</div>
-          <div style="font-size:11px;color:#94a3b8;margin-top:5px;">Only fields A-V containing data are shown.</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:5px;">All fields A-V are shown and editable.</div>
         </div>
         <button type="button" id="stockEditClose" style="border:0;background:#f1f5f9;border-radius:10px;width:36px;height:36px;font-size:20px;cursor:pointer;">×</button>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        ${fieldHtml || '<div style="grid-column:1/-1;padding:18px;border-radius:12px;background:#f8fafc;color:#64748b;text-align:center;font-size:13px;">No editable A-V fields contain data.</div>'}
+        ${fieldHtml}
       </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">

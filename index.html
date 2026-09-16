@@ -13015,6 +13015,16 @@ function renderTable(
             ↗ Add to Pull Out
           </button>
 
+          <button
+            type="button"
+            class="actionBtn"
+            data-stock-transfer="1"
+            data-branch="${escapeHtmlAttribute(row.branch)}"
+            data-tag="${escapeHtmlAttribute(row.tag)}"
+          >
+            ⇄ Transfer
+          </button>
+
         `;
 
       }
@@ -13251,6 +13261,25 @@ function renderTable(
                 button.dataset.branch,
                 button.dataset.tag,
                 button
+              );
+            }
+          );
+        }
+      );
+
+    body
+      .querySelectorAll(
+        "[data-stock-transfer]"
+      )
+      .forEach(
+        button=>{
+          button.addEventListener(
+            "click",
+            ()=>{
+              openBranchTransferChooser(
+                button.dataset.branch,
+                button.dataset.tag,
+                "stocks"
               );
             }
           );
@@ -19175,6 +19204,7 @@ function renderPullOutPopup(){
         <div class="pullOutCell pullOutActionsCell" style="justify-content:flex-end;">
           ${isRetrieved ? "" : `
             <button type="button" class="actionBtn pullOutRestoreBtn" data-pullout-restore="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">↩ ADD TO STOCKS</button>
+            <button type="button" class="actionBtn" data-pullout-transfer="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}">⇄ TRANSFER</button>
           `}
           <button type="button" class="actionBtn ${isRetrieved ? "pullOutRetrieveBtn" : "pullOutDeleteBtn"}" data-pullout-toggle="1" data-branch="${escapeHtmlAttribute(b)}" data-tag="${escapeHtmlAttribute(t)}" data-state="${isRetrieved ? "RETRIEVE" : "PULL OUT"}">${isRetrieved ? "RETRIEVE" : "DELETE"}</button>
         </div>
@@ -19204,6 +19234,18 @@ function renderPullOutPopup(){
         btn.dataset.tag,
         btn.dataset.state,
         btn
+      );
+    };
+  });
+
+  list.querySelectorAll("[data-pullout-transfer]").forEach(btn=>{
+    btn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openBranchTransferChooser(
+        btn.dataset.branch,
+        btn.dataset.tag,
+        "pullout"
       );
     };
   });
@@ -19500,6 +19542,290 @@ async function restorePullOutToStocks(branch,tag,button){
     showStatus(error?.message || "Unable to restore Pull Out item.");
   }finally{
     if(button){button.disabled=false;button.textContent="↩ ADD TO STOCKS";}
+  }
+}
+
+
+/* =========================================================
+   TRANSFER TO OTHER BRANCH — ADDITIVE FEATURE ONLY
+   Source: Available Stocks or ongoing Pull Out.
+   Destination tag = SOURCE_BRANCH + ORIGINAL_TAG
+   Example: GAI + 94426 -> GAI94426
+   The BR column is changed to the destination branch.
+   Source Stocks and matching Audit are deleted after
+   the destination Stock record is created successfully.
+========================================================= */
+
+function openBranchTransferChooser(sourceBranch, sourceTag, sourceType){
+  sourceBranch = String(sourceBranch || "").trim().toUpperCase();
+  sourceTag = String(sourceTag || "").trim();
+  sourceType = String(sourceType || "stocks").trim().toLowerCase();
+
+  if(!sourceBranch || !sourceTag){
+    showStatus("Missing source branch or NTAGN.");
+    return;
+  }
+
+  const existing = document.getElementById("branchTransferModal");
+  if(existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "branchTransferModal";
+  modal.className = "modalBackdrop";
+
+  const choices = BRANCHES
+    .filter(branch => branch !== sourceBranch)
+    .map(branch =>
+      `<option value="${escapeHtmlAttribute(branch)}">${escapeHtml(branch)}</option>`
+    )
+    .join("");
+
+  modal.innerHTML = `
+    <div class="modalCard" style="width:min(520px,96vw);">
+      <div class="modalTitle">Transfer to Other Branch</div>
+      <div class="modalSub" style="margin-bottom:16px;">
+        Transfer <strong>${escapeHtml(sourceTag)}</strong> from
+        <strong>${escapeHtml(sourceBranch)}</strong>.
+      </div>
+
+      <div style="padding:12px 14px;border:1px solid #dbeafe;border-radius:12px;background:#f8fbff;margin-bottom:14px;font-size:12px;color:#334155;line-height:1.55;">
+        New tag will automatically become
+        <strong>${escapeHtml(sourceBranch + sourceTag)}</strong> and BR will become the selected destination branch.
+      </div>
+
+      <label style="display:block;font-size:11px;font-weight:900;color:#475569;letter-spacing:.05em;margin-bottom:7px;">
+        DESTINATION BRANCH
+      </label>
+      <select id="branchTransferDestination" class="select">
+        <option value="">SELECT BRANCH</option>
+        ${choices}
+      </select>
+
+      <div id="branchTransferPreview" style="margin-top:12px;padding:11px 13px;border-radius:10px;background:#f8fafc;color:#64748b;font-size:11px;">
+        Select a destination branch.
+      </div>
+
+      <div style="display:flex;gap:9px;justify-content:flex-end;margin-top:18px;">
+        <button type="button" id="branchTransferCancel" class="controlBtn">Cancel</button>
+        <button type="button" id="branchTransferConfirm" class="controlBtn primary">Transfer</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const destination = modal.querySelector("#branchTransferDestination");
+  const preview = modal.querySelector("#branchTransferPreview");
+  const confirm = modal.querySelector("#branchTransferConfirm");
+
+  destination.addEventListener("change",()=>{
+    const target = String(destination.value || "").trim().toUpperCase();
+    if(!target){
+      preview.textContent = "Select a destination branch.";
+      return;
+    }
+    preview.innerHTML =
+      "New BR: <strong>" + escapeHtml(target) +
+      "</strong> • New NTAGN: <strong>" +
+      escapeHtml(sourceBranch + sourceTag) +
+      "</strong>";
+  });
+
+  modal.querySelector("#branchTransferCancel").onclick = ()=>modal.remove();
+  modal.addEventListener("click",e=>{
+    if(e.target === modal) modal.remove();
+  });
+
+  confirm.onclick = ()=>{
+    const target = String(destination.value || "").trim().toUpperCase();
+    if(!target){
+      showStatus("Select a destination branch.");
+      return;
+    }
+    if(target === sourceBranch){
+      showStatus("Destination branch must be different from the source branch.");
+      return;
+    }
+    void transferBranchItem(sourceBranch, sourceTag, target, sourceType, confirm, modal);
+  };
+}
+
+async function transferBranchItem(sourceBranch, sourceTag, destinationBranch, sourceType, button, modal){
+  sourceBranch = String(sourceBranch || "").trim().toUpperCase();
+  sourceTag = String(sourceTag || "").trim();
+  destinationBranch = String(destinationBranch || "").trim().toUpperCase();
+  sourceType = String(sourceType || "stocks").trim().toLowerCase();
+
+  if(!sourceBranch || !sourceTag || !destinationBranch){
+    showStatus("Missing transfer information.");
+    return;
+  }
+
+  const newTag = sourceBranch + sourceTag;
+  if(button){
+    button.disabled = true;
+    button.textContent = "Transferring...";
+  }
+
+  let insertedDestination = false;
+
+  try{
+    let sourceRecord = null;
+
+    if(sourceType === "pullout"){
+      sourceRecord = await getPullOutRecord(sourceBranch, sourceTag);
+      if(!sourceRecord){
+        throw new Error("Pull Out record was not found.");
+      }
+      const state = String(sourceRecord.STATUS || "").trim().toUpperCase();
+      if(state !== "PULL OUT"){
+        throw new Error("Only ongoing PULL OUT items can be transferred.");
+      }
+    }else{
+      const sourceTable = tableName(sourceBranch,"stocks");
+      const sourceParams = new URLSearchParams();
+      sourceParams.set("BR","eq." + sourceBranch);
+      sourceParams.set("NTAGN","eq." + sourceTag);
+      sourceParams.set("limit","1");
+      const sourceRows = await supabaseRequest(
+        sourceTable + "?" + sourceParams.toString(),
+        {method:"GET"}
+      );
+      if(!Array.isArray(sourceRows) || !sourceRows.length){
+        throw new Error("Stock record " + sourceTag + " was not found in " + sourceBranch + ".");
+      }
+      sourceRecord = sourceRows[0];
+    }
+
+    /* Check every destination location that could create a duplicate tag. */
+    const destinationStockTable = tableName(destinationBranch,"stocks");
+    const destinationAuditTable = tableName(destinationBranch,"audit");
+    const duplicateParams = new URLSearchParams();
+    duplicateParams.set("BR","eq." + destinationBranch);
+    duplicateParams.set("NTAGN","eq." + newTag);
+    duplicateParams.set("limit","1");
+
+    const [existingStock, existingAudit, existingSold, existingPullOut] = await Promise.all([
+      supabaseRequest(destinationStockTable + "?" + duplicateParams.toString(), {method:"GET"}),
+      supabaseRequest(destinationAuditTable + "?" + duplicateParams.toString(), {method:"GET"}),
+      supabaseRequest("pull_out?" + duplicateParams.toString(), {method:"GET"}),
+      supabaseRequest(tableName(destinationBranch,"sold") + "?BR=eq." + encodeURIComponent(destinationBranch) + "&NTAGN=eq." + encodeURIComponent(newTag) + "&limit=1", {method:"GET"})
+    ]);
+
+    if((Array.isArray(existingStock) && existingStock.length) ||
+       (Array.isArray(existingAudit) && existingAudit.length) ||
+       (Array.isArray(existingSold) && existingSold.length) ||
+       (Array.isArray(existingPullOut) && existingPullOut.length)){
+      throw new Error("Transfer blocked: destination tag " + newTag + " already exists.");
+    }
+
+    const destinationRecord = {};
+    DB_COLUMNS.forEach(col=>{
+      destinationRecord[col] = sourceRecord[col] !== undefined && sourceRecord[col] !== null
+        ? sourceRecord[col]
+        : null;
+    });
+    destinationRecord.BR = destinationBranch;
+    destinationRecord.NTAGN = newTag;
+    destinationRecord.STATUS = null;
+
+    await supabaseRequest(
+      destinationStockTable,
+      {
+        method:"POST",
+        body:[destinationRecord],
+        prefer:"return=minimal"
+      }
+    );
+    insertedDestination = true;
+
+    const sourceStockTable = tableName(sourceBranch,"stocks");
+    const sourceAuditTable = tableName(sourceBranch,"audit");
+    const sourceDeleteParams =
+      "?BR=eq." + encodeURIComponent(sourceBranch) +
+      "&NTAGN=eq." + encodeURIComponent(sourceTag);
+
+    try{
+      if(sourceType === "pullout"){
+        await supabaseRequest(
+          "pull_out?BR=eq." + encodeURIComponent(sourceBranch) +
+          "&NTAGN=eq." + encodeURIComponent(sourceTag),
+          {method:"DELETE",prefer:"return=minimal"}
+        );
+      }else{
+        await Promise.all([
+          supabaseRequest(
+            sourceStockTable + sourceDeleteParams,
+            {method:"DELETE",prefer:"return=minimal"}
+          ),
+          supabaseRequest(
+            sourceAuditTable + sourceDeleteParams,
+            {method:"DELETE",prefer:"return=minimal"}
+          )
+        ]);
+      }
+    }catch(sourceDeleteError){
+      /* Roll back the destination insert so a failed transfer never leaves a duplicate copy. */
+      await supabaseRequest(
+        destinationStockTable + "?BR=eq." + encodeURIComponent(destinationBranch) +
+        "&NTAGN=eq." + encodeURIComponent(newTag),
+        {method:"DELETE",prefer:"return=minimal"}
+      ).catch(rollbackError=>{
+        console.error("Transfer rollback failed:",rollbackError);
+      });
+      throw sourceDeleteError;
+    }
+
+    if(sourceType === "pullout"){
+      pullOutPopupRows = pullOutPopupRows.filter(row=>
+        !(String(row?.BR || "").trim().toUpperCase() === sourceBranch &&
+          String(row?.NTAGN || "").trim() === sourceTag)
+      );
+      renderPullOutPopup();
+      loadPullOutCount();
+    }
+
+    modal?.remove();
+    showStatus(
+      sourceTag + " transferred from " + sourceBranch +
+      " to " + destinationBranch +
+      " as " + newTag + "."
+    );
+
+    currentPage = 1;
+    await refreshDashboard();
+
+  }catch(error){
+    console.error("Branch transfer failed:",error);
+    showStatus(error?.message || "Unable to transfer item.");
+
+    /* Destination insertion is rolled back above whenever source deletion fails. */
+    if(insertedDestination){
+      try{
+        const destinationStockTable = tableName(destinationBranch,"stocks");
+        const rows = await supabaseRequest(
+          destinationStockTable +
+          "?BR=eq." + encodeURIComponent(destinationBranch) +
+          "&NTAGN=eq." + encodeURIComponent(newTag),
+          {method:"GET"}
+        );
+        if(Array.isArray(rows) && rows.length && error?.message?.includes("Duplicate")){
+          await supabaseRequest(
+            destinationStockTable +
+            "?BR=eq." + encodeURIComponent(destinationBranch) +
+            "&NTAGN=eq." + encodeURIComponent(newTag),
+            {method:"DELETE",prefer:"return=minimal"}
+          );
+        }
+      }catch(rollbackCheckError){
+        console.error("Transfer duplicate rollback check failed:",rollbackCheckError);
+      }
+    }
+  }finally{
+    if(button){
+      button.disabled = false;
+      button.textContent = "Transfer";
+    }
   }
 }
 

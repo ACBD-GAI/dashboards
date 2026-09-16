@@ -19549,12 +19549,60 @@ async function restorePullOutToStocks(branch,tag,button){
 /* =========================================================
    TRANSFER TO OTHER BRANCH — ADDITIVE FEATURE ONLY
    Source: Available Stocks or ongoing Pull Out.
-   Destination tag = SOURCE_BRANCH + ORIGINAL_TAG
-   Example: GAI + 94426 -> GAI94426
+   The NTAGN keeps the ORIGINAL source-branch prefix.
+
+   Examples:
+     GAI + 94426 -> GAI94426
+     CAS + GAI94426 -> GAI94426
+     BIN + CASGAI94426 -> GAI94426
+
    The BR column is changed to the destination branch.
    Source Stocks and matching Audit are deleted after
    the destination Stock record is created successfully.
 ========================================================= */
+
+function getStableTransferTag(sourceBranch, sourceTag){
+  const branch = String(sourceBranch || '').trim().toUpperCase();
+  let tag = String(sourceTag || '').trim();
+
+  if(!tag) return '';
+
+  /*
+   * Transfer tags can arrive with one or more accumulated branch
+   * prefixes from older transfers, for example:
+   *   CASGAI94426
+   *   BINCASGAI94426
+   *
+   * Keep the LAST branch prefix in that chain, because that is the
+   * original source branch of the item, and keep the remaining tag.
+   * A normal first transfer such as 94426 therefore becomes GAI94426.
+   */
+  const branchCodes = Array.isArray(BRANCHES)
+    ? BRANCHES.map(branch=>String(branch || '').trim().toUpperCase())
+        .filter(Boolean)
+        .sort((a,b)=>b.length-a.length)
+    : [];
+
+  let cursor = tag.toUpperCase();
+  let lastBranch = '';
+  let remaining = tag;
+
+  while(cursor){
+    const matchedBranch = branchCodes.find(branch=>cursor.startsWith(branch));
+    if(!matchedBranch) break;
+
+    lastBranch = matchedBranch;
+    remaining = remaining.slice(matchedBranch.length);
+    cursor = cursor.slice(matchedBranch.length);
+  }
+
+  if(lastBranch && remaining){
+    return lastBranch + remaining;
+  }
+
+  /* First transfer from a normal unprefixed tag. */
+  return branch + tag;
+}
 
 function openBranchTransferChooser(sourceBranch, sourceTag, sourceType){
   sourceBranch = String(sourceBranch || "").trim().toUpperCase();
@@ -19589,8 +19637,9 @@ function openBranchTransferChooser(sourceBranch, sourceTag, sourceType){
       </div>
 
       <div style="padding:12px 14px;border:1px solid #dbeafe;border-radius:12px;background:#f8fbff;margin-bottom:14px;font-size:12px;color:#334155;line-height:1.55;">
-        New tag will automatically become
-        <strong>${escapeHtml(sourceBranch + sourceTag)}</strong> and BR will become the selected destination branch.
+        The original source-branch tag will be kept.
+        <strong>${escapeHtml(getStableTransferTag(sourceBranch, sourceTag))}</strong>
+        will stay unchanged, while BR will become the selected destination branch.
       </div>
 
       <label style="display:block;font-size:11px;font-weight:900;color:#475569;letter-spacing:.05em;margin-bottom:7px;">
@@ -19626,8 +19675,8 @@ function openBranchTransferChooser(sourceBranch, sourceTag, sourceType){
     }
     preview.innerHTML =
       "New BR: <strong>" + escapeHtml(target) +
-      "</strong> • New NTAGN: <strong>" +
-      escapeHtml(sourceBranch + sourceTag) +
+      "</strong> • NTAGN stays: <strong>" +
+      escapeHtml(getStableTransferTag(sourceBranch, sourceTag)) +
       "</strong>";
   });
 
@@ -19661,7 +19710,9 @@ async function transferBranchItem(sourceBranch, sourceTag, destinationBranch, so
     return;
   }
 
-  const newTag = sourceBranch + sourceTag;
+  /* KEEP THE ORIGINAL SOURCE-BRANCH TAG.
+     Do not add the current branch as another prefix. */
+  const newTag = getStableTransferTag(sourceBranch, sourceTag);
   if(button){
     button.disabled = true;
     button.textContent = "Transferring...";
@@ -19789,7 +19840,7 @@ async function transferBranchItem(sourceBranch, sourceTag, destinationBranch, so
     showStatus(
       sourceTag + " transferred from " + sourceBranch +
       " to " + destinationBranch +
-      " as " + newTag + "."
+      ". NTAGN kept as " + newTag + "."
     );
 
     currentPage = 1;

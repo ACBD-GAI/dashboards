@@ -6416,7 +6416,12 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .pullOutActions > .controlBtn[data-pullout-bulk-delete="1"],
 .pullOutActions > .controlBtn[data-pullout-bulk-retrieve="1"]{display:inline-flex;align-items:center;justify-content:center;line-height:1;}
 .pullOutList{max-height:58vh;overflow:auto;border:1px solid #d7e5ef;border-radius:12px;background:#fff;}
-.pullOutHeader,.pullOutRow{display:grid;grid-template-columns:minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
+.pullOutHeader,.pullOutRow{display:grid;grid-template-columns:42px minmax(110px,1fr) minmax(220px,2.4fr) minmax(130px,1.25fr) minmax(210px,1.9fr);gap:0;align-items:center;}
+.pullOutSelectHead{display:flex;align-items:center;justify-content:center;}
+.pullOutSelectCell{display:flex;align-items:center;justify-content:center;}
+.pullOutItemCheck,#pullOutSelectAll{width:16px;height:16px;accent-color:#2563eb;cursor:pointer;}
+.pullOutBulkTransferBtn{border-color:#bfdbfe!important;background:#eff6ff!important;color:#1d4ed8!important;}
+.pullOutBulkTransferBtn:disabled{opacity:.5!important;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
 .pullOutHeader{position:sticky;top:0;z-index:2;background:#234e67;color:#fff;font-size:10px;font-weight:900;letter-spacing:.05em;}
 .pullOutHeader>div,.pullOutCell{padding:11px 10px;min-width:0;}
 .pullOutRow{border-top:1px solid #e2e8f0;font-size:11px;color:#203443;}
@@ -6431,7 +6436,7 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 .pullOutRetrieveBtn{border-color:#fde68a!important;background:#fffbeb!important;color:#b45309!important;}
 @media(max-width:760px){
   .pullOutModal{width:96vw!important;}
-  .pullOutHeader,.pullOutRow{grid-template-columns:90px minmax(180px,1.8fr) 120px 170px;min-width:604px;}
+  .pullOutHeader,.pullOutRow{grid-template-columns:42px 90px minmax(180px,1.8fr) 120px 170px;min-width:646px;}
   .pullOutList{overflow:auto;}
 }
 </style>
@@ -18846,6 +18851,32 @@ async function deleteReportedMissingUnrecoverableConfirmed(branch,tag){
 
 let pullOutPopupRows = [];
 let pullOutPopupLoading = false;
+let pullOutSelectedKeys = new Set();
+
+function pullOutSelectionKey(branch, tag){
+  return (
+    String(branch || "").trim().toUpperCase() +
+    "||" +
+    String(tag || "").trim()
+  );
+}
+
+function getSelectedPullOutItems(){
+  const rows = getPullOutFilteredRows();
+  return rows
+    .filter(row=>{
+      const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
+      if(state !== "PULL OUT") return false;
+      return pullOutSelectedKeys.has(
+        pullOutSelectionKey(row?.BR, row?.NTAGN)
+      );
+    })
+    .map(row=>({
+      branch:String(row?.BR || "").trim().toUpperCase(),
+      tag:String(row?.NTAGN || "").trim()
+    }))
+    .filter(item=>item.branch && item.tag);
+}
 
 function pullOutRecordFromStock(row, branch, tag){
   const record = {};
@@ -19016,6 +19047,9 @@ async function openPullOutPopup(){
   const existing = document.getElementById("pullOutModal");
   if(existing) existing.remove();
 
+  /* Start each Pull Out popup with a clean bulk-transfer selection. */
+  pullOutSelectedKeys.clear();
+
   const selectedBranch = String(
     document.getElementById("branch")?.value || "ALL"
   ).trim().toUpperCase();
@@ -19050,6 +19084,7 @@ async function openPullOutPopup(){
         </div>
 
         <div class="pullOutActions">
+          <button type="button" class="controlBtn pullOutBulkTransferBtn" data-pullout-bulk-transfer="1">⇄ TRANSFER SELECTED (0)</button>
           <button type="button" class="controlBtn" data-pullout-bulk-delete="1">DELETE ALL</button>
           <button type="button" class="controlBtn" data-pullout-bulk-retrieve="1">RETRIEVE ALL</button>
           <button type="button" class="reportPdfBtn primary" data-pullout-pdf="1">↓ DOWNLOAD PDF REPORT</button>
@@ -19058,6 +19093,9 @@ async function openPullOutPopup(){
       </div>
 
       <div class="pullOutHeader">
+        <div class="pullOutSelectHead">
+          <input type="checkbox" id="pullOutSelectAll" aria-label="Select all visible Pull Out items">
+        </div>
         <div>LENS TYPE</div>
         <div>DESCRIPTION</div>
         <div>TAG NUMBER</div>
@@ -19089,6 +19127,7 @@ async function openPullOutPopup(){
   }
 
   modal.querySelector("#pullOutSearch")?.addEventListener("input",renderPullOutPopup);
+  modal.querySelector("[data-pullout-bulk-transfer='1']")?.addEventListener("click",openBulkPullOutTransferChooser);
   modal.querySelector("[data-pullout-refresh='1']")?.addEventListener("click",loadPullOutPopup);
   modal.querySelector("[data-pullout-bulk-delete='1']")?.addEventListener("click",()=>bulkSetPullOutStatus("RETRIEVE"));
   modal.querySelector("[data-pullout-bulk-retrieve='1']")?.addEventListener("click",()=>bulkSetPullOutStatus("PULL OUT"));
@@ -19157,6 +19196,7 @@ function updatePullOutBulkButtons(){
 
   const deleteBtn = document.querySelector("[data-pullout-bulk-delete='1']");
   const retrieveBtn = document.querySelector("[data-pullout-bulk-retrieve='1']");
+  const transferBtn = document.querySelector("[data-pullout-bulk-transfer='1']");
 
   if(deleteBtn){
     deleteBtn.style.display = (statusFilter === "RETRIEVE") ? "none" : "inline-flex";
@@ -19164,28 +19204,87 @@ function updatePullOutBulkButtons(){
   if(retrieveBtn){
     retrieveBtn.style.display = (statusFilter === "ONGOING") ? "none" : "inline-flex";
   }
+  if(transferBtn){
+    const selectedCount = getSelectedPullOutItems().length;
+    transferBtn.style.display = (statusFilter === "RETRIEVE") ? "none" : "inline-flex";
+    transferBtn.disabled = selectedCount === 0;
+    transferBtn.textContent =
+      "⇄ TRANSFER SELECTED (" + selectedCount + ")";
+  }
 }
 
 function renderPullOutPopup(){
   const list = document.getElementById("pullOutList");
   if(!list) return;
 
+  const rows = getPullOutFilteredRows();
+
+  /* Remove selections that no longer exist in the current loaded data. */
+  const validKeys = new Set(
+    (Array.isArray(pullOutPopupRows) ? pullOutPopupRows : [])
+      .filter(row=>String(row?.STATUS || "PULL OUT").trim().toUpperCase() === "PULL OUT")
+      .map(row=>pullOutSelectionKey(row?.BR,row?.NTAGN))
+  );
+  pullOutSelectedKeys.forEach(key=>{
+    if(!validKeys.has(key)){
+      pullOutSelectedKeys.delete(key);
+    }
+  });
+
   updatePullOutBulkButtons();
 
-  const rows = getPullOutFilteredRows();
   const status = document.getElementById("pullOutPopupStatus");
+  const selectedCount = getSelectedPullOutItems().length;
 
   if(status){
     status.innerHTML =
       rows.length +
       " pull out item" +
       (rows.length === 1 ? "" : "s") +
-      ' shown. <span id="pullOutSelectedCount">0 selected.</span>';
+      ' shown. <span id="pullOutSelectedCount">' +
+      selectedCount +
+      " selected.</span>";
   }
 
   if(!rows.length){
     list.innerHTML = '<div class="pullOutEmpty">No Pull Out items found.</div>';
+    const selectAllEmpty = document.getElementById("pullOutSelectAll");
+    if(selectAllEmpty) selectAllEmpty.checked = false;
     return;
+  }
+
+  const selectableRows = rows.filter(row=>
+    String(row?.STATUS || "PULL OUT").trim().toUpperCase() === "PULL OUT"
+  );
+  const allSelectableSelected =
+    selectableRows.length > 0 &&
+    selectableRows.every(row=>
+      pullOutSelectedKeys.has(
+        pullOutSelectionKey(row?.BR,row?.NTAGN)
+      )
+    );
+
+  const selectAll = document.getElementById("pullOutSelectAll");
+  if(selectAll){
+    selectAll.checked = allSelectableSelected;
+    selectAll.indeterminate =
+      !allSelectableSelected &&
+      selectableRows.some(row=>
+        pullOutSelectedKeys.has(
+          pullOutSelectionKey(row?.BR,row?.NTAGN)
+        )
+      );
+    selectAll.onchange = function(){
+      selectableRows.forEach(row=>{
+        const key = pullOutSelectionKey(row?.BR,row?.NTAGN);
+        if(selectAll.checked){
+          pullOutSelectedKeys.add(key);
+        }else{
+          pullOutSelectedKeys.delete(key);
+        }
+      });
+      renderPullOutPopup();
+    };
   }
 
   list.innerHTML = rows.map(row=>{
@@ -19195,9 +19294,24 @@ function renderPullOutPopup(){
     const description = String(row?.DESCRIPTION || "—").trim();
     const state = String(row?.STATUS || "PULL OUT").trim().toUpperCase();
     const isRetrieved = state === "RETRIEVE";
+    const key = pullOutSelectionKey(b,t);
+    const isSelected = !isRetrieved && pullOutSelectedKeys.has(key);
 
     return `
       <div class="pullOutRow">
+        <div class="pullOutCell pullOutSelectCell">
+          ${isRetrieved ? "" : `
+            <input
+              type="checkbox"
+              class="pullOutItemCheck"
+              data-pullout-select="1"
+              data-branch="${escapeHtmlAttribute(b)}"
+              data-tag="${escapeHtmlAttribute(t)}"
+              aria-label="Select ${escapeHtmlAttribute(t)}"
+              ${isSelected ? "checked" : ""}
+            >
+          `}
+        </div>
         <div class="pullOutCell">${escapeHtml(type || "—")}</div>
         <div class="pullOutCell description">${escapeHtml(description || "—")}</div>
         <div class="pullOutCell"><span class="pullOutTag">${escapeHtml(t || "—")}</span></div>
@@ -19211,6 +19325,18 @@ function renderPullOutPopup(){
       </div>
     `;
   }).join("");
+
+  list.querySelectorAll("[data-pullout-select='1']").forEach(input=>{
+    input.addEventListener("change",function(){
+      const key = pullOutSelectionKey(input.dataset.branch,input.dataset.tag);
+      if(input.checked){
+        pullOutSelectedKeys.add(key);
+      }else{
+        pullOutSelectedKeys.delete(key);
+      }
+      renderPullOutPopup();
+    });
+  });
 
   /* Direct handlers: reliable after every Pull Out re-render. */
   list.querySelectorAll("[data-pullout-restore]").forEach(btn=>{
@@ -19527,6 +19653,10 @@ async function restorePullOutToStocks(branch,tag,button){
       {method:"DELETE",prefer:"return=minimal"}
     );
 
+    pullOutSelectedKeys.delete(
+      pullOutSelectionKey(branch,tag)
+    );
+
     pullOutPopupRows = pullOutPopupRows.filter(row=>
       !(String(row?.BR || "").trim().toUpperCase() === branch &&
         String(row?.NTAGN || "").trim() === tag)
@@ -19602,6 +19732,325 @@ function getStableTransferTag(sourceBranch, sourceTag){
 
   /* First transfer from a normal unprefixed tag. */
   return branch + tag;
+}
+
+
+function openBulkPullOutTransferChooser(){
+  const items = getSelectedPullOutItems();
+
+  if(!items.length){
+    showStatus("Select at least one ongoing Pull Out item to transfer.");
+    return;
+  }
+
+  const existing = document.getElementById("branchTransferModal");
+  if(existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "branchTransferModal";
+  modal.className = "modalBackdrop";
+
+  const sourceSummary = items.length === 1
+    ? escapeHtml(items[0].tag)
+    : items.length + " selected Pull Out items";
+
+  const choices = BRANCHES
+    .map(branch =>
+      `<option value="${escapeHtmlAttribute(branch)}">${escapeHtml(branch)}</option>`
+    )
+    .join("");
+
+  modal.innerHTML = `
+    <div class="modalCard" style="width:min(560px,96vw);">
+      <div class="modalTitle">Bulk Transfer Pull Out Items</div>
+      <div class="modalSub" style="margin-bottom:16px;">
+        Transfer <strong>${sourceSummary}</strong> to one destination branch.
+      </div>
+
+      <div style="padding:12px 14px;border:1px solid #dbeafe;border-radius:12px;background:#f8fbff;margin-bottom:14px;font-size:12px;color:#334155;line-height:1.55;">
+        <strong>${items.length}</strong> ongoing Pull Out item${items.length === 1 ? "" : "s"} selected.
+        Each item keeps its original source-branch NTAGN.
+      </div>
+
+      <label style="display:block;font-size:11px;font-weight:900;color:#475569;letter-spacing:.05em;margin-bottom:7px;">
+        DESTINATION BRANCH
+      </label>
+      <select id="bulkPullOutTransferDestination" class="select">
+        <option value="">SELECT BRANCH</option>
+        ${choices}
+      </select>
+
+      <div id="bulkPullOutTransferPreview" style="margin-top:12px;padding:11px 13px;border-radius:10px;background:#f8fafc;color:#64748b;font-size:11px;">
+        Select a destination branch.
+      </div>
+
+      <div style="display:flex;gap:9px;justify-content:flex-end;margin-top:18px;">
+        <button type="button" id="bulkPullOutTransferCancel" class="controlBtn">Cancel</button>
+        <button type="button" id="bulkPullOutTransferConfirm" class="controlBtn primary">TRANSFER SELECTED</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const destination = modal.querySelector("#bulkPullOutTransferDestination");
+  const preview = modal.querySelector("#bulkPullOutTransferPreview");
+  const confirm = modal.querySelector("#bulkPullOutTransferConfirm");
+
+  destination.addEventListener("change",()=>{
+    const target = String(destination.value || "").trim().toUpperCase();
+
+    if(!target){
+      preview.textContent = "Select a destination branch.";
+      return;
+    }
+
+    const sameBranchCount = items.filter(item=>item.branch === target).length;
+
+    preview.innerHTML =
+      "Destination: <strong>" + escapeHtml(target) + "</strong>" +
+      " • " + items.length + " item" + (items.length === 1 ? "" : "s") + " selected" +
+      (sameBranchCount
+        ? " • <strong>" + sameBranchCount + "</strong> item" + (sameBranchCount === 1 ? "" : "s") + " already belong to this branch and will be skipped."
+        : "");
+  });
+
+  modal.querySelector("#bulkPullOutTransferCancel").onclick = ()=>modal.remove();
+
+  modal.addEventListener("click",e=>{
+    if(e.target === modal) modal.remove();
+  });
+
+  confirm.onclick = ()=>{
+    const target = String(destination.value || "").trim().toUpperCase();
+
+    if(!target){
+      showStatus("Select a destination branch.");
+      return;
+    }
+
+    void bulkTransferPullOutItems(items, target, confirm, modal);
+  };
+}
+
+async function bulkTransferPullOutItems(items, destinationBranch, button, modal){
+  destinationBranch = String(destinationBranch || "").trim().toUpperCase();
+
+  if(!Array.isArray(items) || !items.length || !destinationBranch){
+    showStatus("No Pull Out items were selected for transfer.");
+    return;
+  }
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "TRANSFERRING...";
+  }
+
+  const successful = [];
+  const failed = [];
+
+  try{
+    for(let i=0;i<items.length;i++){
+      const item = items[i];
+      const sourceBranch = String(item?.branch || "").trim().toUpperCase();
+      const sourceTag = String(item?.tag || "").trim();
+
+      if(!sourceBranch || !sourceTag){
+        failed.push({
+          item,
+          message:"Missing source branch or NTAGN."
+        });
+        continue;
+      }
+
+      if(sourceBranch === destinationBranch){
+        failed.push({
+          item,
+          message:"Destination branch is the same as the source branch."
+        });
+        continue;
+      }
+
+      let insertedDestination = false;
+      const newTag = getStableTransferTag(sourceBranch, sourceTag);
+
+      try{
+        const sourceRecord = await getPullOutRecord(sourceBranch, sourceTag);
+
+        if(!sourceRecord){
+          throw new Error("Pull Out record was not found.");
+        }
+
+        const state = String(sourceRecord.STATUS || "").trim().toUpperCase();
+        if(state !== "PULL OUT"){
+          throw new Error("Only ongoing PULL OUT items can be transferred.");
+        }
+
+        const destinationStockTable = tableName(destinationBranch,"stocks");
+        const destinationAuditTable = tableName(destinationBranch,"audit");
+        const duplicateParams = new URLSearchParams();
+        duplicateParams.set("BR","eq." + destinationBranch);
+        duplicateParams.set("NTAGN","eq." + newTag);
+        duplicateParams.set("limit","1");
+
+        const [existingStock, existingAudit, existingSold, existingPullOut] = await Promise.all([
+          supabaseRequest(destinationStockTable + "?" + duplicateParams.toString(), {method:"GET"}),
+          supabaseRequest(destinationAuditTable + "?" + duplicateParams.toString(), {method:"GET"}),
+          supabaseRequest("pull_out?BR=eq." + encodeURIComponent(destinationBranch) + "&NTAGN=eq." + encodeURIComponent(newTag) + "&limit=1", {method:"GET"}),
+          supabaseRequest(tableName(destinationBranch,"sold") + "?BR=eq." + encodeURIComponent(destinationBranch) + "&NTAGN=eq." + encodeURIComponent(newTag) + "&limit=1", {method:"GET"})
+        ]);
+
+        if(
+          (Array.isArray(existingStock) && existingStock.length) ||
+          (Array.isArray(existingAudit) && existingAudit.length) ||
+          (Array.isArray(existingSold) && existingSold.length) ||
+          (Array.isArray(existingPullOut) && existingPullOut.length)
+        ){
+          throw new Error("Transfer blocked: destination tag " + newTag + " already exists.");
+        }
+
+        const destinationRecord = {};
+        DB_COLUMNS.forEach(col=>{
+          destinationRecord[col] =
+            sourceRecord[col] !== undefined && sourceRecord[col] !== null
+              ? sourceRecord[col]
+              : null;
+        });
+        destinationRecord.BR = destinationBranch;
+        destinationRecord.NTAGN = newTag;
+        destinationRecord.STATUS = null;
+
+        await supabaseRequest(
+          destinationStockTable,
+          {
+            method:"POST",
+            body:[destinationRecord],
+            prefer:"return=minimal"
+          }
+        );
+        insertedDestination = true;
+
+        try{
+          await supabaseRequest(
+            "pull_out?BR=eq." + encodeURIComponent(sourceBranch) +
+            "&NTAGN=eq." + encodeURIComponent(sourceTag),
+            {method:"DELETE",prefer:"return=minimal"}
+          );
+        }catch(sourceDeleteError){
+          await supabaseRequest(
+            destinationStockTable +
+            "?BR=eq." + encodeURIComponent(destinationBranch) +
+            "&NTAGN=eq." + encodeURIComponent(newTag),
+            {method:"DELETE",prefer:"return=minimal"}
+          ).catch(rollbackError=>{
+            console.error("Bulk transfer rollback failed:",rollbackError);
+          });
+          throw sourceDeleteError;
+        }
+
+        successful.push({
+          item,
+          newTag
+        });
+
+        pullOutSelectedKeys.delete(
+          pullOutSelectionKey(sourceBranch,sourceTag)
+        );
+
+      }catch(error){
+        console.error(
+          "Bulk Pull Out transfer failed for " + sourceBranch + " / " + sourceTag + ":",
+          error
+        );
+
+        if(insertedDestination){
+          try{
+            await supabaseRequest(
+              tableName(destinationBranch,"stocks") +
+              "?BR=eq." + encodeURIComponent(destinationBranch) +
+              "&NTAGN=eq." + encodeURIComponent(newTag),
+              {method:"DELETE",prefer:"return=minimal"}
+            );
+          }catch(rollbackCheckError){
+            console.error("Bulk transfer cleanup failed:",rollbackCheckError);
+          }
+        }
+
+        failed.push({
+          item,
+          message:error?.message || "Unable to transfer item."
+        });
+      }
+
+      if(button){
+        button.textContent =
+          "TRANSFERRING " +
+          (i + 1) +
+          "/" +
+          items.length +
+          "...";
+      }
+
+      await yieldToBrowser();
+    }
+
+    const successfulKeys = new Set(
+      successful.map(result=>
+        pullOutSelectionKey(result.item.branch,result.item.tag)
+      )
+    );
+
+    if(successfulKeys.size){
+      pullOutPopupRows = pullOutPopupRows.filter(row=>
+        !successfulKeys.has(
+          pullOutSelectionKey(row?.BR,row?.NTAGN)
+        )
+      );
+    }
+
+    renderPullOutPopup();
+    loadPullOutCount();
+    await refreshDashboard();
+
+    if(modal) modal.remove();
+
+    const summary =
+      successful.length + " transferred" +
+      (failed.length ? " • " + failed.length + " failed" : "") +
+      ".";
+
+    showStatus(summary);
+
+    if(failed.length){
+      const failedText = failed
+        .slice(0,5)
+        .map(entry=>
+          String(entry.item?.tag || "") +
+          ": " +
+          String(entry.message || "")
+        )
+        .join(" | ");
+
+      setTimeout(()=>{
+        showStatus(
+          failed.length +
+          " item" +
+          (failed.length === 1 ? "" : "s") +
+          " failed. " +
+          failedText
+        );
+      }, 150);
+    }
+
+  }catch(error){
+    console.error("Bulk Pull Out transfer failed:",error);
+    showStatus(error?.message || "Unable to bulk transfer Pull Out items.");
+  }finally{
+    if(button){
+      button.disabled = false;
+      button.textContent = "TRANSFER SELECTED";
+    }
+  }
 }
 
 function openBranchTransferChooser(sourceBranch, sourceTag, sourceType){
@@ -19828,6 +20277,9 @@ async function transferBranchItem(sourceBranch, sourceTag, destinationBranch, so
     }
 
     if(sourceType === "pullout"){
+      pullOutSelectedKeys.delete(
+        pullOutSelectionKey(sourceBranch,sourceTag)
+      );
       pullOutPopupRows = pullOutPopupRows.filter(row=>
         !(String(row?.BR || "").trim().toUpperCase() === sourceBranch &&
           String(row?.NTAGN || "").trim() === sourceTag)

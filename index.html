@@ -6885,45 +6885,6 @@ button:focus-visible,select:focus-visible,input:focus-visible{
   backdrop-filter:blur(18px);
 }
 .loginCard::before,.loginCard::after{display:none;}
-#loginScreen .loginCard > img{
-  width:76px !important;
-  height:76px !important;
-  margin:0 0 24px !important;
-  object-fit:contain !important;
-  transform-origin:center center !important;
-  transform-style:preserve-3d;
-  filter:drop-shadow(0 10px 12px rgba(23,61,152,.20)) !important;
-  animation:aoLoginLensFocus 7.2s cubic-bezier(.34,.02,.18,1) infinite !important;
-}
-.loginCard{isolation:isolate;}
-.loginCard::after{
-  content:"";
-  display:block;
-  position:absolute;
-  z-index:0;
-  left:18%;
-  right:18%;
-  bottom:20px;
-  height:42px;
-  border-radius:50%;
-  background:radial-gradient(ellipse,rgba(52,89,198,.16),rgba(52,89,198,0) 70%);
-  filter:blur(9px);
-  pointer-events:none;
-  animation:aoLoginAura 7.2s ease-in-out infinite;
-}
-.loginCard > *{position:relative;z-index:1;}
-@keyframes aoLoginLensFocus{
-  0%,18%,100%{transform:perspective(720px) translateY(0) rotateX(0) rotateY(0) scale(1);}
-  30%{transform:perspective(720px) translateY(-5px) rotateX(4deg) rotateY(-10deg) scale(1.045);}
-  42%{transform:perspective(720px) translateY(-7px) rotateX(-2deg) rotateY(9deg) scale(1.07);}
-  54%{transform:perspective(720px) translateY(-3px) rotateX(2deg) rotateY(-4deg) scale(1.035);}
-  66%{transform:perspective(720px) translateY(0) rotateX(0) rotateY(0) scale(1);}
-}
-@keyframes aoLoginAura{
-  0%,18%,100%{opacity:.45;transform:scale(.80);}
-  42%{opacity:1;transform:scale(1.32);}
-  66%{opacity:.52;transform:scale(.92);}
-}
 .loginTitle{color:var(--ao-ink);font-size:31px;letter-spacing:-1.2px;}
 .loginSub{margin-bottom:30px;color:var(--ao-slate);font-size:13px;}
 .field label{color:#536179;font-size:10px;font-weight:850;letter-spacing:.12em;}
@@ -6978,70 +6939,6 @@ button:focus-visible,select:focus-visible,input:focus-visible{
 }
 .topbar::before,.topbar::after{display:none;}
 .brand{gap:13px;}
-.brandLogo{
-  width:50px;
-  height:50px;
-  position:relative;
-  isolation:isolate;
-  overflow:hidden !important;
-  border:1px solid rgba(255,255,255,.52) !important;
-  border-radius:14px;
-  background:#fff !important;
-  box-shadow:0 5px 14px rgba(0,0,0,.16) !important;
-  transform-origin:center center;
-  transform-style:preserve-3d;
-  animation:aoBrandLensFocus 8.4s cubic-bezier(.34,.02,.18,1) infinite;
-}
-.brandLogo img{
-  position:relative;
-  z-index:1;
-  filter:drop-shadow(0 3px 4px rgba(17,36,80,.16)) !important;
-  transform-origin:center center;
-  animation:aoBrandMarkFocus 8.4s cubic-bezier(.34,.02,.18,1) infinite !important;
-}
-.brandLogo::before{
-  content:"";
-  position:absolute;
-  z-index:0;
-  inset:-35%;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(73,123,246,.24),rgba(73,123,246,0) 67%);
-  pointer-events:none;
-  animation:aoBrandGlow 8.4s ease-in-out infinite;
-}
-.brandLogo::after{
-  content:"";
-  position:absolute;
-  z-index:2;
-  inset:0;
-  border-radius:inherit;
-  background:linear-gradient(112deg,transparent 35%,rgba(255,255,255,0) 43%,rgba(255,255,255,.74) 50%,rgba(255,255,255,0) 57%,transparent 65%);
-  transform:translateX(-130%);
-  pointer-events:none;
-  animation:aoBrandSheen 8.4s ease-in-out infinite;
-}
-@keyframes aoBrandLensFocus{
-  0%,16%,100%{transform:perspective(540px) translateY(0) rotateX(0) rotateY(0) scale(1);}
-  27%{transform:perspective(540px) translateY(-2px) rotateX(5deg) rotateY(-11deg) scale(1.035);}
-  39%{transform:perspective(540px) translateY(-3px) rotateX(-3deg) rotateY(8deg) scale(1.055);}
-  53%{transform:perspective(540px) translateY(-1px) rotateX(1deg) rotateY(-3deg) scale(1.02);}
-  65%{transform:perspective(540px) translateY(0) rotateX(0) rotateY(0) scale(1);}
-}
-@keyframes aoBrandMarkFocus{
-  0%,16%,100%{transform:scale(1);}
-  39%{transform:scale(1.045);}
-  65%{transform:scale(1);}
-}
-@keyframes aoBrandGlow{
-  0%,16%,100%{opacity:.16;transform:scale(.82);}
-  39%{opacity:.70;transform:scale(1.18);}
-  65%{opacity:.20;transform:scale(.90);}
-}
-@keyframes aoBrandSheen{
-  0%,23%{transform:translateX(-130%);opacity:0;}
-  29%{opacity:.92;}
-  48%,100%{transform:translateX(130%);opacity:0;}
-}
 .brandTitle{color:#fff;font-size:20px;letter-spacing:-.65px;}
 .brandSub{margin-top:4px;color:#b9c7dc;font-size:10px;font-weight:750;letter-spacing:.08em;}
 .userArea{gap:8px;}
@@ -7241,7 +7138,7 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
 
 @media(max-width:1050px){.app{padding:22px;}.cards{grid-template-columns:repeat(auto-fit,minmax(165px,1fr));}}
 @media(max-width:700px){
-  #loginScreen{padding:16px;}.loginCard{padding:32px 24px;border-radius:19px;}#loginScreen .loginCard > img{width:68px!important;height:68px!important;margin-bottom:20px!important;}
+  #loginScreen{padding:16px;}.loginCard{padding:32px 24px;border-radius:19px;}
   .app{padding:13px;}.topbar{min-height:66px;margin-bottom:13px;border-radius:14px;padding:10px 11px 10px 13px;}.brandLogo{width:43px;height:43px;border-radius:12px;}.brandTitle{font-size:17px;}.brandSub{font-size:9px;}.userEmail{display:none;}
   .controls{gap:8px;padding:9px;border-radius:14px;}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}.statCard{min-height:112px;padding:14px;border-radius:14px;}.statNumber{font-size:26px;}.statIcon{width:31px;height:31px;}
   .tableCard{border-radius:16px;}body > .tableCard{width:calc(100% - 26px);margin-bottom:26px!important;}.tableHeader{align-items:flex-start;min-height:0;padding:15px;}.tableActions{flex-wrap:wrap;justify-content:flex-end;}.empty{padding:54px 16px;}.modalCard{border-radius:18px;}

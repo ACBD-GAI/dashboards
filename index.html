@@ -23371,17 +23371,18 @@ async function aoChatDeleteMessage(messageId,imagePath){
   const id = String(messageId || "").trim();
   const branch = aoChatBranch();
   const recipient = aoChatRecipient();
-  const email = String(currentEmail || "").trim();
+  const email = String(currentEmail || "").trim().toLowerCase();
+  const sid = String(sessionId || "").trim();
 
-  if(!id || !branch || !recipient || !sessionId || !email){
+  if(!id || !branch || !recipient || !sid || !email){
     aoChatStatus("Please log in first.");
     return;
   }
 
-  const confirmed=await aoChatConfirmDelete(!!imagePath);
+  const confirmed = await aoChatConfirmDelete(!!imagePath);
   if(!confirmed)return;
 
-  aoChatStatus("Deleting...");
+  aoChatStatus("Checking admin permission...");
 
   const key = aoChatConversationKey(branch,recipient);
   const list = aoChatConversationCache.get(key);
@@ -23407,28 +23408,112 @@ async function aoChatDeleteMessage(messageId,imagePath){
     }
   });
 
-  try{
+  async function deleteViaAdminRpc(){
+    const result = await supabaseRequest(
+      "rpc/ao_delete_chat_message_admin",
+      {
+        method:"POST",
+        prefer:"return=representation",
+        body:{
+          p_session_id:sid,
+          p_message_id:id,
+          p_branch:branch,
+          p_recipient:recipient
+        }
+      }
+    );
+
+    if(!result || result.ok !== true || result.deleted !== true){
+      const reason = String(result?.reason || "").trim();
+
+      if(reason === "ADMIN_SESSION_INVALID"){
+        throw new Error("Administrator session could not be verified. Please log in again.");
+      }
+
+      if(reason === "MESSAGE_NOT_FOUND_OR_NOT_OWNED"){
+        throw new Error("This message is not owned by the logged-in admin, or it is no longer in this conversation.");
+      }
+
+      throw new Error("The admin delete operation was rejected.");
+    }
+
+    return true;
+  }
+
+  async function deleteViaLegacyDirect(){
     /*
-     * Keep deletion strictly inside this admin's selected
-     * conversation. The sender_email filter is case-insensitive
-     * so older rows with different email capitalization can still
-     * be deleted. sender_type is intentionally not used here
-     * because the sender email is already the ownership boundary
-     * and older admin chat rows may use a different sender_type.
+     * Compatibility fallback for installations where the new RPC
+     * has not been installed yet. It uses the exact current admin
+     * email and conversation filters and verifies the row afterwards.
      */
-    const deleted =
+    try{
+      const rows = await supabaseRequest(
+        "chat_messages?id=eq." + encodeURIComponent(id) +
+        "&select=id,sender_email,sender_type,branch,scanner_email&limit=1",
+        {method:"GET"}
+      );
+
+      if(!Array.isArray(rows) || !rows.length){
+        return true; // Already deleted elsewhere.
+      }
+
+      const row = rows[0];
+      const owner = String(row?.sender_email || "").trim().toLowerCase();
+      if(owner !== email){
+        throw new Error("This message belongs to a different account.");
+      }
+
+      const rowBranch = String(row?.branch || "").trim().toUpperCase();
+      const rowRecipient = String(row?.scanner_email || "").trim().toLowerCase();
+      if(rowBranch !== branch || rowRecipient !== recipient){
+        throw new Error("This message is outside the selected conversation.");
+      }
+
       await supabaseRequest(
         "chat_messages?id=eq." + encodeURIComponent(id) +
         "&branch=eq." + encodeURIComponent(branch) +
         "&scanner_email=eq." + encodeURIComponent(recipient) +
-        "&sender_email=ilike." + encodeURIComponent(email),
+        "&sender_email=eq." + encodeURIComponent(email) +
+        "&sender_type=eq.DASHBOARD",
         {
           method:"DELETE",
-          prefer:"return=representation"
+          prefer:"return=minimal"
         }
       );
 
-    if(!Array.isArray(deleted) || !deleted.length){
+      const verify = await supabaseRequest(
+        "chat_messages?id=eq." + encodeURIComponent(id) + "&select=id&limit=1",
+        {method:"GET"}
+      );
+
+      if(Array.isArray(verify) && verify.length){
+        throw new Error("Supabase did not remove the message. Please run ADMIN_CHAT_DELETE_SETUP.sql once in the Supabase SQL Editor.");
+      }
+
+      return true;
+    }catch(e){
+      throw e;
+    }
+  }
+
+  try{
+    let deleted = false;
+
+    try{
+      deleted = await deleteViaAdminRpc();
+    }catch(rpcError){
+      const rpcMessage = String(rpcError?.message || "");
+      const rpcMissing =
+        /404|42883|PGRST202|could not find the function|function .* does not exist/i.test(rpcMessage);
+
+      if(!rpcMissing){
+        throw rpcError;
+      }
+
+      deleted = await deleteViaLegacyDirect();
+    }
+
+    if(!deleted){
       throw new Error("Message could not be deleted.");
     }
 
@@ -23496,10 +23581,18 @@ async function aoChatDeleteMessage(messageId,imagePath){
       e
     );
 
-    aoChatStatus(
-      e?.message ||
-      "Message could not be deleted."
-    );
+    const message = String(e?.message || "").trim();
+
+    if(/ADMIN_SESSION_INVALID/i.test(message)){
+      aoChatStatus("Administrator session could not be verified. Please log in again.");
+    }else if(/ADMIN_CHAT_DELETE_SETUP\.sql/i.test(message)){
+      aoChatStatus(message);
+    }else{
+      aoChatStatus(
+        message ||
+        "Message could not be deleted."
+      );
+    }
   }
 }
 

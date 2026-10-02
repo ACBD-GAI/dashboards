@@ -22728,6 +22728,7 @@ function aoChatStorageFileName(label){
    */
   const safeLabel =
     String(label || "")
+      .trim()
       .replace(/[\\/:*?"<>|]+/g,"_")
       .replace(/[\r\n\t]+/g," ")
       .replace(/\s+/g,"_")
@@ -25114,12 +25115,29 @@ async function aoChatSend(){
     let uploadedImagePath = "";
 
     if(pendingImage){
+
+      /*
+       * IMPORTANT:
+       * The image filename MUST use the text/SI No.
+       * entered in THIS SAME chat message.
+       * It is not taken from the branch, admin email,
+       * original photo filename, or any outside value.
+       */
+      const imageLabel = text;
+
+      if(!imageLabel){
+        throw new Error(
+          "Please enter the SI No. or text to send with the image."
+        );
+      }
+
       aoChatStatus("Uploading image…");
       uploadedImagePath =
         await aoChatUploadImage(
           pendingImage,
-          text
+          imageLabel
         );
+
       message +=
         (message ? "\n" : "") +
         "[[AO_CHAT_IMAGE]]" +

@@ -22716,20 +22716,39 @@ async function aoChatCompressImage(file){
   );
 }
 
-function aoChatStorageFileName(){
+function aoChatStorageFileName(label){
   const d = new Date();
   const pad = n => String(n).padStart(2,"0");
   const ms = String(d.getMilliseconds()).padStart(3,"0");
-  return d.getFullYear() + "-" +
+
+  /*
+   * Include the SI No. / message text used with the image
+   * in the Storage filename, while keeping the filename
+   * safe for Supabase Storage and reasonably short.
+   */
+  const safeLabel =
+    String(label || "")
+      .replace(/[\\/:*?"<>|]+/g,"_")
+      .replace(/[\r\n\t]+/g," ")
+      .replace(/\s+/g,"_")
+      .replace(/_+/g,"_")
+      .replace(/^[_ .]+|[_ .]+$/g,"")
+      .slice(0,80);
+
+  const stamp =
+    d.getFullYear() + "-" +
     pad(d.getMonth() + 1) + "-" +
     pad(d.getDate()) + "_" +
     pad(d.getHours()) + "-" +
     pad(d.getMinutes()) + "-" +
     pad(d.getSeconds()) + "-" +
-    ms + ".jpg";
+    ms;
+
+  return (safeLabel ? safeLabel + "_" : "chat-image_") +
+    stamp + ".jpg";
 }
 
-async function aoChatUploadImage(file){
+async function aoChatUploadImage(file,label){
 
   if(
     !window.supabase ||
@@ -22764,7 +22783,7 @@ async function aoChatUploadImage(file){
       .replace(/[^a-z0-9._-]/gi,"_")
       .slice(0,45) || "admin";
 
-  const fileName = aoChatStorageFileName();
+  const fileName = aoChatStorageFileName(label);
 
   const path =
     safeBranch + "/" +
@@ -25097,7 +25116,10 @@ async function aoChatSend(){
     if(pendingImage){
       aoChatStatus("Uploading image…");
       uploadedImagePath =
-        await aoChatUploadImage(pendingImage);
+        await aoChatUploadImage(
+          pendingImage,
+          text
+        );
       message +=
         (message ? "\n" : "") +
         "[[AO_CHAT_IMAGE]]" +

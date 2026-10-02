@@ -6301,8 +6301,74 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
 /* Checked attached-image messages: turn the surrounding blue padding green. */
 .ao-chat-bubble:has(.ao-chat-message-image.ao-chat-image-checked){
-  background:linear-gradient(135deg,#dcfce7,#bbf7d0) !important;
-  box-shadow:0 3px 10px rgba(22,163,74,.14) !important;
+  background:linear-gradient(135deg,#4ade80,#22c55e) !important;
+  box-shadow:0 3px 12px rgba(21,128,61,.34) !important;
+}
+
+/* Conversation search — chat box only. */
+.ao-chat-search-wrap{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:8px 10px;
+  border-top:1px solid #e5ebf2;
+  border-bottom:1px solid #e5ebf2;
+  background:#fbfdff;
+}
+.ao-chat-search-input{
+  flex:1 1 auto;
+  min-width:0;
+  height:34px;
+  padding:0 11px;
+  border:1px solid #cbd8e5;
+  border-radius:9px;
+  outline:none;
+  background:#ffffff;
+  color:#294463;
+  font-size:11px;
+  font-weight:700;
+  box-shadow:0 2px 6px rgba(24,65,111,.04);
+}
+.ao-chat-search-input:focus{
+  border-color:#70a7d6;
+  box-shadow:0 0 0 3px rgba(59,130,246,.10);
+}
+.ao-chat-search-input::placeholder{
+  color:#8aa0b5;
+  font-weight:600;
+}
+.ao-chat-search-clear{
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  border:1px solid #cbd8e5;
+  border-radius:9px;
+  background:#ffffff;
+  color:#5f7893;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ao-chat-search-clear:hover{
+  background:#f3f8fd;
+  border-color:#9fb8cf;
+}
+.ao-chat-search-count{
+  flex:0 0 auto;
+  min-width:38px;
+  text-align:center;
+  color:#6f88a4;
+  font-size:9px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.ao-chat-search-input:disabled,
+.ao-chat-search-clear:disabled{
+  opacity:.55;
+  cursor:not-allowed;
 }
 .ao-chat-image-caption{
   margin-top:5px;
@@ -24072,6 +24138,36 @@ function aoChatToggleImageChecked(
   );
 }
 
+let aoChatSearchText = "";
+
+function aoChatSetSearch(value){
+  aoChatSearchText = String(value || "").trim().toLowerCase();
+  const input = document.getElementById("aoChatSearchInput");
+  const clear = document.getElementById("aoChatSearchClear");
+  if(input && input.value !== value){
+    input.value = String(value || "");
+  }
+  if(clear){
+    clear.disabled = !aoChatSearchText;
+  }
+}
+
+function aoChatClearSearch(){
+  aoChatSetSearch("");
+  const input = document.getElementById("aoChatSearchInput");
+  if(input) input.value = "";
+
+  const branch = aoChatBranch();
+  const recipient = aoChatRecipient();
+  const box = document.getElementById("aoChatMessages");
+  if(branch && recipient && box){
+    const cached = aoChatConversationCache.get(branch + "|" + recipient);
+    if(Array.isArray(cached)){
+      aoChatRenderConversation(cached,branch,recipient,box);
+    }
+  }
+}
+
 async function aoChatLoad(){
 
   if(
@@ -24268,6 +24364,51 @@ function aoChatRenderConversation(
         read
     );
 
+  const visibleList =
+    aoChatSearchText
+      ? list.filter(r => {
+          const raw = String(r.message || "");
+          const sender = String(r.sender_email || "");
+          const type = String(r.sender_type || "");
+          return (
+            raw.toLowerCase().includes(aoChatSearchText) ||
+            aoChatTextPart(raw).toLowerCase().includes(aoChatSearchText) ||
+            sender.toLowerCase().includes(aoChatSearchText) ||
+            type.toLowerCase().includes(aoChatSearchText)
+          );
+        })
+      : list;
+
+  const visibleIncoming =
+    visibleList.filter(
+      r =>
+        String(r.sender_type || "").toUpperCase() ===
+        "SCANNER"
+    );
+
+  const visibleUnread =
+    visibleIncoming.filter(
+      r =>
+        new Date(
+          r.created_at
+        ).getTime() >
+        read
+    );
+
+  const searchCount =
+    document.getElementById("aoChatSearchCount");
+
+  if(searchCount){
+    if(!aoChatSearchText){
+      searchCount.textContent = list.length ? String(list.length) : "";
+    }else{
+      searchCount.textContent =
+        visibleList.length +
+        "/" +
+        list.length;
+    }
+  }
+
   const wasBottom =
     (
       box.scrollHeight -
@@ -24275,24 +24416,24 @@ function aoChatRenderConversation(
       box.scrollTop
     ) < 60;
 
-  if(!list.length){
+  if(!visibleList.length){
 
     box.innerHTML =
       '<div class="ao-chat-empty">' +
-      'No messages with ' +
-      aoChatEsc(recipient) +
-      ' yet.' +
+      (aoChatSearchText
+        ? 'No conversation messages match "' + aoChatEsc(aoChatSearchText) + '".'
+        : 'No messages with ' + aoChatEsc(recipient) + ' yet.') +
       '</div>';
 
   }else{
 
     const firstUnread =
-      unread.length
-        ? unread[0].id
+      visibleUnread.length
+        ? visibleUnread[0].id
         : null;
 
     box.innerHTML =
-      list.map(
+      visibleList.map(
         r => {
 
           const mine =
@@ -24842,6 +24983,51 @@ document.addEventListener(
     }
 
     /* -------------------------------
+       CONVERSATION SEARCH
+       ------------------------------- */
+
+    const chatSearchInput =
+      document.getElementById("aoChatSearchInput");
+
+    const chatSearchClear =
+      document.getElementById("aoChatSearchClear");
+
+    if(chatSearchInput){
+
+      chatSearchInput.addEventListener(
+        "input",
+        () => {
+          aoChatSearchText =
+            String(chatSearchInput.value || "")
+              .trim()
+              .toLowerCase();
+
+          if(chatSearchClear){
+            chatSearchClear.disabled = !aoChatSearchText;
+          }
+
+          const branch = aoChatBranch();
+          const recipient = aoChatRecipient();
+          const box = document.getElementById("aoChatMessages");
+          if(branch && recipient && box){
+            const cached = aoChatConversationCache.get(branch + "|" + recipient);
+            if(Array.isArray(cached)){
+              aoChatRenderConversation(cached,branch,recipient,box);
+            }
+          }
+        }
+      );
+
+    }
+
+    if(chatSearchClear){
+      chatSearchClear.addEventListener(
+        "click",
+        () => aoChatClearSearch()
+      );
+    }
+
+    /* -------------------------------
        CHAT BRANCH SELECT
        ------------------------------- */
 
@@ -24907,6 +25093,8 @@ document.addEventListener(
 
           aoChatSelectedBranch =
             branch;
+
+          aoChatClearSearch();
 
           localStorage.setItem(
             "aoChatSelectedBranch",
@@ -24989,13 +25177,33 @@ document.addEventListener(
           const email =
             aoChatRecipient();
 
+          aoChatClearSearch();
+
+          const searchInput =
+            document.getElementById("aoChatSearchInput");
+
           if(
             !branch ||
             !email
           ){
 
+            if(searchInput){
+              searchInput.disabled = true;
+              searchInput.value = "";
+            }
+
+            aoChatSearchText = "";
+
+            const searchClear =
+              document.getElementById("aoChatSearchClear");
+            if(searchClear) searchClear.disabled = true;
+
             return;
 
+          }
+
+          if(searchInput){
+            searchInput.disabled = false;
           }
 
           aoChatLoad();
@@ -25003,6 +25211,13 @@ document.addEventListener(
         }
       );
 
+    }
+
+    const initialSearchBranch = aoChatBranch();
+    const initialSearchRecipient = aoChatRecipient();
+    if(initialSearchBranch && initialSearchRecipient){
+      const initialSearchInput = document.getElementById("aoChatSearchInput");
+      if(initialSearchInput) initialSearchInput.disabled = false;
     }
 
     /* -------------------------------
@@ -25604,6 +25819,35 @@ document.addEventListener("DOMContentLoaded",()=>{
     id="aoChatNotify"
     class="ao-chat-notify"
   ></div>
+
+  <!-- CONVERSATION SEARCH -->
+  <div class="ao-chat-search-wrap">
+    <input
+      id="aoChatSearchInput"
+      class="ao-chat-search-input"
+      type="search"
+      autocomplete="off"
+      placeholder="Search conversation..."
+      aria-label="Search conversation"
+      disabled
+    >
+
+    <span
+      id="aoChatSearchCount"
+      class="ao-chat-search-count"
+    ></span>
+
+    <button
+      id="aoChatSearchClear"
+      class="ao-chat-search-clear"
+      type="button"
+      title="Clear conversation search"
+      aria-label="Clear conversation search"
+      disabled
+    >
+      ✕
+    </button>
+  </div>
 
   <!-- MESSAGES -->
   <div

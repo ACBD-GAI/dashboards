@@ -6252,6 +6252,35 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   color:#64748b;
 }
 .ao-chat-image-download{display:inline-flex!important;align-items:center;justify-content:center;min-height:30px!important;margin-top:8px;padding:6px 10px!important;border:1px solid #c8d8eb!important;border-radius:9px!important;background:#f5f9ff!important;color:#245a9a!important;font-size:10px!important;font-weight:800!important;text-decoration:none!important;cursor:pointer!important;box-shadow:none!important}.ao-chat-image-download:hover{background:#eaf3ff!important;border-color:#9fc2e7!important;transform:none!important}.ao-chat-image-download::after{display:none!important}
+.ao-chat-image-check{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:30px;
+  margin-top:6px;
+  margin-left:6px;
+  padding:6px 10px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  background:#ffffff;
+  color:#475569;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+  vertical-align:top;
+  box-shadow:none;
+}
+
+.ao-chat-image-check:hover{
+  background:#f8fafc;
+  border-color:#94a3b8;
+}
+
+.ao-chat-image-check.checked{
+  border-color:#86efac;
+  background:#f0fdf4;
+  color:#15803d;
+}
 .ao-chat-message-image{
   display:block;
   width:min(290px,100%);
@@ -6262,6 +6291,12 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
   cursor:pointer;
   border:1px solid rgba(148,163,184,.22);
   background:#f8fafc;
+  transition:border-color .18s ease, box-shadow .18s ease;
+}
+
+.ao-chat-message-image.ao-chat-image-checked{
+  border:2px solid #16a34a !important;
+  box-shadow:0 0 0 3px rgba(22,163,74,.12);
 }
 .ao-chat-image-caption{
   margin-top:5px;
@@ -23972,6 +24007,65 @@ async function aoChatDownloadImage(url,fileName,button){
   }
 }
 
+function aoChatImageCheckedKey(messageId){
+  return (
+    "aoChatImageChecked:" +
+    String(messageId || "")
+  );
+}
+
+function aoChatImageIsChecked(messageId){
+  if(!messageId) return false;
+
+  return (
+    localStorage.getItem(
+      aoChatImageCheckedKey(messageId)
+    ) === "1"
+  );
+}
+
+function aoChatToggleImageChecked(
+  messageId,
+  imageElement,
+  buttonElement
+){
+  if(!messageId || !imageElement || !buttonElement){
+    return;
+  }
+
+  const key =
+    aoChatImageCheckedKey(messageId);
+
+  const checked =
+    !aoChatImageIsChecked(messageId);
+
+  if(checked){
+    localStorage.setItem(key,"1");
+  }else{
+    localStorage.removeItem(key);
+  }
+
+  imageElement.classList.toggle(
+    "ao-chat-image-checked",
+    checked
+  );
+
+  buttonElement.classList.toggle(
+    "checked",
+    checked
+  );
+
+  buttonElement.textContent =
+    checked
+      ? "✓ Checked"
+      : "✓ Mark as Checked";
+
+  buttonElement.setAttribute(
+    "aria-pressed",
+    String(checked)
+  );
+}
+
 async function aoChatLoad(){
 
   if(
@@ -24261,10 +24355,42 @@ function aoChatRenderConversation(
                     recipient,
                     r.created_at
                   );
-                  const encodedUrl = encodeURIComponent(imageUrl);
-                  const encodedName = encodeURIComponent(downloadName);
+
+                  const encodedUrl =
+                    encodeURIComponent(imageUrl);
+
+                  const encodedName =
+                    encodeURIComponent(downloadName);
+
+                  const encodedMessageId =
+                    encodeURIComponent(
+                      String(r.id || imagePath)
+                    );
+
+                  const imageChecked =
+                    aoChatImageIsChecked(
+                      String(r.id || imagePath)
+                    );
+
+                  const imageClass =
+                    imageChecked
+                      ? " ao-chat-image-checked"
+                      : "";
+
+                  const checkButtonClass =
+                    imageChecked
+                      ? " checked"
+                      : "";
+
+                  const checkButtonText =
+                    imageChecked
+                      ? "✓ Checked"
+                      : "✓ Mark as Checked";
+
                   return (
-                    '<img class="ao-chat-message-image"' +
+                    '<img class="ao-chat-message-image' +
+                    imageClass +
+                    '"' +
                     ' src="' +
                     aoChatEsc(imageUrl) +
                     '"' +
@@ -24272,9 +24398,28 @@ function aoChatRenderConversation(
                     ' loading="lazy"' +
                     ' onclick="window.open(this.src,\'_blank\',\'noopener\')"' +
                     '>' +
+
                     '<button type="button" class="ao-chat-image-download"' +
-                    ' onclick="aoChatDownloadImage(decodeURIComponent(\'' + encodedUrl + '\'),decodeURIComponent(\'' + encodedName + '\'),this);event.stopPropagation();"' +
-                    '>↓ Download Image</button>'
+                    ' onclick="aoChatDownloadImage(decodeURIComponent(\'' +
+                    encodedUrl +
+                    '\'),decodeURIComponent(\'' +
+                    encodedName +
+                    '\'),this);event.stopPropagation();"' +
+                    '>↓ Download Image</button>' +
+
+                    '<button type="button"' +
+                    ' class="ao-chat-image-check' +
+                    checkButtonClass +
+                    '"' +
+                    ' aria-pressed="' +
+                    String(imageChecked) +
+                    '"' +
+                    ' onclick="aoChatToggleImageChecked(decodeURIComponent(\'' +
+                    encodedMessageId +
+                    '\'),this.previousElementSibling.previousElementSibling,this);event.stopPropagation();"' +
+                    '>' +
+                    checkButtonText +
+                    '</button>'
                   );
                 })()
               : "";

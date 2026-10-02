@@ -22516,6 +22516,123 @@ function aoChatTextPart(message){
     .trim();
 }
 
+/* =========================================================
+   SHARED ADMIN CHAT STATE
+   Uses hidden chat_messages state rows so multiple admins
+   share Checked/Read status without changing visible chat text.
+   ========================================================= */
+const AO_CHAT_SHARED_STATE_MARKER = "[[AO_CHAT_SHARED_STATE]]";
+const aoChatSharedReadCache = new Map();
+const aoChatSharedStatePostBusy = new Set();
+
+function aoChatIsSharedStateMessage(message){
+  return String(message || "").startsWith(AO_CHAT_SHARED_STATE_MARKER);
+}
+
+function aoChatSharedStatePayload(message){
+  const raw = String(message || "");
+  if(!raw.startsWith(AO_CHAT_SHARED_STATE_MARKER)) return null;
+  try{
+    return JSON.parse(
+      raw.slice(AO_CHAT_SHARED_STATE_MARKER.length)
+    );
+  }catch(e){
+    return null;
+  }
+}
+
+function aoChatSharedStateMessage(payload){
+  return AO_CHAT_SHARED_STATE_MARKER + JSON.stringify(payload || {});
+}
+
+function aoChatConversationKey(branch,email){
+  return String(branch || "").trim().toUpperCase() + "|" +
+    String(email || "").trim().toLowerCase();
+}
+
+function aoChatAppendSharedStateRow(branch,email,payload){
+  const key = aoChatConversationKey(branch,email);
+  const list = aoChatConversationCache.get(key);
+  if(!Array.isArray(list)) return;
+  list.push({
+    id:"ao-local-state-" + Date.now() + "-" + Math.random().toString(36).slice(2),
+    branch:String(branch || "").trim().toUpperCase(),
+    scanner_email:String(email || "").trim().toLowerCase(),
+    sender_email:String(currentEmail || "").trim().toLowerCase(),
+    sender_type:"DASHBOARD",
+    message:aoChatSharedStateMessage(payload),
+    created_at:new Date().toISOString()
+  });
+}
+
+async function aoChatPostSharedState(branch,email,payload){
+  const key = aoChatConversationKey(branch,email) + "|" + JSON.stringify(payload || {});
+  if(aoChatSharedStatePostBusy.has(key)) return;
+  aoChatSharedStatePostBusy.add(key);
+  try{
+    await supabaseRequest(
+      "chat_messages",
+      {
+        method:"POST",
+        prefer:"return=minimal",
+        body:{
+          branch:String(branch || "").trim().toUpperCase(),
+          scanner_email:String(email || "").trim().toLowerCase(),
+          sender_email:String(currentEmail || "").trim().toLowerCase(),
+          sender_type:"DASHBOARD",
+          message:aoChatSharedStateMessage(payload)
+        }
+      }
+    );
+  }finally{
+    aoChatSharedStatePostBusy.delete(key);
+  }
+}
+
+function aoChatSharedReadFromList(list){
+  let latest = 0;
+  (Array.isArray(list) ? list : []).forEach(r => {
+    if(!aoChatIsSharedStateMessage(r?.message)) return;
+    const p = aoChatSharedStatePayload(r.message);
+    if(!p || p.kind !== "read") return;
+    const ts = Number(p.ts || 0);
+    if(Number.isFinite(ts)) latest = Math.max(latest,ts);
+  });
+  return latest;
+}
+
+function aoChatSharedCheckedFromList(list,messageId){
+  let latestTs = -1;
+  let value = null;
+  const target = String(messageId || "");
+  (Array.isArray(list) ? list : []).forEach(r => {
+    if(!aoChatIsSharedStateMessage(r?.message)) return;
+    const p = aoChatSharedStatePayload(r.message);
+    if(!p || p.kind !== "checked" || String(p.messageId || "") !== target) return;
+    const rowTs = new Date(r.created_at || 0).getTime();
+    const payloadTs = Number(p.updatedAt || 0);
+    const ts = Number.isFinite(payloadTs) && payloadTs > 0 ? payloadTs : rowTs;
+    if(ts >= latestTs){
+      latestTs = ts;
+      value = p.checked === true;
+    }
+  });
+  return value;
+}
+
+function aoChatSharedStateRowsUrl(branch,email){
+  return (
+    "chat_messages" +
+    "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
+    "&branch=eq." + encodeURIComponent(String(branch || "").trim().toUpperCase()) +
+    "&scanner_email=eq." + encodeURIComponent(String(email || "").trim().toLowerCase()) +
+    "&sender_type=eq.DASHBOARD" +
+    "&message=like." + encodeURIComponent("*" + AO_CHAT_SHARED_STATE_MARKER + "*") +
+    "&order=created_at.desc" +
+    "&limit=2000"
+  );
+}
+
 function aoChatPublicImageUrl(path){
   if(!path) return "";
   return SUPABASE_URL +
@@ -22742,10 +22859,55 @@ async function aoChatStartRealtime(){
             const row =
               payload?.new || {};
 
-            if(
+            const senderType =
               String(row.sender_type || "")
-                .toUpperCase() !== "SCANNER"
-            ){
+                .toUpperCase();
+
+            const isSharedState =
+              aoChatIsSharedStateMessage(row.message);
+
+            if(senderType !== "SCANNER" && !isSharedState){
+              return;
+            }
+
+            const rowBranch =
+              String(row.branch || "")
+                .trim()
+                .toUpperCase();
+
+            const rowEmail =
+              String(row.scanner_email || "")
+                .trim()
+                .toLowerCase();
+
+            if(isSharedState && rowBranch && rowEmail){
+              const key = aoChatConversationKey(rowBranch,rowEmail);
+              const cached = aoChatConversationCache.get(key);
+              if(Array.isArray(cached)){
+                const id = String(row.id || "");
+                const exists = cached.some(x => String(x.id || "") === id);
+                if(!exists) cached.push(row);
+              }
+
+              const p = aoChatSharedStatePayload(row.message);
+              if(p?.kind === "read"){
+                const ts = Number(p.ts || 0);
+                if(Number.isFinite(ts)){
+                  aoChatSharedReadCache.set(
+                    key,
+                    Math.max(Number(aoChatSharedReadCache.get(key) || 0),ts)
+                  );
+                }
+              }
+
+              if(
+                aoChatOpen &&
+                rowBranch === aoChatBranch() &&
+                rowEmail === aoChatRecipient()
+              ){
+                aoChatLoad().catch(() => {});
+              }
+
               return;
             }
 
@@ -22760,16 +22922,6 @@ async function aoChatStartRealtime(){
              * If this exact conversation is open,
              * refresh it immediately.
              */
-            const rowBranch =
-              String(row.branch || "")
-                .trim()
-                .toUpperCase();
-
-            const rowEmail =
-              String(row.scanner_email || "")
-                .trim()
-                .toLowerCase();
-
             if(
               aoChatOpen &&
               rowBranch &&
@@ -22864,24 +23016,58 @@ function aoChatKey(branch,email){
 
 function aoChatRead(branch,email){
 
-  return Number(
+  const key =
+    aoChatConversationKey(branch,email);
+
+  const localRead = Number(
     localStorage.getItem(
       aoChatKey(branch,email)
     ) || 0
   );
 
+  const sharedRead = Number(
+    aoChatSharedReadCache.get(key) || 0
+  );
+
+  return Math.max(localRead,sharedRead);
+
 }
 
 function aoChatMark(branch,email,ts){
 
-  if(ts){
+  const stamp = Number(ts || 0);
+  if(!stamp) return;
 
-    localStorage.setItem(
-      aoChatKey(branch,email),
-      String(ts)
-    );
+  localStorage.setItem(
+    aoChatKey(branch,email),
+    String(stamp)
+  );
 
+  const key =
+    aoChatConversationKey(branch,email);
+
+  const currentShared =
+    Number(aoChatSharedReadCache.get(key) || 0);
+
+  if(stamp <= currentShared){
+    return;
   }
+
+  aoChatSharedReadCache.set(key,stamp);
+
+  aoChatAppendSharedStateRow(
+    branch,
+    email,
+    {kind:"read",ts:stamp,updatedAt:Date.now()}
+  );
+
+  aoChatPostSharedState(
+    branch,
+    email,
+    {kind:"read",ts:stamp,updatedAt:Date.now()}
+  ).catch(error => {
+    console.warn("Shared chat read-state save failed:",error);
+  });
 
 }
 
@@ -23875,132 +24061,94 @@ async function aoChatLoadUnread(){
 
   try{
 
-    const rows =
-      await supabaseRequest(
-        "chat_messages" +
-        "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
-        "&sender_type=eq.SCANNER" +
-        "&order=created_at.desc" +
-        "&limit=1000"
+    const [rows,stateRows] =
+      await Promise.all([
+        supabaseRequest(
+          "chat_messages" +
+          "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
+          "&sender_type=eq.SCANNER" +
+          "&order=created_at.desc" +
+          "&limit=1000"
+        ),
+        supabaseRequest(
+          "chat_messages" +
+          "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
+          "&sender_type=eq.DASHBOARD" +
+          "&message=like." + encodeURIComponent("*" + AO_CHAT_SHARED_STATE_MARKER + "*") +
+          "&order=created_at.desc" +
+          "&limit=2000"
+        )
+      ]);
+
+    const sharedReadMap = new Map();
+
+    (Array.isArray(stateRows) ? stateRows : []).forEach(r => {
+      if(!aoChatIsSharedStateMessage(r?.message)) return;
+      const p = aoChatSharedStatePayload(r.message);
+      if(!p || p.kind !== "read") return;
+      const branch = String(r.branch || "").trim().toUpperCase();
+      const email = String(r.scanner_email || "").trim().toLowerCase();
+      const ts = Number(p.ts || 0);
+      if(!branch || !email || !Number.isFinite(ts)) return;
+      const key = aoChatConversationKey(branch,email);
+      const next = Math.max(Number(sharedReadMap.get(key) || 0),ts);
+      sharedReadMap.set(key,next);
+      aoChatSharedReadCache.set(key,next);
+    });
+
+    const grouped = new Map();
+
+    (Array.isArray(rows) ? rows : []).forEach(r => {
+
+      const branch =
+        String(r.branch || "").trim().toUpperCase();
+
+      const email =
+        String(r.scanner_email || "").trim().toLowerCase();
+
+      const ts = new Date(r.created_at).getTime();
+
+      if(!branch || !email || !Number.isFinite(ts)) return;
+
+      const key = aoChatConversationKey(branch,email);
+      const read = Math.max(
+        Number(localStorage.getItem(aoChatKey(branch,email)) || 0),
+        Number(sharedReadMap.get(key) || 0)
       );
 
-    const grouped =
-      new Map();
+      if(ts <= read) return;
 
-    (
-      Array.isArray(rows)
-        ? rows
-        : []
-    )
-    .forEach(
-      r => {
+      let g = grouped.get(key);
 
-        const branch =
-          String(
-            r.branch || ""
-          )
-          .trim()
-          .toUpperCase();
-
-        const email =
-          String(
-            r.scanner_email || ""
-          )
-          .trim()
-          .toLowerCase();
-
-        const ts =
-          new Date(
-            r.created_at
-          ).getTime();
-
-        if(
-          !branch ||
-          !email ||
-          !Number.isFinite(ts)
-        ){
-
-          return;
-
-        }
-
-        const read =
-          aoChatRead(
-            branch,
-            email
-          );
-
-        if(ts <= read){
-          return;
-        }
-
-        const key =
-          branch +
-          "|" +
-          email;
-
-        let g =
-          grouped.get(key);
-
-        if(!g){
-
-          g = {
-            branch:branch,
-            email:email,
-            count:0,
-            last_created_at:
-              r.created_at,
-            last_message:
-              aoChatIsImageMessage(r.message)
-                ? "📷 Image"
-                : String(
-                    r.message || ""
-                  )
-          };
-
-          grouped.set(
-            key,
-            g
-          );
-
-        }
-
-        g.count++;
-
-        if(
-          ts >=
-          new Date(
-            g.last_created_at
-          ).getTime()
-        ){
-
-          g.last_created_at =
-            r.created_at;
-
-          g.last_message =
-            aoChatIsImageMessage(r.message)
-              ? "📷 Image"
-              : String(
-                  r.message || ""
-                );
-
-        }
-
+      if(!g){
+        g = {
+          branch:branch,
+          email:email,
+          count:0,
+          last_created_at:r.created_at,
+          last_message:aoChatIsImageMessage(r.message)
+            ? "📷 Image"
+            : String(r.message || "")
+        };
+        grouped.set(key,g);
       }
-    );
 
-    aoChatNotifications =
-      Array.from(
-        grouped.values()
-      );
+      g.count++;
+
+      if(ts >= new Date(g.last_created_at).getTime()){
+        g.last_created_at = r.created_at;
+        g.last_message = aoChatIsImageMessage(r.message)
+          ? "📷 Image"
+          : String(r.message || "");
+      }
+
+    });
+
+    aoChatNotifications = Array.from(grouped.values());
 
     aoChatBadge(
       aoChatNotifications.reduce(
-        (t,x) =>
-          t +
-          Number(
-            x.count || 0
-          ),
+        (t,x) => t + Number(x.count || 0),
         0
       )
     );
@@ -24089,6 +24237,16 @@ function aoChatImageCheckedKey(messageId){
 function aoChatImageIsChecked(messageId){
   if(!messageId) return false;
 
+  const branch = aoChatBranch();
+  const recipient = aoChatRecipient();
+  const key = aoChatConversationKey(branch,recipient);
+  const list = aoChatConversationCache.get(key);
+  const shared = aoChatSharedCheckedFromList(list,messageId);
+
+  if(shared !== null){
+    return shared;
+  }
+
   return (
     localStorage.getItem(
       aoChatImageCheckedKey(messageId)
@@ -24096,7 +24254,45 @@ function aoChatImageIsChecked(messageId){
   );
 }
 
-function aoChatToggleImageChecked(
+function aoChatApplyImageCheckedState(
+  imageElement,
+  buttonElement,
+  checked
+){
+  if(imageElement){
+    imageElement.classList.toggle(
+      "ao-chat-image-checked",
+      !!checked
+    );
+  }
+  if(buttonElement){
+    buttonElement.classList.toggle(
+      "checked",
+      !!checked
+    );
+    buttonElement.textContent =
+      checked ? "✓ Checked" : "✓ Mark as Checked";
+    buttonElement.setAttribute(
+      "aria-pressed",
+      String(!!checked)
+    );
+  }
+}
+
+function aoChatRemoveLocalSharedState(list,messageId){
+  if(!Array.isArray(list)) return;
+  const target = String(messageId || "");
+  for(let i=list.length-1;i>=0;i--){
+    const row = list[i];
+    if(!String(row?.id || "").startsWith("ao-local-state-")) continue;
+    const p = aoChatSharedStatePayload(row.message);
+    if(p?.kind === "checked" && String(p.messageId || "") === target){
+      list.splice(i,1);
+    }
+  }
+}
+
+async function aoChatToggleImageChecked(
   messageId,
   imageElement,
   buttonElement
@@ -24105,37 +24301,72 @@ function aoChatToggleImageChecked(
     return;
   }
 
-  const key =
-    aoChatImageCheckedKey(messageId);
+  const branch = aoChatBranch();
+  const recipient = aoChatRecipient();
+  if(!branch || !recipient) return;
 
-  const checked =
-    !aoChatImageIsChecked(messageId);
+  const key = aoChatConversationKey(branch,recipient);
+  const list = aoChatConversationCache.get(key);
+  const checked = !aoChatImageIsChecked(messageId);
 
   if(checked){
-    localStorage.setItem(key,"1");
+    localStorage.setItem(aoChatImageCheckedKey(messageId),"1");
   }else{
-    localStorage.removeItem(key);
+    localStorage.removeItem(aoChatImageCheckedKey(messageId));
   }
 
-  imageElement.classList.toggle(
-    "ao-chat-image-checked",
+  aoChatRemoveLocalSharedState(list,messageId);
+  aoChatAppendSharedStateRow(
+    branch,
+    recipient,
+    {
+      kind:"checked",
+      messageId:String(messageId),
+      checked:checked,
+      updatedAt:Date.now()
+    }
+  );
+
+  aoChatApplyImageCheckedState(
+    imageElement,
+    buttonElement,
     checked
   );
 
-  buttonElement.classList.toggle(
-    "checked",
-    checked
-  );
+  try{
+    await aoChatPostSharedState(
+      branch,
+      recipient,
+      {
+        kind:"checked",
+        messageId:String(messageId),
+        checked:checked,
+        updatedAt:Date.now()
+      }
+    );
 
-  buttonElement.textContent =
-    checked
-      ? "✓ Checked"
-      : "✓ Mark as Checked";
+    aoChatLoadUnread().catch(()=>{});
+  }catch(error){
+    console.warn("Shared chat checked-state save failed:",error);
+    aoChatRemoveLocalSharedState(list,messageId);
 
-  buttonElement.setAttribute(
-    "aria-pressed",
-    String(checked)
-  );
+    if(checked){
+      localStorage.removeItem(aoChatImageCheckedKey(messageId));
+    }else{
+      localStorage.setItem(aoChatImageCheckedKey(messageId),"1");
+    }
+
+    aoChatStatus(
+      error?.message ||
+      "Unable to save the checked status."
+    );
+    aoChatRenderConversation(
+      Array.isArray(list) ? list : [],
+      branch,
+      recipient,
+      document.getElementById("aoChatMessages")
+    );
+  }
 }
 
 let aoChatSearchText = "";
@@ -24275,17 +24506,20 @@ async function aoChatLoad(){
 
   try{
 
-    const rows =
-      await supabaseRequest(
-        "chat_messages" +
-        "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
-        "&branch=eq." +
-        encodeURIComponent(branch) +
-        "&scanner_email=eq." +
-        encodeURIComponent(recipient) +
-        "&order=created_at.asc" +
-        "&limit=300"
-      );
+    const [rows,stateRows] =
+      await Promise.all([
+        supabaseRequest(
+          "chat_messages" +
+          "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
+          "&branch=eq." +
+          encodeURIComponent(branch) +
+          "&scanner_email=eq." +
+          encodeURIComponent(recipient) +
+          "&order=created_at.asc" +
+          "&limit=300"
+        ),
+        supabaseRequest(aoChatSharedStateRowsUrl(branch,recipient))
+      ]);
 
     if(
       loadSeq !==
@@ -24296,18 +24530,34 @@ async function aoChatLoad(){
 
     }
 
-    const list =
-      Array.isArray(rows)
-        ? rows
-        : [];
+    const list = [
+      ...(Array.isArray(rows) ? rows : []),
+      ...(Array.isArray(stateRows) ? stateRows.filter(r => aoChatIsSharedStateMessage(r?.message)) : [])
+    ];
+
+    const deduped = new Map();
+    list.forEach(r => {
+      const id = String(r?.id || "");
+      const dedupeKey = id || (String(r?.created_at || "") + "|" + String(r?.message || ""));
+      deduped.set(dedupeKey,r);
+    });
+
+    const finalList = Array.from(deduped.values()).sort(
+      (a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    const sharedRead = aoChatSharedReadFromList(finalList);
+    if(sharedRead){
+      aoChatSharedReadCache.set(key,sharedRead);
+    }
 
     aoChatConversationCache.set(
       key,
-      list
+      finalList
     );
 
     aoChatRenderConversation(
-      list,
+      finalList,
       branch,
       recipient,
       box
@@ -24340,6 +24590,10 @@ function aoChatRenderConversation(
   box
 ){
 
+  const conversationMessages =
+    (Array.isArray(list) ? list : [])
+      .filter(r => !aoChatIsSharedStateMessage(r?.message));
+
   const read =
     aoChatRead(
       branch,
@@ -24347,7 +24601,7 @@ function aoChatRenderConversation(
     );
 
   const incoming =
-    list.filter(
+    conversationMessages.filter(
       r =>
         String(
           r.sender_type || ""
@@ -24366,7 +24620,7 @@ function aoChatRenderConversation(
 
   const visibleList =
     aoChatSearchText
-      ? list.filter(r => {
+      ? conversationMessages.filter(r => {
           const raw = String(r.message || "");
           const sender = String(r.sender_email || "");
           const type = String(r.sender_type || "");
@@ -24377,7 +24631,7 @@ function aoChatRenderConversation(
             type.toLowerCase().includes(aoChatSearchText)
           );
         })
-      : list;
+      : conversationMessages;
 
   const visibleIncoming =
     visibleList.filter(
@@ -24400,12 +24654,12 @@ function aoChatRenderConversation(
 
   if(searchCount){
     if(!aoChatSearchText){
-      searchCount.textContent = list.length ? String(list.length) : "";
+      searchCount.textContent = conversationMessages.length ? String(conversationMessages.length) : "";
     }else{
       searchCount.textContent =
         visibleList.length +
         "/" +
-        list.length;
+        conversationMessages.length;
     }
   }
 

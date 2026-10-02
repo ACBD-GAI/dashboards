@@ -6488,12 +6488,68 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
     width:40px;
     min-width:40px;
   }
+  .ao-chat-search-compact{
+    flex:1.05 1 0;
+    min-width:125px;
+    height:40px;
+    box-sizing:border-box;
+    padding:0;
+    border:0;
+    background:transparent;
+  }
+  .ao-chat-search-compact .ao-chat-search-input{
+    height:40px;
+    min-width:0;
+    box-sizing:border-box;
+    padding:0 9px;
+    border-radius:10px;
+    font-size:10px;
+  }
+  .ao-chat-search-compact .ao-chat-search-count{
+    min-width:28px;
+    font-size:8px;
+  }
+  .ao-chat-search-compact .ao-chat-search-clear{
+    flex:0 0 30px;
+    width:30px;
+    height:30px;
+    border-radius:8px;
+    font-size:11px;
+  }
+  .ao-chat-delete-link{
+    display:inline-flex;
+    margin-top:6px;
+    margin-left:5px;
+    padding:3px 7px;
+    border:1px solid rgba(220,38,38,.35);
+    border-radius:7px;
+    background:rgba(220,38,38,.08);
+    color:#b91c1c;
+    font-size:9px;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:none;
+    min-height:24px;
+    align-items:center;
+  }
+  .ao-chat-row.mine .ao-chat-delete-link{
+    color:#fff;
+    border-color:rgba(255,255,255,.28);
+    background:rgba(255,255,255,.10);
+  }
   @media(max-width:600px){
     .ao-chat-branch-pair{
       gap:6px;
     }
     .ao-chat-user-field{
       flex:1.25 1 0;
+    }
+    .ao-chat-search-compact{
+      min-width:108px;
+    }
+    .ao-chat-search-compact .ao-chat-search-input{
+      font-size:9px;
+      padding:0 7px;
     }
     .ao-chat-branch-pair .ao-chat-refresh-users{
       flex-basis:38px;
@@ -22818,6 +22874,142 @@ async function aoChatUploadImage(file,label){
   return path;
 }
 
+async function aoChatDeleteStoredImage(path){
+  const imagePath = String(path || "").trim();
+  if(!imagePath) return;
+
+  const client =
+    window.__aoChatStorageClient ||
+    (window.__aoChatStorageClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+        {auth:{persistSession:false,autoRefreshToken:false}}
+      )
+    );
+
+  const result =
+    await client.storage
+      .from(AO_CHAT_IMAGE_BUCKET)
+      .remove([imagePath]);
+
+  if(result.error){
+    throw new Error(
+      result.error.message ||
+      "Attached photo could not be deleted."
+    );
+  }
+}
+
+async function aoChatDeleteMessage(messageId,imagePath){
+  const id = String(messageId || "").trim();
+  const branch = aoChatBranch();
+  const recipient = aoChatRecipient();
+
+  if(!id || !branch || !recipient || !sessionId || !currentEmail){
+    aoChatStatus("Please log in first.");
+    return;
+  }
+
+  if(!window.confirm(
+    "Delete this message" +
+    (imagePath ? " and attached photo" : "") +
+    "?"
+  )){
+    return;
+  }
+
+  aoChatStatus("Deleting...");
+
+  const key = aoChatConversationKey(branch,recipient);
+  const list = aoChatConversationCache.get(key);
+  const sharedStateIds = [];
+
+  (Array.isArray(list) ? list : []).forEach(r => {
+    if(!aoChatIsSharedStateMessage(r?.message)) return;
+    const payload = aoChatSharedStatePayload(r.message);
+    if(
+      payload?.kind === "checked" &&
+      String(payload.messageId || "") === id
+    ){
+      const stateId = String(r.id || "");
+      if(
+        stateId &&
+        !stateId.startsWith("ao-local-state-")
+      ){
+        sharedStateIds.push(stateId);
+      }
+    }
+  });
+
+  try{
+    const deleted =
+      await supabaseRequest(
+        "chat_messages?id=eq." + encodeURIComponent(id),
+        {method:"DELETE",prefer:"return=representation"}
+      );
+
+    if(!Array.isArray(deleted) || !deleted.length){
+      throw new Error("Message could not be deleted.");
+    }
+
+    for(const stateId of sharedStateIds){
+      try{
+        await supabaseRequest(
+          "chat_messages?id=eq." + encodeURIComponent(stateId),
+          {method:"DELETE",prefer:"return=minimal"}
+        );
+      }catch(stateError){
+        console.warn(
+          "Shared checked-state cleanup failed:",
+          stateError
+        );
+      }
+    }
+
+    localStorage.removeItem(aoChatImageCheckedKey(id));
+
+    if(Array.isArray(list)){
+      for(let i=list.length-1;i>=0;i--){
+        const rowId = String(list[i]?.id || "");
+        if(
+          rowId === id ||
+          sharedStateIds.includes(rowId)
+        ){
+          list.splice(i,1);
+        }
+      }
+    }
+
+    try{
+      if(imagePath){
+        await aoChatDeleteStoredImage(imagePath);
+      }
+    }catch(imageError){
+      console.warn(
+        "Dashboard chat image delete failed:",
+        imageError
+      );
+      aoChatStatus(
+        "Message deleted, but the attached photo could not be removed from Storage."
+      );
+    }
+
+    await aoChatLoad();
+
+    if(!imagePath || !document.getElementById("aoChatStatus")?.textContent){
+      aoChatStatus("");
+    }
+
+  }catch(e){
+    console.error("Dashboard chat delete failed:",e);
+    aoChatStatus(
+      e?.message ||
+      "Message could not be deleted."
+    );
+  }
+}
+
 /* =========================================================
    CHAT REALTIME — NOTIFICATION ONLY
    Uses Supabase Realtime for INSERT events on chat_messages.
@@ -24854,10 +25046,27 @@ function aoChatRenderConversation(
               )
               : "";
 
+          const encodedDeleteId =
+            encodeURIComponent(String(r.id || ""));
+          const encodedDeletePath =
+            encodeURIComponent(String(imagePath || ""));
+
+          const deleteHtml =
+            '<button type="button" class="ao-chat-delete-link"' +
+            ' onclick="aoChatDeleteMessage(decodeURIComponent(\'' +
+            encodedDeleteId +
+            '\'),decodeURIComponent(\'' +
+            encodedDeletePath +
+            '\'));event.stopPropagation();">' +
+            '🗑 Delete' +
+            '</button>';
+
           return (
             sep +
             '<div class="ao-chat-row ' +
             (mine ? "mine" : "") +
+            '" data-chat-id="' +
+            aoChatEsc(String(r.id || "")) +
             '">' +
 
               '<div class="ao-chat-bubble">' +
@@ -24872,6 +25081,7 @@ function aoChatRenderConversation(
 
                 textHtml +
                 imageHtml +
+                deleteHtml +
 
                 '<div class="ao-chat-time">' +
                   aoChatEsc(
@@ -26094,6 +26304,34 @@ document.addEventListener("DOMContentLoaded",()=>{
         </select>
       </div>
 
+      <div class="ao-chat-search-wrap ao-chat-search-compact">
+        <input
+          id="aoChatSearchInput"
+          class="ao-chat-search-input"
+          type="search"
+          autocomplete="off"
+          placeholder="Search conversation..."
+          aria-label="Search conversation"
+          disabled
+        >
+
+        <span
+          id="aoChatSearchCount"
+          class="ao-chat-search-count"
+        ></span>
+
+        <button
+          id="aoChatSearchClear"
+          class="ao-chat-search-clear"
+          type="button"
+          title="Clear conversation search"
+          aria-label="Clear conversation search"
+          disabled
+        >
+          ✕
+        </button>
+      </div>
+
       <button
         id="aoChatRefreshUsers"
         class="ao-chat-refresh-users"
@@ -26113,35 +26351,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     id="aoChatNotify"
     class="ao-chat-notify"
   ></div>
-
-  <!-- CONVERSATION SEARCH -->
-  <div class="ao-chat-search-wrap">
-    <input
-      id="aoChatSearchInput"
-      class="ao-chat-search-input"
-      type="search"
-      autocomplete="off"
-      placeholder="Search conversation..."
-      aria-label="Search conversation"
-      disabled
-    >
-
-    <span
-      id="aoChatSearchCount"
-      class="ao-chat-search-count"
-    ></span>
-
-    <button
-      id="aoChatSearchClear"
-      class="ao-chat-search-clear"
-      type="button"
-      title="Clear conversation search"
-      aria-label="Clear conversation search"
-      disabled
-    >
-      ✕
-    </button>
-  </div>
 
   <!-- MESSAGES -->
   <div

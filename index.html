@@ -22510,10 +22510,106 @@ function aoChatImagePath(message){
   return m ? String(m[1] || "").trim() : "";
 }
 
+const AO_CHAT_SHARED_CHECKED_ON = "\u2060\u2061";
+const AO_CHAT_SHARED_CHECKED_OFF = "\u2060\u2062";
+const AO_CHAT_SHARED_READ_PREFIX = "\u2060\u2063";
+const AO_CHAT_SHARED_READ_DIGIT = "\u2064";
+const AO_CHAT_SHARED_READ_SEPARATOR = "\u2062";
+
 function aoChatTextPart(message){
   return String(message || "")
     .replace(/\n?\[\[AO_CHAT_IMAGE\]\][^\n\r]*/g, "")
+    .replace(/\u2060\u2061/g, "")
+    .replace(/\u2060\u2062/g, "")
+    .replace(/\u2060\u2063(?:\u2064+\u2062)+/g, "")
     .trim();
+}
+
+function aoChatSharedReadTimestamp(message){
+  const re = /\u2060\u2063((?:\u2064+\u2062)+)/g;
+  let latest = 0;
+  let match;
+
+  while((match = re.exec(String(message || "")))){
+    const groups =
+      String(match[1] || "")
+        .split(AO_CHAT_SHARED_READ_SEPARATOR)
+        .filter(Boolean);
+
+    if(!groups.length){
+      continue;
+    }
+
+    const digits = groups
+      .map(group => Math.max(0, group.length - 1))
+      .join("");
+
+    const ts = Number(digits);
+
+    if(Number.isFinite(ts) && ts > latest){
+      latest = ts;
+    }
+  }
+
+  return latest;
+}
+
+function aoChatHasSharedChecked(message){
+  return String(message || "").includes(AO_CHAT_SHARED_CHECKED_ON);
+}
+
+function aoChatHasSharedCheckedState(message){
+  const value = String(message || "");
+
+  if(value.includes(AO_CHAT_SHARED_CHECKED_ON)){
+    return "checked";
+  }
+
+  if(value.includes(AO_CHAT_SHARED_CHECKED_OFF)){
+    return "unchecked";
+  }
+
+  return "";
+}
+
+function aoChatSetSharedChecked(message,checked){
+  let next = String(message || "")
+    .replace(/\u2060\u2061/g, "")
+    .replace(/\u2060\u2062/g, "");
+
+  next = next.replace(/[ \t\r\n]+$/g, "");
+
+  return next +
+    (checked
+      ? AO_CHAT_SHARED_CHECKED_ON
+      : AO_CHAT_SHARED_CHECKED_OFF);
+}
+
+function aoChatSetSharedReadMarker(message,ts){
+  let next = aoChatRemoveSharedReadMarkers(message);
+
+  const digits =
+    String(Math.max(0,Math.floor(Number(ts) || 0)));
+
+  const encoded =
+    digits
+      .split("")
+      .map(d =>
+        AO_CHAT_SHARED_READ_DIGIT.repeat(
+          Number(d) + 1
+        ) +
+        AO_CHAT_SHARED_READ_SEPARATOR
+      )
+      .join("");
+
+  return next +
+    AO_CHAT_SHARED_READ_PREFIX +
+    encoded;
+}
+
+function aoChatRemoveSharedReadMarkers(message){
+  return String(message || "")
+    .replace(/\u2060\u2063(?:\u2064+\u2062)+/g, "");
 }
 
 function aoChatPublicImageUrl(path){
@@ -22785,6 +22881,62 @@ async function aoChatStartRealtime(){
 
           }
         )
+        .on(
+          "postgres_changes",
+          {
+            event:"UPDATE",
+            schema:"public",
+            table:"chat_messages"
+          },
+          payload => {
+
+            const row =
+              payload?.new || {};
+
+            if(
+              String(row.sender_type || "").toUpperCase() !== "SCANNER"
+            ){
+              return;
+            }
+
+            const rowBranch =
+              String(row.branch || "").trim().toUpperCase();
+
+            const rowEmail =
+              String(row.scanner_email || "").trim().toLowerCase();
+
+            const cacheKey =
+              rowBranch + "|" + rowEmail;
+
+            const cached =
+              aoChatConversationCache.get(cacheKey);
+
+            if(Array.isArray(cached)){
+              const index =
+                cached.findIndex(item =>
+                  String(item?.id || "") === String(row.id || "")
+                );
+
+              if(index >= 0){
+                cached[index] = row;
+              }
+            }
+
+            aoChatLoadUnread()
+              .catch(() => {});
+
+            if(
+              aoChatOpen &&
+              rowBranch &&
+              rowEmail &&
+              rowBranch === aoChatBranch() &&
+              rowEmail === aoChatRecipient()
+            ){
+              aoChatLoad()
+                .catch(() => {});
+            }
+          }
+        )
         .subscribe(
           status => {
 
@@ -22864,23 +23016,115 @@ function aoChatKey(branch,email){
 
 function aoChatRead(branch,email){
 
-  return Number(
+  const localRead = Number(
     localStorage.getItem(
       aoChatKey(branch,email)
     ) || 0
   );
 
+  const cacheKey =
+    String(branch || "").toUpperCase() +
+    "|" +
+    String(email || "").toLowerCase();
+
+  const cached =
+    aoChatConversationCache.get(cacheKey);
+
+  let sharedRead = 0;
+
+  if(Array.isArray(cached)){
+    cached.forEach(row => {
+      if(
+        String(row?.sender_type || "").toUpperCase() !== "SCANNER"
+      ){
+        return;
+      }
+
+      const marker =
+        aoChatSharedReadTimestamp(row?.message);
+
+      if(marker > sharedRead){
+        sharedRead = marker;
+      }
+    });
+  }
+
+  return Math.max(localRead,sharedRead);
+
 }
 
-function aoChatMark(branch,email,ts){
+async function aoChatMark(branch,email,ts){
 
-  if(ts){
+  if(!ts){
+    return;
+  }
 
-    localStorage.setItem(
-      aoChatKey(branch,email),
-      String(ts)
+  localStorage.setItem(
+    aoChatKey(branch,email),
+    String(ts)
+  );
+
+  const cacheKey =
+    String(branch || "").toUpperCase() +
+    "|" +
+    String(email || "").toLowerCase();
+
+  const cached =
+    aoChatConversationCache.get(cacheKey);
+
+  if(!Array.isArray(cached) || !cached.length){
+    return;
+  }
+
+  const latestIncoming =
+    cached
+      .filter(row =>
+        String(row?.sender_type || "").toUpperCase() === "SCANNER" &&
+        Number.isFinite(new Date(row?.created_at).getTime()) &&
+        new Date(row.created_at).getTime() <= ts
+      )
+      .sort((a,b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
+      )[0];
+
+  if(!latestIncoming || !latestIncoming.id){
+    return;
+  }
+
+  const existing =
+    aoChatSharedReadTimestamp(latestIncoming.message);
+
+  if(existing >= ts){
+    return;
+  }
+
+  const oldMessage =
+    String(latestIncoming.message || "");
+
+  const newMessage =
+    aoChatSetSharedReadMarker(oldMessage,ts);
+
+  latestIncoming.message = newMessage;
+
+  try{
+    await supabaseRequest(
+      "chat_messages?id=eq." +
+      encodeURIComponent(String(latestIncoming.id)),
+      {
+        method:"PATCH",
+        prefer:"return=minimal",
+        body:{
+          message:newMessage
+        }
+      }
     );
-
+  }catch(error){
+    latestIncoming.message = oldMessage;
+    console.warn(
+      "Shared chat read-state sync failed:",
+      error
+    );
   }
 
 }
@@ -23887,6 +24131,31 @@ async function aoChatLoadUnread(){
     const grouped =
       new Map();
 
+    const sharedReadMap =
+      new Map();
+
+    (Array.isArray(rows) ? rows : []).forEach(r => {
+      const branch =
+        String(r.branch || "").trim().toUpperCase();
+      const email =
+        String(r.scanner_email || "").trim().toLowerCase();
+      const marker =
+        aoChatSharedReadTimestamp(r.message);
+
+      if(!branch || !email || !marker){
+        return;
+      }
+
+      const key = branch + "|" + email;
+      sharedReadMap.set(
+        key,
+        Math.max(
+          Number(sharedReadMap.get(key) || 0),
+          marker
+        )
+      );
+    });
+
     (
       Array.isArray(rows)
         ? rows
@@ -23924,11 +24193,20 @@ async function aoChatLoadUnread(){
 
         }
 
+        const localRead = Number(
+          localStorage.getItem(
+            aoChatKey(branch,email)
+          ) || 0
+        );
+
+        const sharedRead = Number(
+          sharedReadMap.get(
+            branch + "|" + email
+          ) || 0
+        );
+
         const read =
-          aoChatRead(
-            branch,
-            email
-          );
+          Math.max(localRead,sharedRead);
 
         if(ts <= read){
           return;
@@ -23953,9 +24231,7 @@ async function aoChatLoadUnread(){
             last_message:
               aoChatIsImageMessage(r.message)
                 ? "📷 Image"
-                : String(
-                    r.message || ""
-                  )
+                : aoChatTextPart(r.message) || "New message"
           };
 
           grouped.set(
@@ -23980,9 +24256,7 @@ async function aoChatLoadUnread(){
           g.last_message =
             aoChatIsImageMessage(r.message)
               ? "📷 Image"
-              : String(
-                  r.message || ""
-                );
+              : aoChatTextPart(r.message) || "New message";
 
         }
 
@@ -24086,8 +24360,43 @@ function aoChatImageCheckedKey(messageId){
   );
 }
 
+function aoChatImageCachedRow(messageId){
+  if(!messageId) return null;
+
+  for(const list of aoChatConversationCache.values()){
+    if(!Array.isArray(list)) continue;
+
+    const row =
+      list.find(item =>
+        String(item?.id || "") === String(messageId)
+      );
+
+    if(row){
+      return row;
+    }
+  }
+
+  return null;
+}
+
 function aoChatImageIsChecked(messageId){
   if(!messageId) return false;
+
+  const row =
+    aoChatImageCachedRow(messageId);
+
+  if(row){
+    const sharedState =
+      aoChatHasSharedCheckedState(row.message);
+
+    if(sharedState === "checked"){
+      return true;
+    }
+
+    if(sharedState === "unchecked"){
+      return false;
+    }
+  }
 
   return (
     localStorage.getItem(
@@ -24096,7 +24405,37 @@ function aoChatImageIsChecked(messageId){
   );
 }
 
-function aoChatToggleImageChecked(
+function aoChatApplyImageCheckedState(
+  imageElement,
+  buttonElement,
+  checked
+){
+  if(imageElement){
+    imageElement.classList.toggle(
+      "ao-chat-image-checked",
+      checked
+    );
+  }
+
+  if(buttonElement){
+    buttonElement.classList.toggle(
+      "checked",
+      checked
+    );
+
+    buttonElement.textContent =
+      checked
+        ? "✓ Checked"
+        : "✓ Mark as Checked";
+
+    buttonElement.setAttribute(
+      "aria-pressed",
+      String(checked)
+    );
+  }
+}
+
+async function aoChatToggleImageChecked(
   messageId,
   imageElement,
   buttonElement
@@ -24105,11 +24444,28 @@ function aoChatToggleImageChecked(
     return;
   }
 
-  const key =
-    aoChatImageCheckedKey(messageId);
+  const row =
+    aoChatImageCachedRow(messageId);
+
+  const oldMessage =
+    row
+      ? String(row.message || "")
+      : "";
 
   const checked =
     !aoChatImageIsChecked(messageId);
+
+  const newMessage =
+    row
+      ? aoChatSetSharedChecked(oldMessage,checked)
+      : oldMessage;
+
+  if(row){
+    row.message = newMessage;
+  }
+
+  const key =
+    aoChatImageCheckedKey(messageId);
 
   if(checked){
     localStorage.setItem(key,"1");
@@ -24117,25 +24473,56 @@ function aoChatToggleImageChecked(
     localStorage.removeItem(key);
   }
 
-  imageElement.classList.toggle(
-    "ao-chat-image-checked",
+  aoChatApplyImageCheckedState(
+    imageElement,
+    buttonElement,
     checked
   );
 
-  buttonElement.classList.toggle(
-    "checked",
-    checked
-  );
+  if(!row){
+    return;
+  }
 
-  buttonElement.textContent =
-    checked
-      ? "✓ Checked"
-      : "✓ Mark as Checked";
+  try{
+    await supabaseRequest(
+      "chat_messages?id=eq." +
+      encodeURIComponent(String(messageId)),
+      {
+        method:"PATCH",
+        prefer:"return=minimal",
+        body:{
+          message:newMessage
+        }
+      }
+    );
 
-  buttonElement.setAttribute(
-    "aria-pressed",
-    String(checked)
-  );
+    await aoChatLoadUnread().catch(()=>{});
+
+  }catch(error){
+    row.message = oldMessage;
+
+    if(checked){
+      localStorage.removeItem(key);
+    }else{
+      localStorage.setItem(key,"1");
+    }
+
+    aoChatApplyImageCheckedState(
+      imageElement,
+      buttonElement,
+      !checked
+    );
+
+    console.error(
+      "Shared chat image checked-state sync failed:",
+      error
+    );
+
+    aoChatStatus(
+      error?.message ||
+      "Unable to sync the checked status."
+    );
+  }
 }
 
 let aoChatSearchText = "";
@@ -24371,7 +24758,6 @@ function aoChatRenderConversation(
           const sender = String(r.sender_email || "");
           const type = String(r.sender_type || "");
           return (
-            raw.toLowerCase().includes(aoChatSearchText) ||
             aoChatTextPart(raw).toLowerCase().includes(aoChatSearchText) ||
             sender.toLowerCase().includes(aoChatSearchText) ||
             type.toLowerCase().includes(aoChatSearchText)

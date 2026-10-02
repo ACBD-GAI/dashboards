@@ -6296,7 +6296,13 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
 
 .ao-chat-message-image.ao-chat-image-checked{
   border:2px solid #16a34a !important;
-  box-shadow:0 0 0 3px rgba(22,163,74,.12);
+  box-shadow:none !important;
+}
+
+/* Checked attached-image messages: turn the surrounding blue padding green. */
+.ao-chat-bubble:has(.ao-chat-message-image.ao-chat-image-checked){
+  background:linear-gradient(135deg,#dcfce7,#bbf7d0) !important;
+  box-shadow:0 3px 10px rgba(22,163,74,.14) !important;
 }
 .ao-chat-image-caption{
   margin-top:5px;

@@ -22911,7 +22911,15 @@ async function aoChatDeleteMessage(messageId,imagePath){
     return;
   }
 
-  aoChatStatus("Deleting…");
+  if(!window.confirm(
+    "Delete this message" +
+    (imagePath ? " and attached photo" : "") +
+    "?"
+  )){
+    return;
+  }
+
+  aoChatStatus("Deleting...");
 
   const key = aoChatConversationKey(branch,recipient);
   const list = aoChatConversationCache.get(key);
@@ -23000,7 +23008,8 @@ async function aoChatDeleteMessage(messageId,imagePath){
   }catch(e){
     console.error("Dashboard chat delete failed:",e);
     aoChatStatus(
-      "Unable to delete this message. Please try again."
+      e?.message ||
+      "Message could not be deleted."
     );
   }
 }

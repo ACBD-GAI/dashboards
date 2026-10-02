@@ -22911,15 +22911,7 @@ async function aoChatDeleteMessage(messageId,imagePath){
     return;
   }
 
-  if(!window.confirm(
-    "Delete this message" +
-    (imagePath ? " and attached photo" : "") +
-    "?"
-  )){
-    return;
-  }
-
-  aoChatStatus("Deleting...");
+  aoChatStatus("Deleting…");
 
   const key = aoChatConversationKey(branch,recipient);
   const list = aoChatConversationCache.get(key);
@@ -22945,7 +22937,11 @@ async function aoChatDeleteMessage(messageId,imagePath){
   try{
     const deleted =
       await supabaseRequest(
-        "chat_messages?id=eq." + encodeURIComponent(id),
+        "chat_messages?id=eq." + encodeURIComponent(id) +
+        "&branch=eq." + encodeURIComponent(branch) +
+        "&scanner_email=eq." + encodeURIComponent(recipient) +
+        "&sender_email=eq." + encodeURIComponent(String(currentEmail || "").trim().toLowerCase()) +
+        "&sender_type=eq.DASHBOARD",
         {method:"DELETE",prefer:"return=representation"}
       );
 
@@ -23004,8 +23000,7 @@ async function aoChatDeleteMessage(messageId,imagePath){
   }catch(e){
     console.error("Dashboard chat delete failed:",e);
     aoChatStatus(
-      e?.message ||
-      "Message could not be deleted."
+      "Unable to delete this message. Please try again."
     );
   }
 }
@@ -25052,14 +25047,18 @@ function aoChatRenderConversation(
             encodeURIComponent(String(imagePath || ""));
 
           const deleteHtml =
-            '<button type="button" class="ao-chat-delete-link"' +
-            ' onclick="aoChatDeleteMessage(decodeURIComponent(\'' +
-            encodedDeleteId +
-            '\'),decodeURIComponent(\'' +
-            encodedDeletePath +
-            '\'));event.stopPropagation();">' +
-            '🗑 Delete' +
-            '</button>';
+            mine
+              ? (
+                '<button type="button" class="ao-chat-delete-link"' +
+                ' onclick="aoChatDeleteMessage(decodeURIComponent(\'' +
+                encodedDeleteId +
+                '\'),decodeURIComponent(\'' +
+                encodedDeletePath +
+                '\'));event.stopPropagation();">' +
+                '🗑 Delete' +
+                '</button>'
+              )
+              : '';
 
           return (
             sep +

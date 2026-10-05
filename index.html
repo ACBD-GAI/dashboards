@@ -27318,6 +27318,15 @@ document.addEventListener("DOMContentLoaded",()=>{
   cursor:pointer;
 }
 .ao-video-control:hover{background:rgba(255,255,255,.14)!important}
+.ao-video-control[aria-pressed="true"]{
+  background:linear-gradient(135deg,rgba(239,68,68,.34),rgba(190,24,93,.28))!important;
+  border-color:rgba(248,113,113,.45)!important;
+}
+.ao-video-control{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  user-select:none;
+}
 .ao-video-control.danger{
   border-color:rgba(248,113,113,.35)!important;
   background:linear-gradient(135deg,#ef4444,#b91c1c)!important;
@@ -28597,30 +28606,65 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   function aoVideoToggleMute(){
-    if(!aoVideoState?.localStream) return;
-    const audioTracks=aoVideoState.localStream.getAudioTracks();
+    const state=aoVideoState;
+    if(!state?.localStream) return;
+
+    const audioTracks=state.localStream.getAudioTracks();
     if(!audioTracks.length) return;
 
-    const enabled=!audioTracks.every(track=>track.enabled);
-    audioTracks.forEach(track=>{track.enabled=!enabled;});
+    // The previous logic inverted the state twice, so pressing Mute while
+    // audio was enabled left the track enabled. Explicitly calculate the
+    // next state instead.
+    const nextEnabled=audioTracks.some(track=>!track.enabled);
+    audioTracks.forEach(track=>{track.enabled=nextEnabled;});
+
+    // Keep the WebRTC sender state synchronized as well. This is important
+    // for Android WebView builds where the sender can otherwise retain its
+    // previous enabled state.
+    try{
+      state.peer?.getSenders?.().forEach(sender=>{
+        if(sender.track && sender.track.kind==="audio") sender.track.enabled=nextEnabled;
+      });
+    }catch(error){
+      console.warn("Audio sender toggle sync failed:",error);
+    }
 
     const btn=document.getElementById("aoVideoMute");
     if(btn){
-      btn.textContent=enabled ? "🎤 Unmute" : "🎤 Mute";
+      btn.textContent=nextEnabled ? "🎤 Mute" : "🔇 Unmute";
+      btn.setAttribute("aria-pressed",String(!nextEnabled));
     }
   }
 
   function aoVideoToggleCamera(){
-    if(!aoVideoState?.localStream) return;
-    const videoTracks=aoVideoState.localStream.getVideoTracks();
+    const state=aoVideoState;
+    if(!state?.localStream) return;
+
+    const videoTracks=state.localStream.getVideoTracks();
     if(!videoTracks.length) return;
 
-    const enabled=!videoTracks.every(track=>track.enabled);
-    videoTracks.forEach(track=>{track.enabled=!enabled;});
+    // Same fix for camera: explicitly compute the desired next state.
+    const nextEnabled=videoTracks.some(track=>!track.enabled);
+    videoTracks.forEach(track=>{track.enabled=nextEnabled;});
+
+    try{
+      state.peer?.getSenders?.().forEach(sender=>{
+        if(sender.track && sender.track.kind==="video") sender.track.enabled=nextEnabled;
+      });
+    }catch(error){
+      console.warn("Video sender toggle sync failed:",error);
+    }
+
+    const localPlaceholder=document.getElementById("aoVideoLocalPlaceholder");
+    if(localPlaceholder){
+      localPlaceholder.textContent=nextEnabled ? "Your camera will appear here." : "Camera is off";
+      localPlaceholder.style.display=nextEnabled ? "none" : "flex";
+    }
 
     const btn=document.getElementById("aoVideoCamera");
     if(btn){
-      btn.textContent=enabled ? "📷 Camera" : "📷 Camera Off";
+      btn.textContent=nextEnabled ? "📷 Camera" : "📷 Camera Off";
+      btn.setAttribute("aria-pressed",String(!nextEnabled));
     }
   }
 

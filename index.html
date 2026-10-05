@@ -27524,6 +27524,25 @@ document.addEventListener("DOMContentLoaded",()=>{
       .replace(/'/g,"&#039;");
   }
 
+  function aoVideoMinimizeChat(){
+    try{
+      const panel=document.getElementById("aoChatPanel");
+      if(!panel) return;
+
+      const isOpen=panel.classList.contains("open");
+      if(!isOpen) return;
+
+      if(typeof aoChatToggle === "function"){
+        aoChatToggle();
+      }else{
+        panel.classList.remove("open");
+        panel.setAttribute("aria-hidden","true");
+      }
+    }catch(error){
+      console.warn("Unable to minimize chat before video call:",error);
+    }
+  }
+
   function aoVideoUrl(){
     try{
       return typeof SUPABASE_URL !== "undefined" ? SUPABASE_URL : "";
@@ -27902,6 +27921,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(button && !button.dataset.aoVideoBound){
       button.dataset.aoVideoBound="1";
       button.addEventListener("click",()=>{
+        aoVideoMinimizeChat();
         if(aoVideoIsDashboard()){
           const branch=
             typeof aoChatBranch==="function"
@@ -28161,22 +28181,45 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(state.localStream) return state.localStream;
 
     if(!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia!=="function"){
-      throw new Error("Camera and microphone access are not available in this browser.");
+      throw new Error("Camera and microphone access are unavailable in this app. The Android WebView must be granted CAMERA and RECORD_AUDIO permissions.");
     }
 
-    const stream=await navigator.mediaDevices.getUserMedia({
-      video:{
-        width:{ideal:1280},
-        height:{ideal:720},
-        frameRate:{ideal:24,max:30},
-        facingMode:"user"
-      },
-      audio:{
-        echoCancellation:true,
-        noiseSuppression:true,
-        autoGainControl:true
+    let stream;
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({
+        video:{
+          width:{ideal:1280},
+          height:{ideal:720},
+          frameRate:{ideal:24,max:30},
+          facingMode:{ideal:"user"}
+        },
+        audio:{
+          echoCancellation:true,
+          noiseSuppression:true,
+          autoGainControl:true
+        }
+      });
+    }catch(error){
+      /* Some Android WebView builds are stricter about constraints.
+         Retry once with the simplest WebRTC request before surfacing
+         the native-permission error. */
+      if(
+        error?.name === "OverconstrainedError" ||
+        error?.name === "NotReadableError" ||
+        error?.name === "TypeError"
+      ){
+        stream=await navigator.mediaDevices.getUserMedia({
+          video:true,
+          audio:true
+        });
+      }else{
+        const name=String(error?.name || "").trim();
+        if(name === "NotAllowedError" || name === "SecurityError"){
+          throw new Error("Camera and microphone permission was denied by the app. Allow Camera and Microphone for this Android app, then try the video call again.");
+        }
+        throw error;
       }
-    });
+    }
 
     state.localStream=stream;
 
@@ -28240,10 +28283,14 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     aoVideoOpenCallUi(
       targetType==="ADMIN" ? "Calling Admin" : "Calling Scanner",
-      "Calling " + targetEmail + "…"
+      "Starting camera and microphone…"
     );
 
     try{
+      await aoVideoPreparePeerWithMedia();
+
+      aoVideoSetStatus("Calling " + targetEmail + "…");
+
       await aoVideoSend({
         kind:"invite",
         callId,
@@ -28308,8 +28355,16 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     aoVideoOpenCallUi(
       info.fromType==="SCANNER" ? "Scanner Video Call" : "Admin Video Call",
-      "Joining call…"
+      "Starting camera and microphone…"
     );
+
+    try{
+      await aoVideoPreparePeerWithMedia();
+    }catch(error){
+      aoVideoSetStatus(error?.message || "Camera and microphone could not be opened.");
+      aoVideoEndCall(false);
+      throw error;
+    }
 
     await aoVideoSend({
       kind:"accept",

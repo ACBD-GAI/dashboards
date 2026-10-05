@@ -27002,6 +27002,16 @@ document.addEventListener("DOMContentLoaded",()=>{
       😊
     </button>
 
+    <button
+      id="aoVideoCallBtn"
+      class="ao-video-call-btn"
+      type="button"
+      aria-label="Video call"
+      title="Video call"
+    >
+      📹
+    </button>
+
     <input
       id="aoChatInput"
       class="ao-chat-input"
@@ -27154,5 +27164,1619 @@ document.addEventListener("DOMContentLoaded",()=>{
   else init();
 })();
 </script>
+
+<style id="aoVideoCallStyles">
+.ao-video-call-btn{
+  flex:0 0 42px;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  min-height:42px!important;
+  padding:0!important;
+  border:1px solid #bfdbfe!important;
+  border-radius:11px!important;
+  background:linear-gradient(135deg,#eff6ff,#dbeafe)!important;
+  color:#1d4ed8!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px!important;
+  cursor:pointer;
+  box-shadow:0 5px 14px rgba(37,99,235,.08)!important;
+}
+.ao-video-call-btn:hover{
+  background:linear-gradient(135deg,#dbeafe,#bfdbfe)!important;
+  transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(37,99,235,.14)!important;
+}
+.ao-video-call-btn:disabled{
+  opacity:.45!important;
+  cursor:not-allowed!important;
+  transform:none!important;
+}
+.ao-video-overlay,
+.ao-video-incoming-overlay{
+  position:fixed;
+  inset:0;
+  z-index:25000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(8,15,30,.76);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.ao-video-overlay.open,
+.ao-video-incoming-overlay.open{
+  display:flex;
+}
+.ao-video-card{
+  width:min(980px,100%);
+  max-height:min(92vh,900px);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:24px;
+  background:linear-gradient(145deg,#0f1a2f,#182844 55%,#0e1a2c);
+  box-shadow:0 30px 90px rgba(0,0,0,.35);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+}
+.ao-video-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.ao-video-title{
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.01em;
+}
+.ao-video-status{
+  margin-top:3px;
+  color:rgba(255,255,255,.68);
+  font-size:10px;
+  line-height:1.4;
+}
+.ao-video-close{
+  width:34px;
+  min-width:34px;
+  height:34px;
+  min-height:34px!important;
+  padding:0!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.08)!important;
+  color:#fff!important;
+  cursor:pointer;
+}
+.ao-video-stage{
+  position:relative;
+  min-height:420px;
+  height:min(66vh,620px);
+  background:#050a12;
+  overflow:hidden;
+}
+.ao-video-remote{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#050a12;
+}
+.ao-video-local-wrap{
+  position:absolute;
+  top:14px;
+  left:14px;
+  width:min(28%,240px);
+  aspect-ratio:4/3;
+  border-radius:15px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.28);
+  background:#090f19;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+}
+.ao-video-local{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  background:#090f19;
+}
+.ao-video-placeholder{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(255,255,255,.52);
+  font-size:12px;
+  text-align:center;
+  padding:20px;
+}
+.ao-video-controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  flex-wrap:wrap;
+  padding:12px 14px 15px;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+.ao-video-control{
+  min-width:110px;
+  min-height:40px!important;
+  padding:9px 13px!important;
+  border-radius:11px!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  background:rgba(255,255,255,.08)!important;
+  color:#fff!important;
+  font-size:11px!important;
+  font-weight:850!important;
+  cursor:pointer;
+}
+.ao-video-control:hover{background:rgba(255,255,255,.14)!important}
+.ao-video-control.danger{
+  border-color:rgba(248,113,113,.35)!important;
+  background:linear-gradient(135deg,#ef4444,#b91c1c)!important;
+}
+.ao-video-picker-card{
+  width:min(520px,100%);
+  max-height:82vh;
+  overflow:auto;
+  border:1px solid #dbe5f0;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 25px 80px rgba(0,0,0,.25);
+  color:#162337;
+}
+.ao-video-picker-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:16px 18px;
+  border-bottom:1px solid #edf1f5;
+}
+.ao-video-picker-title{
+  font-size:15px;
+  font-weight:950;
+}
+.ao-video-picker-sub{
+  margin-top:3px;
+  color:#64748b;
+  font-size:10px;
+}
+.ao-video-picker-close{
+  width:34px;
+  min-width:34px;
+  height:34px;
+  min-height:34px!important;
+  padding:0!important;
+  border:1px solid #e2e8f0!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#475569!important;
+  cursor:pointer;
+}
+.ao-video-admin-list{
+  display:grid;
+  gap:8px;
+  padding:14px;
+}
+.ao-video-admin-option{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 13px;
+  border:1px solid #dbe5f0;
+  border-radius:13px;
+  background:linear-gradient(180deg,#fff,#f8fbff);
+  color:#243447;
+  text-align:left;
+  cursor:pointer;
+}
+.ao-video-admin-option:hover{
+  border-color:#93c5fd;
+  background:#eff6ff;
+  transform:translateY(-1px);
+}
+.ao-video-admin-email{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+  font-weight:850;
+}
+.ao-video-admin-state{
+  flex:0 0 auto;
+  padding:4px 7px;
+  border-radius:999px;
+  font-size:9px;
+  font-weight:900;
+}
+.ao-video-admin-state.online{
+  color:#15803d;
+  background:#dcfce7;
+  border:1px solid #bbf7d0;
+}
+.ao-video-admin-state.offline{
+  color:#64748b;
+  background:#f1f5f9;
+  border:1px solid #e2e8f0;
+}
+.ao-video-admin-empty{
+  padding:24px 16px;
+  text-align:center;
+  color:#64748b;
+  font-size:11px;
+  line-height:1.5;
+}
+.ao-video-incoming-card{
+  width:min(430px,100%);
+  border-radius:22px;
+  background:#fff;
+  border:1px solid #dbe5f0;
+  box-shadow:0 25px 80px rgba(0,0,0,.30);
+  overflow:hidden;
+  color:#162337;
+}
+.ao-video-incoming-top{
+  padding:18px 18px 14px;
+  background:linear-gradient(135deg,#eff6ff,#f8fbff 58%,#f5f3ff);
+}
+.ao-video-incoming-icon{
+  width:50px;
+  height:50px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:15px;
+  background:linear-gradient(135deg,#dbeafe,#ede9fe);
+  color:#1d4ed8;
+  font-size:23px;
+  margin-bottom:11px;
+}
+.ao-video-incoming-title{
+  font-size:16px;
+  font-weight:950;
+}
+.ao-video-incoming-from{
+  margin-top:5px;
+  color:#475569;
+  font-size:11px;
+  line-height:1.5;
+  word-break:break-word;
+}
+.ao-video-incoming-actions{
+  display:flex;
+  gap:8px;
+  padding:14px 18px 18px;
+}
+.ao-video-incoming-actions button{
+  flex:1;
+  min-height:42px;
+  border-radius:11px!important;
+  font-size:11px!important;
+  font-weight:900!important;
+}
+.ao-video-decline{
+  border:1px solid #fecaca!important;
+  background:#fff1f2!important;
+  color:#b91c1c!important;
+}
+.ao-video-accept{
+  border:1px solid #86efac!important;
+  background:linear-gradient(135deg,#22c55e,#16a34a)!important;
+  color:#fff!important;
+}
+@media(max-width:650px){
+  .ao-video-overlay,.ao-video-incoming-overlay{padding:0}
+  .ao-video-card{
+    width:100%;
+    height:100%;
+    max-height:none;
+    border-radius:0;
+  }
+  .ao-video-stage{
+    min-height:0;
+    height:calc(100dvh - 155px);
+  }
+  .ao-video-local-wrap{width:34%;top:10px;left:10px}
+  .ao-video-controls{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  .ao-video-control{min-width:95px}
+}
+</style>
+
+<script id="aoVideoCallScript">
+(function(){
+  "use strict";
+
+  const AO_VIDEO_PROTOCOL = "AO_VIDEO_CALL_V1";
+  const AO_VIDEO_EVENT = "signal";
+  const AO_VIDEO_CHANNEL = "ao-video-call-v1";
+  const AO_VIDEO_CALL_TIMEOUT = 30000;
+
+  let aoVideoSignalClient = null;
+  let aoVideoSignalChannel = null;
+  let aoVideoSignalReady = false;
+  let aoVideoSignalStarting = false;
+  let aoVideoState = null;
+  let aoVideoIncoming = null;
+  let aoVideoInviteTimer = null;
+  let aoVideoAdminPicker = null;
+
+  function aoVideoIsDashboard(){
+    return !!document.getElementById("aoChatRecipient");
+  }
+
+  function aoVideoEscape(value){
+    return String(value == null ? "" : value)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function aoVideoUrl(){
+    try{
+      return typeof SUPABASE_URL !== "undefined" ? SUPABASE_URL : "";
+    }catch(e){
+      return "";
+    }
+  }
+
+  function aoVideoKey(){
+    try{
+      return typeof SUPABASE_KEY !== "undefined" ? SUPABASE_KEY : "";
+    }catch(e){
+      return "";
+    }
+  }
+
+  function aoVideoIdentity(){
+    if(aoVideoIsDashboard()){
+      let email = "";
+      try{
+        email = String(
+          typeof currentEmail !== "undefined" ? currentEmail : ""
+        ).trim().toLowerCase();
+      }catch(e){}
+      return {
+        email,
+        type:"DASHBOARD",
+        branch:"",
+        label:"Admin"
+      };
+    }
+
+    let email = "";
+    let branch = "";
+    try{
+      if(typeof aoChatEmail === "function") email = aoChatEmail();
+    }catch(e){}
+    try{
+      if(typeof aoChatBranch === "function") branch = aoChatBranch();
+      else if(typeof BRANCH !== "undefined") branch = String(BRANCH || "").trim().toUpperCase();
+    }catch(e){}
+    return {
+      email:String(email || "").trim().toLowerCase(),
+      type:"SCANNER",
+      branch:String(branch || "").trim().toUpperCase(),
+      label:"Scanner"
+    };
+  }
+
+  function aoVideoRest(path){
+    return fetch(
+      aoVideoUrl() + "/rest/v1/" + path,
+      {
+        method:"GET",
+        headers:{
+          apikey:aoVideoKey(),
+          Authorization:"Bearer " + aoVideoKey(),
+          Accept:"application/json"
+        }
+      }
+    ).then(async response=>{
+      const text=await response.text();
+      let data;
+      try{
+        data=text?JSON.parse(text):[];
+      }catch(e){
+        throw new Error("Unable to read video-call service response.");
+      }
+      if(!response.ok){
+        const message=data && (data.message || data.error || data.hint || data.details);
+        throw new Error(
+          "Video-call service error (" +
+          response.status +
+          ")" +
+          (message ? ": " + message : "")
+        );
+      }
+      return data;
+    });
+  }
+
+  function aoVideoLoadSupabaseClient(){
+    if(window.supabase && typeof window.supabase.createClient === "function"){
+      return Promise.resolve(window.supabase);
+    }
+
+    if(window.__aoVideoSupabaseLoader){
+      return window.__aoVideoSupabaseLoader;
+    }
+
+    window.__aoVideoSupabaseLoader = new Promise((resolve,reject)=>{
+      const existing = document.querySelector(
+        "script[data-ao-supabase-video-client='1']"
+      );
+
+      if(existing){
+        existing.addEventListener("load",()=>{
+          if(window.supabase?.createClient) resolve(window.supabase);
+          else reject(new Error("Supabase Realtime is unavailable."));
+        },{once:true});
+        existing.addEventListener("error",()=>{
+          reject(new Error("Could not load Supabase Realtime."));
+        },{once:true});
+        return;
+      }
+
+      const generic = [...document.scripts].find(
+        s => /@supabase\/supabase-js/i.test(String(s.src || ""))
+      );
+
+      if(generic){
+        const wait = setInterval(()=>{
+          if(window.supabase?.createClient){
+            clearInterval(wait);
+            resolve(window.supabase);
+          }
+        },50);
+        setTimeout(()=>{
+          clearInterval(wait);
+          if(window.supabase?.createClient) resolve(window.supabase);
+          else reject(new Error("Supabase Realtime did not become available."));
+        },12000);
+        return;
+      }
+
+      const script=document.createElement("script");
+      script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      script.async=true;
+      script.dataset.aoSupabaseVideoClient="1";
+      script.onload=()=>{
+        if(window.supabase?.createClient) resolve(window.supabase);
+        else reject(new Error("Supabase Realtime client unavailable."));
+      };
+      script.onerror=()=>{
+        reject(new Error("Could not load Supabase Realtime."));
+      };
+      document.head.appendChild(script);
+    });
+
+    return window.__aoVideoSupabaseLoader;
+  }
+
+  async function aoVideoEnsureSignal(){
+    if(aoVideoSignalReady && aoVideoSignalChannel){
+      return aoVideoSignalChannel;
+    }
+
+    if(aoVideoSignalStarting){
+      while(aoVideoSignalStarting){
+        await new Promise(resolve=>setTimeout(resolve,60));
+      }
+      return aoVideoSignalReady ? aoVideoSignalChannel : null;
+    }
+
+    aoVideoSignalStarting=true;
+
+    try{
+      const lib=await aoVideoLoadSupabaseClient();
+
+      if(!lib || typeof lib.createClient !== "function"){
+        throw new Error("Supabase Realtime is unavailable.");
+      }
+
+      if(!aoVideoSignalClient){
+        aoVideoSignalClient=lib.createClient(
+          aoVideoUrl(),
+          aoVideoKey(),
+          {
+            auth:{
+              persistSession:false,
+              autoRefreshToken:false,
+              detectSessionInUrl:false
+            },
+            realtime:{
+              params:{
+                eventsPerSecond:20
+              }
+            }
+          }
+        );
+      }
+
+      if(!aoVideoSignalChannel){
+        aoVideoSignalChannel=aoVideoSignalClient
+          .channel(AO_VIDEO_CHANNEL,{
+            config:{
+              broadcast:{
+                self:false,
+                ack:true
+              }
+            }
+          })
+          .on(
+            "broadcast",
+            {event:AO_VIDEO_EVENT},
+            payload=>{
+              try{
+                aoVideoHandleSignal(payload?.payload || {});
+              }catch(error){
+                console.warn("Video-call signaling handler failed:",error);
+              }
+            }
+          );
+
+        await new Promise((resolve,reject)=>{
+          let settled=false;
+          const finish=(ok,error)=>{
+            if(settled) return;
+            settled=true;
+            if(ok) resolve();
+            else reject(error || new Error("Video-call signaling failed."));
+          };
+
+          const subscription=aoVideoSignalChannel.subscribe(
+            status=>{
+              if(status==="SUBSCRIBED"){
+                aoVideoSignalReady=true;
+                finish(true);
+              }else if(
+                status==="CHANNEL_ERROR" ||
+                status==="TIMED_OUT" ||
+                status==="CLOSED"
+              ){
+                aoVideoSignalReady=false;
+                finish(false,new Error("Video-call signaling channel unavailable."));
+              }
+            }
+          );
+
+          void subscription;
+          setTimeout(()=>{
+            if(!settled){
+              finish(false,new Error("Video-call signaling timed out."));
+            }
+          },12000);
+        });
+      }
+
+      aoVideoSignalReady=true;
+      return aoVideoSignalChannel;
+    }catch(error){
+      aoVideoSignalReady=false;
+      console.warn("Video-call signaling startup failed:",error);
+      throw error;
+    }finally{
+      aoVideoSignalStarting=false;
+    }
+  }
+
+  async function aoVideoSend(payload){
+    const channel=await aoVideoEnsureSignal();
+    if(!channel){
+      throw new Error("Video-call signaling is unavailable.");
+    }
+
+    const identity=aoVideoIdentity();
+    const message={
+      protocol:AO_VIDEO_PROTOCOL,
+      version:1,
+      sentAt:Date.now(),
+      callId:String(payload.callId || ""),
+      kind:String(payload.kind || ""),
+      fromEmail:identity.email,
+      fromType:identity.type,
+      fromBranch:identity.branch || "",
+      fromLabel:identity.label || "",
+      toEmail:String(payload.toEmail || "").trim().toLowerCase(),
+      toType:String(payload.toType || "").trim().toUpperCase(),
+      toBranch:String(payload.toBranch || "").trim().toUpperCase(),
+      data:payload.data === undefined ? null : payload.data
+    };
+
+    const response=await channel.send({
+      type:"broadcast",
+      event:AO_VIDEO_EVENT,
+      payload:message
+    });
+
+    if(response && response !== "ok" && typeof response === "object" && response.error){
+      throw response.error;
+    }
+
+    return true;
+  }
+
+  function aoVideoEnsureUi(){
+    if(document.getElementById("aoVideoCallOverlay")) return;
+
+    const callOverlay=document.createElement("div");
+    callOverlay.id="aoVideoCallOverlay";
+    callOverlay.className="ao-video-overlay";
+    callOverlay.setAttribute("aria-hidden","true");
+    callOverlay.innerHTML=
+      '<div class="ao-video-card">' +
+        '<div class="ao-video-head">' +
+          '<div>' +
+            '<div id="aoVideoCallTitle" class="ao-video-title">Video Call</div>' +
+            '<div id="aoVideoCallStatus" class="ao-video-status">Preparing…</div>' +
+          '</div>' +
+          '<button id="aoVideoCallClose" class="ao-video-close" type="button" aria-label="Close">✕</button>' +
+        '</div>' +
+        '<div class="ao-video-stage">' +
+          '<video id="aoVideoRemote" class="ao-video-remote" autoplay playsinline></video>' +
+          '<div id="aoVideoRemotePlaceholder" class="ao-video-placeholder">Waiting for the other camera…</div>' +
+          '<div class="ao-video-local-wrap">' +
+            '<video id="aoVideoLocal" class="ao-video-local" autoplay muted playsinline></video>' +
+            '<div id="aoVideoLocalPlaceholder" class="ao-video-placeholder">Your camera will appear here.</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ao-video-controls">' +
+          '<button id="aoVideoMute" class="ao-video-control" type="button">🎤 Mute</button>' +
+          '<button id="aoVideoCamera" class="ao-video-control" type="button">📷 Camera</button>' +
+          '<button id="aoVideoEnd" class="ao-video-control danger" type="button">☎ End Call</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(callOverlay);
+
+    const incoming=document.createElement("div");
+    incoming.id="aoVideoIncomingOverlay";
+    incoming.className="ao-video-incoming-overlay";
+    incoming.setAttribute("aria-hidden","true");
+    incoming.innerHTML=
+      '<div class="ao-video-incoming-card">' +
+        '<div class="ao-video-incoming-top">' +
+          '<div class="ao-video-incoming-icon">📹</div>' +
+          '<div class="ao-video-incoming-title">Incoming Video Call</div>' +
+          '<div id="aoVideoIncomingFrom" class="ao-video-incoming-from"></div>' +
+        '</div>' +
+        '<div class="ao-video-incoming-actions">' +
+          '<button id="aoVideoDecline" class="ao-video-decline" type="button">Decline</button>' +
+          '<button id="aoVideoAccept" class="ao-video-accept" type="button">Accept</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(incoming);
+
+    document.getElementById("aoVideoCallClose").onclick=()=>{
+      aoVideoEndCall(true);
+    };
+    document.getElementById("aoVideoEnd").onclick=()=>{
+      aoVideoEndCall(true);
+    };
+    document.getElementById("aoVideoMute").onclick=()=>{
+      aoVideoToggleMute();
+    };
+    document.getElementById("aoVideoCamera").onclick=()=>{
+      aoVideoToggleCamera();
+    };
+    document.getElementById("aoVideoAccept").onclick=()=>{
+      aoVideoAcceptIncoming().catch(error=>{
+        console.error("Video-call accept failed:",error);
+        aoVideoSetStatus(error?.message || "Unable to accept the video call.");
+        aoVideoCloseIncoming();
+      });
+    };
+    document.getElementById("aoVideoDecline").onclick=()=>{
+      aoVideoDeclineIncoming().catch(error=>{
+        console.warn("Video-call decline failed:",error);
+      });
+    };
+
+    callOverlay.addEventListener("click",event=>{
+      if(event.target===callOverlay && aoVideoState?.status==="ringing-outgoing"){
+        aoVideoEndCall(true);
+      }
+    });
+
+    incoming.addEventListener("click",event=>{
+      if(event.target===incoming){
+        aoVideoDeclineIncoming().catch(()=>{});
+      }
+    });
+
+    const button=document.getElementById("aoVideoCallBtn");
+    if(button && !button.dataset.aoVideoBound){
+      button.dataset.aoVideoBound="1";
+      button.addEventListener("click",()=>{
+        if(aoVideoIsDashboard()){
+          const branch=
+            typeof aoChatBranch==="function"
+              ? String(aoChatBranch() || "").trim().toUpperCase()
+              : "";
+          const recipient=
+            typeof aoChatRecipient==="function"
+              ? String(aoChatRecipient() || "").trim().toLowerCase()
+              : "";
+
+          if(!branch || !recipient){
+            if(typeof aoChatStatus==="function"){
+              aoChatStatus("Select a branch and scanner first.");
+            }
+            return;
+          }
+
+          aoVideoStartCall({
+            toEmail:recipient,
+            toType:"SCANNER",
+            toBranch:branch
+          }).catch(error=>{
+            console.error("Dashboard video call start failed:",error);
+            if(typeof aoChatStatus==="function"){
+              aoChatStatus(error?.message || "Unable to start video call.");
+            }
+          });
+        }else{
+          aoVideoOpenAdminPicker();
+        }
+      });
+    }
+
+    if(aoVideoIsDashboard()){
+      const recipient=document.getElementById("aoChatRecipient");
+      if(recipient && !recipient.dataset.aoVideoChangeBound){
+        recipient.dataset.aoVideoChangeBound="1";
+        recipient.addEventListener("change",aoVideoUpdateButtonState);
+      }
+      aoVideoUpdateButtonState();
+    }
+  }
+
+  function aoVideoUpdateButtonState(){
+    const button=document.getElementById("aoVideoCallBtn");
+    if(!button) return;
+
+    if(aoVideoIsDashboard()){
+      const branch=
+        typeof aoChatBranch==="function"
+          ? String(aoChatBranch() || "").trim()
+          : "";
+      const recipient=
+        typeof aoChatRecipient==="function"
+          ? String(aoChatRecipient() || "").trim()
+          : "";
+      button.disabled=!(branch && recipient);
+    }else{
+      button.disabled=false;
+    }
+  }
+
+  function aoVideoSetStatus(text){
+    const el=document.getElementById("aoVideoCallStatus");
+    if(el) el.textContent=String(text || "");
+  }
+
+  function aoVideoOpenCallUi(title,status){
+    aoVideoEnsureUi();
+
+    const overlay=document.getElementById("aoVideoCallOverlay");
+    const titleEl=document.getElementById("aoVideoCallTitle");
+    const remote=document.getElementById("aoVideoRemote");
+    const local=document.getElementById("aoVideoLocal");
+    const remotePh=document.getElementById("aoVideoRemotePlaceholder");
+    const localPh=document.getElementById("aoVideoLocalPlaceholder");
+
+    if(titleEl) titleEl.textContent=title || "Video Call";
+    aoVideoSetStatus(status || "Connecting…");
+
+    if(remote){
+      remote.srcObject=null;
+    }
+    if(local){
+      local.srcObject=null;
+    }
+    if(remotePh) remotePh.style.display="";
+    if(localPh) localPh.style.display="";
+
+    overlay?.classList.add("open");
+    overlay?.setAttribute("aria-hidden","false");
+  }
+
+  function aoVideoCloseCallUi(){
+    const overlay=document.getElementById("aoVideoCallOverlay");
+    if(overlay){
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden","true");
+    }
+
+    const remote=document.getElementById("aoVideoRemote");
+    const local=document.getElementById("aoVideoLocal");
+    if(remote) remote.srcObject=null;
+    if(local) local.srcObject=null;
+
+    const mute=document.getElementById("aoVideoMute");
+    const camera=document.getElementById("aoVideoCamera");
+    if(mute) mute.textContent="🎤 Mute";
+    if(camera) camera.textContent="📷 Camera";
+  }
+
+  function aoVideoOpenIncoming(info){
+    aoVideoEnsureUi();
+
+    const from=document.getElementById("aoVideoIncomingFrom");
+    if(from){
+      const callerLabel=
+        info.fromType==="SCANNER"
+          ? "Scanner"
+          : "Admin";
+      from.innerHTML=
+        "<strong>" + aoVideoEscape(callerLabel) + "</strong>" +
+        " · " +
+        aoVideoEscape(info.fromEmail || "") +
+        (info.fromBranch
+          ? "<br>Branch: <strong>" + aoVideoEscape(info.fromBranch) + "</strong>"
+          : "");
+    }
+
+    const overlay=document.getElementById("aoVideoIncomingOverlay");
+    overlay?.classList.add("open");
+    overlay?.setAttribute("aria-hidden","false");
+    aoVideoIncoming=info;
+  }
+
+  function aoVideoCloseIncoming(){
+    const overlay=document.getElementById("aoVideoIncomingOverlay");
+    if(overlay){
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden","true");
+    }
+    aoVideoIncoming=null;
+  }
+
+  function aoVideoHasActiveCall(){
+    return !!aoVideoState;
+  }
+
+  function aoVideoCreatePeer(){
+    const state=aoVideoState;
+    if(!state) throw new Error("No active video call.");
+
+    if(state.peer) return state.peer;
+
+    const peer=new RTCPeerConnection({
+      iceServers:[
+        {urls:"stun:stun.l.google.com:19302"},
+        {urls:"stun:stun1.l.google.com:19302"}
+      ]
+    });
+
+    peer.onicecandidate=event=>{
+      if(event.candidate){
+        aoVideoSend({
+          kind:"ice",
+          callId:state.callId,
+          toEmail:state.remoteEmail,
+          toType:state.remoteType,
+          toBranch:state.remoteBranch,
+          data:event.candidate
+        }).catch(error=>{
+          console.warn("Video-call ICE signaling failed:",error);
+        });
+      }
+    };
+
+    peer.ontrack=event=>{
+      const remote=document.getElementById("aoVideoRemote");
+      if(!remote) return;
+      if(event.streams && event.streams[0]){
+        remote.srcObject=event.streams[0];
+      }else{
+        let stream=remote.srcObject;
+        if(!stream || typeof stream.addTrack!=="function"){
+          stream=new MediaStream();
+          remote.srcObject=stream;
+        }
+        stream.addTrack(event.track);
+      }
+      const placeholder=document.getElementById("aoVideoRemotePlaceholder");
+      if(placeholder) placeholder.style.display="none";
+    };
+
+    peer.onconnectionstatechange=()=>{
+      const cs=peer.connectionState;
+
+      if(cs==="connected"){
+        state.connected=true;
+        state.status="connected";
+        aoVideoSetStatus(
+          state.role==="caller"
+            ? "Connected to " + state.remoteEmail
+            : "Connected"
+        );
+      }else if(cs==="connecting"){
+        aoVideoSetStatus("Connecting video and audio…");
+      }else if(cs==="disconnected"){
+        aoVideoSetStatus("Connection interrupted. Reconnecting…");
+      }else if(cs==="failed"){
+        aoVideoSetStatus("Connection failed.");
+        setTimeout(()=>{
+          if(aoVideoState && aoVideoState.callId===state.callId){
+            aoVideoEndCall(true);
+          }
+        },1200);
+      }else if(cs==="closed"){
+        if(aoVideoState && aoVideoState.callId===state.callId){
+          aoVideoEndCall(false);
+        }
+      }
+    };
+
+    peer.oniceconnectionstatechange=()=>{
+      if(
+        peer.iceConnectionState==="failed" &&
+        aoVideoState &&
+        aoVideoState.callId===state.callId
+      ){
+        aoVideoSetStatus("Network connection failed.");
+        setTimeout(()=>{
+          if(aoVideoState && aoVideoState.callId===state.callId){
+            aoVideoEndCall(true);
+          }
+        },1000);
+      }
+    };
+
+    state.peer=peer;
+
+    if(state.localStream){
+      state.localStream.getTracks().forEach(track=>{
+        try{
+          peer.addTrack(track,state.localStream);
+        }catch(error){
+          console.warn("Video track attach failed:",error);
+        }
+      });
+    }
+
+    return peer;
+  }
+
+  async function aoVideoEnsureLocalMedia(){
+    const state=aoVideoState;
+    if(!state) throw new Error("No active video call.");
+
+    if(state.localStream) return state.localStream;
+
+    if(!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia!=="function"){
+      throw new Error("Camera and microphone access are not available in this browser.");
+    }
+
+    const stream=await navigator.mediaDevices.getUserMedia({
+      video:{
+        width:{ideal:1280},
+        height:{ideal:720},
+        frameRate:{ideal:24,max:30},
+        facingMode:"user"
+      },
+      audio:{
+        echoCancellation:true,
+        noiseSuppression:true,
+        autoGainControl:true
+      }
+    });
+
+    state.localStream=stream;
+
+    const local=document.getElementById("aoVideoLocal");
+    if(local){
+      local.srcObject=stream;
+      try{ await local.play(); }catch(e){}
+    }
+
+    const placeholder=document.getElementById("aoVideoLocalPlaceholder");
+    if(placeholder) placeholder.style.display="none";
+
+    return stream;
+  }
+
+  async function aoVideoPreparePeerWithMedia(){
+    await aoVideoEnsureLocalMedia();
+    aoVideoCreatePeer();
+  }
+
+  async function aoVideoStartCall(options){
+    if(aoVideoState){
+      throw new Error("You already have a video call in progress.");
+    }
+
+    const me=aoVideoIdentity();
+    const targetEmail=String(options?.toEmail || "").trim().toLowerCase();
+    const targetType=String(options?.toType || "").trim().toUpperCase();
+    const targetBranch=String(options?.toBranch || "").trim().toUpperCase();
+
+    if(!me.email){
+      throw new Error("Your session is not ready for a video call.");
+    }
+    if(!targetEmail){
+      throw new Error("No video-call recipient was selected.");
+    }
+    if(targetEmail===me.email){
+      throw new Error("You cannot call your own account.");
+    }
+
+    await aoVideoEnsureSignal();
+
+    const callId=
+      "AO-" +
+      Date.now().toString(36) +
+      "-" +
+      Math.random().toString(36).slice(2,8);
+
+    aoVideoState={
+      callId,
+      role:"caller",
+      status:"ringing-outgoing",
+      remoteEmail:targetEmail,
+      remoteType:targetType,
+      remoteBranch:targetBranch,
+      localStream:null,
+      peer:null,
+      connected:false,
+      pendingIce:[]
+    };
+
+    aoVideoOpenCallUi(
+      targetType==="ADMIN" ? "Calling Admin" : "Calling Scanner",
+      "Calling " + targetEmail + "…"
+    );
+
+    try{
+      await aoVideoSend({
+        kind:"invite",
+        callId,
+        toEmail:targetEmail,
+        toType:targetType,
+        toBranch:targetBranch,
+        data:null
+      });
+
+      clearTimeout(aoVideoInviteTimer);
+      aoVideoInviteTimer=setTimeout(()=>{
+        if(
+          aoVideoState &&
+          aoVideoState.callId===callId &&
+          aoVideoState.status==="ringing-outgoing"
+        ){
+          aoVideoSetStatus("No answer.");
+          setTimeout(()=>aoVideoEndCall(true),900);
+        }
+      },AO_VIDEO_CALL_TIMEOUT);
+    }catch(error){
+      aoVideoEndCall(false);
+      throw error;
+    }
+
+    return true;
+  }
+
+  async function aoVideoAcceptIncoming(){
+    const info=aoVideoIncoming;
+    if(!info) return;
+
+    if(aoVideoState){
+      await aoVideoSend({
+        kind:"busy",
+        callId:info.callId,
+        toEmail:info.fromEmail,
+        toType:info.fromType,
+        toBranch:info.fromBranch,
+        data:null
+      }).catch(()=>{});
+      aoVideoCloseIncoming();
+      return;
+    }
+
+    await aoVideoEnsureSignal();
+
+    aoVideoCloseIncoming();
+
+    aoVideoState={
+      callId:info.callId,
+      role:"callee",
+      status:"connecting",
+      remoteEmail:info.fromEmail,
+      remoteType:info.fromType,
+      remoteBranch:info.fromBranch,
+      localStream:null,
+      peer:null,
+      connected:false,
+      pendingIce:[]
+    };
+
+    aoVideoOpenCallUi(
+      info.fromType==="SCANNER" ? "Scanner Video Call" : "Admin Video Call",
+      "Joining call…"
+    );
+
+    await aoVideoSend({
+      kind:"accept",
+      callId:info.callId,
+      toEmail:info.fromEmail,
+      toType:info.fromType,
+      toBranch:info.fromBranch,
+      data:null
+    });
+  }
+
+  async function aoVideoDeclineIncoming(){
+    const info=aoVideoIncoming;
+    aoVideoCloseIncoming();
+
+    if(!info) return;
+
+    try{
+      await aoVideoEnsureSignal();
+      await aoVideoSend({
+        kind:"decline",
+        callId:info.callId,
+        toEmail:info.fromEmail,
+        toType:info.fromType,
+        toBranch:info.fromBranch,
+        data:null
+      });
+    }catch(error){
+      console.warn("Video-call decline signal failed:",error);
+    }
+  }
+
+  async function aoVideoHandleSignal(message){
+    if(!message || message.protocol!==AO_VIDEO_PROTOCOL) return;
+
+    const me=aoVideoIdentity();
+    if(!me.email) return;
+
+    const toEmail=String(message.toEmail || "").trim().toLowerCase();
+    const callId=String(message.callId || "");
+
+    if(!callId || toEmail!==me.email) return;
+    if(String(message.fromEmail || "").trim().toLowerCase()===me.email) return;
+
+    const kind=String(message.kind || "").toLowerCase();
+
+    if(kind==="invite"){
+      if(aoVideoState){
+        await aoVideoSend({
+          kind:"busy",
+          callId,
+          toEmail:message.fromEmail,
+          toType:message.fromType,
+          toBranch:message.fromBranch,
+          data:null
+        }).catch(()=>{});
+        return;
+      }
+
+      if(aoVideoIncoming){
+        await aoVideoSend({
+          kind:"busy",
+          callId,
+          toEmail:message.fromEmail,
+          toType:message.fromType,
+          toBranch:message.fromBranch,
+          data:null
+        }).catch(()=>{});
+        return;
+      }
+
+      aoVideoOpenIncoming({
+        callId,
+        fromEmail:String(message.fromEmail || "").trim().toLowerCase(),
+        fromType:String(message.fromType || "").trim().toUpperCase(),
+        fromBranch:String(message.fromBranch || "").trim().toUpperCase()
+      });
+      return;
+    }
+
+    if(
+      kind==="accept" ||
+      kind==="decline" ||
+      kind==="busy"
+    ){
+      if(
+        !aoVideoState ||
+        aoVideoState.callId!==callId
+      ){
+        return;
+      }
+
+      clearTimeout(aoVideoInviteTimer);
+
+      if(kind==="decline"){
+        aoVideoSetStatus("Call declined.");
+        setTimeout(()=>aoVideoEndCall(true),850);
+        return;
+      }
+
+      if(kind==="busy"){
+        aoVideoSetStatus("The selected user is already on another call.");
+        setTimeout(()=>aoVideoEndCall(true),1100);
+        return;
+      }
+
+      /* ACCEPT from callee -> caller creates the WebRTC offer. */
+      if(
+        aoVideoState.role==="caller" &&
+        aoVideoState.status==="ringing-outgoing"
+      ){
+        aoVideoState.status="connecting";
+        aoVideoSetStatus("Call accepted. Starting camera and microphone…");
+
+        await aoVideoPreparePeerWithMedia();
+
+        const offer=await aoVideoState.peer.createOffer({
+          offerToReceiveAudio:true,
+          offerToReceiveVideo:true
+        });
+
+        await aoVideoState.peer.setLocalDescription(offer);
+
+        await aoVideoSend({
+          kind:"offer",
+          callId,
+          toEmail:aoVideoState.remoteEmail,
+          toType:aoVideoState.remoteType,
+          toBranch:aoVideoState.remoteBranch,
+          data:aoVideoState.peer.localDescription
+        });
+      }
+      return;
+    }
+
+    if(
+      kind==="offer" ||
+      kind==="answer" ||
+      kind==="ice" ||
+      kind==="end"
+    ){
+      if(
+        !aoVideoState ||
+        aoVideoState.callId!==callId
+      ){
+        return;
+      }
+    }
+
+    if(kind==="offer"){
+      await aoVideoPreparePeerWithMedia();
+
+      const peer=aoVideoState.peer;
+      const description=message.data;
+
+      if(!description){
+        throw new Error("Video-call offer is missing.");
+      }
+
+      await peer.setRemoteDescription(new RTCSessionDescription(description));
+
+      const pending=aoVideoState.pendingIce.splice(0);
+      for(const candidate of pending){
+        try{
+          await peer.addIceCandidate(candidate);
+        }catch(error){
+          console.warn("Pending ICE candidate rejected:",error);
+        }
+      }
+
+      const answer=await peer.createAnswer();
+      await peer.setLocalDescription(answer);
+
+      await aoVideoSend({
+        kind:"answer",
+        callId,
+        toEmail:aoVideoState.remoteEmail,
+        toType:aoVideoState.remoteType,
+        toBranch:aoVideoState.remoteBranch,
+        data:aoVideoState.peer.localDescription
+      });
+
+      aoVideoSetStatus("Connecting video and audio…");
+      return;
+    }
+
+    if(kind==="answer"){
+      if(!aoVideoState.peer) return;
+
+      await aoVideoState.peer.setRemoteDescription(
+        new RTCSessionDescription(message.data)
+      );
+
+      const pending=aoVideoState.pendingIce.splice(0);
+      for(const candidate of pending){
+        try{
+          await aoVideoState.peer.addIceCandidate(candidate);
+        }catch(error){
+          console.warn("Pending ICE candidate rejected:",error);
+        }
+      }
+
+      aoVideoSetStatus("Connecting video and audio…");
+      return;
+    }
+
+    if(kind==="ice"){
+      const candidate=message.data;
+      if(!candidate) return;
+
+      if(
+        aoVideoState.peer &&
+        aoVideoState.peer.remoteDescription
+      ){
+        try{
+          await aoVideoState.peer.addIceCandidate(candidate);
+        }catch(error){
+          console.warn("ICE candidate rejected:",error);
+        }
+      }else{
+        aoVideoState.pendingIce.push(candidate);
+      }
+      return;
+    }
+
+    if(kind==="end"){
+      aoVideoSetStatus("Call ended by the other user.");
+      setTimeout(()=>aoVideoEndCall(false),650);
+    }
+  }
+
+  function aoVideoToggleMute(){
+    if(!aoVideoState?.localStream) return;
+    const audioTracks=aoVideoState.localStream.getAudioTracks();
+    if(!audioTracks.length) return;
+
+    const enabled=!audioTracks.every(track=>track.enabled);
+    audioTracks.forEach(track=>{track.enabled=!enabled;});
+
+    const btn=document.getElementById("aoVideoMute");
+    if(btn){
+      btn.textContent=enabled ? "🎤 Unmute" : "🎤 Mute";
+    }
+  }
+
+  function aoVideoToggleCamera(){
+    if(!aoVideoState?.localStream) return;
+    const videoTracks=aoVideoState.localStream.getVideoTracks();
+    if(!videoTracks.length) return;
+
+    const enabled=!videoTracks.every(track=>track.enabled);
+    videoTracks.forEach(track=>{track.enabled=!enabled;});
+
+    const btn=document.getElementById("aoVideoCamera");
+    if(btn){
+      btn.textContent=enabled ? "📷 Camera" : "📷 Camera Off";
+    }
+  }
+
+  async function aoVideoEndCall(notifyPeer){
+    clearTimeout(aoVideoInviteTimer);
+
+    const state=aoVideoState;
+    aoVideoState=null;
+
+    if(state && notifyPeer && state.remoteEmail){
+      try{
+        await aoVideoSend({
+          kind:"end",
+          callId:state.callId,
+          toEmail:state.remoteEmail,
+          toType:state.remoteType,
+          toBranch:state.remoteBranch,
+          data:null
+        });
+      }catch(error){
+        console.warn("Video-call end signal failed:",error);
+      }
+    }
+
+    if(state?.peer){
+      try{state.peer.ontrack=null;}catch(e){}
+      try{state.peer.close();}catch(e){}
+    }
+
+    if(state?.localStream){
+      state.localStream.getTracks().forEach(track=>{
+        try{track.stop();}catch(e){}
+      });
+    }
+
+    aoVideoCloseCallUi();
+
+    const message=notifyPeer ? "Video call ended." : "";
+    if(message){
+      if(aoVideoIsDashboard()){
+        if(typeof aoChatStatus==="function") aoChatStatus(message);
+      }else{
+        if(typeof aoChatStatus==="function") aoChatStatus(message);
+      }
+      setTimeout(()=>{
+        try{ if(typeof aoChatStatus==="function") aoChatStatus(""); }catch(e){}
+      },1800);
+    }
+  }
+
+  async function aoVideoOpenAdminPicker(){
+    if(aoVideoState){
+      if(typeof aoChatStatus==="function"){
+        aoChatStatus("You already have a video call in progress.");
+      }
+      return;
+    }
+
+    const identity=aoVideoIdentity();
+    if(!identity.email || !identity.branch){
+      if(typeof aoChatStatus==="function"){
+        aoChatStatus("Please log in first.");
+      }
+      return;
+    }
+
+    try{
+      await aoVideoEnsureSignal();
+    }catch(error){
+      if(typeof aoChatStatus==="function"){
+        aoChatStatus(error?.message || "Video-call service unavailable.");
+      }
+      return;
+    }
+
+    aoVideoEnsureUi();
+
+    if(aoVideoAdminPicker){
+      aoVideoAdminPicker.remove();
+      aoVideoAdminPicker=null;
+    }
+
+    const modal=document.createElement("div");
+    modal.className="ao-video-incoming-overlay open";
+    modal.setAttribute("aria-hidden","false");
+    modal.innerHTML=
+      '<div class="ao-video-picker-card">' +
+        '<div class="ao-video-picker-head">' +
+          '<div>' +
+            '<div class="ao-video-picker-title">Choose Admin to Call</div>' +
+            '<div class="ao-video-picker-sub">' +
+              'Branch: ' + aoVideoEscape(identity.branch) +
+            '</div>' +
+          '</div>' +
+          '<button type="button" class="ao-video-picker-close" aria-label="Close">✕</button>' +
+        '</div>' +
+        '<div id="aoVideoAdminList" class="ao-video-admin-list">' +
+          '<div class="ao-video-admin-empty">Loading admins…</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+    aoVideoAdminPicker=modal;
+
+    const close=()=>{
+      if(modal) modal.remove();
+      if(aoVideoAdminPicker===modal) aoVideoAdminPicker=null;
+    };
+
+    modal.querySelector(".ao-video-picker-close").onclick=close;
+    modal.addEventListener("click",event=>{
+      if(event.target===modal) close();
+    });
+
+    const list=modal.querySelector("#aoVideoAdminList");
+
+    try{
+      const rows=await aoVideoRest(
+        "app_allowed_users?select=email,is_admin,active"
+      );
+
+      const isTrue=value=>{
+        const s=String(value == null ? "" : value).trim().toLowerCase();
+        return value===true || s==="true" || s==="1" || s==="yes";
+      };
+
+      const admins=(Array.isArray(rows) ? rows : [])
+        .filter(row=>isTrue(row?.is_admin))
+        .filter(row=>{
+          const active=row?.active;
+          return active===undefined || active===null || isTrue(active);
+        })
+        .map(row=>String(row?.email || "").trim().toLowerCase())
+        .filter(Boolean)
+        .filter(email=>email!==identity.email);
+
+      const unique=[...new Set(admins)].sort();
+
+      if(!unique.length){
+        if(list){
+          list.innerHTML=
+            '<div class="ao-video-admin-empty">' +
+              'No active administrators were found.' +
+            '</div>';
+        }
+        return;
+      }
+
+      if(list){
+        list.innerHTML=unique.map(email=>
+          '<button type="button" class="ao-video-admin-option" data-admin-email="' +
+            aoVideoEscape(email) +
+          '">' +
+            '<span class="ao-video-admin-email">' +
+              aoVideoEscape(email) +
+            '</span>' +
+            '<span class="ao-video-admin-state online">ADMIN</span>' +
+          '</button>'
+        ).join("");
+
+        list.querySelectorAll("[data-admin-email]").forEach(button=>{
+          button.addEventListener("click",()=>{
+            const email=String(button.dataset.adminEmail || "").trim().toLowerCase();
+            close();
+
+            aoVideoStartCall({
+              toEmail:email,
+              toType:"ADMIN",
+              toBranch:identity.branch
+            }).catch(error=>{
+              console.error("Scanner video call start failed:",error);
+              if(typeof aoChatStatus==="function"){
+                aoChatStatus(error?.message || "Unable to start video call.");
+              }
+            });
+          });
+        });
+      }
+    }catch(error){
+      console.error("Admin list for video call failed:",error);
+      if(list){
+        list.innerHTML=
+          '<div class="ao-video-admin-empty">' +
+            aoVideoEscape(error?.message || "Unable to load administrators.") +
+          '</div>';
+      }
+    }
+  }
+
+  function aoVideoInit(){
+    if(!document.body) return;
+
+    aoVideoEnsureUi();
+
+    /* The button is inside the existing message box; no existing chat handler is replaced. */
+    aoVideoUpdateButtonState();
+
+    /* Start signaling lazily after the existing page is settled. */
+    setTimeout(()=>{
+      aoVideoEnsureSignal().catch(()=>{});
+    },1200);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",aoVideoInit,{once:true});
+  }else{
+    aoVideoInit();
+  }
+
+})();
+</script>
+
 </body>
 </html>

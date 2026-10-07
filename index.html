@@ -29173,5 +29173,174 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 })();
 </script>
+<script id="aoVideoRingtoneAddOn">
+(function(){
+  "use strict";
+
+  /*
+   * ADD-ON ONLY:
+   * - Does not replace or modify the existing video-call functions.
+   * - Uses the existing call UI as the state indicator.
+   * - Rings while an outgoing call is waiting for acceptance.
+   * - Rings while an incoming call is waiting for Accept/Decline.
+   * - Stops immediately when ringing state disappears.
+   */
+
+  let audioContext = null;
+  let ringTimer = null;
+  let ringActive = false;
+  let observerStarted = false;
+  let checkTimer = null;
+  let unlockBound = false;
+
+  function getAudioContext(){
+    if(audioContext) return audioContext;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return null;
+    try{
+      audioContext = new Ctx();
+    }catch(error){
+      console.warn("Acebedo ringtone audio could not be initialized:", error);
+      return null;
+    }
+    return audioContext;
+  }
+
+  async function unlockAudio(){
+    const ctx = getAudioContext();
+    if(!ctx) return;
+    try{
+      if(ctx.state === "suspended") await ctx.resume();
+    }catch(error){
+      /* Browser autoplay rules may defer audio until the next user gesture. */
+    }
+  }
+
+  function playTone(frequency, when, duration, gainValue){
+    const ctx = getAudioContext();
+    if(!ctx || ctx.state !== "running") return;
+
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, when);
+
+    gain.gain.setValueAtTime(0.0001, when);
+    gain.gain.exponentialRampToValueAtTime(gainValue, when + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start(when);
+    oscillator.stop(when + duration + 0.035);
+  }
+
+  function playRingCycle(){
+    const ctx = getAudioContext();
+    if(!ctx || ctx.state !== "running") return;
+
+    const now = ctx.currentTime + 0.02;
+
+    /* Two-tone telephone-style ring, kept soft enough for an office app. */
+    playTone(523.25, now,       0.42, 0.075);
+    playTone(659.25, now + 0.46, 0.42, 0.075);
+
+    /* Second short ring after a small pause. */
+    playTone(523.25, now + 1.18, 0.42, 0.075);
+    playTone(659.25, now + 1.64, 0.42, 0.075);
+  }
+
+  async function startRingtone(){
+    if(ringActive) return;
+    ringActive = true;
+
+    await unlockAudio();
+    if(!ringActive) return;
+
+    playRingCycle();
+    ringTimer = setInterval(playRingCycle, 3300);
+  }
+
+  function stopRingtone(){
+    ringActive = false;
+    if(ringTimer){
+      clearInterval(ringTimer);
+      ringTimer = null;
+    }
+  }
+
+  function isOpen(el){
+    return !!el && el.classList.contains("open");
+  }
+
+  function isOutgoingRinging(){
+    const overlay = document.getElementById("aoVideoCallOverlay");
+    if(!isOpen(overlay)) return false;
+
+    const title = String(document.getElementById("aoVideoCallTitle")?.textContent || "").trim();
+    const status = String(document.getElementById("aoVideoCallStatus")?.textContent || "").trim();
+
+    /* Ring only after the existing caller status changes to "Calling …",
+       which happens after the invite is sent. Do not ring during media setup. */
+    return /^Calling\s+/i.test(status);
+  }
+
+  function isIncomingRinging(){
+    return isOpen(document.getElementById("aoVideoIncomingOverlay"));
+  }
+
+  function syncRingtone(){
+    const shouldRing = isOutgoingRinging() || isIncomingRinging();
+    if(shouldRing) startRingtone();
+    else stopRingtone();
+  }
+
+  function bindUnlock(){
+    if(unlockBound) return;
+    unlockBound = true;
+
+    const unlock = function(){
+      unlockAudio().catch(()=>{});
+      if(!ringActive) syncRingtone();
+    };
+
+    document.addEventListener("pointerdown", unlock, {passive:true});
+    document.addEventListener("touchstart", unlock, {passive:true});
+    document.addEventListener("keydown", unlock, {passive:true});
+  }
+
+  function boot(){
+    if(!document.body) return;
+    bindUnlock();
+
+    /* Observe only UI state; the existing call functions remain untouched. */
+    if(!observerStarted){
+      observerStarted = true;
+      const observer = new MutationObserver(function(){
+        syncRingtone();
+      });
+      observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class","aria-hidden"]});
+    }
+
+    if(!checkTimer){
+      checkTimer = setInterval(syncRingtone,250);
+    }
+
+    syncRingtone();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded",boot,{once:true});
+  }else{
+    boot();
+  }
+
+  window.addEventListener("pagehide",stopRingtone);
+  window.addEventListener("beforeunload",stopRingtone);
+})();
+</script>
+
 </body>
 </html>

@@ -7676,6 +7676,17 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
 }
 </style>
 
+
+<style id="aoUdbLogoSizeTweak">
+/* Surgical size tweak: dashboard/header picture only. */
+@media (min-width:701px){
+  .topbar .brandLogo{
+    width:47px !important;
+    height:47px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -28419,6 +28430,17 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(String(message.fromEmail || "").trim().toLowerCase()===me.email) return;
 
     const kind=String(message.kind || "").toLowerCase();
+
+    /*
+     * FIX: if the caller cancels before the receiver accepts,
+     * the receiver only has aoVideoIncoming (the popup), not
+     * aoVideoState. The old end-signal guard therefore ignored
+     * the cancellation and left the popup visible.
+     */
+    if(kind==="end" && aoVideoIncoming && aoVideoIncoming.callId===callId){
+      aoVideoCloseIncoming();
+      return;
+    }
 
     if(kind==="invite"){
       if(aoVideoState){

@@ -28877,5 +28877,301 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 
+
+<script id="aoAdminDisplayNameAddOn">
+(function(){
+  "use strict";
+
+  const TABLE = "admin_display_names";
+  const CACHE_MS = 15000;
+  let nameMap = new Map();
+  let loadedAt = 0;
+  let loadPromise = null;
+  let editor = null;
+  let observerStarted = false;
+
+  function myEmail(){
+    try{
+      return String(typeof currentEmail !== "undefined" ? currentEmail : "")
+        .trim().toLowerCase();
+    }catch(e){ return ""; }
+  }
+
+  function esc(value){
+    return String(value == null ? "" : value)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/\"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function nameFor(email){
+    const e = String(email || "").trim().toLowerCase();
+    return nameMap.get(e) || e;
+  }
+
+  function apiHeaders(extra){
+    return Object.assign({
+      apikey: SUPABASE_KEY,
+      Authorization: "Bearer " + SUPABASE_KEY,
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    }, extra || {});
+  }
+
+  async function loadNames(force){
+    const now = Date.now();
+    if(!force && loadedAt && (now - loadedAt) < CACHE_MS) return nameMap;
+    if(loadPromise && !force) return loadPromise;
+
+    loadPromise = (async function(){
+      try{
+        const response = await fetch(
+          SUPABASE_URL + "/rest/v1/" + TABLE + "?select=email,display_name",
+          { method:"GET", headers:apiHeaders() }
+        );
+        const body = await response.text();
+        if(!response.ok) throw new Error("Display-name service error (" + response.status + ")");
+
+        const rows = body ? JSON.parse(body) : [];
+        const next = new Map();
+        (Array.isArray(rows) ? rows : []).forEach(function(row){
+          const email = String(row && row.email || "").trim().toLowerCase();
+          const display = String(row && row.display_name || "").trim();
+          if(email && display) next.set(email, display);
+        });
+        nameMap = next;
+      }catch(error){
+        console.warn("Admin display-name load failed:", error);
+      }
+      loadedAt = Date.now();
+      loadPromise = null;
+      applyAll();
+      return nameMap;
+    })();
+
+    return loadPromise;
+  }
+
+  function applyHeader(){
+    const email = myEmail();
+    const el = document.getElementById("userEmail");
+    if(!el || !email) return;
+    const name = nameFor(email);
+    if(el.textContent !== name) el.textContent = name;
+    if(el.title !== name) el.title = name;
+  }
+
+  function applyChat(){
+    document.querySelectorAll("#aoChatMessages .ao-chat-name, .ao-chat-messages .ao-chat-name").forEach(function(el){
+      const raw = String(el.textContent || "").trim();
+      const sep = raw.indexOf(" · ");
+      if(sep < 0) return;
+      const role = raw.slice(0, sep).trim();
+      const sender = raw.slice(sep + 3).trim();
+      if(role.toUpperCase() !== "ADMIN") return;
+      if(!sender || !sender.includes("@")) return;
+      const nextText = role + " · " + nameFor(sender);
+      if(el.textContent !== nextText) el.textContent = nextText;
+    });
+  }
+
+  function applyAll(){
+    applyHeader();
+    applyChat();
+  }
+
+  function ensureStyle(){
+    if(document.getElementById("aoAdminDisplayNameStyle")) return;
+    const style = document.createElement("style");
+    style.id = "aoAdminDisplayNameStyle";
+    style.textContent = `
+      #aoAdminDisplayNameBtn{
+        width:40px;height:40px;min-height:40px;padding:0;
+        margin-left:0;border:1px solid rgba(255,255,255,.9);
+        border-radius:12px;background:rgba(255,255,255,.78);
+        color:#1e3a4c;font-size:17px;cursor:pointer;
+        box-shadow:0 5px 14px rgba(15,23,42,.07);
+      }
+      #aoAdminDisplayNameBtn:hover{background:#fff;transform:translateY(-1px)}
+      .ao-admin-name-overlay{
+        position:fixed;inset:0;z-index:250000;display:flex;
+        align-items:center;justify-content:center;padding:18px;
+        background:rgba(15,23,42,.48);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+      }
+      .ao-admin-name-card{
+        width:min(430px,100%);padding:22px;border-radius:18px;
+        background:#fff;border:1px solid #dcecf5;
+        box-shadow:0 25px 70px rgba(15,23,42,.18);
+      }
+      .ao-admin-name-title{font-size:17px;font-weight:900;color:#102033;margin:0 0 5px}
+      .ao-admin-name-sub{font-size:11px;line-height:1.5;color:#64748b;margin-bottom:15px}
+      .ao-admin-name-card label{display:block;font-size:10px;font-weight:900;letter-spacing:.06em;color:#334155;margin-bottom:7px}
+      .ao-admin-name-input{
+        width:100%;min-height:46px;padding:11px 13px;border:1px solid #cbdde9;
+        border-radius:12px;outline:none;background:#fff;color:#102033;font-size:14px;font-weight:700;
+      }
+      .ao-admin-name-input:focus{border-color:#38aee2;box-shadow:0 0 0 4px rgba(56,189,248,.11)}
+      .ao-admin-name-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}
+      .ao-admin-name-actions button{min-height:40px;padding:9px 13px;border-radius:11px;font-size:11px;font-weight:850}
+      .ao-admin-name-cancel{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1}
+      .ao-admin-name-save{background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;border:0}
+      .ao-admin-name-status{min-height:17px;margin-top:8px;font-size:10px;color:#64748b}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function closeEditor(){
+    if(editor) editor.remove();
+    editor = null;
+  }
+
+  async function saveName(value, status, saveBtn){
+    const email = myEmail();
+    if(!email){
+      status.textContent = "Please log in first.";
+      return;
+    }
+
+    let display = String(value == null ? "" : value).trim();
+    display = display.replace(/[\r\n]+/g," ");
+    display = display.replace(/\s+/g," ");
+    if(display.length > 60) display = display.slice(0,60);
+    if(display.includes(" · ")){
+      status.textContent = "Please do not use the · separator.";
+      return;
+    }
+
+    saveBtn.disabled = true;
+    status.textContent = "Saving…";
+    try{
+      const response = await fetch(
+        SUPABASE_URL + "/rest/v1/" + TABLE + "?on_conflict=email",
+        {
+          method:"POST",
+          headers:apiHeaders({Prefer:"resolution=merge-duplicates,return=minimal"}),
+          body:JSON.stringify({
+            email:email,
+            display_name:display,
+            updated_at:new Date().toISOString()
+          })
+        }
+      );
+      const body = await response.text();
+      if(!response.ok){
+        let detail = "";
+        try{
+          const j = body ? JSON.parse(body) : {};
+          detail = j.message || j.hint || j.details || "";
+        }catch(e){}
+        throw new Error("Could not save display name" + (detail ? ": " + detail : "."));
+      }
+
+      if(display) nameMap.set(email,display);
+      else nameMap.delete(email);
+      loadedAt = Date.now();
+      applyAll();
+      closeEditor();
+    }catch(error){
+      console.error("Admin display-name save failed:",error);
+      status.textContent = error && error.message ? error.message : "Could not save display name.";
+      saveBtn.disabled = false;
+    }
+  }
+
+  function openEditor(){
+    const email = myEmail();
+    if(!email) return;
+    if(editor){ closeEditor(); return; }
+
+    ensureStyle();
+    const overlay = document.createElement("div");
+    overlay.className = "ao-admin-name-overlay";
+    overlay.innerHTML =
+      '<div class="ao-admin-name-card" role="dialog" aria-modal="true" aria-label="Admin display name">' +
+        '<div class="ao-admin-name-title">Your Admin Display Name</div>' +
+        '<div class="ao-admin-name-sub">This name is shown to scanners in chat and video calls. Your email remains the private/internal account ID.</div>' +
+        '<label for="aoAdminNameInput">DISPLAY NAME</label>' +
+        '<input id="aoAdminNameInput" class="ao-admin-name-input" maxlength="60" autocomplete="nickname" placeholder="Example: IT SUPPORT">' +
+        '<div id="aoAdminNameStatus" class="ao-admin-name-status"></div>' +
+        '<div class="ao-admin-name-actions">' +
+          '<button type="button" class="ao-admin-name-cancel">Cancel</button>' +
+          '<button type="button" class="ao-admin-name-save">Save Name</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+    editor = overlay;
+
+    const input = overlay.querySelector("#aoAdminNameInput");
+    const status = overlay.querySelector("#aoAdminNameStatus");
+    const save = overlay.querySelector(".ao-admin-name-save");
+    const cancel = overlay.querySelector(".ao-admin-name-cancel");
+    input.value = nameMap.get(email) || "";
+
+    cancel.onclick = closeEditor;
+    overlay.addEventListener("click", function(event){
+      if(event.target === overlay) closeEditor();
+    });
+    input.addEventListener("keydown", function(event){
+      if(event.key === "Enter") save.click();
+      if(event.key === "Escape") closeEditor();
+    });
+    save.onclick = function(){ saveName(input.value,status,save); };
+
+    setTimeout(function(){ input.focus(); input.select(); },30);
+  }
+
+  function ensureButton(){
+    const area = document.querySelector(".userArea");
+    const user = document.getElementById("userEmail");
+    if(!area || !user) return;
+    if(document.getElementById("aoAdminDisplayNameBtn")) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "aoAdminDisplayNameBtn";
+    btn.className = "iconBtn";
+    btn.setAttribute("aria-label","Change your admin display name");
+    btn.title = "Change your admin display name";
+    btn.textContent = "✎";
+    btn.addEventListener("click",openEditor);
+
+    area.insertBefore(btn, area.firstChild);
+  }
+
+  function startObserver(){
+    if(observerStarted || !document.body) return;
+    observerStarted = true;
+    let timer = 0;
+    const observer = new MutationObserver(function(){
+      clearTimeout(timer);
+      timer = setTimeout(function(){
+        ensureButton();
+        applyAll();
+      },80);
+    });
+    observer.observe(document.body,{childList:true,subtree:true});
+  }
+
+  function boot(){
+    ensureStyle();
+    ensureButton();
+    loadNames(false).catch(function(){});
+    setInterval(function(){
+      ensureButton();
+      loadNames(true).catch(function(){});
+    },CACHE_MS);
+    startObserver();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded",boot,{once:true});
+  }else{
+    boot();
+  }
+})();
+</script>
 </body>
 </html>

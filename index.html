@@ -29517,26 +29517,76 @@ document.addEventListener("DOMContentLoaded",()=>{
     }
   }
 
-  function playRingCycle(){
-    const ctx = getAudioContext();
-    if(!ctx || ctx.state !== "running" || !masterGain){
-      return false;
-    }
-
-    const now = ctx.currentTime + 0.035;
-
-    /*
-     * Messenger/Facebook-LIKE cadence:
-     *   high-low pair, high-low pair, short pause, repeat.
-     * This is an original synthesized tone, not the Facebook recording.
-     */
-    const ok1 = playBellTone(880,  now,       0.20, 0.70);
-    const ok2 = playBellTone(660,  now + 0.23, 0.20, 0.62);
-    const ok3 = playBellTone(988,  now + 0.62, 0.20, 0.72);
-    const ok4 = playBellTone(740,  now + 0.85, 0.20, 0.64);
-
-    return ok1 || ok2 || ok3 || ok4;
+ function playRingCycle(){
+  const ctx = getAudioContext();
+  if(!ctx || ctx.state !== "running" || !masterGain){
+    return false;
   }
+
+  const now = ctx.currentTime + 0.035;
+
+  /*
+   * FÜR ELISE — opening motif
+   * Uses the existing playBellTone() engine.
+   *
+   * E5 D#5 E5 D#5 E5 B4 D5 C5 A4
+   * C4 E4 A4 B4
+   * E4 G#4 B4 C5
+   *
+   * Fast phone-ringtone tempo so it repeats cleanly.
+   */
+
+  const notes = {
+    E5: 659.25,
+    D5: 587.33,
+    C5: 523.25,
+    B4: 493.88,
+    A4: 440.00,
+    G4: 392.00,
+    Gs4: 415.30,
+    E4: 329.63,
+    C4: 261.63
+  };
+
+  const beat = 0.24;
+  let t = now;
+  let ok = false;
+
+  function note(name,beats=1,level=0.68){
+    const duration = beat * beats * 0.92;
+    ok = playBellTone(
+      notes[name],
+      t,
+      duration,
+      level
+    ) || ok;
+
+    t += beat * beats;
+  }
+
+  /* Für Elise opening */
+  note("E5");
+  note("D5",0.92);
+  note("E5");
+  note("D5",0.92);
+  note("E5");
+  note("B4");
+  note("D5");
+  note("C5");
+  note("A4",1.8);
+
+  note("C4");
+  note("E4");
+  note("A4");
+  note("B4");
+
+  note("E4");
+  note("Gs4");
+  note("B4");
+  note("C5",1.5);
+
+  return ok;
+}
 
   async function startRingtone(){
     if(ringActive) return;
@@ -29568,7 +29618,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       }
 
       playRingCycle();
-    },2600);
+    },4700);
   }
 
   function stopRingtone(){

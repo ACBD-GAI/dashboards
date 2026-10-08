@@ -29712,5 +29712,597 @@ document.addEventListener("DOMContentLoaded",()=>{
   word-break:break-word;
 }
 </style>
+
+<script id="aoPrivateChatRoutingAddon">
+/* =========================================================
+   ACEBEDO PRIVATE CHAT ROUTING ADD-ON
+   PURPOSE:
+   - Route each scanner's chat to its assigned admin.
+   - Dashboard shows only scanners assigned to the logged-in admin.
+   - Scanner talks only to its assigned admin.
+   - Keeps existing inventory/login/scanner/video-call/photo UI intact.
+   NOTE: Requires public.chat_assignments and chat_messages.recipient_email.
+   ========================================================= */
+(function(){
+  "use strict";
+
+  const ASSIGNMENT_TABLE = "chat_assignments";
+  const recipientCache = new Map();
+  const adminCache = new Map();
+  const loadLocks = new Map();
+
+  const normEmail = value => String(value || "").trim().toLowerCase();
+  const normBranch = value => String(value || "").trim().toUpperCase();
+
+  async function assignmentRowsForAdmin(adminEmail, branch){
+    const key = "admin|" + normEmail(adminEmail) + "|" + normBranch(branch);
+    if(recipientCache.has(key)) return recipientCache.get(key);
+
+    const rows = await supabaseRequest(
+      ASSIGNMENT_TABLE +
+      "?select=scanner_email,branch,admin_email,active" +
+      "&admin_email=eq." + encodeURIComponent(normEmail(adminEmail)) +
+      "&branch=eq." + encodeURIComponent(normBranch(branch)) +
+      "&active=eq.true" +
+      "&order=scanner_email.asc"
+    );
+
+    const list = [...new Set((Array.isArray(rows) ? rows : [])
+      .map(r => normEmail(r?.scanner_email))
+      .filter(Boolean))];
+
+    recipientCache.set(key,list);
+    return list;
+  }
+
+  async function assignedAdminForScanner(branch, scannerEmail){
+    const b = normBranch(branch);
+    const s = normEmail(scannerEmail);
+    const key = "scanner|" + b + "|" + s;
+    if(adminCache.has(key)) return adminCache.get(key);
+
+    const rows = await sbRequest(
+      "/rest/v1/" + ASSIGNMENT_TABLE +
+      "?select=admin_email,branch,scanner_email,active" +
+      "&branch=eq." + encodeURIComponent(b) +
+      "&scanner_email=eq." + encodeURIComponent(s) +
+      "&active=eq.true" +
+      "&limit=1"
+    );
+
+    const admin = Array.isArray(rows) && rows.length
+      ? normEmail(rows[0]?.admin_email)
+      : "";
+
+    adminCache.set(key,admin);
+    return admin;
+  }
+
+  function clearPrivateChatCaches(){
+    recipientCache.clear();
+    adminCache.clear();
+  }
+
+  /* ---------------------------------------------------------
+     DASHBOARD: recipient list = ONLY assigned scanner users
+     --------------------------------------------------------- */
+  window.aoChatLoadRecipients = async function(preferredEmail=""){
+    if(typeof sessionId === "undefined" || !sessionId ||
+       typeof currentEmail === "undefined" || !currentEmail) return;
+
+    const select = document.getElementById("aoChatRecipient");
+    if(!select) return;
+
+    const branch = typeof aoChatBranch === "function" ? normBranch(aoChatBranch()) : "";
+    if(!branch || branch === "ALL"){
+      select.innerHTML = '<option value="">Select a specific branch first</option>';
+      select.disabled = true;
+      return;
+    }
+
+    select.disabled = true;
+    select.innerHTML = '<option value="">Loading assigned users...</option>';
+
+    try{
+      const list = await assignmentRowsForAdmin(currentEmail,branch);
+      const old = normEmail(preferredEmail || select.value || "");
+
+      if(!list.length){
+        select.innerHTML = '<option value="">No assigned scanner users</option>';
+        select.disabled = true;
+        return;
+      }
+
+      select.innerHTML = '<option value="">Select a branch user...</option>' +
+        list.map(email =>
+          '<option value="' + (typeof aoChatEsc === "function" ? aoChatEsc(email) : email) + '">' +
+          (typeof aoChatEsc === "function" ? aoChatEsc(email) : email) +
+          '</option>'
+        ).join("");
+
+      if(old && list.includes(old)) select.value = old;
+      select.disabled = false;
+    }catch(error){
+      console.warn("Private chat assignment load failed:",error);
+      select.innerHTML = '<option value="">Unable to load assignments</option>';
+      select.disabled = true;
+    }
+  };
+
+  /* Keep the existing fresh-loader name working because existing startup
+     code can call it directly. */
+  window.aoChatLoadRecipientsFresh = async function(branch,preferredEmail=""){
+    if(typeof aoChatLoadRecipients === "function"){
+      return aoChatLoadRecipients(preferredEmail);
+    }
+  };
+
+  /* ---------------------------------------------------------
+     DASHBOARD: unread = only scanner messages addressed to me
+     --------------------------------------------------------- */
+  window.aoChatLoadUnread = async function(){
+    if(typeof sessionId === "undefined" || !sessionId ||
+       typeof currentEmail === "undefined" || !currentEmail ||
+       typeof aoChatUnreadBusy !== "undefined" && aoChatUnreadBusy) return;
+
+    aoChatUnreadBusy = true;
+    try{
+      const me = normEmail(currentEmail);
+      const [rows,stateRows] = await Promise.all([
+        supabaseRequest(
+          "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,recipient_email,message,created_at" +
+          "&sender_type=eq.SCANNER" +
+          "&recipient_email=eq." + encodeURIComponent(me) +
+          "&order=created_at.desc&limit=1000"
+        ),
+        supabaseRequest(
+          "chat_messages?select=id,branch,scanner_email,sender_email,sender_type,recipient_email,message,created_at" +
+          "&sender_type=eq.DASHBOARD" +
+          "&sender_email=eq." + encodeURIComponent(me) +
+          "&message=like." + encodeURIComponent("*" + (typeof AO_CHAT_SHARED_STATE_MARKER !== "undefined" ? AO_CHAT_SHARED_STATE_MARKER : "[[AO_CHAT_SHARED_STATE]]") + "*") +
+          "&order=created_at.desc&limit=2000"
+        )
+      ]);
+
+      const sharedReadMap = new Map();
+      (Array.isArray(stateRows) ? stateRows : []).forEach(r=>{
+        if(typeof aoChatIsSharedStateMessage === "function" && !aoChatIsSharedStateMessage(r?.message)) return;
+        let p = null;
+        try{ p = typeof aoChatSharedStatePayload === "function" ? aoChatSharedStatePayload(r.message) : null; }catch(e){}
+        if(!p || p.kind !== "read") return;
+        const b = normBranch(r.branch), s = normEmail(r.scanner_email), ts = Number(p.ts || 0);
+        if(!b || !s || !Number.isFinite(ts)) return;
+        const key = b + "|" + s;
+        sharedReadMap.set(key,Math.max(Number(sharedReadMap.get(key) || 0),ts));
+        if(typeof aoChatSharedReadCache !== "undefined"){
+          aoChatSharedReadCache.set(key,Math.max(Number(aoChatSharedReadCache.get(key) || 0),ts));
+        }
+      });
+
+      const grouped = new Map();
+      (Array.isArray(rows) ? rows : []).forEach(r=>{
+        const b = normBranch(r.branch), s = normEmail(r.scanner_email);
+        const ts = new Date(r.created_at).getTime();
+        if(!b || !s || !Number.isFinite(ts)) return;
+
+        const key = b + "|" + s;
+        let read = Number(sharedReadMap.get(key) || 0);
+        if(typeof aoChatKey === "function") read = Math.max(read,Number(localStorage.getItem(aoChatKey(b,s)) || 0));
+        if(ts <= read) return;
+
+        let g = grouped.get(key);
+        if(!g){
+          g = {branch:b,email:s,count:0,last_created_at:r.created_at,last_message:""};
+          grouped.set(key,g);
+        }
+        g.count++;
+        if(ts >= new Date(g.last_created_at).getTime()){
+          g.last_created_at = r.created_at;
+          g.last_message = typeof aoChatIsImageMessage === "function" && aoChatIsImageMessage(r.message)
+            ? "📷 Image" : String(r.message || "");
+        }
+      });
+
+      aoChatNotifications = Array.from(grouped.values());
+      if(typeof aoChatBadge === "function"){
+        aoChatBadge(aoChatNotifications.reduce((t,x)=>t+Number(x.count||0),0));
+      }
+      if(typeof aoChatRenderNotifications === "function") aoChatRenderNotifications();
+    }catch(error){
+      console.warn("Private chat unread load failed:",error);
+    }finally{
+      aoChatUnreadBusy = false;
+    }
+  };
+
+  /* ---------------------------------------------------------
+     DASHBOARD: shared state rows are also addressed to this admin
+     --------------------------------------------------------- */
+  window.aoChatSharedStateRowsUrl = function(branch,email){
+    const b = normBranch(branch), s = normEmail(email);
+    return "chat_messages" +
+      "?select=id,branch,scanner_email,sender_email,sender_type,recipient_email,message,created_at" +
+      "&branch=eq." + encodeURIComponent(b) +
+      "&scanner_email=eq." + encodeURIComponent(s) +
+      "&sender_type=eq.DASHBOARD" +
+      "&sender_email=eq." + encodeURIComponent(normEmail(currentEmail)) +
+      "&message=like." + encodeURIComponent("*[[AO_CHAT_SHARED_STATE]]*") +
+      "&order=created_at.desc&limit=2000";
+  };
+
+  window.aoChatPostSharedState = async function(branch,email,payload){
+    const b = normBranch(branch), s = normEmail(email), me = normEmail(currentEmail);
+    await supabaseRequest("chat_messages",{
+      method:"POST",
+      prefer:"return=minimal",
+      body:{
+        branch:b,
+        scanner_email:s,
+        sender_email:me,
+        sender_type:"DASHBOARD",
+        recipient_email:me,
+        message:(typeof aoChatSharedStateMessage === "function"
+          ? aoChatSharedStateMessage(payload)
+          : "[[AO_CHAT_SHARED_STATE]]" + JSON.stringify(payload || {}))
+      }
+    });
+  };
+
+  /* ---------------------------------------------------------
+     DASHBOARD: load exactly one private conversation
+     --------------------------------------------------------- */
+  window.aoChatLoad = async function(){
+    if(typeof sessionId === "undefined" || !sessionId ||
+       typeof currentEmail === "undefined" || !currentEmail) return;
+
+    const loadSeq = ++aoChatLoadSeq;
+    const branch = typeof aoChatBranch === "function" ? normBranch(aoChatBranch()) : "";
+    const recipient = typeof aoChatRecipient === "function" ? normEmail(aoChatRecipient()) : "";
+    const box = document.getElementById("aoChatMessages");
+    if(!box) return;
+
+    if(!branch || branch === "ALL"){
+      box.innerHTML = '<div class="ao-chat-empty">Select a branch to open a private conversation.</div>';
+      return;
+    }
+    if(!recipient){
+      box.innerHTML = '<div class="ao-chat-empty">Select an assigned branch user to open a private conversation.</div>';
+      const sub=document.getElementById("aoChatSub");
+      if(sub) sub.textContent = branch + " · Select assigned user";
+      return;
+    }
+
+    const key = branch + "|" + recipient;
+    if(loadLocks.get(key)) return;
+    loadLocks.set(key,true);
+
+    try{
+      /* Do not allow an admin to manually open a scanner not assigned to them. */
+      const assigned = await assignmentRowsForAdmin(currentEmail,branch);
+      if(!assigned.includes(recipient)){
+        box.innerHTML = '<div class="ao-chat-empty">This scanner user is not assigned to your account.</div>';
+        return;
+      }
+
+      const rows = await supabaseRequest(
+        "chat_messages" +
+        "?select=id,branch,scanner_email,sender_email,sender_type,recipient_email,message,created_at" +
+        "&branch=eq." + encodeURIComponent(branch) +
+        "&scanner_email=eq." + encodeURIComponent(recipient) +
+        "&or=" + encodeURIComponent(
+          "(and(sender_type.eq.SCANNER,recipient_email.eq." + normEmail(currentEmail) + ")," +
+          "and(sender_type.eq.DASHBOARD,sender_email.eq." + normEmail(currentEmail) + "))"
+        ) +
+        "&order=created_at.asc&limit=500"
+      );
+
+      const stateRows = await supabaseRequest(aoChatSharedStateRowsUrl(branch,recipient)).catch(()=>[]);
+      if(loadSeq !== aoChatLoadSeq) return;
+
+      const list = [
+        ...(Array.isArray(rows) ? rows : []),
+        ...(Array.isArray(stateRows) ? stateRows.filter(r=>typeof aoChatIsSharedStateMessage !== "function" || aoChatIsSharedStateMessage(r?.message)) : [])
+      ];
+
+      const deduped = new Map();
+      list.forEach(r=>{
+        const id = String(r?.id || "");
+        const k = id || (String(r?.created_at || "") + "|" + String(r?.message || ""));
+        deduped.set(k,r);
+      });
+      const finalList = Array.from(deduped.values()).sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime());
+
+      if(typeof aoChatConversationCache !== "undefined") aoChatConversationCache.set(key,finalList);
+      if(typeof aoChatRenderConversation === "function") aoChatRenderConversation(finalList,branch,recipient,box);
+    }catch(error){
+      console.warn("Private dashboard conversation load failed:",error);
+      if(typeof aoChatStatus === "function") aoChatStatus(error?.message || "Chat temporarily unavailable.");
+    }finally{
+      loadLocks.delete(key);
+    }
+  };
+
+  /* ---------------------------------------------------------
+     DASHBOARD: send only to the selected assigned scanner
+     --------------------------------------------------------- */
+  window.aoChatSend = async function(){
+    if(aoChatSending) return;
+
+    const input=document.getElementById("aoChatInput");
+    const text=String(input?.value||"").trim();
+    const pendingImage=aoChatPendingImage;
+    const branch=typeof aoChatBranch === "function" ? normBranch(aoChatBranch()) : "";
+    const recipient=typeof aoChatRecipient === "function" ? normEmail(aoChatRecipient()) : "";
+
+    if((!text&&!pendingImage)||!sessionId||!currentEmail){
+      aoChatStatus("Please log in first."); return;
+    }
+    if(!branch || branch === "ALL"){
+      aoChatStatus("Select a specific branch first."); return;
+    }
+    if(!recipient){
+      aoChatStatus("Select an assigned branch user first."); return;
+    }
+
+    const assigned=await assignmentRowsForAdmin(currentEmail,branch).catch(()=>[]);
+    if(!assigned.includes(recipient)){
+      aoChatStatus("This scanner user is not assigned to your account."); return;
+    }
+
+    aoChatSending=true;
+    const btn=document.getElementById("aoChatSend");
+    if(btn)btn.disabled=true;
+    aoChatStatus("Sending...");
+
+    let uploadedImagePath="";
+    try{
+      let message=text;
+      if(pendingImage){
+        if(!text) throw new Error("Please enter the SI No. or text to send with the image.");
+        aoChatStatus("Uploading image…");
+        uploadedImagePath=await aoChatUploadImage(pendingImage,text);
+        message+=(message?"\n":"")+"[[AO_CHAT_IMAGE]]"+uploadedImagePath;
+      }
+
+      await supabaseRequest("chat_messages",{
+        method:"POST",
+        prefer:"return=minimal",
+        body:{
+          branch:branch,
+          scanner_email:recipient,
+          sender_email:normEmail(currentEmail),
+          sender_type:"DASHBOARD",
+          recipient_email:recipient,
+          message:message
+        }
+      });
+
+      input.value="";
+      if(typeof aoChatClearPendingImage === "function") aoChatClearPendingImage();
+      aoChatStatus("");
+      if(typeof aoChatConversationCache !== "undefined") aoChatConversationCache.delete(branch+"|"+recipient);
+      await aoChatLoad();
+      aoChatLoadUnread().catch(()=>{});
+    }catch(e){
+      console.error("Private dashboard chat send failed:",e);
+      try{
+        if(uploadedImagePath && window.__aoChatStorageClient){
+          await window.__aoChatStorageClient.storage.from(AO_CHAT_IMAGE_BUCKET).remove([uploadedImagePath]);
+        }
+      }catch(cleanupError){ console.warn("Chat image cleanup failed:",cleanupError); }
+      aoChatStatus(e?.message || "Message could not be sent.");
+    }finally{
+      aoChatSending=false;
+      if(btn)btn.disabled=false;
+    }
+  };
+
+  /* ---------------------------------------------------------
+     SCANNER: automatically find its one assigned admin
+     --------------------------------------------------------- */
+  window.aoPrivateChatAssignedAdmin = async function(){
+    const branch=typeof aoChatBranch === "function" ? normBranch(aoChatBranch()) : "";
+    const scanner=typeof aoChatEmail === "function" ? normEmail(aoChatEmail()) : "";
+    return assignedAdminForScanner(branch,scanner);
+  };
+
+  /* ---------------------------------------------------------
+     SCANNER: load only its assigned admin conversation
+     --------------------------------------------------------- */
+  window.aoChatLoad = async function(){
+    if(aoChatEditing) return;
+    const branch=typeof aoChatBranch === "function" ? normBranch(aoChatBranch()) : "";
+    const email=typeof aoChatEmail === "function" ? normEmail(aoChatEmail()) : "";
+    const box=document.getElementById("aoChatMessages");
+    if(!box||!branch||!email) return;
+
+    try{
+      const admin=await assignedAdminForScanner(branch,email);
+      if(!admin){
+        box.innerHTML='<div class="ao-chat-empty">No administrator is assigned to this scanner account yet.</div>';
+        const sub=document.getElementById("aoChatSub");
+        if(sub)sub.textContent=branch+" · No admin assigned";
+        return;
+      }
+
+      const rows=await sbRequest(
+        "/rest/v1/chat_messages" +
+        "?select=id,branch,scanner_email,sender_email,sender_type,recipient_email,message,created_at" +
+        "&branch=eq."+encodeURIComponent(branch)+
+        "&scanner_email=eq."+encodeURIComponent(email)+
+        "&or="+encodeURIComponent(
+          "(and(sender_type.eq.SCANNER,sender_email.eq."+email+"),"+
+          "and(sender_type.eq.DASHBOARD,sender_email.eq."+admin+"))"
+        )+
+        "&order=created_at.asc&limit=500"
+      );
+
+      /* Shared checked/read state created by the assigned admin. */
+      const stateRows=await sbRequest(
+        "/rest/v1/chat_messages"+
+        "?select=id,branch,scanner_email,sender_email,sender_type,recipient_email,message,created_at"+
+        "&branch=eq."+encodeURIComponent(branch)+
+        "&scanner_email=eq."+encodeURIComponent(email)+
+        "&sender_type=eq.DASHBOARD"+
+        "&sender_email=eq."+encodeURIComponent(admin)+
+        "&message=like."+encodeURIComponent("*[[AO_CHAT_SHARED_STATE]]*")+
+        "&order=created_at.desc&limit=2000"
+      ).catch(()=>[]);
+
+      const list=[
+        ...(Array.isArray(rows)?rows:[]),
+        ...(Array.isArray(stateRows)?stateRows:[])
+      ];
+      const deduped=new Map();
+      list.forEach(r=>{
+        const id=String(r?.id||"");
+        const k=id||(String(r?.created_at||"")+"|"+String(r?.message||""));
+        deduped.set(k,r);
+      });
+      const finalList=Array.from(deduped.values()).sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime());
+
+      if(typeof aoChatRenderSearch === "function") aoChatSetupSearch?.();
+      /* Reuse existing scanner renderer with its own branch/email identity. */
+      const conversationMessages=finalList.filter(r=>typeof aoChatIsSharedStateMessage !== "function" || !aoChatIsSharedStateMessage(r?.message));
+      const read=Number(localStorage.getItem("aoChatRead:BRANCH:"+branch+":"+email)||0);
+      const incoming=conversationMessages.filter(r=>normEmail(r.sender_email)===admin && String(r.sender_type||"").toUpperCase()==="DASHBOARD");
+      const unread=incoming.filter(r=>new Date(r.created_at).getTime()>read);
+      const old=box.scrollTop,bottom=(box.scrollHeight-box.clientHeight-old)<60;
+
+      if(!conversationMessages.length){
+        box.innerHTML='<div class="ao-chat-empty">No messages yet. Send a message to Admin.</div>';
+      }else{
+        const firstUnread=unread.length?unread[0].id:null;
+        box.innerHTML=conversationMessages.map(r=>{
+          const mine=normEmail(r.sender_email)===email;
+          const raw=String(r.message||"");
+          const imagePath=typeof aoChatImagePath === "function" ? aoChatImagePath(raw) : "";
+          const textPart=typeof aoChatTextPart === "function" ? aoChatTextPart(raw) : raw;
+          const imageHtml=imagePath?'<img class="ao-chat-message-image" src="'+aoChatEsc(aoChatPublicImageUrl(imagePath))+'" alt="Chat image" loading="lazy" onclick="window.open(this.src,\'_blank\',\'noopener\')">':'';
+          const textHtml=textPart?'<div class="ao-chat-image-caption">'+aoChatEsc(textPart)+'</div>':'';
+          const editHtml=mine?'<button type="button" class="ao-chat-edit-link" data-edit-id="'+aoChatEsc(r.id)+'">✎ Edit</button>':'';
+          const deleteHtml=mine?'<button type="button" class="ao-chat-delete-link" data-delete-id="'+aoChatEsc(r.id)+'" data-delete-path="'+aoChatEsc(imagePath)+'">🗑 Delete</button>':'';
+          const sep=firstUnread!==null&&r.id===firstUnread?'<div class="ao-chat-unread-divider">'+unread.length+' UNREAD MESSAGE'+(unread.length===1?'':'S')+' FROM ADMIN</div>':'';
+          const label=mine?"BRANCH":"ADMIN";
+          const displaySender=(typeof window.aoAdminDisplayNameFor === "function")?window.aoAdminDisplayNameFor(r.sender_email||""):(r.sender_email||"");
+          return sep+'<div class="ao-chat-row '+(mine?'mine':'')+'" data-chat-id="'+aoChatEsc(String(r.id||""))+'"><div class="ao-chat-bubble"><div class="ao-chat-name">'+aoChatEsc(label)+' · '+aoChatEsc(displaySender)+'</div>'+textHtml+imageHtml+editHtml+deleteHtml+'<div class="ao-chat-time">'+aoChatEsc(typeof aoChatTime === "function"?aoChatTime(r.created_at):"")+'</div></div></div>';
+        }).join("");
+
+        box.querySelectorAll("[data-edit-id]").forEach(btn=>btn.addEventListener("click",()=>{
+          const row=conversationMessages.find(r=>String(r.id)===String(btn.getAttribute("data-edit-id")));
+          if(row && typeof aoChatEditMessage === "function") aoChatEditMessage(row.id,aoChatTextPart(row.message),aoChatImagePath(row.message));
+        }));
+        box.querySelectorAll("[data-delete-id]").forEach(btn=>btn.addEventListener("click",()=>{
+          if(typeof aoChatDeleteMessage === "function") aoChatDeleteMessage(btn.getAttribute("data-delete-id"),btn.getAttribute("data-delete-path")||"");
+        }));
+        if(aoChatOpen&&bottom&&!aoChatSearchValue?.()) box.scrollTop=box.scrollHeight;
+      }
+
+      if(aoChatOpen&&incoming.length){
+        const last=new Date(incoming[incoming.length-1].created_at).getTime();
+        if(last&&typeof aoChatMark === "function") aoChatMark(last);
+        aoChatBadge(0);
+      }
+
+      const sub=document.getElementById("aoChatSub");
+      if(sub)sub.textContent=branch+" · "+admin;
+      adminCache.set("scanner|"+branch+"|"+email,admin);
+    }catch(e){
+      console.warn("Private scanner chat load failed:",e);
+      aoChatStatus(e?.message||"Chat temporarily unavailable.");
+    }
+  };
+
+  /* ---------------------------------------------------------
+     SCANNER: send automatically to its assigned admin
+     --------------------------------------------------------- */
+  window.aoChatSend = async function(){
+    if(aoChatSending)return;
+    const input=document.getElementById("aoChatInput");
+    const text=String(input?.value||"").trim();
+    const pendingImage=aoChatPendingImage;
+    const branch=typeof aoChatBranch === "function" ? normBranch(aoChatBranch()) : "";
+    const email=typeof aoChatEmail === "function" ? normEmail(aoChatEmail()) : "";
+
+    if(!text&&!pendingImage)return;
+    if(pendingImage&&!text){aoChatStatus("Please add a text message before sending a picture.");input?.focus();return;}
+    if(!branch||!email){aoChatStatus("Please log in first.");return;}
+
+    const admin=await assignedAdminForScanner(branch,email);
+    if(!admin){aoChatStatus("No administrator is assigned to this scanner account yet.");return;}
+
+    aoChatSending=true;
+    const btn=document.getElementById("aoChatSend");
+    if(btn)btn.disabled=true;
+    aoChatStatus("Sending...");
+    let uploadedImagePath="";
+
+    try{
+      let message=text;
+      if(pendingImage){
+        aoChatStatus("Uploading image…");
+        uploadedImagePath=await aoChatUploadImage(pendingImage,text);
+        message+=(message?"\n":"")+"[[AO_CHAT_IMAGE]]"+uploadedImagePath;
+      }
+
+      await sbRequest("/rest/v1/chat_messages",{
+        method:"POST",
+        headers:{Prefer:"return=minimal"},
+        body:JSON.stringify({
+          branch:branch,
+          scanner_email:email,
+          sender_email:email,
+          sender_type:"SCANNER",
+          recipient_email:admin,
+          message:message
+        })
+      });
+
+      input.value="";
+      if(typeof aoChatClearPendingImage === "function") aoChatClearPendingImage();
+      aoChatStatus("");
+      await aoChatLoad();
+    }catch(e){
+      console.error("Private scanner chat send failed:",e);
+      try{
+        if(uploadedImagePath){
+          await fetch(SUPABASE_URL+"/storage/v1/object/"+AO_CHAT_IMAGE_BUCKET+"/"+uploadedImagePath,{method:"DELETE",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}});
+        }
+      }catch(cleanupError){console.warn("Scanner chat image cleanup failed:",cleanupError);}
+      aoChatStatus(e?.message||"Message could not be sent.");
+    }finally{
+      aoChatSending=false;
+      if(btn)btn.disabled=false;
+    }
+  };
+
+  /* ---------------------------------------------------------
+     Invalidate assignment caches when the chat UI changes branch.
+     --------------------------------------------------------- */
+  document.addEventListener("change",function(event){
+    if(event.target && event.target.id === "aoChatBranch") clearPrivateChatCaches();
+  },true);
+
+  /* Startup: do not disturb existing listeners; refresh only once the
+     page is ready and a session exists. */
+  const boot=function(){
+    setTimeout(function(){
+      try{
+        if(typeof currentEmail !== "undefined" && currentEmail){
+          if(typeof aoChatLoadUnread === "function") aoChatLoadUnread().catch(()=>{});
+          if(typeof BRANCH !== "undefined" && BRANCH && typeof aoChatLoad === "function") aoChatLoad().catch(()=>{});
+        }
+      }catch(e){}
+    },250);
+  };
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
+  else boot();
+
+  /* Expose a tiny helper so a future admin-assignment UI can invalidate caches. */
+  window.aoRefreshPrivateChatAssignments = clearPrivateChatCaches;
+})();
+
+</script>
 </body>
 </html>

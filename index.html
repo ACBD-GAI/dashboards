@@ -8215,6 +8215,7 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
               <th>DESCRIPTION</th>
               <th>TAG</th>
               <th class="soldOnlyColumn" id="sellingPriceHeader" style="display:none;">SELLING PRICE</th>
+              <th class="soldOnlyColumn" id="soldUserEmailHeader" style="display:none;">SOLD BY (EMAIL)</th>
               <th>SI NO.</th>
               <th>DATE</th>
               <th>ACTIONS</th>
@@ -11198,6 +11199,11 @@ function mapRow(
     sellingPrice:
       row["SELLINGPRICE"] ?? "",
 
+    soldBy:
+      row["USER EMAIL"] ??
+      row.user_email ??
+      "",
+
     marked:
       String(row["STATUS"] ?? "").trim().toUpperCase() === "MARKED",
 
@@ -11439,6 +11445,10 @@ function updateSoldOnlyColumns(){
     document
       .getElementById("sellingPriceHeader");
 
+  const soldUserEmailHeader =
+    document
+      .getElementById("soldUserEmailHeader");
+
   const filters =
     document
       .getElementById("soldFilters");
@@ -11463,6 +11473,13 @@ function updateSoldOnlyColumns(){
 
   if(header){
     header.style.display =
+      report === "sold"
+        ? ""
+        : "none";
+  }
+
+  if(soldUserEmailHeader){
+    soldUserEmailHeader.style.display =
       report === "sold"
         ? ""
         : "none";
@@ -13821,6 +13838,14 @@ function renderTable(
           ? ""
           : String(row.sellingPrice);
 
+      const soldBy =
+        escapeHtml(
+          row.soldBy ??
+          row.raw?.["USER EMAIL"] ??
+          row.raw?.user_email ??
+          ""
+        );
+
       const date =
         escapeHtml(
           row.date
@@ -14055,6 +14080,9 @@ function renderTable(
                   data-branch="${escapeHtmlAttribute(row.branch)}"
                   onchange="saveSoldSellingPrice(this)"
                 >
+              </td>
+              <td class="soldUserEmailCell" title="${soldBy || "No seller email recorded"}">
+                ${soldBy || "—"}
               </td>
             `
             : ""
@@ -29670,5 +29698,19 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 
 
+
+<style id="aoSoldUserEmailCellStyle">
+/* SOLD OUT seller email — isolated display-only styling */
+.soldUserEmailCell{
+  min-width:190px;
+  max-width:280px;
+  color:#2563eb;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.35;
+  white-space:normal;
+  word-break:break-word;
+}
+</style>
 </body>
 </html>

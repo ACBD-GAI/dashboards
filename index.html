@@ -29481,314 +29481,62 @@ document.addEventListener("DOMContentLoaded",()=>{
     }
   }
 
- function playBellTone(freq, startTime, duration, level = 0.68) {
-  const ctx = getAudioContext();
+  function playBellTone(frequency, when, duration, level){
+    const ctx = getAudioContext();
+    if(!ctx || ctx.state !== "running" || !masterGain) return false;
 
-  if (!ctx || ctx.state !== "running" || !masterGain) {
-    return false;
-  }
-
-  try {
     const osc1 = ctx.createOscillator();
     const osc2 = ctx.createOscillator();
-    const osc3 = ctx.createOscillator();
-
     const gain = ctx.createGain();
 
-    // Piano-like harmonic structure
+    /* Triangle + sine gives the bright, soft digital-phone character. */
     osc1.type = "triangle";
-    osc1.frequency.setValueAtTime(freq, startTime);
-
     osc2.type = "sine";
-    osc2.frequency.setValueAtTime(freq * 2, startTime);
+    osc1.frequency.setValueAtTime(frequency,when);
+    osc2.frequency.setValueAtTime(frequency * 2,when);
 
-    osc3.type = "sine";
-    osc3.frequency.setValueAtTime(freq * 3, startTime);
+    gain.gain.setValueAtTime(0.0001,when);
+    gain.gain.exponentialRampToValueAtTime(level,when + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001,when + duration);
 
-    // Slightly softer upper harmonics
-    const g1 = ctx.createGain();
-    const g2 = ctx.createGain();
-    const g3 = ctx.createGain();
-
-    g1.gain.value = 1.00;
-    g2.gain.value = 0.24;
-    g3.gain.value = 0.08;
-
-    osc1.connect(g1);
-    osc2.connect(g2);
-    osc3.connect(g3);
-
-    g1.connect(gain);
-    g2.connect(gain);
-    g3.connect(gain);
-
+    osc1.connect(gain);
+    osc2.connect(gain);
     gain.connect(masterGain);
 
-    const attack = 0.012;
-    const decay = Math.min(0.18, duration * 0.28);
-    const release = Math.min(0.20, duration * 0.35);
-
-    const peak = level;
-
-    gain.gain.setValueAtTime(0.0001, startTime);
-
-    // Fast piano-style attack
-    gain.gain.linearRampToValueAtTime(
-      peak,
-      startTime + attack
-    );
-
-    // Initial decay
-    gain.gain.exponentialRampToValueAtTime(
-      Math.max(peak * 0.48, 0.0001),
-      startTime + attack + decay
-    );
-
-    // Sustain
-    const sustainTime = Math.max(
-      startTime + attack + decay,
-      startTime + duration - release
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      Math.max(peak * 0.30, 0.0001),
-      sustainTime
-    );
-
-    // Release
-    gain.gain.exponentialRampToValueAtTime(
-      0.0001,
-      startTime + duration
-    );
-
-    const stopTime = startTime + duration + 0.03;
-
-    osc1.start(startTime);
-    osc2.start(startTime);
-    osc3.start(startTime);
-
-    osc1.stop(stopTime);
-    osc2.stop(stopTime);
-    osc3.stop(stopTime);
-
-    return true;
-
-  } catch (err) {
-    console.warn("playBellTone error:", err);
-    return false;
-  }
-}
-
-function playRingCycle() {
-  const ctx = getAudioContext();
-
-  if (!ctx || ctx.state !== "running" || !masterGain) {
-    return false;
+    try{
+      osc1.start(when);
+      osc2.start(when);
+      osc1.stop(when + duration + 0.04);
+      osc2.stop(when + duration + 0.04);
+      return true;
+    }catch(error){
+      try{ osc1.disconnect(); }catch(e){}
+      try{ osc2.disconnect(); }catch(e){}
+      try{ gain.disconnect(); }catch(e){}
+      return false;
+    }
   }
 
-  const now = ctx.currentTime + 0.035;
+  function playRingCycle(){
+    const ctx = getAudioContext();
+    if(!ctx || ctx.state !== "running" || !masterGain){
+      return false;
+    }
 
-  /*
-   * FÜR ELISE
-   * Extended opening section
-   *
-   * A more complete melody so it is immediately
-   * recognizable before the ringtone repeats.
-   *
-   * Opening:
-   * E5 D#5 E5 D#5 E5 B4 D5 C5 A4
-   *
-   * Then continues through the next musical phrases.
-   */
+    const now = ctx.currentTime + 0.035;
 
-  const notes = {
-    C4: 261.63,
-    D4: 293.66,
-    E4: 329.63,
-    F4: 349.23,
-    G4: 392.00,
+    /*
+     * Messenger/Facebook-LIKE cadence:
+     *   high-low pair, high-low pair, short pause, repeat.
+     * This is an original synthesized tone, not the Facebook recording.
+     */
+    const ok1 = playBellTone(880,  now,       0.20, 0.70);
+    const ok2 = playBellTone(660,  now + 0.23, 0.20, 0.62);
+    const ok3 = playBellTone(988,  now + 0.62, 0.20, 0.72);
+    const ok4 = playBellTone(740,  now + 0.85, 0.20, 0.64);
 
-    A4: 440.00,
-    B4: 493.88,
-
-    C5: 523.25,
-    D5: 587.33,
-    Ds5: 622.25,
-    E5: 659.25,
-    F5: 698.46,
-    G5: 783.99,
-
-    E6: 1318.51
-  };
-
-  /*
-   * Für Elise is in 3/8.
-   *
-   * This tempo is deliberately moderate:
-   * fast enough for a ringtone,
-   * but slow enough to recognize the melody.
-   */
-  const beat = 0.19;
-
-  let t = now;
-  let ok = false;
-
-  function note(name, beats = 1, level = 0.62) {
-    const duration = beat * beats * 0.88;
-
-    ok = playBellTone(
-      notes[name],
-      t,
-      duration,
-      level
-    ) || ok;
-
-    t += beat * beats;
+    return ok1 || ok2 || ok3 || ok4;
   }
-
-  /*
-   * ==========================================
-   * PHRASE 1
-   * ==========================================
-   *
-   * E D# E D# E B D C A
-   */
-  note("E5", 0.85, 0.66);
-  note("Ds5", 0.85, 0.64);
-  note("E5", 0.85, 0.66);
-  note("Ds5", 0.85, 0.64);
-  note("E5", 0.90, 0.68);
-  note("B4", 0.90, 0.60);
-  note("D5", 0.90, 0.62);
-  note("C5", 0.90, 0.62);
-  note("A4", 1.80, 0.68);
-
-  /*
-   * ==========================================
-   * PHRASE 2
-   * ==========================================
-   *
-   * C E A
-   * B E G# B
-   * C E E D#
-   *
-   * This gives the opening section its
-   * characteristic rise before returning
-   * to the main motif.
-   */
-
-  note("C4", 0.90, 0.55);
-  note("E4", 0.90, 0.58);
-  note("A4", 0.90, 0.62);
-
-  note("B4", 0.90, 0.62);
-
-  note("E4", 0.90, 0.58);
-  note("G4", 0.90, 0.59); // softened substitute if no G# oscillator note
-  note("B4", 0.90, 0.62);
-
-  note("C5", 0.90, 0.65);
-  note("E4", 0.90, 0.55);
-  note("E5", 0.90, 0.66);
-  note("Ds5", 0.90, 0.64);
-
-  /*
-   * ==========================================
-   * PHRASE 3
-   * ==========================================
-   *
-   * E D# E B D C
-   * A C E A
-   * B E C B
-   * A A
-   */
-  note("E5", 0.85, 0.66);
-  note("Ds5", 0.85, 0.64);
-  note("E5", 0.85, 0.66);
-  note("B4", 0.90, 0.60);
-  note("D5", 0.90, 0.62);
-  note("C5", 0.90, 0.62);
-
-  note("A4", 0.90, 0.64);
-  note("C4", 0.90, 0.55);
-  note("E4", 0.90, 0.58);
-  note("A4", 0.90, 0.64);
-
-  note("B4", 0.90, 0.62);
-  note("E4", 0.90, 0.58);
-  note("C5", 0.90, 0.64);
-  note("B4", 0.90, 0.62);
-
-  note("A4", 1.00, 0.66);
-  note("A4", 1.50, 0.68);
-
-  /*
-   * ==========================================
-   * PHRASE 4
-   * ==========================================
-   *
-   * B C D E
-   * G F E D
-   * F E D C
-   * E D C B
-   *
-   * This is the descending passage that makes
-   * the melody feel much more complete.
-   */
-
-  note("B4", 0.80, 0.60);
-  note("C5", 0.80, 0.62);
-  note("D5", 0.80, 0.64);
-  note("E5", 1.00, 0.66);
-
-  note("G4", 0.80, 0.57);
-  note("F5", 0.80, 0.62);
-  note("E5", 0.80, 0.64);
-  note("D5", 1.00, 0.60);
-
-  note("F4", 0.80, 0.55);
-  note("E5", 0.80, 0.64);
-  note("D5", 0.80, 0.60);
-  note("C5", 1.00, 0.60);
-
-  note("E4", 0.80, 0.55);
-  note("D5", 0.80, 0.60);
-  note("C5", 0.80, 0.58);
-  note("B4", 1.20, 0.60);
-
-  /*
-   * ==========================================
-   * RETURN TO MAIN MOTIF
-   * ==========================================
-   *
-   * E E E
-   * E D# E
-   * D# E D# E D#
-   * E B D C A
-   */
-
-  note("E4", 0.80, 0.55);
-  note("E5", 0.80, 0.64);
-  note("E5", 0.80, 0.64);
-
-  note("E6", 0.90, 0.70);
-  note("Ds5", 0.85, 0.64);
-  note("E5", 0.85, 0.66);
-
-  note("Ds5", 0.72, 0.62);
-  note("E5", 0.72, 0.64);
-  note("Ds5", 0.72, 0.62);
-  note("E5", 0.72, 0.64);
-  note("Ds5", 0.72, 0.62);
-
-  note("E5", 0.90, 0.68);
-  note("B4", 0.90, 0.60);
-  note("D5", 0.90, 0.62);
-  note("C5", 0.90, 0.62);
-  note("A4", 2.00, 0.70);
-
-  return ok;
-}
 
   async function startRingtone(){
     if(ringActive) return;
@@ -29820,7 +29568,7 @@ function playRingCycle() {
       }
 
       playRingCycle();
-    },4700);
+    },2600);
   }
 
   function stopRingtone(){

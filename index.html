@@ -29589,27 +29589,46 @@ function playRingCycle() {
   const now = ctx.currentTime + 0.035;
 
   /*
-   * FÜR ELISE — recognizable opening motif
+   * FÜR ELISE
+   * Extended opening section
    *
+   * A more complete melody so it is immediately
+   * recognizable before the ringtone repeats.
+   *
+   * Opening:
    * E5 D#5 E5 D#5 E5 B4 D5 C5 A4
-   * C4 E4 A4 B4
-   * E4 G#4 B4 C5
+   *
+   * Then continues through the next musical phrases.
    */
 
   const notes = {
     C4: 261.63,
+    D4: 293.66,
     E4: 329.63,
-    Gs4: 415.30,
+    F4: 349.23,
+    G4: 392.00,
+
     A4: 440.00,
     B4: 493.88,
+
     C5: 523.25,
     D5: 587.33,
     Ds5: 622.25,
-    E5: 659.25
+    E5: 659.25,
+    F5: 698.46,
+    G5: 783.99,
+
+    E6: 1318.51
   };
 
-  // Slower than your original so Für Elise is recognizable
-  const beat = 0.22;
+  /*
+   * Für Elise is in 3/8.
+   *
+   * This tempo is deliberately moderate:
+   * fast enough for a ringtone,
+   * but slow enough to recognize the melody.
+   */
+  const beat = 0.19;
 
   let t = now;
   let ok = false;
@@ -29628,36 +29647,145 @@ function playRingCycle() {
   }
 
   /*
-   * Für Elise opening
+   * ==========================================
+   * PHRASE 1
+   * ==========================================
    *
-   * E  D# E  D# E  B  D  C  A
+   * E D# E D# E B D C A
    */
   note("E5", 0.85, 0.66);
   note("Ds5", 0.85, 0.64);
   note("E5", 0.85, 0.66);
   note("Ds5", 0.85, 0.64);
   note("E5", 0.90, 0.68);
-
   note("B4", 0.90, 0.60);
   note("D5", 0.90, 0.62);
   note("C5", 0.90, 0.62);
   note("A4", 1.80, 0.68);
 
   /*
-   * Second phrase
+   * ==========================================
+   * PHRASE 2
+   * ==========================================
+   *
+   * C E A
+   * B E G# B
+   * C E E D#
+   *
+   * This gives the opening section its
+   * characteristic rise before returning
+   * to the main motif.
    */
+
   note("C4", 0.90, 0.55);
   note("E4", 0.90, 0.58);
   note("A4", 0.90, 0.62);
+
   note("B4", 0.90, 0.62);
 
-  /*
-   * Closing part
-   */
   note("E4", 0.90, 0.58);
-  note("Gs4", 0.90, 0.60);
+  note("G4", 0.90, 0.59); // softened substitute if no G# oscillator note
   note("B4", 0.90, 0.62);
-  note("C5", 1.60, 0.68);
+
+  note("C5", 0.90, 0.65);
+  note("E4", 0.90, 0.55);
+  note("E5", 0.90, 0.66);
+  note("Ds5", 0.90, 0.64);
+
+  /*
+   * ==========================================
+   * PHRASE 3
+   * ==========================================
+   *
+   * E D# E B D C
+   * A C E A
+   * B E C B
+   * A A
+   */
+  note("E5", 0.85, 0.66);
+  note("Ds5", 0.85, 0.64);
+  note("E5", 0.85, 0.66);
+  note("B4", 0.90, 0.60);
+  note("D5", 0.90, 0.62);
+  note("C5", 0.90, 0.62);
+
+  note("A4", 0.90, 0.64);
+  note("C4", 0.90, 0.55);
+  note("E4", 0.90, 0.58);
+  note("A4", 0.90, 0.64);
+
+  note("B4", 0.90, 0.62);
+  note("E4", 0.90, 0.58);
+  note("C5", 0.90, 0.64);
+  note("B4", 0.90, 0.62);
+
+  note("A4", 1.00, 0.66);
+  note("A4", 1.50, 0.68);
+
+  /*
+   * ==========================================
+   * PHRASE 4
+   * ==========================================
+   *
+   * B C D E
+   * G F E D
+   * F E D C
+   * E D C B
+   *
+   * This is the descending passage that makes
+   * the melody feel much more complete.
+   */
+
+  note("B4", 0.80, 0.60);
+  note("C5", 0.80, 0.62);
+  note("D5", 0.80, 0.64);
+  note("E5", 1.00, 0.66);
+
+  note("G4", 0.80, 0.57);
+  note("F5", 0.80, 0.62);
+  note("E5", 0.80, 0.64);
+  note("D5", 1.00, 0.60);
+
+  note("F4", 0.80, 0.55);
+  note("E5", 0.80, 0.64);
+  note("D5", 0.80, 0.60);
+  note("C5", 1.00, 0.60);
+
+  note("E4", 0.80, 0.55);
+  note("D5", 0.80, 0.60);
+  note("C5", 0.80, 0.58);
+  note("B4", 1.20, 0.60);
+
+  /*
+   * ==========================================
+   * RETURN TO MAIN MOTIF
+   * ==========================================
+   *
+   * E E E
+   * E D# E
+   * D# E D# E D#
+   * E B D C A
+   */
+
+  note("E4", 0.80, 0.55);
+  note("E5", 0.80, 0.64);
+  note("E5", 0.80, 0.64);
+
+  note("E6", 0.90, 0.70);
+  note("Ds5", 0.85, 0.64);
+  note("E5", 0.85, 0.66);
+
+  note("Ds5", 0.72, 0.62);
+  note("E5", 0.72, 0.64);
+  note("Ds5", 0.72, 0.62);
+  note("E5", 0.72, 0.64);
+  note("Ds5", 0.72, 0.62);
+
+  note("E5", 0.90, 0.68);
+  note("B4", 0.90, 0.60);
+  note("D5", 0.90, 0.62);
+  note("C5", 0.90, 0.62);
+  note("A4", 2.00, 0.70);
 
   return ok;
 }

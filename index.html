@@ -22977,33 +22977,6 @@ function aoChatTextPart(message){
     .trim();
 }
 
-
-/* =========================================================
-   PRIVATE CHAT TARGET METADATA
-   Stored inside existing chat text so no database schema
-   change is required. Hidden before display.
-========================================================= */
-const AO_CHAT_TARGET_OPEN="[[AO_CHAT_TARGET]]";
-const AO_CHAT_TARGET_CLOSE="[[/AO_CHAT_TARGET]]";
-function aoChatTargetMeta(message){
-  const raw=String(message||"");
-  const match=raw.match(/\[\[AO_CHAT_TARGET\]\]([\s\S]*?)\[\[\/AO_CHAT_TARGET\]\]/);
-  if(!match)return null;
-  try{
-    const data=JSON.parse(match[1]);
-    const adminEmail=String(data?.adminEmail||"").trim().toLowerCase();
-    return adminEmail?{adminEmail}:null;
-  }catch(e){return null;}
-}
-function aoChatStripTargetMeta(message){
-  return String(message||"").replace(/\[\[AO_CHAT_TARGET\]\][\s\S]*?\[\[\/AO_CHAT_TARGET\]\]\s*/g,"").trim();
-}
-function aoChatAttachAdminTarget(message,adminEmail){
-  const clean=aoChatStripTargetMeta(message);
-  const email=String(adminEmail||"").trim().toLowerCase();
-  return email ? AO_CHAT_TARGET_OPEN+JSON.stringify({adminEmail:email})+AO_CHAT_TARGET_CLOSE+"\n"+clean : clean;
-}
-
 /* =========================================================
    SHARED ADMIN CHAT STATE
    Uses hidden chat_messages state rows so multiple admins
@@ -24973,9 +24946,6 @@ async function aoChatLoadUnread(){
       const ts = new Date(r.created_at).getTime();
 
       if(!branch || !email || !Number.isFinite(ts)) return;
-      const targetMeta=aoChatTargetMeta(r?.message);
-      const currentAdmin=String(currentEmail||"").trim().toLowerCase();
-      if(targetMeta && targetMeta.adminEmail && targetMeta.adminEmail!==currentAdmin) return;
 
       const key = aoChatConversationKey(branch,email);
       const read = Math.max(
@@ -25300,7 +25270,7 @@ async function aoChatLoad(){
 
     box.innerHTML =
       '<div class="ao-chat-empty">' +
-      'Select a branch and branch user to open a private task conversation.' +
+      'Select a branch and branch user to open a private conversation.' +
       '</div>';
 
     return;
@@ -25409,18 +25379,9 @@ async function aoChatLoad(){
       deduped.set(dedupeKey,r);
     });
 
-    const finalList = Array.from(deduped.values())
-      .filter(r=>{
-        if(aoChatIsSharedStateMessage(r?.message)) return true;
-        const senderType=String(r?.sender_type||"").trim().toUpperCase();
-        const senderEmail=String(r?.sender_email||"").trim().toLowerCase();
-        const meta=aoChatTargetMeta(r?.message);
-        const me=String(currentEmail||"").trim().toLowerCase();
-        if(senderType==="SCANNER") return !meta || meta.adminEmail===me;
-        if(senderType==="DASHBOARD") return senderEmail===me;
-        return true;
-      })
-      .sort((a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    const finalList = Array.from(deduped.values()).sort(
+      (a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
 
     const sharedRead = aoChatSharedReadFromList(finalList);
     if(sharedRead){
@@ -26039,7 +26000,7 @@ async function aoChatSend(){
             .trim()
             .toLowerCase(),
           sender_type:"DASHBOARD",
-          message:aoChatAttachAdminTarget(message,String(currentEmail||"").trim().toLowerCase())
+          message:message
         }
       }
     );
@@ -26254,7 +26215,7 @@ document.addEventListener(
 
               messages.innerHTML =
                 '<div class="ao-chat-empty">' +
-                'Select a branch and branch user to open a private task conversation.' +
+                'Select a branch and branch user to open a private conversation.' +
                 '</div>';
 
             }
@@ -26910,7 +26871,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     <div>
       <div class="ao-chat-title">
-        Private Task Chat
+        Branch Chat
       </div>
 
       <div
@@ -26934,8 +26895,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   <!-- CHAT BRANCH + BRANCH USER SELECTION -->
   <div class="ao-chat-branch">
-
-    <div style="font-size:9px;font-weight:900;letter-spacing:.08em;color:#6b7f95;margin:0 0 7px 2px;">PRIVATE TASK CHANNEL · BRANCH + USER</div>
 
     <div class="ao-chat-branch-pair">
 
@@ -28130,7 +28089,36 @@ document.addEventListener("DOMContentLoaded",()=>{
       button.dataset.aoVideoBound="1";
       button.addEventListener("click",()=>{
         aoVideoMinimizeChat();
-        aoVideoOpenAdminPicker();
+        if(aoVideoIsDashboard()){
+          const branch=
+            typeof aoChatBranch==="function"
+              ? String(aoChatBranch() || "").trim().toUpperCase()
+              : "";
+          const recipient=
+            typeof aoChatRecipient==="function"
+              ? String(aoChatRecipient() || "").trim().toLowerCase()
+              : "";
+
+          if(!branch || !recipient){
+            if(typeof aoChatStatus==="function"){
+              aoChatStatus("Select a branch and scanner first.");
+            }
+            return;
+          }
+
+          aoVideoStartCall({
+            toEmail:recipient,
+            toType:"SCANNER",
+            toBranch:branch
+          }).catch(error=>{
+            console.error("Dashboard video call start failed:",error);
+            if(typeof aoChatStatus==="function"){
+              aoChatStatus(error?.message || "Unable to start video call.");
+            }
+          });
+        }else{
+          aoVideoOpenAdminPicker();
+        }
       });
     }
 
@@ -28148,7 +28136,19 @@ document.addEventListener("DOMContentLoaded",()=>{
     const button=document.getElementById("aoVideoCallBtn");
     if(!button) return;
 
-    button.disabled=false;
+    if(aoVideoIsDashboard()){
+      const branch=
+        typeof aoChatBranch==="function"
+          ? String(aoChatBranch() || "").trim()
+          : "";
+      const recipient=
+        typeof aoChatRecipient==="function"
+          ? String(aoChatRecipient() || "").trim()
+          : "";
+      button.disabled=!(branch && recipient);
+    }else{
+      button.disabled=false;
+    }
   }
 
   function aoVideoSetStatus(text){
@@ -28933,13 +28933,17 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   async function aoVideoOpenAdminPicker(){
     if(aoVideoState){
-      if(typeof aoChatStatus==="function") aoChatStatus("You already have a video call in progress.");
+      if(typeof aoChatStatus==="function"){
+        aoChatStatus("You already have a video call in progress.");
+      }
       return;
     }
 
     const identity=aoVideoIdentity();
-    if(!identity.email){
-      if(typeof aoChatStatus==="function") aoChatStatus("Please log in first.");
+    if(!identity.email || !identity.branch){
+      if(typeof aoChatStatus==="function"){
+        aoChatStatus("Please log in first.");
+      }
       return;
     }
 
@@ -28947,57 +28951,128 @@ document.addEventListener("DOMContentLoaded",()=>{
       await aoVideoEnsureSignal();
       await aoVideoTrackPresence();
     }catch(error){
-      if(typeof aoChatStatus==="function") aoChatStatus(error?.message || "Video-call service unavailable.");
+      if(typeof aoChatStatus==="function"){
+        aoChatStatus(error?.message || "Video-call service unavailable.");
+      }
       return;
     }
 
     aoVideoEnsureUi();
-    if(aoVideoAdminPicker){aoVideoAdminPicker.remove();aoVideoAdminPicker=null;}
+
+    if(aoVideoAdminPicker){
+      aoVideoAdminPicker.remove();
+      aoVideoAdminPicker=null;
+    }
 
     const modal=document.createElement("div");
     modal.className="ao-video-incoming-overlay open";
     modal.setAttribute("aria-hidden","false");
     modal.innerHTML=
-      '<div class="ao-video-picker-card ao-video-dashboard-picker">'+
-        '<div class="ao-video-picker-head">'+
-          '<div><div class="ao-video-picker-title">Choose Branch User to Call</div><div class="ao-video-picker-sub">Select a branch, then choose the scanner email</div></div>'+          '<button type="button" class="ao-video-picker-close" aria-label="Close">✕</button>'+        '</div>'+        '<div class="ao-video-scanner-picker-tools" style="display:block">'+          '<label class="ao-video-picker-field"><span>BRANCH</span><select id="aoVideoTargetBranch" class="ao-video-target-select"><option value="">Select branch...</option></select></label>'+        '</div>'+        '<div id="aoVideoAdminList" class="ao-video-admin-list"><div class="ao-video-admin-empty">Choose a branch to load scanner users.</div></div>'+      '</div>';
+      '<div class="ao-video-picker-card">' +
+        '<div class="ao-video-picker-head">' +
+          '<div>' +
+            '<div class="ao-video-picker-title">Choose Admin to Call</div>' +
+            '<div class="ao-video-picker-sub">' +
+              'Branch: ' + aoVideoEscape(identity.branch) +
+            '</div>' +
+          '</div>' +
+          '<button type="button" class="ao-video-picker-close" aria-label="Close">✕</button>' +
+        '</div>' +
+        '<div id="aoVideoAdminList" class="ao-video-admin-list">' +
+          '<div class="ao-video-admin-empty">Loading admins…</div>' +
+        '</div>' +
+      '</div>';
 
     document.body.appendChild(modal);
     aoVideoAdminPicker=modal;
-    const close=()=>{if(modal)modal.remove();if(aoVideoAdminPicker===modal)aoVideoAdminPicker=null;};
-    modal.querySelector('.ao-video-picker-close')?.addEventListener('click',close);
-    modal.addEventListener('click',e=>{if(e.target===modal)close();});
-    const list=modal.querySelector('#aoVideoAdminList');
-    const branchSelect=modal.querySelector('#aoVideoTargetBranch');
-    const esc=aoVideoEscape;
-    const isTrue=v=>{const x=String(v==null?"":v).trim().toLowerCase();return v===true||x==='true'||x==='1'||x==='yes';};
+
+    const close=()=>{
+      if(modal) modal.remove();
+      if(aoVideoAdminPicker===modal) aoVideoAdminPicker=null;
+    };
+
+    modal.querySelector(".ao-video-picker-close").onclick=close;
+    modal.addEventListener("click",event=>{
+      if(event.target===modal) close();
+    });
+
+    const list=modal.querySelector("#aoVideoAdminList");
 
     try{
-      const rows=await aoVideoRest('allowed_users?select=email,branch,active');
-      let scanners=(Array.isArray(rows)?rows:[])
-        .filter(r=>{const a=r?.active;return a===undefined||a===null||isTrue(a);})
-        .map(r=>({email:String(r?.email||'').trim().toLowerCase(),branch:String(r?.branch||'').trim().toUpperCase()}))
-        .filter(r=>r.email&&r.branch&&r.email!==identity.email);
-      const dedupe=new Map();scanners.forEach(r=>dedupe.set(r.branch+'|'+r.email,r));scanners=[...dedupe.values()];
-      const branches=[...new Set(scanners.map(r=>r.branch))].sort();
-      branchSelect.innerHTML='<option value="">Select branch...</option>'+branches.map(b=>'<option value="'+esc(b)+'">'+esc(b)+'</option>').join('');
-      const render=()=>{
-        const branch=String(branchSelect.value||'').trim().toUpperCase();
-        if(!branch){list.innerHTML='<div class="ao-video-admin-empty">Choose a branch to load scanner users.</div>';return;}
-        const online=new Set();
-        try{
-          const state=aoVideoSignalChannel?.presenceState?.()||{};
-          Object.keys(state).forEach(k=>(Array.isArray(state[k])?state[k]:[]).forEach(m=>{if(String(m?.type||'').trim().toUpperCase()==='SCANNER'){const e=String(m?.email||k||'').trim().toLowerCase();if(e)online.add(e);}}));
-        }catch(e){}
-        const listRows=scanners.filter(r=>r.branch===branch).sort((a,b)=>a.email.localeCompare(b.email));
-        if(!listRows.length){list.innerHTML='<div class="ao-video-admin-empty">No scanner users were found for '+esc(branch)+'.</div>';return;}
-        list.innerHTML=listRows.map(r=>{const on=online.has(r.email);return '<button type="button" class="ao-video-admin-option" data-scanner-email="'+esc(r.email)+'" data-scanner-branch="'+esc(r.branch)+'"><span class="ao-video-picker-person"><span class="ao-video-picker-avatar">👓</span><span class="ao-video-picker-person-copy"><span class="ao-video-admin-email">'+esc(r.email)+'</span><span class="ao-video-picker-role">Scanner · '+esc(r.branch)+'</span></span></span><span class="ao-video-admin-state '+(on?'online':'offline')+'"><span class="ao-video-admin-dot"></span>'+(on?'ONLINE':'OFFLINE')+'</span></button>';}).join('');
-        list.querySelectorAll('[data-scanner-email]').forEach(btn=>btn.addEventListener('click',()=>{const email=String(btn.dataset.scannerEmail||'').trim().toLowerCase();const toBranch=String(btn.dataset.scannerBranch||'').trim().toUpperCase();close();aoVideoStartCall({toEmail:email,toType:'SCANNER',toBranch}).catch(err=>{console.error('Dashboard video call start failed:',err);if(typeof aoChatStatus==='function')aoChatStatus(err?.message||'Unable to start video call.');});}));
+      const rows=await aoVideoRest(
+        "app_allowed_users?select=email,is_admin,active"
+      );
+
+      const isTrue=value=>{
+        const s=String(value == null ? "" : value).trim().toLowerCase();
+        return value===true || s==="true" || s==="1" || s==="yes";
       };
-      branchSelect.addEventListener('change',render);render();
+
+      const admins=(Array.isArray(rows) ? rows : [])
+        .filter(row=>isTrue(row?.is_admin))
+        .filter(row=>{
+          const active=row?.active;
+          return active===undefined || active===null || isTrue(active);
+        })
+        .map(row=>String(row?.email || "").trim().toLowerCase())
+        .filter(Boolean)
+        .filter(email=>email!==identity.email);
+
+      const unique=[...new Set(admins)].sort();
+
+      if(!unique.length){
+        if(list){
+          list.innerHTML=
+            '<div class="ao-video-admin-empty">' +
+              'No active administrators were found.' +
+            '</div>';
+        }
+        return;
+      }
+
+      if(list){
+        const onlineAdmins=aoVideoOnlineAdminEmails();
+        list.innerHTML=unique.map(email=>{
+          const isOnline=onlineAdmins.has(email);
+          return '<button type="button" class="ao-video-admin-option" data-admin-email="' +
+            aoVideoEscape(email) +
+          '" data-admin-online="' + String(isOnline) + '">' +
+            '<span class="ao-video-admin-email">' +
+              aoVideoEscape(email) +
+            '</span>' +
+            '<span class="ao-video-admin-state ' + (isOnline ? 'online' : 'offline') + '">' +
+              '<span class="ao-video-admin-dot"></span>' +
+              (isOnline ? 'ONLINE' : 'OFFLINE') +
+            '</span>' +
+          '</button>';
+        }).join("");
+
+        list.querySelectorAll("[data-admin-email]").forEach(button=>{
+          button.addEventListener("click",()=>{
+            const email=String(button.dataset.adminEmail || "").trim().toLowerCase();
+            close();
+
+            aoVideoStartCall({
+              toEmail:email,
+              toType:"ADMIN",
+              toBranch:identity.branch
+            }).catch(error=>{
+              console.error("Scanner video call start failed:",error);
+              if(typeof aoChatStatus==="function"){
+                aoChatStatus(error?.message || "Unable to start video call.");
+              }
+            });
+          });
+        });
+      }
     }catch(error){
-      console.error('Branch user video-call picker failed:',error);
-      if(list)list.innerHTML='<div class="ao-video-admin-empty">'+esc(error?.message||'Unable to load branch users.')+'</div>';
+      console.error("Admin list for video call failed:",error);
+      if(list){
+        list.innerHTML=
+          '<div class="ao-video-admin-empty">' +
+            aoVideoEscape(error?.message || "Unable to load administrators.") +
+          '</div>';
+      }
     }
   }
 
@@ -29247,7 +29322,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         '<div class="ao-admin-name-title">Your Admin Display Name</div>' +
         '<div class="ao-admin-name-sub">This name is shown to scanners in chat and video calls. Your email remains the private/internal account ID.</div>' +
         '<label for="aoAdminNameInput">DISPLAY NAME</label>' +
-        '<input id="aoAdminNameInput" class="ao-admin-name-input" maxlength="60" autocomplete="nickname" placeholder="Example: IT SUPPORT">' +
+        '<input id="aoAdminNameInput" class="ao-admin-name-input" maxlength="60" autocomplete="nickname" placeholder="Example: ANAK NG CEO">' +
         '<div id="aoAdminNameStatus" class="ao-admin-name-status"></div>' +
         '<div class="ao-admin-name-actions">' +
           '<button type="button" class="ao-admin-name-cancel">Cancel</button>' +

@@ -29481,79 +29481,142 @@ document.addEventListener("DOMContentLoaded",()=>{
     }
   }
 
-  function playBellTone(frequency, when, duration, level){
-    const ctx = getAudioContext();
-    if(!ctx || ctx.state !== "running" || !masterGain) return false;
+ function playBellTone(freq, startTime, duration, level = 0.68) {
+  const ctx = getAudioContext();
 
-    const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    /* Triangle + sine gives the bright, soft digital-phone character. */
-    osc1.type = "triangle";
-    osc2.type = "sine";
-    osc1.frequency.setValueAtTime(frequency,when);
-    osc2.frequency.setValueAtTime(frequency * 2,when);
-
-    gain.gain.setValueAtTime(0.0001,when);
-    gain.gain.exponentialRampToValueAtTime(level,when + 0.025);
-    gain.gain.exponentialRampToValueAtTime(0.0001,when + duration);
-
-    osc1.connect(gain);
-    osc2.connect(gain);
-    gain.connect(masterGain);
-
-    try{
-      osc1.start(when);
-      osc2.start(when);
-      osc1.stop(when + duration + 0.04);
-      osc2.stop(when + duration + 0.04);
-      return true;
-    }catch(error){
-      try{ osc1.disconnect(); }catch(e){}
-      try{ osc2.disconnect(); }catch(e){}
-      try{ gain.disconnect(); }catch(e){}
-      return false;
-    }
+  if (!ctx || ctx.state !== "running" || !masterGain) {
+    return false;
   }
 
- function playRingCycle(){
+  try {
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const osc3 = ctx.createOscillator();
+
+    const gain = ctx.createGain();
+
+    // Piano-like harmonic structure
+    osc1.type = "triangle";
+    osc1.frequency.setValueAtTime(freq, startTime);
+
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(freq * 2, startTime);
+
+    osc3.type = "sine";
+    osc3.frequency.setValueAtTime(freq * 3, startTime);
+
+    // Slightly softer upper harmonics
+    const g1 = ctx.createGain();
+    const g2 = ctx.createGain();
+    const g3 = ctx.createGain();
+
+    g1.gain.value = 1.00;
+    g2.gain.value = 0.24;
+    g3.gain.value = 0.08;
+
+    osc1.connect(g1);
+    osc2.connect(g2);
+    osc3.connect(g3);
+
+    g1.connect(gain);
+    g2.connect(gain);
+    g3.connect(gain);
+
+    gain.connect(masterGain);
+
+    const attack = 0.012;
+    const decay = Math.min(0.18, duration * 0.28);
+    const release = Math.min(0.20, duration * 0.35);
+
+    const peak = level;
+
+    gain.gain.setValueAtTime(0.0001, startTime);
+
+    // Fast piano-style attack
+    gain.gain.linearRampToValueAtTime(
+      peak,
+      startTime + attack
+    );
+
+    // Initial decay
+    gain.gain.exponentialRampToValueAtTime(
+      Math.max(peak * 0.48, 0.0001),
+      startTime + attack + decay
+    );
+
+    // Sustain
+    const sustainTime = Math.max(
+      startTime + attack + decay,
+      startTime + duration - release
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      Math.max(peak * 0.30, 0.0001),
+      sustainTime
+    );
+
+    // Release
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      startTime + duration
+    );
+
+    const stopTime = startTime + duration + 0.03;
+
+    osc1.start(startTime);
+    osc2.start(startTime);
+    osc3.start(startTime);
+
+    osc1.stop(stopTime);
+    osc2.stop(stopTime);
+    osc3.stop(stopTime);
+
+    return true;
+
+  } catch (err) {
+    console.warn("playBellTone error:", err);
+    return false;
+  }
+}
+
+function playRingCycle() {
   const ctx = getAudioContext();
-  if(!ctx || ctx.state !== "running" || !masterGain){
+
+  if (!ctx || ctx.state !== "running" || !masterGain) {
     return false;
   }
 
   const now = ctx.currentTime + 0.035;
 
   /*
-   * FÜR ELISE — opening motif
-   * Uses the existing playBellTone() engine.
+   * FÜR ELISE — recognizable opening motif
    *
    * E5 D#5 E5 D#5 E5 B4 D5 C5 A4
    * C4 E4 A4 B4
    * E4 G#4 B4 C5
-   *
-   * Fast phone-ringtone tempo so it repeats cleanly.
    */
 
   const notes = {
-    E5: 659.25,
-    D5: 587.33,
-    C5: 523.25,
-    B4: 493.88,
-    A4: 440.00,
-    G4: 392.00,
-    Gs4: 415.30,
+    C4: 261.63,
     E4: 329.63,
-    C4: 261.63
+    Gs4: 415.30,
+    A4: 440.00,
+    B4: 493.88,
+    C5: 523.25,
+    D5: 587.33,
+    Ds5: 622.25,
+    E5: 659.25
   };
 
-  const beat = 0.24;
+  // Slower than your original so Für Elise is recognizable
+  const beat = 0.22;
+
   let t = now;
   let ok = false;
 
-  function note(name,beats=1,level=0.68){
-    const duration = beat * beats * 0.92;
+  function note(name, beats = 1, level = 0.62) {
+    const duration = beat * beats * 0.88;
+
     ok = playBellTone(
       notes[name],
       t,
@@ -29564,26 +29627,37 @@ document.addEventListener("DOMContentLoaded",()=>{
     t += beat * beats;
   }
 
-  /* Für Elise opening */
-  note("E5");
-  note("D5",0.92);
-  note("E5");
-  note("D5",0.92);
-  note("E5");
-  note("B4");
-  note("D5");
-  note("C5");
-  note("A4",1.8);
+  /*
+   * Für Elise opening
+   *
+   * E  D# E  D# E  B  D  C  A
+   */
+  note("E5", 0.85, 0.66);
+  note("Ds5", 0.85, 0.64);
+  note("E5", 0.85, 0.66);
+  note("Ds5", 0.85, 0.64);
+  note("E5", 0.90, 0.68);
 
-  note("C4");
-  note("E4");
-  note("A4");
-  note("B4");
+  note("B4", 0.90, 0.60);
+  note("D5", 0.90, 0.62);
+  note("C5", 0.90, 0.62);
+  note("A4", 1.80, 0.68);
 
-  note("E4");
-  note("Gs4");
-  note("B4");
-  note("C5",1.5);
+  /*
+   * Second phrase
+   */
+  note("C4", 0.90, 0.55);
+  note("E4", 0.90, 0.58);
+  note("A4", 0.90, 0.62);
+  note("B4", 0.90, 0.62);
+
+  /*
+   * Closing part
+   */
+  note("E4", 0.90, 0.58);
+  note("Gs4", 0.90, 0.60);
+  note("B4", 0.90, 0.62);
+  note("C5", 1.60, 0.68);
 
   return ok;
 }

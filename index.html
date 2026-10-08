@@ -27420,6 +27420,16 @@ document.addEventListener("DOMContentLoaded",()=>{
   font-size:9px;
   font-weight:900;
 }
+.ao-video-admin-dot{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  margin-right:5px;
+  border-radius:50%;
+  background:currentColor;
+  box-shadow:0 0 0 2px rgba(255,255,255,.45),0 0 10px currentColor;
+  vertical-align:middle;
+}
 .ao-video-admin-state.online{
   color:#15803d;
   background:#dcfce7;
@@ -27495,6 +27505,54 @@ document.addEventListener("DOMContentLoaded",()=>{
   background:linear-gradient(135deg,#22c55e,#16a34a)!important;
   color:#fff!important;
 }
+.ao-video-notice-stack{
+  position:fixed;
+  top:82px;
+  right:18px;
+  z-index:27000;
+  width:min(380px,calc(100vw - 36px));
+  display:grid;
+  gap:10px;
+  pointer-events:none;
+}
+.ao-video-notice{
+  pointer-events:auto;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:12px 12px 12px 13px;
+  border:1px solid rgba(148,163,184,.30);
+  border-radius:16px;
+  background:rgba(8,18,35,.92);
+  color:#fff;
+  box-shadow:0 18px 50px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  animation:aoVideoNoticeIn .28s cubic-bezier(.2,.8,.2,1);
+}
+.ao-video-notice::before{content:"";width:4px;align-self:stretch;border-radius:999px;background:#38bdf8;box-shadow:0 0 14px rgba(56,189,248,.55)}
+.ao-video-notice.warning::before{background:#f59e0b;box-shadow:0 0 14px rgba(245,158,11,.55)}
+.ao-video-notice.danger::before{background:#fb7185;box-shadow:0 0 14px rgba(251,113,133,.55)}
+.ao-video-notice.success::before{background:#4ade80;box-shadow:0 0 14px rgba(74,222,128,.55)}
+.ao-video-notice-icon{width:36px;height:36px;flex:0 0 36px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:linear-gradient(135deg,rgba(59,130,246,.24),rgba(139,92,246,.22));font-size:16px;animation:aoVideoNoticePulse 1.3s ease-in-out infinite}
+.ao-video-notice.warning .ao-video-notice-icon{background:rgba(245,158,11,.16)}
+.ao-video-notice.danger .ao-video-notice-icon{background:rgba(244,63,94,.16)}
+.ao-video-notice.success .ao-video-notice-icon{background:rgba(34,197,94,.16)}
+.ao-video-notice-copy{min-width:0;display:grid;gap:2px}
+.ao-video-notice-copy strong{font-size:11px;font-weight:950;letter-spacing:.02em}
+.ao-video-notice-copy span{font-size:10px;line-height:1.45;color:rgba(255,255,255,.72)}
+.ao-video-notice-close{margin-left:auto;width:28px;min-width:28px;height:28px;min-height:28px!important;padding:0!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:9px!important;background:rgba(255,255,255,.06)!important;color:rgba(255,255,255,.72)!important;cursor:pointer;line-height:1;font-size:17px!important}
+.ao-video-notice.closing{animation:aoVideoNoticeOut .22s ease forwards}
+@keyframes aoVideoNoticeIn{from{opacity:0;transform:translate3d(24px,-8px,0) scale(.97)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes aoVideoNoticeOut{to{opacity:0;transform:translate3d(18px,-4px,0) scale(.97)}}
+@keyframes aoVideoNoticePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.ao-video-incoming-card{position:relative;box-shadow:0 28px 90px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.45) inset}
+.ao-video-incoming-card::before{content:"INCOMING";position:absolute;top:14px;right:14px;padding:5px 8px;border-radius:999px;color:#0f5132;background:#dcfce7;border:1px solid #bbf7d0;font-size:8px;font-weight:950;letter-spacing:.12em;animation:aoIncomingBadge 1.15s ease-in-out infinite}
+.ao-video-incoming-icon{position:relative}
+.ao-video-incoming-icon::after{content:"";position:absolute;inset:-5px;border:2px solid rgba(59,130,246,.25);border-radius:18px;animation:aoIncomingRing 1.4s ease-out infinite}
+@keyframes aoIncomingRing{0%{transform:scale(.86);opacity:.9}100%{transform:scale(1.24);opacity:0}}
+@keyframes aoIncomingBadge{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:.82}}
+
 @media(max-width:650px){
   .ao-video-overlay,.ao-video-incoming-overlay{padding:0}
   .ao-video-card{
@@ -27530,6 +27588,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   let aoVideoIncoming = null;
   let aoVideoInviteTimer = null;
   let aoVideoAdminPicker = null;
+  let aoVideoPresenceTrackedEmail = "";
 
   function aoVideoIsDashboard(){
     return !!document.getElementById("aoChatRecipient");
@@ -27644,6 +27703,59 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   }
 
+  function aoVideoOnlineAdminEmails(){
+    const online=new Set();
+    try{
+      const channel=aoVideoSignalChannel;
+      if(!channel || typeof channel.presenceState!=="function") return online;
+      const state=channel.presenceState() || {};
+      Object.keys(state).forEach(key=>{
+        const metas=Array.isArray(state[key]) ? state[key] : [];
+        metas.forEach(meta=>{
+          const type=String(meta?.type || "").trim().toUpperCase();
+          const email=String(meta?.email || key || "").trim().toLowerCase();
+          if(type==="DASHBOARD" && email) online.add(email);
+        });
+      });
+    }catch(error){
+      console.warn("Video-call presence read failed:",error);
+    }
+    return online;
+  }
+
+  function aoVideoRefreshAdminPresence(){
+    const online=aoVideoOnlineAdminEmails();
+    document.querySelectorAll(".ao-video-admin-option[data-admin-email]").forEach(button=>{
+      const email=String(button.getAttribute("data-admin-email") || "").trim().toLowerCase();
+      const state=button.querySelector(".ao-video-admin-state");
+      if(!state) return;
+      const isOnline=online.has(email);
+      state.classList.toggle("online",isOnline);
+      state.classList.toggle("offline",!isOnline);
+      state.innerHTML='<span class="ao-video-admin-dot"></span>'+(isOnline ? "ONLINE" : "OFFLINE");
+      button.setAttribute("data-admin-online",String(isOnline));
+    });
+  }
+
+  async function aoVideoTrackPresence(){
+    const channel=aoVideoSignalChannel;
+    if(!channel || typeof channel.track!=="function") return;
+    const identity=aoVideoIdentity();
+    const email=String(identity.email || "").trim().toLowerCase();
+    try{
+      if(!email){
+        if(aoVideoPresenceTrackedEmail && typeof channel.untrack==="function") await channel.untrack();
+        aoVideoPresenceTrackedEmail="";
+        return;
+      }
+      if(aoVideoPresenceTrackedEmail===email) return;
+      await channel.track({email,type:identity.type,branch:identity.branch || "",at:Date.now()});
+      aoVideoPresenceTrackedEmail=email;
+    }catch(error){
+      console.warn("Video-call presence update failed:",error);
+    }
+  }
+
   function aoVideoLoadSupabaseClient(){
     if(window.supabase && typeof window.supabase.createClient === "function"){
       return Promise.resolve(window.supabase);
@@ -27752,7 +27864,8 @@ document.addEventListener("DOMContentLoaded",()=>{
               broadcast:{
                 self:false,
                 ack:true
-              }
+              },
+              presence:{}
             }
           })
           .on(
@@ -27767,6 +27880,11 @@ document.addEventListener("DOMContentLoaded",()=>{
             }
           );
 
+        aoVideoSignalChannel
+          .on("presence",{event:"sync"},()=>aoVideoRefreshAdminPresence())
+          .on("presence",{event:"join"},()=>aoVideoRefreshAdminPresence())
+          .on("presence",{event:"leave"},()=>aoVideoRefreshAdminPresence());
+
         await new Promise((resolve,reject)=>{
           let settled=false;
           const finish=(ok,error)=>{
@@ -27780,6 +27898,7 @@ document.addEventListener("DOMContentLoaded",()=>{
             status=>{
               if(status==="SUBSCRIBED"){
                 aoVideoSignalReady=true;
+                aoVideoTrackPresence().catch(()=>{});
                 finish(true);
               }else if(
                 status==="CHANNEL_ERROR" ||
@@ -28009,6 +28128,44 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(el) el.textContent=String(text || "");
   }
 
+  function aoVideoEnsureNoticeUi(){
+    let stack=document.getElementById("aoVideoNoticeStack");
+    if(stack) return stack;
+    stack=document.createElement("div");
+    stack.id="aoVideoNoticeStack";
+    stack.className="ao-video-notice-stack";
+    stack.setAttribute("aria-live","polite");
+    document.body.appendChild(stack);
+    return stack;
+  }
+
+  function aoVideoShowNotice(title,message,tone="info",duration=4200){
+    try{
+      const stack=aoVideoEnsureNoticeUi();
+      const notice=document.createElement("div");
+      notice.className="ao-video-notice " + tone;
+      notice.innerHTML=
+        '<div class="ao-video-notice-icon">' +
+          (tone==="danger" ? '☎' : tone==="warning" ? '⚠' : tone==="success" ? '✓' : '📹') +
+        '</div>' +
+        '<div class="ao-video-notice-copy">' +
+          '<strong>' + aoVideoEscape(title) + '</strong>' +
+          '<span>' + aoVideoEscape(message) + '</span>' +
+        '</div>' +
+        '<button type="button" class="ao-video-notice-close" aria-label="Close">×</button>';
+      stack.appendChild(notice);
+      const remove=()=>{
+        if(notice.classList.contains("closing")) return;
+        notice.classList.add("closing");
+        setTimeout(()=>notice.remove(),220);
+      };
+      notice.querySelector(".ao-video-notice-close")?.addEventListener("click",remove);
+      setTimeout(remove,duration);
+    }catch(error){
+      console.warn("Video-call notification display failed:",error);
+    }
+  }
+
   function aoVideoOpenCallUi(title,status){
     aoVideoEnsureUi();
 
@@ -28069,6 +28226,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         (info.fromBranch
           ? "<br>Branch: <strong>" + aoVideoEscape(info.fromBranch) + "</strong>"
           : "");
+      aoVideoShowNotice("Incoming video call",callerLabel + " is calling you.","success",3000);
     }
 
     const overlay=document.getElementById("aoVideoIncomingOverlay");
@@ -28301,6 +28459,8 @@ document.addEventListener("DOMContentLoaded",()=>{
       pendingIce:[]
     };
 
+    aoVideoTrackPresence().catch(()=>{});
+
     aoVideoOpenCallUi(
       targetType==="ADMIN" ? "Calling Admin" : "Calling Scanner",
       "Starting camera and microphone…"
@@ -28439,11 +28599,13 @@ document.addEventListener("DOMContentLoaded",()=>{
      */
     if(kind==="end" && aoVideoIncoming && aoVideoIncoming.callId===callId){
       aoVideoCloseIncoming();
+      aoVideoShowNotice("Call cancelled","The caller ended the call before it was answered.","info",2800);
       return;
     }
 
     if(kind==="invite"){
       if(aoVideoState){
+        aoVideoShowNotice("Another call is coming in","You are already on a video call. The new call was declined automatically.","warning");
         await aoVideoSend({
           kind:"busy",
           callId,
@@ -28456,6 +28618,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       }
 
       if(aoVideoIncoming){
+        aoVideoShowNotice("Call already ringing","You already have an incoming video call waiting.","warning");
         await aoVideoSend({
           kind:"busy",
           callId,
@@ -28492,12 +28655,14 @@ document.addEventListener("DOMContentLoaded",()=>{
 
       if(kind==="decline"){
         aoVideoSetStatus("Call declined.");
+        aoVideoShowNotice("Call declined","The other user declined your video call.","danger");
         setTimeout(()=>aoVideoEndCall(true),850);
         return;
       }
 
       if(kind==="busy"){
         aoVideoSetStatus("The selected user is already on another call.");
+        aoVideoShowNotice("User is busy","The person you called is already on another video call.","warning");
         setTimeout(()=>aoVideoEndCall(true),1100);
         return;
       }
@@ -28695,6 +28860,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     const state=aoVideoState;
     aoVideoState=null;
+    aoVideoTrackPresence().catch(()=>{});
 
     if(state && notifyPeer && state.remoteEmail){
       try{
@@ -28755,6 +28921,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     try{
       await aoVideoEnsureSignal();
+      await aoVideoTrackPresence();
     }catch(error){
       if(typeof aoChatStatus==="function"){
         aoChatStatus(error?.message || "Video-call service unavailable.");
@@ -28836,16 +29003,21 @@ document.addEventListener("DOMContentLoaded",()=>{
       }
 
       if(list){
-        list.innerHTML=unique.map(email=>
-          '<button type="button" class="ao-video-admin-option" data-admin-email="' +
+        const onlineAdmins=aoVideoOnlineAdminEmails();
+        list.innerHTML=unique.map(email=>{
+          const isOnline=onlineAdmins.has(email);
+          return '<button type="button" class="ao-video-admin-option" data-admin-email="' +
             aoVideoEscape(email) +
-          '">' +
+          '" data-admin-online="' + String(isOnline) + '">' +
             '<span class="ao-video-admin-email">' +
               aoVideoEscape(email) +
             '</span>' +
-            '<span class="ao-video-admin-state online">ADMIN</span>' +
-          '</button>'
-        ).join("");
+            '<span class="ao-video-admin-state ' + (isOnline ? 'online' : 'offline') + '">' +
+              '<span class="ao-video-admin-dot"></span>' +
+              (isOnline ? 'ONLINE' : 'OFFLINE') +
+            '</span>' +
+          '</button>';
+        }).join("");
 
         list.querySelectorAll("[data-admin-email]").forEach(button=>{
           button.addEventListener("click",()=>{
@@ -28880,14 +29052,21 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(!document.body) return;
 
     aoVideoEnsureUi();
+    aoVideoEnsureNoticeUi();
 
     /* The button is inside the existing message box; no existing chat handler is replaced. */
     aoVideoUpdateButtonState();
 
     /* Start signaling lazily after the existing page is settled. */
     setTimeout(()=>{
-      aoVideoEnsureSignal().catch(()=>{});
+      aoVideoEnsureSignal().then(()=>aoVideoTrackPresence()).catch(()=>{});
     },1200);
+
+    if(!window.__aoVideoPresenceTimer){
+      window.__aoVideoPresenceTimer=setInterval(()=>{
+        aoVideoEnsureSignal().then(()=>aoVideoTrackPresence()).catch(()=>{});
+      },5000);
+    }
   }
 
   if(document.readyState==="loading"){

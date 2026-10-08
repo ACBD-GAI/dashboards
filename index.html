@@ -6489,9 +6489,11 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
     min-width:40px;
   }
   .ao-chat-search-compact{
+    width:100%;
     flex:1.05 1 0;
-    min-width:125px;
+    min-width:0;
     height:40px;
+    margin-top:8px;
     box-sizing:border-box;
     padding:0;
     border:0;
@@ -6545,7 +6547,8 @@ thead th{color:#eaf6ff;background:linear-gradient(100deg,#173b68,#205383 56%,#25
       flex:1.25 1 0;
     }
     .ao-chat-search-compact{
-      min-width:108px;
+      width:100%;
+      min-width:0;
     }
     .ao-chat-search-compact .ao-chat-search-input{
       font-size:9px;
@@ -22837,6 +22840,9 @@ let aoChatNotifications = [];
 
 const aoChatRecipientCache = new Map();
 const aoChatConversationCache = new Map();
+const aoChatRecipientRefreshAt = new Map();
+const aoChatRecipientRefreshPromises = new Map();
+const AO_CHAT_RECIPIENT_REFRESH_COOLDOWN_MS = 12000;
 
 let aoChatUnreadBusy = false;
 let aoChatLoadBusy = false;
@@ -24549,6 +24555,12 @@ async function aoChatLoadRecipients(
       old
     );
 
+    /* Show the cached list immediately, then quietly refresh it when due. */
+    aoChatRefreshRecipientsInBackground(
+      branch,
+      old
+    ).catch(()=>{});
+
     return;
 
   }
@@ -24577,8 +24589,8 @@ async function aoChatLoadRecipients(
       old
     );
 
-    /* Refresh silently in background. */
-    aoChatLoadRecipientsFresh(
+    /* Refresh silently in background, without duplicate overlapping requests. */
+    aoChatRefreshRecipientsInBackground(
       branch,
       old
     ).catch(()=>{});
@@ -24594,11 +24606,48 @@ async function aoChatLoadRecipients(
     'Loading branch users...' +
     '</option>';
 
-  await aoChatLoadRecipientsFresh(
+  await aoChatRefreshRecipientsInBackground(
     branch,
-    old
+    old,
+    true
   );
+}
 
+function aoChatRefreshRecipientsInBackground(
+  branch,
+  preferredEmail="",
+  force=false
+){
+
+  const b = String(branch || "").trim().toUpperCase();
+  if(!b) return Promise.resolve();
+
+  const existing = aoChatRecipientRefreshPromises.get(b);
+  if(existing) return existing;
+
+  const lastRefresh = Number(aoChatRecipientRefreshAt.get(b) || 0);
+  if(
+    !force &&
+    Date.now() - lastRefresh < AO_CHAT_RECIPIENT_REFRESH_COOLDOWN_MS
+  ){
+    return Promise.resolve();
+  }
+
+  aoChatRecipientRefreshAt.set(b,Date.now());
+
+  const task = Promise.resolve()
+    .then(() => aoChatLoadRecipientsFresh(b,preferredEmail))
+    .catch(error => {
+      console.warn("Chat recipient refresh failed:",error);
+    })
+    .finally(() => {
+      if(aoChatRecipientRefreshPromises.get(b) === task){
+        aoChatRecipientRefreshPromises.delete(b);
+      }
+    });
+
+  aoChatRecipientRefreshPromises.set(b,task);
+  return task;
 }
 
 async function aoChatLoadRecipientsFresh(
@@ -24606,276 +24655,135 @@ async function aoChatLoadRecipientsFresh(
   preferredEmail=""
 ){
 
-  const select =
-    document.getElementById(
-      "aoChatRecipient"
-    );
+  branch = String(branch || "").trim().toUpperCase();
+  const select = document.getElementById("aoChatRecipient");
+  if(!select || !branch) return;
 
-  if(!select) return;
+  const emails = new Set();
+  const current = String(currentEmail || "").trim().toLowerCase();
 
-  try{
+  /* Preserve an already visible/cached contact list while refreshing. */
+  const memoryCached = aoChatRecipientCache.get(branch);
+  const storedCached = memoryCached ? null : aoChatReadStoredRecipients(branch);
+  const seedList = Array.isArray(memoryCached)
+    ? memoryCached
+    : (Array.isArray(storedCached) ? storedCached : []);
 
-    const emails =
-      new Set();
+  seedList.forEach(email => {
+    const normalized = String(email || "").trim().toLowerCase();
+    if(normalized) emails.add(normalized);
+  });
 
-    const current =
-      String(
-        currentEmail || ""
-      )
-      .trim()
-      .toLowerCase();
+  function addAuthorizedUsers(rows){
+    if(!Array.isArray(rows)) return;
 
-    /* =========================================================
-       RUN ALL CHAT RECIPIENT SOURCES IN PARALLEL
-       1. Active sessions
-       2. Previous chat contacts
-       3. Authorized branch users
-       ========================================================= */
-
-    const [
-      activeData,
-      previousRows
-    ] =
-      await Promise.all([
-
-        loginApiGet(
-          "getActiveSessions",
-          {
-            sessionId:sessionId
-          }
-        ).catch(
-          () => null
-        ),
-
-        supabaseRequest(
-          "chat_messages?select=scanner_email" +
-          "&branch=eq." +
-          encodeURIComponent(branch) +
-          "&limit=1000"
-        ).catch(
-          () => []
-        )
-
-      ]);
-
-    /* =========================================================
-       1. ACTIVE USERS
-       ========================================================= */
-
-    if(
-      activeData &&
-      activeData.ok === true &&
-      Array.isArray(
-        activeData.users
-      )
-    ){
-
-      activeData.users.forEach(
-        u => {
-
-          const email =
-            String(
-              u?.email || ""
-            )
-            .trim()
-            .toLowerCase();
-
-          const b =
-            String(
-              u?.branch || ""
-            )
-            .trim()
-            .toUpperCase();
-
-          if(
-            email &&
-            b === branch
-          ){
-
-            emails.add(email);
-
-          }
-
-        }
-      );
-
-    }
-
-    /* =========================================================
-       2. PREVIOUS CHAT CONTACTS
-       This also keeps offline users who already chatted before.
-       ========================================================= */
-
-    if(
-      Array.isArray(previousRows)
-    ){
-
-      previousRows.forEach(
-        row => {
-
-          const email =
-            String(
-              row?.scanner_email || ""
-            )
-            .trim()
-            .toLowerCase();
-
-          if(email){
-
-            emails.add(email);
-
-          }
-
-        }
-      );
-
-    }
-
-    /* =========================================================
-       3. AUTHORIZED BRANCH USERS
-       IMPORTANT:
-       This is what makes OFFLINE users visible.
-
-       allowedUsersRows is already loaded by the Dashboard's
-       existing Allowed Users function.
-       ========================================================= */
-
-    if(
-      Array.isArray(
-        allowedUsersRows
-      )
-    ){
-
-      allowedUsersRows.forEach(
-        user => {
-
-          const email =
-            String(
-              user?.email || ""
-            )
-            .trim()
-            .toLowerCase();
-
-          const userBranch =
-            String(
-              user?.branch || ""
-            )
-            .trim()
-            .toUpperCase();
-
-          const activeValue =
-            user?.active;
-
-          /*
-           * Only include users assigned to this branch.
-           *
-           * Do not require them to be online.
-           */
-          if(
-            email &&
-            userBranch === branch &&
-            activeValue !== false &&
-            String(activeValue).toLowerCase() !== "false"
-          ){
-
-            emails.add(email);
-
-          }
-
-        }
-      );
-
-    }
-
-    /* =========================================================
-       4. SAME EMAIL AS DASHBOARD
-       Keep it selectable too.
-       ========================================================= */
-
-    if(current){
-
-      const sameEmailAllowed =
-        Array.isArray(
-          allowedUsersRows
-        ) &&
-        allowedUsersRows.some(
-          user =>
-            String(
-              user?.email || ""
-            )
-            .trim()
-            .toLowerCase() === current &&
-            String(
-              user?.branch || ""
-            )
-            .trim()
-            .toUpperCase() === branch
-        );
-
-      const sameEmailPreviousChat =
-        Array.isArray(
-          previousRows
-        ) &&
-        previousRows.some(
-          row =>
-            String(
-              row?.scanner_email || ""
-            )
-            .trim()
-            .toLowerCase() === current
-        );
+    rows.forEach(user => {
+      const email = String(user?.email || "").trim().toLowerCase();
+      const userBranch = String(user?.branch || "").trim().toUpperCase();
+      const activeValue = user?.active;
 
       if(
-        sameEmailAllowed ||
-        sameEmailPreviousChat
+        email &&
+        userBranch === branch &&
+        activeValue !== false &&
+        String(activeValue).toLowerCase() !== "false"
       ){
-
-        emails.add(current);
-
+        emails.add(email);
       }
+    });
+  }
 
+  function publishRecipientList(){
+    const list = Array.from(emails).sort();
+
+    aoChatRecipientCache.set(branch,list);
+    aoChatStoreRecipients(branch,list);
+
+    /* An older request must never replace the currently selected branch. */
+    if(aoChatBranch() === branch){
+      aoChatRenderRecipientOptions(
+        branch,
+        list,
+        preferredEmail
+      );
+    }
+  }
+
+  /* Use any already-loaded authorized users immediately while the fresh copy loads. */
+  addAuthorizedUsers(allowedUsersRows);
+  if(emails.size){
+    publishRecipientList();
+  }
+
+  /* Start all sources together; each source publishes as soon as it responds. */
+  const authorizedPromise = loginApiGet(
+    "getAllowedUsers",
+    {sessionId:sessionId}
+  ).then(data => {
+    if(data && data.ok === true && Array.isArray(data.users)){
+      allowedUsersRows = data.users;
     }
 
-    /* =========================================================
-       FINAL LIST
-       ========================================================= */
+    addAuthorizedUsers(allowedUsersRows);
 
-    const list =
-      Array.from(
-        emails
-      ).sort();
+    /* Preserve the current dashboard email if authorized for this branch. */
+    if(current && Array.isArray(allowedUsersRows)){
+      const sameEmailAllowed = allowedUsersRows.some(user =>
+        String(user?.email || "").trim().toLowerCase() === current &&
+        String(user?.branch || "").trim().toUpperCase() === branch
+      );
+      if(sameEmailAllowed) emails.add(current);
+    }
 
-    aoChatRecipientCache.set(
-      branch,
-      list
-    );
+    publishRecipientList();
+  }).catch(error => {
+    /* The other two sources remain usable if the login service is unavailable. */
+    console.warn("Authorized chat recipients unavailable:",error);
+    addAuthorizedUsers(allowedUsersRows);
+    publishRecipientList();
+  });
 
-    aoChatStoreRecipients(
-      branch,
-      list
-    );
+  const activePromise = loginApiGet(
+    "getActiveSessions",
+    {sessionId:sessionId}
+  ).then(activeData => {
+    if(activeData && activeData.ok === true && Array.isArray(activeData.users)){
+      activeData.users.forEach(user => {
+        const email = String(user?.email || "").trim().toLowerCase();
+        const userBranch = String(user?.branch || "").trim().toUpperCase();
+        if(email && userBranch === branch) emails.add(email);
+      });
+    }
+    publishRecipientList();
+  }).catch(() => {});
 
-    aoChatRenderRecipientOptions(
-      branch,
-      list,
-      preferredEmail
-    );
+  const previousPromise = supabaseRequest(
+    "chat_messages?select=scanner_email" +
+    "&branch=eq." + encodeURIComponent(branch) +
+    "&limit=1000"
+  ).then(previousRows => {
+    if(Array.isArray(previousRows)){
+      previousRows.forEach(row => {
+        const email = String(row?.scanner_email || "").trim().toLowerCase();
+        if(email) emails.add(email);
+      });
 
-  }catch(e){
+      if(current && previousRows.some(row =>
+        String(row?.scanner_email || "").trim().toLowerCase() === current
+      )){
+        emails.add(current);
+      }
+    }
+    publishRecipientList();
+  }).catch(() => {});
 
-    console.warn(
-      "Chat recipient load failed:",
-      e
-    );
+  await Promise.all([
+    authorizedPromise,
+    activePromise,
+    previousPromise
+  ]);
 
-    select.innerHTML =
-      '<option value="">' +
-      'Unable to load branch users' +
-      '</option>';
-
-    select.disabled = true;
-
-  }
+  publishRecipientList();
 
 }
 /* =========================================================
@@ -26390,6 +26298,7 @@ document.addEventListener(
           aoChatRecipientCache.delete(
             branch
           );
+          aoChatRecipientRefreshAt.delete(branch);
 
           try{
 
@@ -26399,8 +26308,10 @@ document.addEventListener(
               )
             );
 
-            await aoChatLoadRecipients(
-              aoChatRecipient()
+            await aoChatRefreshRecipientsInBackground(
+              branch,
+              aoChatRecipient(),
+              true
             );
 
           }finally{
@@ -26933,34 +26844,6 @@ document.addEventListener("DOMContentLoaded",()=>{
         </select>
       </div>
 
-      <div class="ao-chat-search-wrap ao-chat-search-compact">
-        <input
-          id="aoChatSearchInput"
-          class="ao-chat-search-input"
-          type="search"
-          autocomplete="off"
-          placeholder="Search conversation..."
-          aria-label="Search conversation"
-          disabled
-        >
-
-        <span
-          id="aoChatSearchCount"
-          class="ao-chat-search-count"
-        ></span>
-
-        <button
-          id="aoChatSearchClear"
-          class="ao-chat-search-clear"
-          type="button"
-          title="Clear conversation search"
-          aria-label="Clear conversation search"
-          disabled
-        >
-          ✕
-        </button>
-      </div>
-
       <button
         id="aoChatRefreshUsers"
         class="ao-chat-refresh-users"
@@ -26971,6 +26854,34 @@ document.addEventListener("DOMContentLoaded",()=>{
         ↻
       </button>
 
+    </div>
+
+    <div class="ao-chat-search-wrap ao-chat-search-compact">
+      <input
+        id="aoChatSearchInput"
+        class="ao-chat-search-input"
+        type="search"
+        autocomplete="off"
+        placeholder="Search conversation..."
+        aria-label="Search conversation"
+        disabled
+      >
+
+      <span
+        id="aoChatSearchCount"
+        class="ao-chat-search-count"
+      ></span>
+
+      <button
+        id="aoChatSearchClear"
+        class="ao-chat-search-clear"
+        type="button"
+        title="Clear conversation search"
+        aria-label="Clear conversation search"
+        disabled
+      >
+        ✕
+      </button>
     </div>
 
   </div>

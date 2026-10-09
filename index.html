@@ -28145,8 +28145,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     const mute=document.getElementById("aoVideoMute");
     const camera=document.getElementById("aoVideoCamera");
-    if(mute) mute.textContent="🎤 Mute";
-    if(camera) camera.textContent="📷 Camera";
+    if(mute){ mute.textContent="🎤 Mute"; mute.disabled=false; }
+    if(camera){ camera.textContent="📷 Camera"; camera.disabled=false; }
   }
 
   function aoVideoOpenIncoming(info){
@@ -28185,6 +28185,18 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   function aoVideoHasActiveCall(){
     return !!aoVideoState;
+  }
+
+  function aoVideoConnectedStatus(state){
+    const base=state.role==="caller"
+      ? "Connected to " + state.remoteEmail
+      : "Connected";
+    const unavailable=[];
+    if(state.localMedia && !state.localMedia.audio) unavailable.push("microphone");
+    if(state.localMedia && !state.localMedia.video) unavailable.push("camera");
+    return unavailable.length
+      ? base + " · " + unavailable.join(" and ") + " unavailable"
+      : base;
   }
 
   function aoVideoCreatePeer(){
@@ -28238,11 +28250,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       if(cs==="connected"){
         state.connected=true;
         state.status="connected";
-        aoVideoSetStatus(
-          state.role==="caller"
-            ? "Connected to " + state.remoteEmail
-            : "Connected"
-        );
+        aoVideoSetStatus(aoVideoConnectedStatus(state));
       }else if(cs==="connecting"){
         aoVideoSetStatus("Connecting video and audio…");
       }else if(cs==="disconnected"){
@@ -28278,8 +28286,13 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     state.peer=peer;
 
+    const localTracks=state.localStream && typeof state.localStream.getTracks==="function"
+      ? state.localStream.getTracks()
+      : [];
+    const localKinds=new Set(localTracks.map(track=>track.kind));
+
     if(state.localStream){
-      state.localStream.getTracks().forEach(track=>{
+      localTracks.forEach(track=>{
         try{
           peer.addTrack(track,state.localStream);
         }catch(error){
@@ -28288,6 +28301,19 @@ document.addEventListener("DOMContentLoaded",()=>{
       });
     }
 
+    /*
+     * A missing microphone or camera must not prevent a call from connecting.
+     * Negotiate receive-only media for every kind that this device cannot send.
+     */
+    ["audio","video"].forEach(kind=>{
+      if(localKinds.has(kind)) return;
+      try{
+        peer.addTransceiver(kind,{direction:"recvonly"});
+      }catch(error){
+        console.warn("Receive-only " + kind + " transceiver unavailable:",error);
+      }
+    });
+
     return peer;
   }
 
@@ -28295,61 +28321,147 @@ document.addEventListener("DOMContentLoaded",()=>{
     const state=aoVideoState;
     if(!state) throw new Error("No active video call.");
 
-    if(state.localStream) return state.localStream;
+    if(state.mediaChecked) return state.localStream;
 
-    if(!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia!=="function"){
-      throw new Error("Camera and microphone access are unavailable in this app. The Android WebView must be granted CAMERA and RECORD_AUDIO permissions.");
-    }
+    let localStream=null;
+    const mediaDevices=navigator.mediaDevices;
+    const getUserMedia=mediaDevices && mediaDevices.getUserMedia;
 
-    let stream;
-    try{
-      stream=await navigator.mediaDevices.getUserMedia({
-        video:{
-          width:{ideal:1280},
-          height:{ideal:720},
-          frameRate:{ideal:24,max:30},
-          facingMode:{ideal:"user"}
-        },
-        audio:{
-          echoCancellation:true,
-          noiseSuppression:true,
-          autoGainControl:true
-        }
-      });
-    }catch(error){
-      /* Some Android WebView builds are stricter about constraints.
-         Retry once with the simplest WebRTC request before surfacing
-         the native-permission error. */
-      if(
-        error?.name === "OverconstrainedError" ||
-        error?.name === "NotReadableError" ||
-        error?.name === "TypeError"
-      ){
-        stream=await navigator.mediaDevices.getUserMedia({
-          video:true,
-          audio:true
+    if(typeof getUserMedia==="function"){
+      try{
+        /* Keep the normal camera + microphone path unchanged when both work. */
+        localStream=await getUserMedia.call(mediaDevices,{
+          video:{
+            width:{ideal:1280},
+            height:{ideal:720},
+            frameRate:{ideal:24,max:30},
+            facingMode:{ideal:"user"}
+          },
+          audio:{
+            echoCancellation:true,
+            noiseSuppression:true,
+            autoGainControl:true
+          }
         });
-      }else{
-        const name=String(error?.name || "").trim();
-        if(name === "NotAllowedError" || name === "SecurityError"){
-          throw new Error("Camera and microphone permission was denied by the app. Allow Camera and Microphone for this Android app, then try the video call again.");
+      }catch(combinedError){
+        /*
+         * getUserMedia rejects the whole combined request if either device is
+         * missing or denied. Retry each device separately so one can still work.
+         * Device/permission errors are deliberately non-fatal to the call.
+         */
+        const availableTracks=[];
+        const permissionBlocked=["NotAllowedError","SecurityError"].includes(
+          String(combinedError?.name || "")
+        );
+
+        if(permissionBlocked){
+          /* Do not trigger repeated permission prompts after an explicit denial. */
+          console.info("Camera/microphone permission unavailable; continuing receive-only.");
+        }else{
+          const requests=[
+            {
+              kind:"audio",
+              constraints:{
+                audio:{
+                  echoCancellation:true,
+                  noiseSuppression:true,
+                  autoGainControl:true
+                },
+                video:false
+              }
+            },
+            {
+              kind:"video",
+              constraints:{
+                audio:false,
+                video:{
+                  width:{ideal:1280},
+                  height:{ideal:720},
+                  frameRate:{ideal:24,max:30},
+                  facingMode:{ideal:"user"}
+                }
+              }
+            }
+          ];
+
+          for(const request of requests){
+            try{
+              const partial=await getUserMedia.call(mediaDevices,request.constraints);
+              if(partial && typeof partial.getTracks==="function"){
+                partial.getTracks().forEach(track=>availableTracks.push(track));
+              }
+            }catch(deviceError){
+              console.info(
+                "Local " + request.kind + " unavailable; continuing the call without it.",
+                deviceError?.name || combinedError?.name || "MediaError"
+              );
+            }
+          }
         }
-        throw error;
+
+        try{
+          if(typeof MediaStream==="function"){
+            localStream=new MediaStream(availableTracks);
+          }
+        }catch(streamError){
+          console.warn("Unable to build a partial local media stream:",streamError);
+          localStream=null;
+        }
       }
+    }else{
+      console.info("Camera/microphone capture is unavailable; using receive-only call mode.");
     }
 
-    state.localStream=stream;
+    state.localStream=localStream;
+    state.mediaChecked=true;
+
+    const tracks=localStream && typeof localStream.getTracks==="function"
+      ? localStream.getTracks()
+      : [];
+    const hasAudio=tracks.some(track=>track.kind==="audio");
+    const hasVideo=tracks.some(track=>track.kind==="video");
+    state.localMedia={audio:hasAudio,video:hasVideo};
 
     const local=document.getElementById("aoVideoLocal");
     if(local){
-      local.srcObject=stream;
-      try{ await local.play(); }catch(e){}
+      local.srcObject=localStream;
+      if(localStream){
+        try{ await local.play(); }catch(e){}
+      }
     }
 
     const placeholder=document.getElementById("aoVideoLocalPlaceholder");
-    if(placeholder) placeholder.style.display="none";
+    if(placeholder){
+      placeholder.textContent=hasVideo
+        ? "Your camera will appear here."
+        : "Camera unavailable — camera is off.";
+      placeholder.style.display=hasVideo ? "none" : "flex";
+    }
 
-    return stream;
+    const muteButton=document.getElementById("aoVideoMute");
+    if(muteButton){
+      muteButton.disabled=!hasAudio;
+      muteButton.textContent=hasAudio ? "🎤 Mute" : "🎤 Mic unavailable";
+      muteButton.setAttribute("aria-pressed","false");
+    }
+
+    const cameraButton=document.getElementById("aoVideoCamera");
+    if(cameraButton){
+      cameraButton.disabled=!hasVideo;
+      cameraButton.textContent=hasVideo ? "📷 Camera" : "📷 Camera unavailable";
+      cameraButton.setAttribute("aria-pressed",String(!hasVideo));
+    }
+
+    if(!hasAudio || !hasVideo){
+      const missing=[];
+      if(!hasAudio) missing.push("microphone");
+      if(!hasVideo) missing.push("camera");
+      aoVideoSetStatus(
+        missing.join(" and ") + " unavailable. Continuing with available media…"
+      );
+    }
+
+    return localStream;
   }
 
   async function aoVideoPreparePeerWithMedia(){
@@ -28393,6 +28505,8 @@ document.addEventListener("DOMContentLoaded",()=>{
       remoteType:targetType,
       remoteBranch:targetBranch,
       localStream:null,
+      mediaChecked:false,
+      localMedia:null,
       peer:null,
       connected:false,
       pendingIce:[]
@@ -28402,12 +28516,11 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     aoVideoOpenCallUi(
       targetType==="ADMIN" ? "Calling Admin" : "Calling Scanner",
-      "Starting camera and microphone…"
+      "Calling " + targetEmail + "…"
     );
 
     try{
-      await aoVideoPreparePeerWithMedia();
-
+      /* Send the invitation first. Local media is prepared after the other user accepts. */
       aoVideoSetStatus("Calling " + targetEmail + "…");
 
       await aoVideoSend({
@@ -28467,6 +28580,8 @@ document.addEventListener("DOMContentLoaded",()=>{
       remoteType:info.fromType,
       remoteBranch:info.fromBranch,
       localStream:null,
+      mediaChecked:false,
+      localMedia:null,
       peer:null,
       connected:false,
       pendingIce:[]
@@ -28474,25 +28589,23 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     aoVideoOpenCallUi(
       info.fromType==="SCANNER" ? "Scanner Video Call" : "Admin Video Call",
-      "Starting camera and microphone…"
+      "Call accepted. Connecting…"
     );
 
     try{
-      await aoVideoPreparePeerWithMedia();
+      /* Do not block acceptance on optional camera/microphone permissions. */
+      await aoVideoSend({
+        kind:"accept",
+        callId:info.callId,
+        toEmail:info.fromEmail,
+        toType:info.fromType,
+        toBranch:info.fromBranch,
+        data:null
+      });
     }catch(error){
-      aoVideoSetStatus(error?.message || "Camera and microphone could not be opened.");
-      aoVideoEndCall(false);
+      await aoVideoEndCall(false);
       throw error;
     }
-
-    await aoVideoSend({
-      kind:"accept",
-      callId:info.callId,
-      toEmail:info.fromEmail,
-      toType:info.fromType,
-      toBranch:info.fromBranch,
-      data:null
-    });
   }
 
   async function aoVideoDeclineIncoming(){

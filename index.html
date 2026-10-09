@@ -24462,10 +24462,23 @@ function aoChatRenderRecipientOptions(
             String(x.email).toLowerCase() === email
         )?.count || 0;
 
+      let presence = null;
+      try{
+        if(typeof window.aoVideoGetScannerPresence === "function"){
+          presence = window.aoVideoGetScannerPresence(email,branch);
+        }
+      }catch(e){}
+
+      const statusLight =
+        presence === true ? "🟢 " :
+        presence === false ? "⚪ " :
+        "🟡 ";
+
       return (
         '<option value="' +
         aoChatEsc(email) +
         '">' +
+        statusLight +
         aoChatEsc(email) +
         (
           unread
@@ -27675,6 +27688,74 @@ document.addEventListener("DOMContentLoaded",()=>{
       button.setAttribute("data-admin-online",String(isOnline));
     });
   }
+  let aoVideoPresenceHasSynced = false;
+
+  function aoVideoGetScannerPresence(email,branch){
+    const targetEmail=String(email || "").trim().toLowerCase();
+    const targetBranch=String(branch || "").trim().toUpperCase();
+    const channel=aoVideoSignalChannel;
+    if(!targetEmail || !targetBranch || !aoVideoSignalReady ||
+       !aoVideoPresenceHasSynced || !channel ||
+       typeof channel.presenceState!=="function"){
+      return null;
+    }
+
+    try{
+      const state=channel.presenceState() || {};
+      for(const key of Object.keys(state)){
+        const metas=Array.isArray(state[key]) ? state[key] : [];
+        for(const meta of metas){
+          const type=String(meta?.type || "").trim().toUpperCase();
+          const emailValue=String(meta?.email || key || "").trim().toLowerCase();
+          const branchValue=String(meta?.branch || "").trim().toUpperCase();
+          if(type==="SCANNER" && emailValue===targetEmail && branchValue===targetBranch){
+            return true;
+          }
+        }
+      }
+      return false;
+    }catch(error){
+      console.warn("Branch user presence read failed:",error);
+      return null;
+    }
+  }
+
+  window.aoVideoGetScannerPresence=aoVideoGetScannerPresence;
+
+  function aoVideoRefreshBranchUserPresence(){
+    if(!aoVideoIsDashboard()) return;
+    try{
+      if(typeof aoChatBranch!=="function") return;
+      const branch=String(aoChatBranch() || "").trim().toUpperCase();
+      const select=document.getElementById("aoChatRecipient");
+      if(!branch || branch==="ALL" || !select) return;
+
+      let list=null;
+      try{
+        if(typeof aoChatRecipientCache!=="undefined" &&
+           aoChatRecipientCache &&
+           typeof aoChatRecipientCache.get==="function"){
+          list=aoChatRecipientCache.get(branch);
+        }
+      }catch(e){}
+
+      if(!Array.isArray(list) && typeof aoChatReadStoredRecipients==="function"){
+        list=aoChatReadStoredRecipients(branch);
+      }
+      if(!Array.isArray(list)){
+        list=Array.from(select.options || [])
+          .map(option=>String(option.value || "").trim().toLowerCase())
+          .filter(Boolean);
+      }
+      if(Array.isArray(list) && list.length &&
+         typeof aoChatRenderRecipientOptions==="function"){
+        aoChatRenderRecipientOptions(branch,list,select.value);
+      }
+    }catch(error){
+      console.warn("Branch user presence refresh failed:",error);
+    }
+  }
+
 
   async function aoVideoTrackPresence(){
     const channel=aoVideoSignalChannel;
@@ -27820,9 +27901,19 @@ document.addEventListener("DOMContentLoaded",()=>{
           );
 
         aoVideoSignalChannel
-          .on("presence",{event:"sync"},()=>aoVideoRefreshAdminPresence())
-          .on("presence",{event:"join"},()=>aoVideoRefreshAdminPresence())
-          .on("presence",{event:"leave"},()=>aoVideoRefreshAdminPresence());
+          .on("presence",{event:"sync"},()=>{
+            aoVideoPresenceHasSynced=true;
+            aoVideoRefreshAdminPresence();
+            aoVideoRefreshBranchUserPresence();
+          })
+          .on("presence",{event:"join"},()=>{
+            aoVideoRefreshAdminPresence();
+            aoVideoRefreshBranchUserPresence();
+          })
+          .on("presence",{event:"leave"},()=>{
+            aoVideoRefreshAdminPresence();
+            aoVideoRefreshBranchUserPresence();
+          });
 
         await new Promise((resolve,reject)=>{
           let settled=false;
@@ -27845,6 +27936,7 @@ document.addEventListener("DOMContentLoaded",()=>{
                 status==="CLOSED"
               ){
                 aoVideoSignalReady=false;
+                aoVideoPresenceHasSynced=false;
                 finish(false,new Error("Video-call signaling channel unavailable."));
               }
             }
@@ -28120,8 +28212,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     if(remote){
       remote.srcObject=null;
-      remote.muted=false;
-      delete remote.dataset.aoRemoteMutedFallback;
     }
     if(local){
       local.srcObject=null;
@@ -28147,8 +28237,16 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     const mute=document.getElementById("aoVideoMute");
     const camera=document.getElementById("aoVideoCamera");
-    if(mute){ mute.textContent="🎤 Mute"; mute.disabled=false; }
-    if(camera){ camera.textContent="📷 Camera"; camera.disabled=false; }
+    if(mute){
+      mute.textContent="🎤 Mute";
+      mute.disabled=false;
+      mute.removeAttribute("title");
+    }
+    if(camera){
+      camera.textContent="📷 Camera";
+      camera.disabled=false;
+      camera.removeAttribute("title");
+    }
   }
 
   function aoVideoOpenIncoming(info){
@@ -28189,22 +28287,9 @@ document.addEventListener("DOMContentLoaded",()=>{
     return !!aoVideoState;
   }
 
-  function aoVideoConnectedStatus(state){
-    const base=state.role==="caller"
-      ? "Connected to " + state.remoteEmail
-      : "Connected";
-    const unavailable=[];
-    if(state.localMedia && !state.localMedia.audio) unavailable.push("microphone");
-    if(state.localMedia && !state.localMedia.video) unavailable.push("camera");
-    return unavailable.length
-      ? base + " · " + unavailable.join(" and ") + " unavailable"
-      : base;
-  }
-
-  function aoVideoCreatePeer(){
+function aoVideoCreatePeer(){
     const state=aoVideoState;
     if(!state) throw new Error("No active video call.");
-
     if(state.peer) return state.peer;
 
     const peer=new RTCPeerConnection({
@@ -28213,6 +28298,16 @@ document.addEventListener("DOMContentLoaded",()=>{
         {urls:"stun:stun1.l.google.com:19302"}
       ]
     });
+
+    /*
+     * Always negotiate the same media order on both pages, even if this
+     * device has no local microphone/camera. Empty senders can still receive.
+     */
+    if(typeof peer.addTransceiver!=="function"){
+      throw new Error("This browser does not support WebRTC media transceivers. Please update the browser or Android System WebView.");
+    }
+    state.audioTransceiver=peer.addTransceiver("audio",{direction:"sendrecv"});
+    state.videoTransceiver=peer.addTransceiver("video",{direction:"sendrecv"});
 
     peer.onicecandidate=event=>{
       if(event.candidate){
@@ -28232,6 +28327,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     peer.ontrack=event=>{
       const remote=document.getElementById("aoVideoRemote");
       if(!remote) return;
+
       if(event.streams && event.streams[0]){
         remote.srcObject=event.streams[0];
       }else{
@@ -28240,64 +28336,44 @@ document.addEventListener("DOMContentLoaded",()=>{
           stream=new MediaStream();
           remote.srcObject=stream;
         }
-        if(event.track && !stream.getTracks().some(track=>track.id===event.track.id)){
-          stream.addTrack(event.track);
-        }
+        const exists=stream.getTracks().some(track=>track.id===event.track.id);
+        if(!exists) stream.addTrack(event.track);
       }
 
       remote.autoplay=true;
       remote.playsInline=true;
 
-      if(!remote.dataset.aoRemotePlaybackBound){
-        remote.dataset.aoRemotePlaybackBound="1";
-        remote.addEventListener("click",async()=>{
-          if(remote.dataset.aoRemoteMutedFallback!=="1") return;
-          remote.muted=false;
-          try{
-            await remote.play();
-            delete remote.dataset.aoRemoteMutedFallback;
-            aoVideoSetStatus("Remote audio enabled.");
-          }catch(error){
-            remote.muted=true;
-            aoVideoSetStatus("Tap the video again to enable remote audio.");
-          }
-        });
-      }
+      const remoteStream=remote.srcObject;
+      const hasRemoteVideo=!!(
+        remoteStream &&
+        typeof remoteStream.getVideoTracks==="function" &&
+        remoteStream.getVideoTracks().some(track=>track.readyState!=="ended")
+      );
+      const placeholder=document.getElementById("aoVideoRemotePlaceholder");
+      if(placeholder) placeholder.style.display=hasRemoteVideo ? "none" : "";
 
-      if(event.track && event.track.kind==="video"){
-        const placeholder=document.getElementById("aoVideoRemotePlaceholder");
-        if(placeholder) placeholder.style.display="none";
+      try{
+        const playPromise=remote.play();
+        if(playPromise && typeof playPromise.catch==="function"){
+          playPromise.catch(error=>{
+            console.warn("Remote media autoplay was blocked; tap the call video to play it:",error);
+          });
+        }
+      }catch(error){
+        console.warn("Remote media playback could not start automatically:",error);
       }
-
-      /*
-       * Some browsers/WebViews block autoplay when the remote stream includes
-       * audio. Retry muted so the remote camera picture still appears. The
-       * caller can tap the video to enable its audio without ending the call.
-       */
-      remote.play().catch(async error=>{
-        if(!event.track || event.track.kind!=="video"){
-          console.debug("Remote media autoplay is waiting for video/user interaction:",error?.name || error);
-          return;
-        }
-        remote.muted=true;
-        remote.dataset.aoRemoteMutedFallback="1";
-        try{
-          await remote.play();
-          aoVideoSetStatus("Remote camera connected. Tap the video to enable call audio.");
-        }catch(playError){
-          console.warn("Remote camera playback failed:",playError);
-          aoVideoSetStatus("Remote camera connected, but playback was blocked by this app.");
-        }
-      });
     };
 
     peer.onconnectionstatechange=()=>{
       const cs=peer.connectionState;
-
       if(cs==="connected"){
         state.connected=true;
         state.status="connected";
-        aoVideoSetStatus(aoVideoConnectedStatus(state));
+        aoVideoSetStatus(
+          state.role==="caller"
+            ? "Connected to " + state.remoteEmail
+            : "Connected"
+        );
       }else if(cs==="connecting"){
         aoVideoSetStatus("Connecting video and audio…");
       }else if(cs==="disconnected"){
@@ -28331,34 +28407,6 @@ document.addEventListener("DOMContentLoaded",()=>{
       }
     };
 
-    const localTracks=state.localStream && typeof state.localStream.getTracks==="function"
-      ? state.localStream.getTracks()
-      : [];
-
-    /*
-     * IMPORTANT: create audio and video transceivers in the SAME fixed order
-     * on both ends. Adding tracks first can make browsers order the media lines
-     * differently (for example video before audio), which can leave the remote
-     * camera negotiated incorrectly even though the scanner camera is running.
-     * Use sendrecv when this device has that track, otherwise recvonly.
-     */
-    ["audio","video"].forEach(kind=>{
-      const track=localTracks.find(item=>item && item.kind===kind) || null;
-      try{
-        if(track){
-          peer.addTransceiver(track,{
-            direction:"sendrecv",
-            streams:state.localStream ? [state.localStream] : []
-          });
-        }else{
-          peer.addTransceiver(kind,{direction:"recvonly"});
-        }
-      }catch(error){
-        console.warn("Unable to prepare " + kind + " media transceiver:",error);
-        throw error;
-      }
-    });
-
     state.peer=peer;
     return peer;
   }
@@ -28366,17 +28414,19 @@ document.addEventListener("DOMContentLoaded",()=>{
   async function aoVideoEnsureLocalMedia(){
     const state=aoVideoState;
     if(!state) throw new Error("No active video call.");
+    if(state.localStream) return state.localStream;
 
-    if(state.mediaChecked) return state.localStream;
-
-    let localStream=null;
+    const collected=[];
+    let combined=null;
     const mediaDevices=navigator.mediaDevices;
-    const getUserMedia=mediaDevices && mediaDevices.getUserMedia;
+    const canGetMedia=!!(
+      mediaDevices &&
+      typeof mediaDevices.getUserMedia==="function"
+    );
 
-    if(typeof getUserMedia==="function"){
+    if(canGetMedia){
       try{
-        /* Keep the normal camera + microphone path unchanged when both work. */
-        localStream=await getUserMedia.call(mediaDevices,{
+        combined=await mediaDevices.getUserMedia({
           video:{
             width:{ideal:1280},
             height:{ideal:720},
@@ -28389,130 +28439,155 @@ document.addEventListener("DOMContentLoaded",()=>{
             autoGainControl:true
           }
         });
-      }catch(combinedError){
-        /*
-         * getUserMedia rejects the whole combined request if either device is
-         * missing or denied. Retry each device separately so one can still work.
-         * Device/permission errors are deliberately non-fatal to the call.
-         */
-        const availableTracks=[];
-        const permissionBlocked=["NotAllowedError","SecurityError"].includes(
-          String(combinedError?.name || "")
-        );
-
-        if(permissionBlocked){
-          /* Do not trigger repeated permission prompts after an explicit denial. */
-          console.info("Camera/microphone permission unavailable; continuing receive-only.");
-        }else{
-          const requests=[
-            {
-              kind:"audio",
-              constraints:{
-                audio:{
-                  echoCancellation:true,
-                  noiseSuppression:true,
-                  autoGainControl:true
-                },
-                video:false
-              }
-            },
-            {
-              kind:"video",
-              constraints:{
-                audio:false,
-                video:{
-                  width:{ideal:1280},
-                  height:{ideal:720},
-                  frameRate:{ideal:24,max:30},
-                  facingMode:{ideal:"user"}
-                }
-              }
-            }
-          ];
-
-          for(const request of requests){
-            try{
-              const partial=await getUserMedia.call(mediaDevices,request.constraints);
-              if(partial && typeof partial.getTracks==="function"){
-                partial.getTracks().forEach(track=>availableTracks.push(track));
-              }
-            }catch(deviceError){
-              console.info(
-                "Local " + request.kind + " unavailable; continuing the call without it.",
-                deviceError?.name || combinedError?.name || "MediaError"
-              );
-            }
-          }
-        }
-
-        try{
-          if(typeof MediaStream==="function"){
-            localStream=new MediaStream(availableTracks);
-          }
-        }catch(streamError){
-          console.warn("Unable to build a partial local media stream:",streamError);
-          localStream=null;
-        }
+      }catch(error){
+        console.warn("Combined microphone/camera request failed; trying available devices separately:",error?.name || error);
       }
-    }else{
-      console.info("Camera/microphone capture is unavailable; using receive-only call mode.");
     }
 
-    state.localStream=localStream;
-    state.mediaChecked=true;
+    if(combined && typeof combined.getTracks==="function"){
+      combined.getTracks().forEach(track=>collected.push(track));
+    }
 
-    const tracks=localStream && typeof localStream.getTracks==="function"
-      ? localStream.getTracks()
-      : [];
-    const hasAudio=tracks.some(track=>track.kind==="audio");
-    const hasVideo=tracks.some(track=>track.kind==="video");
-    state.localMedia={audio:hasAudio,video:hasVideo};
+    const hasKind=kind=>collected.some(
+      track=>track.kind===kind && track.readyState!=="ended"
+    );
+
+    /*
+     * Asking for both devices at once fails if either device is missing.
+     * Retry only the missing kind so a camera-only or microphone-only
+     * device can still send its available media.
+     */
+    if(canGetMedia && !hasKind("audio")){
+      try{
+        const audioOnly=await mediaDevices.getUserMedia({
+          audio:{
+            echoCancellation:true,
+            noiseSuppression:true,
+            autoGainControl:true
+          },
+          video:false
+        });
+        audioOnly.getAudioTracks().forEach(track=>{
+          if(!hasKind("audio")) collected.push(track);
+          else try{track.stop();}catch(e){}
+        });
+      }catch(error){
+        console.info("No usable microphone; continuing without local audio:",error?.name || error);
+      }
+    }
+
+    if(canGetMedia && !hasKind("video")){
+      try{
+        const videoOnly=await mediaDevices.getUserMedia({
+          video:{
+            width:{ideal:1280},
+            height:{ideal:720},
+            frameRate:{ideal:24,max:30},
+            facingMode:{ideal:"user"}
+          },
+          audio:false
+        });
+        videoOnly.getVideoTracks().forEach(track=>{
+          if(!hasKind("video")) collected.push(track);
+          else try{track.stop();}catch(e){}
+        });
+      }catch(error){
+        console.info("No usable camera; continuing without local video:",error?.name || error);
+      }
+    }
+
+    const localStream=new MediaStream();
+    const addedKinds=new Set();
+    collected.forEach(track=>{
+      if(track.readyState==="ended") return;
+      if(addedKinds.has(track.kind)){
+        try{track.stop();}catch(e){}
+        return;
+      }
+      addedKinds.add(track.kind);
+      localStream.addTrack(track);
+    });
+
+    state.localStream=localStream;
+
+    const hasAudio=localStream.getAudioTracks().some(track=>track.readyState!=="ended");
+    const hasVideo=localStream.getVideoTracks().some(track=>track.readyState!=="ended");
 
     const local=document.getElementById("aoVideoLocal");
     if(local){
-      local.srcObject=localStream;
-      if(localStream){
-        try{ await local.play(); }catch(e){}
+      local.srcObject=hasVideo ? localStream : null;
+      local.autoplay=true;
+      local.playsInline=true;
+      if(hasVideo){
+        try{
+          const playPromise=local.play();
+          if(playPromise && typeof playPromise.catch==="function") playPromise.catch(()=>{});
+        }catch(e){}
       }
     }
 
     const placeholder=document.getElementById("aoVideoLocalPlaceholder");
     if(placeholder){
       placeholder.textContent=hasVideo
-        ? "Your camera will appear here."
-        : "Camera unavailable — camera is off.";
+        ? ""
+        : "Camera unavailable or off";
       placeholder.style.display=hasVideo ? "none" : "flex";
     }
 
     const muteButton=document.getElementById("aoVideoMute");
     if(muteButton){
       muteButton.disabled=!hasAudio;
-      muteButton.textContent=hasAudio ? "🎤 Mute" : "🎤 Mic unavailable";
-      muteButton.setAttribute("aria-pressed","false");
+      muteButton.textContent=hasAudio ? "🎤 Mute" : "🎤 No microphone";
+      muteButton.title=hasAudio ? "Mute or unmute your microphone" : "No usable microphone is available";
     }
-
     const cameraButton=document.getElementById("aoVideoCamera");
     if(cameraButton){
       cameraButton.disabled=!hasVideo;
-      cameraButton.textContent=hasVideo ? "📷 Camera" : "📷 Camera unavailable";
-      cameraButton.setAttribute("aria-pressed",String(!hasVideo));
+      cameraButton.textContent=hasVideo ? "📷 Camera" : "📷 No camera";
+      cameraButton.title=hasVideo ? "Turn your camera on or off" : "No usable camera is available";
     }
 
-    if(!hasAudio || !hasVideo){
-      const missing=[];
-      if(!hasAudio) missing.push("microphone");
-      if(!hasVideo) missing.push("camera");
-      aoVideoSetStatus(
-        missing.join(" and ") + " unavailable. Continuing with available media…"
-      );
+    if(!hasAudio && !hasVideo){
+      aoVideoSetStatus("No local microphone or camera. Connecting in receive-only mode…");
     }
 
     return localStream;
   }
 
   async function aoVideoPreparePeerWithMedia(){
-    await aoVideoEnsureLocalMedia();
-    aoVideoCreatePeer();
+    const state=aoVideoState;
+    if(!state) throw new Error("No active video call.");
+
+    const stream=await aoVideoEnsureLocalMedia();
+    const peer=aoVideoCreatePeer();
+
+    const audioTrack=stream.getAudioTracks().find(track=>track.readyState!=="ended") || null;
+    const videoTrack=stream.getVideoTracks().find(track=>track.readyState!=="ended") || null;
+    const attachPromises=[];
+
+    [
+      [state.audioTransceiver,audioTrack],
+      [state.videoTransceiver,videoTrack]
+    ].forEach(([transceiver,track])=>{
+      if(!transceiver || !transceiver.sender) return;
+      try{
+        if(track && typeof transceiver.sender.setStreams==="function"){
+          transceiver.sender.setStreams(stream);
+        }
+        if(typeof transceiver.sender.replaceTrack==="function"){
+          attachPromises.push(
+            transceiver.sender.replaceTrack(track).catch(error=>{
+              console.warn("Optional local media track could not be attached:",error);
+            })
+          );
+        }
+      }catch(error){
+        console.warn("Optional local media track setup failed:",error);
+      }
+    });
+
+    await Promise.all(attachPromises);
+    return peer;
   }
 
   async function aoVideoStartCall(options){
@@ -28551,24 +28626,26 @@ document.addEventListener("DOMContentLoaded",()=>{
       remoteType:targetType,
       remoteBranch:targetBranch,
       localStream:null,
-      mediaChecked:false,
-      localMedia:null,
       peer:null,
       connected:false,
-      pendingIce:[]
+      pendingIce:[],
+      audioTransceiver:null,
+      videoTransceiver:null
     };
 
     aoVideoTrackPresence().catch(()=>{});
 
     aoVideoOpenCallUi(
       targetType==="ADMIN" ? "Calling Admin" : "Calling Scanner",
-      "Calling " + targetEmail + "…"
+      "Calling " + targetEmail + "… camera and microphone are optional."
     );
 
+    /*
+     * Invite first. Do not require the caller's camera or microphone to
+     * be available before the other user can answer. Media is prepared
+     * after acceptance, with receive-only fallback if no local tracks exist.
+     */
     try{
-      /* Send the invitation first. Local media is prepared after the other user accepts. */
-      aoVideoSetStatus("Calling " + targetEmail + "…");
-
       await aoVideoSend({
         kind:"invite",
         callId,
@@ -28597,7 +28674,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     return true;
   }
 
-  async function aoVideoAcceptIncoming(){
+    async function aoVideoAcceptIncoming(){
     const info=aoVideoIncoming;
     if(!info) return;
 
@@ -28626,32 +28703,34 @@ document.addEventListener("DOMContentLoaded",()=>{
       remoteType:info.fromType,
       remoteBranch:info.fromBranch,
       localStream:null,
-      mediaChecked:false,
-      localMedia:null,
       peer:null,
       connected:false,
-      pendingIce:[]
+      pendingIce:[],
+      audioTransceiver:null,
+      videoTransceiver:null
     };
 
     aoVideoOpenCallUi(
       info.fromType==="SCANNER" ? "Scanner Video Call" : "Admin Video Call",
-      "Call accepted. Connecting…"
+      "Starting camera and microphone…"
     );
 
     try{
-      /* Do not block acceptance on optional camera/microphone permissions. */
-      await aoVideoSend({
-        kind:"accept",
-        callId:info.callId,
-        toEmail:info.fromEmail,
-        toType:info.fromType,
-        toBranch:info.fromBranch,
-        data:null
-      });
+      await aoVideoPreparePeerWithMedia();
     }catch(error){
-      await aoVideoEndCall(false);
+      aoVideoSetStatus(error?.message || "Camera and microphone could not be opened.");
+      aoVideoEndCall(false);
       throw error;
     }
+
+    await aoVideoSend({
+      kind:"accept",
+      callId:info.callId,
+      toEmail:info.fromEmail,
+      toType:info.fromType,
+      toBranch:info.fromBranch,
+      data:null
+    });
   }
 
   async function aoVideoDeclineIncoming(){
@@ -28775,10 +28854,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
         await aoVideoPreparePeerWithMedia();
 
-        const offer=await aoVideoState.peer.createOffer({
-          offerToReceiveAudio:true,
-          offerToReceiveVideo:true
-        });
+        const offer=await aoVideoState.peer.createOffer();
 
         await aoVideoState.peer.setLocalDescription(offer);
 

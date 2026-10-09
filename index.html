@@ -28120,6 +28120,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     if(remote){
       remote.srcObject=null;
+      remote.muted=false;
+      delete remote.dataset.aoRemoteMutedFallback;
     }
     if(local){
       local.srcObject=null;
@@ -28238,10 +28240,55 @@ document.addEventListener("DOMContentLoaded",()=>{
           stream=new MediaStream();
           remote.srcObject=stream;
         }
-        stream.addTrack(event.track);
+        if(event.track && !stream.getTracks().some(track=>track.id===event.track.id)){
+          stream.addTrack(event.track);
+        }
       }
-      const placeholder=document.getElementById("aoVideoRemotePlaceholder");
-      if(placeholder) placeholder.style.display="none";
+
+      remote.autoplay=true;
+      remote.playsInline=true;
+
+      if(!remote.dataset.aoRemotePlaybackBound){
+        remote.dataset.aoRemotePlaybackBound="1";
+        remote.addEventListener("click",async()=>{
+          if(remote.dataset.aoRemoteMutedFallback!=="1") return;
+          remote.muted=false;
+          try{
+            await remote.play();
+            delete remote.dataset.aoRemoteMutedFallback;
+            aoVideoSetStatus("Remote audio enabled.");
+          }catch(error){
+            remote.muted=true;
+            aoVideoSetStatus("Tap the video again to enable remote audio.");
+          }
+        });
+      }
+
+      if(event.track && event.track.kind==="video"){
+        const placeholder=document.getElementById("aoVideoRemotePlaceholder");
+        if(placeholder) placeholder.style.display="none";
+      }
+
+      /*
+       * Some browsers/WebViews block autoplay when the remote stream includes
+       * audio. Retry muted so the remote camera picture still appears. The
+       * caller can tap the video to enable its audio without ending the call.
+       */
+      remote.play().catch(async error=>{
+        if(!event.track || event.track.kind!=="video"){
+          console.debug("Remote media autoplay is waiting for video/user interaction:",error?.name || error);
+          return;
+        }
+        remote.muted=true;
+        remote.dataset.aoRemoteMutedFallback="1";
+        try{
+          await remote.play();
+          aoVideoSetStatus("Remote camera connected. Tap the video to enable call audio.");
+        }catch(playError){
+          console.warn("Remote camera playback failed:",playError);
+          aoVideoSetStatus("Remote camera connected, but playback was blocked by this app.");
+        }
+      });
     };
 
     peer.onconnectionstatechange=()=>{
@@ -28284,36 +28331,35 @@ document.addEventListener("DOMContentLoaded",()=>{
       }
     };
 
-    state.peer=peer;
-
     const localTracks=state.localStream && typeof state.localStream.getTracks==="function"
       ? state.localStream.getTracks()
       : [];
-    const localKinds=new Set(localTracks.map(track=>track.kind));
-
-    if(state.localStream){
-      localTracks.forEach(track=>{
-        try{
-          peer.addTrack(track,state.localStream);
-        }catch(error){
-          console.warn("Video track attach failed:",error);
-        }
-      });
-    }
 
     /*
-     * A missing microphone or camera must not prevent a call from connecting.
-     * Negotiate receive-only media for every kind that this device cannot send.
+     * IMPORTANT: create audio and video transceivers in the SAME fixed order
+     * on both ends. Adding tracks first can make browsers order the media lines
+     * differently (for example video before audio), which can leave the remote
+     * camera negotiated incorrectly even though the scanner camera is running.
+     * Use sendrecv when this device has that track, otherwise recvonly.
      */
     ["audio","video"].forEach(kind=>{
-      if(localKinds.has(kind)) return;
+      const track=localTracks.find(item=>item && item.kind===kind) || null;
       try{
-        peer.addTransceiver(kind,{direction:"recvonly"});
+        if(track){
+          peer.addTransceiver(track,{
+            direction:"sendrecv",
+            streams:state.localStream ? [state.localStream] : []
+          });
+        }else{
+          peer.addTransceiver(kind,{direction:"recvonly"});
+        }
       }catch(error){
-        console.warn("Receive-only " + kind + " transceiver unavailable:",error);
+        console.warn("Unable to prepare " + kind + " media transceiver:",error);
+        throw error;
       }
     });
 
+    state.peer=peer;
     return peer;
   }
 

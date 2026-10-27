@@ -11582,6 +11582,15 @@ function clearSoldFilters(){
   if(tag) tag.value = "";
   if(si) si.value = "";
 
+  /*
+   * Also clear the hidden exact-SI filter applied when navigating
+   * from Unconfirmed Sold Item > Branch > SI NO. Previously this
+   * stayed active after Clear Filters, so other SIs and MARKED rows
+   * remained hidden until the separate top Search Clear button was used.
+   */
+  unconfirmedSelectedSI = "";
+  currentPage = 1;
+
   applySoldFilters();
 }
 

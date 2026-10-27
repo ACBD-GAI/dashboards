@@ -22968,36 +22968,83 @@ const AO_CHAT_IMAGE_MAX_INPUT_BYTES = 8 * 1024 * 1024;
 const AO_CHAT_IMAGE_MAX_OUTPUT_BYTES = 1200 * 1024;
 const AO_CHAT_IMAGE_MAX_DIMENSION = 1600;
 
+/*
+ * Admin-private routing marker. This is stored in the existing message
+ * column so no new database column or destructive schema change is needed.
+ * All newly sent text, image, and hidden read/checked-state rows must carry
+ * this marker. A message is rendered only by the matching admin conversation.
+ */
+const AO_CHAT_ADMIN_MARKER_PREFIX = "[[AO_CHAT_ADMIN:";
+
+function aoChatAdminMarker(email){
+  const normalized = String(email || "").trim().toLowerCase();
+  return normalized ? AO_CHAT_ADMIN_MARKER_PREFIX + normalized + "]]" : "";
+}
+
+function aoChatAdminMessageEmail(message){
+  const match = String(message || "").match(/^\[\[AO_CHAT_ADMIN:([^\]\r\n]+)\]\]/i);
+  return match ? String(match[1] || "").trim().toLowerCase() : "";
+}
+
+function aoChatStripAdminTag(message){
+  return String(message || "").replace(/^\[\[AO_CHAT_ADMIN:[^\]\r\n]+\]\]\r?\n?/, "");
+}
+
+function aoChatCurrentAdminEmail(){
+  try{
+    return String(typeof currentEmail !== "undefined" ? currentEmail : "")
+      .trim().toLowerCase();
+  }catch(e){ return ""; }
+}
+
+function aoChatTagAdminMessage(message,email){
+  const marker = aoChatAdminMarker(email || aoChatCurrentAdminEmail());
+  const body = aoChatStripAdminTag(message);
+  return marker ? marker + "\n" + body : body;
+}
+
+function aoChatAdminMessageFilter(email){
+  const marker = aoChatAdminMarker(email || aoChatCurrentAdminEmail());
+  return marker ? "&message=like." + encodeURIComponent("*" + marker + "*") : "";
+}
+
+function aoChatAdminStateMessageFilter(email){
+  const marker = aoChatAdminMarker(email || aoChatCurrentAdminEmail());
+  return marker
+    ? "&message=like." + encodeURIComponent("*" + marker + "*" + AO_CHAT_SHARED_STATE_MARKER + "*")
+    : "";
+}
+
 function aoChatIsImageMessage(message){
-  return String(message || "").includes("[[AO_CHAT_IMAGE]]");
+  return aoChatStripAdminTag(message).includes("[[AO_CHAT_IMAGE]]");
 }
 
 function aoChatImagePath(message){
-  const m = String(message || "").match(/\[\[AO_CHAT_IMAGE\]\]([^\n\r]+)/);
+  const m = aoChatStripAdminTag(message).match(/\[\[AO_CHAT_IMAGE\]\]([^\n\r]+)/);
   return m ? String(m[1] || "").trim() : "";
 }
 
 function aoChatTextPart(message){
-  return String(message || "")
+  return aoChatStripAdminTag(message)
     .replace(/\n?\[\[AO_CHAT_IMAGE\]\][^\n\r]*/g, "")
     .trim();
 }
 
 /* =========================================================
-   SHARED ADMIN CHAT STATE
-   Uses hidden chat_messages state rows so multiple admins
-   share Checked/Read status without changing visible chat text.
+   ADMIN-PRIVATE CHAT STATE
+   Uses hidden chat_messages state rows so the same admin's
+   devices share Checked/Read status without sharing it with other admins.
    ========================================================= */
 const AO_CHAT_SHARED_STATE_MARKER = "[[AO_CHAT_SHARED_STATE]]";
 const aoChatSharedReadCache = new Map();
 const aoChatSharedStatePostBusy = new Set();
 
 function aoChatIsSharedStateMessage(message){
-  return String(message || "").startsWith(AO_CHAT_SHARED_STATE_MARKER);
+  return aoChatStripAdminTag(message).startsWith(AO_CHAT_SHARED_STATE_MARKER);
 }
 
 function aoChatSharedStatePayload(message){
-  const raw = String(message || "");
+  const raw = aoChatStripAdminTag(message);
   if(!raw.startsWith(AO_CHAT_SHARED_STATE_MARKER)) return null;
   try{
     return JSON.parse(
@@ -23012,9 +23059,10 @@ function aoChatSharedStateMessage(payload){
   return AO_CHAT_SHARED_STATE_MARKER + JSON.stringify(payload || {});
 }
 
-function aoChatConversationKey(branch,email){
+function aoChatConversationKey(branch,email,adminEmail){
   return String(branch || "").trim().toUpperCase() + "|" +
-    String(email || "").trim().toLowerCase();
+    String(email || "").trim().toLowerCase() + "|ADMIN:" +
+    String(adminEmail || aoChatCurrentAdminEmail()).trim().toLowerCase();
 }
 
 function aoChatAppendSharedStateRow(branch,email,payload){
@@ -23027,7 +23075,7 @@ function aoChatAppendSharedStateRow(branch,email,payload){
     scanner_email:String(email || "").trim().toLowerCase(),
     sender_email:String(currentEmail || "").trim().toLowerCase(),
     sender_type:"DASHBOARD",
-    message:aoChatSharedStateMessage(payload),
+    message:aoChatTagAdminMessage(aoChatSharedStateMessage(payload),aoChatCurrentAdminEmail()),
     created_at:new Date().toISOString()
   });
 }
@@ -23047,7 +23095,7 @@ async function aoChatPostSharedState(branch,email,payload){
           scanner_email:String(email || "").trim().toLowerCase(),
           sender_email:String(currentEmail || "").trim().toLowerCase(),
           sender_type:"DASHBOARD",
-          message:aoChatSharedStateMessage(payload)
+          message:aoChatTagAdminMessage(aoChatSharedStateMessage(payload),aoChatCurrentAdminEmail())
         }
       }
     );
@@ -23088,13 +23136,14 @@ function aoChatSharedCheckedFromList(list,messageId){
 }
 
 function aoChatSharedStateRowsUrl(branch,email){
+  const adminEmail = aoChatCurrentAdminEmail();
   return (
     "chat_messages" +
     "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
     "&branch=eq." + encodeURIComponent(String(branch || "").trim().toUpperCase()) +
     "&scanner_email=eq." + encodeURIComponent(String(email || "").trim().toLowerCase()) +
     "&sender_type=eq.DASHBOARD" +
-    "&message=like." + encodeURIComponent("*" + AO_CHAT_SHARED_STATE_MARKER + "*") +
+    aoChatAdminStateMessageFilter(adminEmail) +
     "&order=created_at.desc" +
     "&limit=2000"
   );
@@ -23494,7 +23543,7 @@ async function aoChatDeleteMessage(messageId,imagePath){
     try{
       const rows = await supabaseRequest(
         "chat_messages?id=eq." + encodeURIComponent(id) +
-        "&select=id,sender_email,sender_type,branch,scanner_email&limit=1",
+        "&select=id,sender_email,sender_type,branch,scanner_email,message&limit=1",
         {method:"GET"}
       );
 
@@ -23506,6 +23555,9 @@ async function aoChatDeleteMessage(messageId,imagePath){
       const owner = String(row?.sender_email || "").trim().toLowerCase();
       if(owner !== email){
         throw new Error("This message belongs to a different account.");
+      }
+      if(aoChatAdminMessageEmail(row?.message) !== email){
+        throw new Error("This message belongs to a different admin conversation.");
       }
 
       const rowBranch = String(row?.branch || "").trim().toUpperCase();
@@ -23702,6 +23754,10 @@ async function aoChatStartRealtime(){
             const row =
               payload?.new || {};
 
+            if(aoChatAdminMessageEmail(row.message) !== aoChatCurrentAdminEmail()){
+              return;
+            }
+
             const senderType =
               String(row.sender_type || "")
                 .toUpperCase();
@@ -23848,6 +23904,7 @@ function aoChatKey(branch,email){
 
   return (
     "aoChatRead:ADMIN:" +
+    aoChatCurrentAdminEmail() + ":" +
     String(branch || "")
       .toUpperCase() +
     ":" +
@@ -24825,6 +24882,7 @@ async function aoChatLoadUnread(){
           "chat_messages" +
           "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
           "&sender_type=eq.SCANNER" +
+          aoChatAdminMessageFilter(aoChatCurrentAdminEmail()) +
           "&order=created_at.desc" +
           "&limit=1000"
         ),
@@ -24832,7 +24890,7 @@ async function aoChatLoadUnread(){
           "chat_messages" +
           "?select=id,branch,scanner_email,sender_email,sender_type,message,created_at" +
           "&sender_type=eq.DASHBOARD" +
-          "&message=like." + encodeURIComponent("*" + AO_CHAT_SHARED_STATE_MARKER + "*") +
+          aoChatAdminStateMessageFilter(aoChatCurrentAdminEmail()) +
           "&order=created_at.desc" +
           "&limit=2000"
         )
@@ -24886,7 +24944,7 @@ async function aoChatLoadUnread(){
           last_created_at:r.created_at,
           last_message:aoChatIsImageMessage(r.message)
             ? "📷 Image"
-            : String(r.message || "")
+            : aoChatTextPart(r.message)
         };
         grouped.set(key,g);
       }
@@ -24897,7 +24955,7 @@ async function aoChatLoadUnread(){
         g.last_created_at = r.created_at;
         g.last_message = aoChatIsImageMessage(r.message)
           ? "📷 Image"
-          : String(r.message || "");
+          : aoChatTextPart(r.message);
       }
 
     });
@@ -24988,6 +25046,7 @@ async function aoChatDownloadImage(url,fileName,button){
 function aoChatImageCheckedKey(messageId){
   return (
     "aoChatImageChecked:" +
+    aoChatCurrentAdminEmail() + ":" +
     String(messageId || "")
   );
 }
@@ -25150,7 +25209,7 @@ function aoChatClearSearch(){
   const recipient = aoChatRecipient();
   const box = document.getElementById("aoChatMessages");
   if(branch && recipient && box){
-    const cached = aoChatConversationCache.get(branch + "|" + recipient);
+    const cached = aoChatConversationCache.get(aoChatConversationKey(branch,recipient));
     if(Array.isArray(cached)){
       aoChatRenderConversation(cached,branch,recipient,box);
     }
@@ -25223,9 +25282,7 @@ async function aoChatLoad(){
   }
 
   const key =
-    branch +
-    "|" +
-    recipient;
+    aoChatConversationKey(branch,recipient);
 
   const cached =
     aoChatConversationCache.get(
@@ -25273,6 +25330,7 @@ async function aoChatLoad(){
           encodeURIComponent(branch) +
           "&scanner_email=eq." +
           encodeURIComponent(recipient) +
+          aoChatAdminMessageFilter(aoChatCurrentAdminEmail()) +
           "&order=created_at.asc" +
           "&limit=300"
         ),
@@ -25288,9 +25346,12 @@ async function aoChatLoad(){
 
     }
 
+    const activeAdmin = aoChatCurrentAdminEmail();
     const list = [
-      ...(Array.isArray(rows) ? rows : []),
-      ...(Array.isArray(stateRows) ? stateRows.filter(r => aoChatIsSharedStateMessage(r?.message)) : [])
+      ...(Array.isArray(rows) ? rows : []).filter(r => aoChatAdminMessageEmail(r?.message) === activeAdmin),
+      ...(Array.isArray(stateRows) ? stateRows.filter(r =>
+        aoChatAdminMessageEmail(r?.message) === activeAdmin && aoChatIsSharedStateMessage(r?.message)
+      ) : [])
     ];
 
     const deduped = new Map();
@@ -25348,8 +25409,10 @@ function aoChatRenderConversation(
   box
 ){
 
+  const activeAdmin = aoChatCurrentAdminEmail();
   const conversationMessages =
     (Array.isArray(list) ? list : [])
+      .filter(r => aoChatAdminMessageEmail(r?.message) === activeAdmin)
       .filter(r => !aoChatIsSharedStateMessage(r?.message));
 
   const read =
@@ -25921,7 +25984,7 @@ async function aoChatSend(){
             .trim()
             .toLowerCase(),
           sender_type:"DASHBOARD",
-          message:message
+          message:aoChatTagAdminMessage(message,aoChatCurrentAdminEmail())
         }
       }
     );
@@ -25932,9 +25995,7 @@ async function aoChatSend(){
     aoChatStatus("");
 
     const key =
-      branch +
-      "|" +
-      recipient;
+      aoChatConversationKey(branch,recipient);
 
     /*
      * Do not wait for a second full page rebuild
@@ -26064,7 +26125,7 @@ document.addEventListener(
           const recipient = aoChatRecipient();
           const box = document.getElementById("aoChatMessages");
           if(branch && recipient && box){
-            const cached = aoChatConversationCache.get(branch + "|" + recipient);
+            const cached = aoChatConversationCache.get(aoChatConversationKey(branch,recipient));
             if(Array.isArray(cached)){
               aoChatRenderConversation(cached,branch,recipient,box);
             }

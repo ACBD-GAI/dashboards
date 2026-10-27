@@ -27531,6 +27531,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   const AO_VIDEO_EVENT = "signal";
   const AO_VIDEO_CHANNEL = "ao-video-call-v1";
   const AO_VIDEO_CALL_TIMEOUT = 30000;
+  const AO_VIDEO_AVAILABILITY_PREFIX = "ao-video-call-availability:";
+  const aoVideoAvailabilityMemory = new Map();
 
   let aoVideoSignalClient = null;
   let aoVideoSignalChannel = null;
@@ -27541,6 +27543,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   let aoVideoInviteTimer = null;
   let aoVideoAdminPicker = null;
   let aoVideoPresenceTrackedEmail = "";
+  let aoVideoPresenceTrackedState = "";
 
   function aoVideoIsDashboard(){
     return !!document.getElementById("aoChatRecipient");
@@ -27655,6 +27658,51 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   }
 
+  function aoVideoGetAvailability(email){
+    const normalized=String(email || "").trim().toLowerCase();
+    if(!normalized) return "ONLINE";
+    try{
+      const stored=String(
+        localStorage.getItem(AO_VIDEO_AVAILABILITY_PREFIX + encodeURIComponent(normalized)) || ""
+      ).trim().toUpperCase();
+      if(stored==="OFFLINE" || stored==="ONLINE") return stored;
+    }catch(error){}
+    return aoVideoAvailabilityMemory.get(normalized) || "ONLINE";
+  }
+
+  function aoVideoPresenceMetaAcceptsCalls(meta){
+    const availability=String(meta?.availability || "ONLINE").trim().toUpperCase();
+    const accepting=meta?.acceptingCalls;
+    return availability!=="OFFLINE" && accepting!==false &&
+      String(accepting == null ? "" : accepting).trim().toLowerCase()!=="false";
+  }
+
+  function aoVideoAdminAvailability(email){
+    const target=String(email || "").trim().toLowerCase();
+    if(!target) return "UNAVAILABLE";
+    try{
+      const channel=aoVideoSignalChannel;
+      if(!channel || typeof channel.presenceState!=="function") return "UNAVAILABLE";
+      const state=channel.presenceState() || {};
+      let found=false;
+      let accepting=false;
+      Object.keys(state).forEach(key=>{
+        const metas=Array.isArray(state[key]) ? state[key] : [];
+        metas.forEach(meta=>{
+          const type=String(meta?.type || "").trim().toUpperCase();
+          const candidate=String(meta?.email || key || "").trim().toLowerCase();
+          if(type!=="DASHBOARD" || candidate!==target) return;
+          found=true;
+          if(aoVideoPresenceMetaAcceptsCalls(meta)) accepting=true;
+        });
+      });
+      return accepting ? "ONLINE" : (found ? "OFFLINE" : "UNAVAILABLE");
+    }catch(error){
+      console.warn("Admin availability read failed:",error);
+      return "UNAVAILABLE";
+    }
+  }
+
   function aoVideoOnlineAdminEmails(){
     const online=new Set();
     try{
@@ -27666,7 +27714,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         metas.forEach(meta=>{
           const type=String(meta?.type || "").trim().toUpperCase();
           const email=String(meta?.email || key || "").trim().toLowerCase();
-          if(type==="DASHBOARD" && email) online.add(email);
+          if(type==="DASHBOARD" && email && aoVideoPresenceMetaAcceptsCalls(meta)) online.add(email);
         });
       });
     }catch(error){
@@ -27766,11 +27814,29 @@ document.addEventListener("DOMContentLoaded",()=>{
       if(!email){
         if(aoVideoPresenceTrackedEmail && typeof channel.untrack==="function") await channel.untrack();
         aoVideoPresenceTrackedEmail="";
+        aoVideoPresenceTrackedState="";
         return;
       }
-      if(aoVideoPresenceTrackedEmail===email) return;
-      await channel.track({email,type:identity.type,branch:identity.branch || "",at:Date.now()});
+      const availability=identity.type==="DASHBOARD" ? aoVideoGetAvailability(email) : "ONLINE";
+      const trackState=[email,identity.type,String(identity.branch || ""),availability].join("|");
+      if(aoVideoPresenceTrackedState===trackState){
+        if(identity.type==="DASHBOARD") aoVideoUpdateAvailabilityUi();
+        return;
+      }
+      if(aoVideoPresenceTrackedEmail && aoVideoPresenceTrackedEmail!==email && typeof channel.untrack==="function"){
+        await channel.untrack();
+      }
+      await channel.track({
+        email,
+        type:identity.type,
+        branch:identity.branch || "",
+        availability,
+        acceptingCalls:availability!=="OFFLINE",
+        at:Date.now()
+      });
       aoVideoPresenceTrackedEmail=email;
+      aoVideoPresenceTrackedState=trackState;
+      if(identity.type==="DASHBOARD") aoVideoUpdateAvailabilityUi();
     }catch(error){
       console.warn("Video-call presence update failed:",error);
     }
@@ -28781,6 +28847,18 @@ function aoVideoCreatePeer(){
     }
 
     if(kind==="invite"){
+      if(aoVideoIsDashboard() && aoVideoGetAvailability(me.email)==="OFFLINE"){
+        await aoVideoSend({
+          kind:"unavailable",
+          callId,
+          toEmail:message.fromEmail,
+          toType:message.fromType,
+          toBranch:message.fromBranch,
+          data:null
+        }).catch(()=>{});
+        return;
+      }
+
       if(aoVideoState){
         aoVideoShowNotice("Another call is coming in","You are already on a video call. The new call was declined automatically.","warning");
         await aoVideoSend({
@@ -28819,7 +28897,8 @@ function aoVideoCreatePeer(){
     if(
       kind==="accept" ||
       kind==="decline" ||
-      kind==="busy"
+      kind==="busy" ||
+      kind==="unavailable"
     ){
       if(
         !aoVideoState ||
@@ -28838,8 +28917,26 @@ function aoVideoCreatePeer(){
       }
 
       if(kind==="busy"){
-        aoVideoSetStatus("The selected user is already on another call.");
-        aoVideoShowNotice("User is busy","The person you called is already on another video call.","warning");
+        const adminCall=aoVideoState.remoteType==="ADMIN";
+        aoVideoSetStatus(adminCall ? "The admin is already on another call." : "The selected user is already on another call.");
+        aoVideoShowNotice(
+          adminCall ? "Admin is busy" : "User is busy",
+          adminCall ? "The admin is already on another video call. Try again later or choose another admin." : "The person you called is already on another video call.",
+          "warning",
+          4600
+        );
+        setTimeout(()=>aoVideoEndCall(true),1100);
+        return;
+      }
+
+      if(kind==="unavailable"){
+        aoVideoSetStatus("The admin is unavailable.");
+        aoVideoShowNotice(
+          "Admin unavailable",
+          "This admin is offline or has paused incoming calls. Try another admin or call again later.",
+          "warning",
+          4800
+        );
         setTimeout(()=>aoVideoEndCall(true),1100);
         return;
       }
@@ -29196,7 +29293,20 @@ function aoVideoCreatePeer(){
         list.querySelectorAll("[data-admin-email]").forEach(button=>{
           button.addEventListener("click",()=>{
             const email=String(button.dataset.adminEmail || "").trim().toLowerCase();
+            const availability=aoVideoAdminAvailability(email);
             close();
+
+            if(availability!=="ONLINE"){
+              aoVideoShowNotice(
+                availability==="OFFLINE" ? "Admin unavailable" : "Admin is not online",
+                availability==="OFFLINE"
+                  ? "This admin has paused incoming calls. Choose another admin or try again later."
+                  : "This admin is not connected right now. Please choose another admin or try again later.",
+                "warning",
+                4800
+              );
+              return;
+            }
 
             aoVideoStartCall({
               toEmail:email,
@@ -29204,6 +29314,12 @@ function aoVideoCreatePeer(){
               toBranch:identity.branch
             }).catch(error=>{
               console.error("Scanner video call start failed:",error);
+              aoVideoShowNotice(
+                "Unable to start call",
+                error?.message || "Please check your connection and try again.",
+                "danger",
+                4200
+              );
               if(typeof aoChatStatus==="function"){
                 aoChatStatus(error?.message || "Unable to start video call.");
               }
@@ -29222,11 +29338,126 @@ function aoVideoCreatePeer(){
     }
   }
 
+  function aoVideoEnsureAvailabilityUi(){
+    if(!aoVideoIsDashboard()) return;
+    const panel=document.getElementById("aoChatPanel");
+    const header=panel?.querySelector(".ao-chat-head");
+    if(!panel || !header) return;
+
+    if(!document.getElementById("aoVideoAvailabilityStyles")){
+      const style=document.createElement("style");
+      style.id="aoVideoAvailabilityStyles";
+      style.textContent=`
+        #aoVideoAvailabilityControl{margin:8px 12px 0;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #cfe3ee;border-radius:14px;background:linear-gradient(135deg,#ffffff,#f1f9ff);box-shadow:0 5px 16px rgba(15,23,42,.05)}
+        #aoVideoAvailabilityControl .ao-video-availability-copy{min-width:0;display:grid;gap:3px}
+        #aoVideoAvailabilityControl .ao-video-availability-label{font-size:9px;font-weight:950;letter-spacing:.09em;color:#496579}
+        #aoVideoAvailabilityControl .ao-video-availability-hint{font-size:10px;line-height:1.35;color:#64748b}
+        #aoVideoAvailabilityControl .ao-video-availability-actions{display:flex;gap:5px;flex:0 0 auto;padding:3px;border:1px solid #dbe7ef;border-radius:12px;background:#edf5fa}
+        #aoVideoAvailabilityControl .ao-video-availability-btn{min-height:32px!important;padding:7px 10px!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;color:#587083!important;box-shadow:none!important;font-size:10px!important;font-weight:900!important;white-space:nowrap}
+        #aoVideoAvailabilityControl .ao-video-availability-btn.active.online{background:linear-gradient(135deg,#22c55e,#15803d)!important;color:#fff!important;box-shadow:0 5px 12px rgba(22,163,74,.19)!important}
+        #aoVideoAvailabilityControl .ao-video-availability-btn.active.offline{background:linear-gradient(135deg,#334155,#0f172a)!important;color:#fff!important;box-shadow:0 5px 12px rgba(15,23,42,.19)!important}
+        #aoVideoAvailabilityControl .ao-video-availability-btn:focus-visible{outline:3px solid rgba(56,189,248,.4)!important;outline-offset:2px}
+        @media(max-width:520px){#aoVideoAvailabilityControl{align-items:flex-start;flex-direction:column;gap:8px}#aoVideoAvailabilityControl .ao-video-availability-actions{width:100%}#aoVideoAvailabilityControl .ao-video-availability-btn{flex:1}}
+      `;
+      document.head.appendChild(style);
+    }
+
+    let control=document.getElementById("aoVideoAvailabilityControl");
+    if(!control){
+      control=document.createElement("div");
+      control.id="aoVideoAvailabilityControl";
+      control.innerHTML=
+        '<div class="ao-video-availability-copy">' +
+          '<span class="ao-video-availability-label">VIDEO CALL AVAILABILITY</span>' +
+          '<span id="aoVideoAvailabilityHint" class="ao-video-availability-hint">Choose whether scanners can call you.</span>' +
+        '</div>' +
+        '<div class="ao-video-availability-actions" role="group" aria-label="Video call availability">' +
+          '<button type="button" class="ao-video-availability-btn online" data-ao-video-availability="ONLINE" aria-pressed="true">● Online</button>' +
+          '<button type="button" class="ao-video-availability-btn offline" data-ao-video-availability="OFFLINE" aria-pressed="false">◌ Offline</button>' +
+        '</div>';
+      header.insertAdjacentElement("afterend",control);
+      control.querySelectorAll("[data-ao-video-availability]").forEach(button=>{
+        button.addEventListener("click",()=>{
+          aoVideoSetAvailability(button.getAttribute("data-ao-video-availability"));
+        });
+      });
+    }
+    aoVideoUpdateAvailabilityUi();
+  }
+
+  function aoVideoUpdateAvailabilityUi(){
+    if(!aoVideoIsDashboard()) return;
+    const control=document.getElementById("aoVideoAvailabilityControl");
+    if(!control) return;
+    const identity=aoVideoIdentity();
+    const status=aoVideoGetAvailability(identity.email);
+    control.querySelectorAll("[data-ao-video-availability]").forEach(button=>{
+      const active=String(button.getAttribute("data-ao-video-availability") || "").toUpperCase()===status;
+      button.classList.toggle("active",active);
+      button.setAttribute("aria-pressed",String(active));
+    });
+    const hint=document.getElementById("aoVideoAvailabilityHint");
+    if(hint){
+      hint.textContent=status==="OFFLINE"
+        ? "Scanner calls are paused. You will not receive new calls."
+        : "You are ready to receive video calls from scanners.";
+    }
+    control.setAttribute("data-current-availability",status);
+  }
+
+  async function aoVideoSetAvailability(nextValue){
+    if(!aoVideoIsDashboard()) return;
+    const identity=aoVideoIdentity();
+    const email=String(identity.email || "").trim().toLowerCase();
+    if(!email){
+      aoVideoShowNotice("Sign in first","Please sign in to change video-call availability.","warning",3500);
+      return;
+    }
+    const value=String(nextValue || "").trim().toUpperCase()==="OFFLINE" ? "OFFLINE" : "ONLINE";
+    aoVideoAvailabilityMemory.set(email,value);
+    try{
+      localStorage.setItem(AO_VIDEO_AVAILABILITY_PREFIX + encodeURIComponent(email),value);
+    }catch(error){
+      console.warn("Could not persist video-call availability in this browser:",error);
+    }
+    aoVideoPresenceTrackedState="";
+    aoVideoUpdateAvailabilityUi();
+
+    try{
+      await aoVideoEnsureSignal();
+      await aoVideoTrackPresence();
+      if(value==="OFFLINE" && aoVideoIncoming){
+        const info=aoVideoIncoming;
+        aoVideoCloseIncoming();
+        await aoVideoSend({
+          kind:"unavailable",
+          callId:info.callId,
+          toEmail:info.fromEmail,
+          toType:info.fromType,
+          toBranch:info.fromBranch,
+          data:null
+        }).catch(()=>{});
+      }
+    }catch(error){
+      console.warn("Video-call availability update could not be published:",error);
+    }
+
+    aoVideoShowNotice(
+      value==="OFFLINE" ? "Incoming calls paused" : "You're online",
+      value==="OFFLINE"
+        ? "Scanners will see you as unavailable until you switch back online."
+        : "Scanners can now call you for video support.",
+      value==="OFFLINE" ? "warning" : "success",
+      3600
+    );
+  }
+
   function aoVideoInit(){
     if(!document.body) return;
 
     aoVideoEnsureUi();
     aoVideoEnsureNoticeUi();
+    aoVideoEnsureAvailabilityUi();
 
     /* The button is inside the existing message box; no existing chat handler is replaced. */
     aoVideoUpdateButtonState();

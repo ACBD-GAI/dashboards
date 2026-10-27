@@ -29676,6 +29676,43 @@ function aoVideoCreatePeer(){
     applyProfileAvatar();
   }
 
+  /* Visual-only layout helper: keep profile identity together and utility
+     buttons together. Existing refresh/logout/edit handlers are unchanged. */
+  function arrangeHeaderControls(){
+    const area = document.querySelector(".userArea");
+    const user = document.getElementById("userEmail");
+    const avatar = document.getElementById("aoAdminProfileAvatar");
+    const edit = document.getElementById("aoAdminDisplayNameBtn");
+    const refresh = area && area.querySelector('button[title="Refresh"]');
+    const logout = area && area.querySelector('button[title="Logout"]');
+    if(!area || !user || !avatar || !edit || !refresh || !logout) return;
+
+    let profile = document.getElementById("aoAdminHeaderProfile");
+    if(!profile){
+      profile = document.createElement("div");
+      profile.id = "aoAdminHeaderProfile";
+      profile.className = "ao-admin-header-profile";
+      profile.setAttribute("aria-label","Admin profile");
+    }
+    let actions = document.getElementById("aoAdminHeaderActions");
+    if(!actions){
+      actions = document.createElement("div");
+      actions.id = "aoAdminHeaderActions";
+      actions.className = "ao-admin-header-actions";
+      actions.setAttribute("aria-label","Dashboard actions");
+    }
+
+    /* Move nodes without recreating them, preserving handlers and state.
+       Position checks make this idempotent for the existing DOM observer. */
+    if(profile.parentElement !== area) area.appendChild(profile);
+    if(actions.parentElement !== area) area.appendChild(actions);
+    if(profile.children[0] !== avatar) profile.insertBefore(avatar,profile.firstChild);
+    if(profile.children[1] !== user) profile.insertBefore(user,profile.children[1] || null);
+    if(profile.children[2] !== edit) profile.appendChild(edit);
+    if(actions.children[0] !== refresh) actions.insertBefore(refresh,actions.firstChild);
+    if(actions.children[1] !== logout) actions.appendChild(logout);
+  }
+
   function applyProfileAvatar(){
     const email = myEmail();
     const area = document.querySelector(".userArea");
@@ -29710,6 +29747,7 @@ function aoVideoCreatePeer(){
       if(!frame.querySelector("img") && frame.textContent !== initial) frame.textContent = initial;
       else if(frame.querySelector("img")) frame.textContent = initial;
     }
+    arrangeHeaderControls();
   }
 
   function applyChat(){
@@ -29736,16 +29774,25 @@ function aoVideoCreatePeer(){
     const style = document.createElement("style");
     style.id = "aoAdminDisplayNameStyle";
     style.textContent = `
-      #aoAdminDisplayNameBtn{
-        width:40px;height:40px;min-height:40px;padding:0;
-        margin-left:0;border:1px solid rgba(255,255,255,.9);
-        border-radius:12px;background:rgba(255,255,255,.78);
-        color:#1e3a4c;font-size:17px;cursor:pointer;
-        box-shadow:0 5px 14px rgba(15,23,42,.07);
-      }
-      #aoAdminDisplayNameBtn:hover{background:#fff;transform:translateY(-1px)}
-      .ao-admin-profile-avatar{width:36px;height:36px;flex:0 0 36px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border-radius:50%;border:2px solid #d9edf8;background:linear-gradient(145deg,#38bdf8,#3658bb);color:#fff;font-size:14px;font-weight:900;box-shadow:0 4px 12px rgba(14,165,233,.18)}
+      /* Polished, balanced account cluster for the dark dashboard header. */
+      .userArea{display:flex;align-items:center;justify-content:flex-end;gap:9px;min-width:0;}
+      .ao-admin-header-profile{display:flex;align-items:center;gap:8px;min-width:0;max-width:calc(100vw - 170px);padding:5px 7px 5px 6px;border:1px solid rgba(255,255,255,.15);border-radius:15px;background:rgba(255,255,255,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.045);}
+      .ao-admin-profile-avatar{width:36px;height:36px;flex:0 0 36px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border-radius:50%;border:2px solid #d9edf8;background:linear-gradient(145deg,#38bdf8,#3658bb);color:#fff;font-size:14px;font-weight:900;box-shadow:0 3px 10px rgba(14,165,233,.16)}
       .ao-admin-profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+      #aoAdminHeaderProfile #userEmail{display:block!important;flex:1 1 auto;min-width:0;width:auto;max-width:clamp(100px,34vw,160px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;padding:0 2px;border:0!important;border-radius:8px;background:transparent!important;color:#f0f5ff!important;box-shadow:none!important;font-size:11px;font-weight:850;backdrop-filter:none;-webkit-backdrop-filter:none;}
+      #aoAdminHeaderProfile #aoAdminDisplayNameBtn{width:32px;height:32px;min-height:32px;flex:0 0 32px;padding:0;margin:0;border:1px solid rgba(147,197,253,.27);border-radius:10px;background:rgba(96,165,250,.15);color:#dbeafe;font-size:16px;cursor:pointer;box-shadow:none;}
+      #aoAdminHeaderProfile #aoAdminDisplayNameBtn:hover{background:rgba(96,165,250,.27);transform:translateY(-1px);border-color:rgba(147,197,253,.48)}
+      .ao-admin-header-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto;padding-left:8px;border-left:1px solid rgba(255,255,255,.15)}
+      .ao-admin-header-actions .iconBtn{width:36px;height:36px;min-height:36px;flex:0 0 36px;padding:0;border-radius:11px;}
+      @media(max-width:420px){
+        .userArea{gap:6px;}
+        .ao-admin-header-profile{gap:6px;padding:4px 5px;max-width:calc(100vw - 145px);}
+        .ao-admin-profile-avatar{width:32px;height:32px;flex-basis:32px;}
+        #aoAdminHeaderProfile #userEmail{max-width:clamp(78px,27vw,112px);font-size:10px;}
+        #aoAdminHeaderProfile #aoAdminDisplayNameBtn{width:28px;height:28px;min-height:28px;flex-basis:28px;border-radius:9px;}
+        .ao-admin-header-actions{gap:4px;padding-left:5px;}
+        .ao-admin-header-actions .iconBtn{width:32px;height:32px;min-height:32px;flex-basis:32px;border-radius:10px;}
+      }
       .ao-admin-photo-row{display:flex;align-items:center;gap:13px;margin:12px 0 17px;padding:12px;border:1px solid #dcecf5;border-radius:14px;background:linear-gradient(135deg,#f7fcff,#fff)}
       .ao-admin-photo-frame{width:78px;height:78px;flex:0 0 78px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:18px;border:2px solid #cfe7f4;background:linear-gradient(145deg,#e0f2fe,#eef2ff);color:#2563eb;font-size:27px;font-weight:950;box-shadow:0 5px 15px rgba(14,165,233,.12)}
       .ao-admin-photo-frame img{display:block;width:100%;height:100%;object-fit:cover}

@@ -29341,23 +29341,22 @@ function aoVideoCreatePeer(){
   function aoVideoEnsureAvailabilityUi(){
     if(!aoVideoIsDashboard()) return;
     const panel=document.getElementById("aoChatPanel");
-    const header=panel?.querySelector(".ao-chat-head");
-    if(!panel || !header) return;
+    const searchInput=panel?.querySelector("#aoChatSearchInput");
+    const searchWrap=searchInput?.closest(".ao-chat-search-wrap");
+    if(!panel || !searchInput || !searchWrap) return;
 
     if(!document.getElementById("aoVideoAvailabilityStyles")){
       const style=document.createElement("style");
       style.id="aoVideoAvailabilityStyles";
       style.textContent=`
-        #aoVideoAvailabilityControl{margin:8px 12px 0;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #cfe3ee;border-radius:14px;background:linear-gradient(135deg,#ffffff,#f1f9ff);box-shadow:0 5px 16px rgba(15,23,42,.05)}
-        #aoVideoAvailabilityControl .ao-video-availability-copy{min-width:0;display:grid;gap:3px}
-        #aoVideoAvailabilityControl .ao-video-availability-label{font-size:9px;font-weight:950;letter-spacing:.09em;color:#496579}
-        #aoVideoAvailabilityControl .ao-video-availability-hint{font-size:10px;line-height:1.35;color:#64748b}
-        #aoVideoAvailabilityControl .ao-video-availability-actions{display:flex;gap:5px;flex:0 0 auto;padding:3px;border:1px solid #dbe7ef;border-radius:12px;background:#edf5fa}
-        #aoVideoAvailabilityControl .ao-video-availability-btn{min-height:32px!important;padding:7px 10px!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;color:#587083!important;box-shadow:none!important;font-size:10px!important;font-weight:900!important;white-space:nowrap}
-        #aoVideoAvailabilityControl .ao-video-availability-btn.active.online{background:linear-gradient(135deg,#22c55e,#15803d)!important;color:#fff!important;box-shadow:0 5px 12px rgba(22,163,74,.19)!important}
-        #aoVideoAvailabilityControl .ao-video-availability-btn.active.offline{background:linear-gradient(135deg,#334155,#0f172a)!important;color:#fff!important;box-shadow:0 5px 12px rgba(15,23,42,.19)!important}
+        /* Compact availability toggle beside Search Conversation. */
+        #aoVideoAvailabilityControl{display:flex;align-items:center;gap:3px;flex:0 0 auto;margin:0;padding:2px;border:1px solid #dbe7ef;border-radius:10px;background:#edf5fa;box-shadow:none}
+        #aoVideoAvailabilityControl .ao-video-availability-actions{display:flex;align-items:center;gap:3px;flex:0 0 auto}
+        #aoVideoAvailabilityControl .ao-video-availability-btn{min-height:29px!important;padding:6px 8px!important;border:1px solid transparent!important;border-radius:8px!important;background:transparent!important;color:#587083!important;box-shadow:none!important;font-size:9px!important;font-weight:900!important;white-space:nowrap}
+        #aoVideoAvailabilityControl .ao-video-availability-btn.active.online{background:linear-gradient(135deg,#22c55e,#15803d)!important;color:#fff!important;box-shadow:0 3px 8px rgba(22,163,74,.17)!important}
+        #aoVideoAvailabilityControl .ao-video-availability-btn.active.offline{background:linear-gradient(135deg,#334155,#0f172a)!important;color:#fff!important;box-shadow:0 3px 8px rgba(15,23,42,.16)!important}
         #aoVideoAvailabilityControl .ao-video-availability-btn:focus-visible{outline:3px solid rgba(56,189,248,.4)!important;outline-offset:2px}
-        @media(max-width:520px){#aoVideoAvailabilityControl{align-items:flex-start;flex-direction:column;gap:8px}#aoVideoAvailabilityControl .ao-video-availability-actions{width:100%}#aoVideoAvailabilityControl .ao-video-availability-btn{flex:1}}
+        @media(max-width:360px){#aoVideoAvailabilityControl .ao-video-availability-btn{padding:5px 6px!important;font-size:8px!important}}
       `;
       document.head.appendChild(style);
     }
@@ -29367,20 +29366,20 @@ function aoVideoCreatePeer(){
       control=document.createElement("div");
       control.id="aoVideoAvailabilityControl";
       control.innerHTML=
-        '<div class="ao-video-availability-copy">' +
-          '<span class="ao-video-availability-label">VIDEO CALL AVAILABILITY</span>' +
-          '<span id="aoVideoAvailabilityHint" class="ao-video-availability-hint">Choose whether scanners can call you.</span>' +
-        '</div>' +
         '<div class="ao-video-availability-actions" role="group" aria-label="Video call availability">' +
           '<button type="button" class="ao-video-availability-btn online" data-ao-video-availability="ONLINE" aria-pressed="true">● Online</button>' +
           '<button type="button" class="ao-video-availability-btn offline" data-ao-video-availability="OFFLINE" aria-pressed="false">◌ Offline</button>' +
         '</div>';
-      header.insertAdjacentElement("afterend",control);
       control.querySelectorAll("[data-ao-video-availability]").forEach(button=>{
         button.addEventListener("click",()=>{
           aoVideoSetAvailability(button.getAttribute("data-ao-video-availability"));
         });
       });
+    }
+
+    /* Keep the existing toggle beside the search field, never above messages. */
+    if(control.parentElement!==searchWrap || searchInput.nextElementSibling!==control){
+      searchInput.insertAdjacentElement("afterend",control);
     }
     aoVideoUpdateAvailabilityUi();
   }
@@ -29396,13 +29395,8 @@ function aoVideoCreatePeer(){
       button.classList.toggle("active",active);
       button.setAttribute("aria-pressed",String(active));
     });
-    const hint=document.getElementById("aoVideoAvailabilityHint");
-    if(hint){
-      hint.textContent=status==="OFFLINE"
-        ? "Scanner calls are paused. You will not receive new calls."
-        : "You are ready to receive video calls from scanners.";
-    }
     control.setAttribute("data-current-availability",status);
+    control.setAttribute("aria-label",status==="OFFLINE" ? "Incoming scanner calls are offline" : "Incoming scanner calls are online");
   }
 
   async function aoVideoSetAvailability(nextValue){

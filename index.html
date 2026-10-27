@@ -29546,10 +29546,15 @@ function aoVideoCreatePeer(){
   const TABLE = "admin_display_names";
   const CACHE_MS = 15000;
   let nameMap = new Map();
+  let profilePhotoPathMap = new Map();
+  let profilePhotosLoadedAt = 0;
+  let profilePhotosLoadPromise = null;
   let loadedAt = 0;
   let loadPromise = null;
   let editor = null;
   let observerStarted = false;
+  const PHOTO_BUCKET = "ao-chat-images";
+  const PHOTO_MAX_BYTES = 8 * 1024 * 1024;
 
   function myEmail(){
     try{
@@ -29572,6 +29577,16 @@ function aoVideoCreatePeer(){
     return nameMap.get(e) || e;
   }
 
+  function profilePhotoUrl(email){
+    const e = String(email || "").trim().toLowerCase();
+    const path = profilePhotoPathMap.get(e) || "";
+    if(!path) return "";
+    return SUPABASE_URL + "/storage/v1/object/public/" + PHOTO_BUCKET + "/" +
+      path.split("/").map(encodeURIComponent).join("/");
+  }
+
+  window.aoAdminProfilePhotoFor = profilePhotoUrl;
+
   function apiHeaders(extra){
     return Object.assign({
       apikey: SUPABASE_KEY,
@@ -29579,6 +29594,41 @@ function aoVideoCreatePeer(){
       Accept: "application/json",
       "Content-Type": "application/json"
     }, extra || {});
+  }
+
+  async function loadProfilePhotos(force){
+    const now = Date.now();
+    if(!force && profilePhotosLoadedAt && (now - profilePhotosLoadedAt) < CACHE_MS){
+      return profilePhotoPathMap;
+    }
+    if(profilePhotosLoadPromise && !force) return profilePhotosLoadPromise;
+
+    profilePhotosLoadPromise = (async function(){
+      try{
+        const response = await fetch(
+          SUPABASE_URL + "/rest/v1/" + TABLE + "?select=email,profile_photo_path",
+          {method:"GET",headers:apiHeaders()}
+        );
+        const body = await response.text();
+        if(!response.ok) throw new Error("Profile-photo column is not available yet.");
+        const rows = body ? JSON.parse(body) : [];
+        const next = new Map();
+        (Array.isArray(rows) ? rows : []).forEach(function(row){
+          const email = String(row && row.email || "").trim().toLowerCase();
+          const path = String(row && row.profile_photo_path || "").trim();
+          if(email && path) next.set(email,path);
+        });
+        profilePhotoPathMap = next;
+      }catch(error){
+        /* Display-name loading must continue to work before the optional photo column is added. */
+        console.warn("Admin profile-photo load skipped:", error);
+      }
+      profilePhotosLoadedAt = Date.now();
+      profilePhotosLoadPromise = null;
+      applyProfileAvatar();
+      return profilePhotoPathMap;
+    })();
+    return profilePhotosLoadPromise;
   }
 
   async function loadNames(force){
@@ -29606,6 +29656,7 @@ function aoVideoCreatePeer(){
       }catch(error){
         console.warn("Admin display-name load failed:", error);
       }
+      await loadProfilePhotos(force);
       loadedAt = Date.now();
       loadPromise = null;
       applyAll();
@@ -29622,6 +29673,43 @@ function aoVideoCreatePeer(){
     const name = nameFor(email);
     if(el.textContent !== name) el.textContent = name;
     if(el.title !== name) el.title = name;
+    applyProfileAvatar();
+  }
+
+  function applyProfileAvatar(){
+    const email = myEmail();
+    const area = document.querySelector(".userArea");
+    const user = document.getElementById("userEmail");
+    if(!area || !user || !email) return;
+    let frame = document.getElementById("aoAdminProfileAvatar");
+    if(!frame){
+      frame = document.createElement("span");
+      frame.id = "aoAdminProfileAvatar";
+      frame.className = "ao-admin-profile-avatar";
+      frame.setAttribute("aria-label","Admin profile photo");
+      area.insertBefore(frame,user);
+    }
+    const url = profilePhotoUrl(email);
+    if(url && frame.dataset.failedPhotoUrl !== url){
+      let img = frame.querySelector("img");
+      if(!img){
+        frame.textContent = "";
+        img = document.createElement("img");
+        img.alt = nameFor(email) + " profile photo";
+        img.onerror = function(){
+          frame.dataset.failedPhotoUrl = url;
+          frame.textContent = String(nameFor(email)||"A").trim().charAt(0).toUpperCase() || "A";
+        };
+        frame.appendChild(img);
+      }
+      if(img.getAttribute("src") !== url) img.setAttribute("src",url);
+      img.alt = nameFor(email) + " profile photo";
+    }else{
+      if(url && frame.dataset.failedPhotoUrl !== url) frame.dataset.failedPhotoUrl = "";
+      const initial = String(nameFor(email) || "A").trim().charAt(0).toUpperCase() || "A";
+      if(!frame.querySelector("img") && frame.textContent !== initial) frame.textContent = initial;
+      else if(frame.querySelector("img")) frame.textContent = initial;
+    }
   }
 
   function applyChat(){
@@ -29656,6 +29744,13 @@ function aoVideoCreatePeer(){
         box-shadow:0 5px 14px rgba(15,23,42,.07);
       }
       #aoAdminDisplayNameBtn:hover{background:#fff;transform:translateY(-1px)}
+      .ao-admin-profile-avatar{width:36px;height:36px;flex:0 0 36px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border-radius:50%;border:2px solid #d9edf8;background:linear-gradient(145deg,#38bdf8,#3658bb);color:#fff;font-size:14px;font-weight:900;box-shadow:0 4px 12px rgba(14,165,233,.18)}
+      .ao-admin-profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+      .ao-admin-photo-row{display:flex;align-items:center;gap:13px;margin:12px 0 17px;padding:12px;border:1px solid #dcecf5;border-radius:14px;background:linear-gradient(135deg,#f7fcff,#fff)}
+      .ao-admin-photo-frame{width:78px;height:78px;flex:0 0 78px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:18px;border:2px solid #cfe7f4;background:linear-gradient(145deg,#e0f2fe,#eef2ff);color:#2563eb;font-size:27px;font-weight:950;box-shadow:0 5px 15px rgba(14,165,233,.12)}
+      .ao-admin-photo-frame img{display:block;width:100%;height:100%;object-fit:cover}
+      .ao-admin-photo-controls{min-width:0;flex:1}.ao-admin-photo-controls small{display:block;color:#64748b;font-size:10px;line-height:1.5;margin-top:6px}
+      .ao-admin-photo-input{display:block;width:100%;max-width:100%;font-size:11px;color:#334155}
       .ao-admin-name-overlay{
         position:fixed;inset:0;z-index:250000;display:flex;
         align-items:center;justify-content:center;padding:18px;
@@ -29684,11 +29779,91 @@ function aoVideoCreatePeer(){
   }
 
   function closeEditor(){
+    if(editor && editor.__previewObjectUrl){
+      try{URL.revokeObjectURL(editor.__previewObjectUrl);}catch(e){}
+    }
     if(editor) editor.remove();
     editor = null;
   }
 
-  async function saveName(value, status, saveBtn){
+  function profileStorageClient(){
+    if(window.__aoAdminProfileStorageClient) return window.__aoAdminProfileStorageClient;
+    if(!window.supabase || typeof window.supabase.createClient !== "function"){
+      throw new Error("Photo storage client is unavailable. Refresh the dashboard and try again.");
+    }
+    window.__aoAdminProfileStorageClient = window.supabase.createClient(
+      SUPABASE_URL,SUPABASE_KEY,
+      {auth:{persistSession:false,autoRefreshToken:false}}
+    );
+    return window.__aoAdminProfileStorageClient;
+  }
+
+  async function compressProfilePhoto(file){
+    if(!(file instanceof File) || !String(file.type||"").startsWith("image/")){
+      throw new Error("Choose an image file for your profile photo.");
+    }
+    if(file.size > PHOTO_MAX_BYTES){
+      throw new Error("Please choose an image smaller than 8 MB.");
+    }
+    return new Promise(function(resolve,reject){
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = function(){
+        try{
+          const maxDimension = 720;
+          const scale = Math.min(1,maxDimension/Math.max(image.naturalWidth,image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1,Math.round(image.naturalWidth*scale));
+          canvas.height = Math.max(1,Math.round(image.naturalHeight*scale));
+          const context = canvas.getContext("2d");
+          if(!context) throw new Error("Could not prepare the profile photo.");
+          context.drawImage(image,0,0,canvas.width,canvas.height);
+          canvas.toBlob(function(blob){
+            URL.revokeObjectURL(objectUrl);
+            if(blob) resolve(blob);
+            else reject(new Error("Could not process this image. Try another photo."));
+          },"image/jpeg",0.84);
+        }catch(error){URL.revokeObjectURL(objectUrl);reject(error);}
+      };
+      image.onerror = function(){URL.revokeObjectURL(objectUrl);reject(new Error("Could not read this image. Try another photo."));};
+      image.src = objectUrl;
+    });
+  }
+
+  async function uploadProfilePhoto(email,file){
+    const client = profileStorageClient();
+    const compressed = await compressProfilePhoto(file);
+    const safeEmail = String(email||"").trim().toLowerCase().replace(/[^a-z0-9._-]/g,"_");
+    const path = "admin-profiles/" + safeEmail + "/" + Date.now() + ".jpg";
+    const uploaded = await client.storage.from(PHOTO_BUCKET).upload(path,compressed,{
+      contentType:"image/jpeg",cacheControl:"3600",upsert:false
+    });
+    if(uploaded.error) throw new Error(uploaded.error.message || "Could not upload profile photo.");
+
+    try{
+      const response = await fetch(
+        SUPABASE_URL + "/rest/v1/" + TABLE + "?email=eq." + encodeURIComponent(email),
+        {
+          method:"PATCH",
+          headers:apiHeaders({Prefer:"return=minimal"}),
+          body:JSON.stringify({profile_photo_path:path,updated_at:new Date().toISOString()})
+        }
+      );
+      const body = await response.text();
+      if(!response.ok){
+        let detail="";
+        try{const j=body?JSON.parse(body):{};detail=j.message||j.hint||j.details||"";}catch(e){}
+        throw new Error("Could not save the photo reference. Run the supplied profile-photo SQL setup, then try again." + (detail ? " ("+detail+")" : ""));
+      }
+      profilePhotoPathMap.set(String(email||"").trim().toLowerCase(),path);
+      return path;
+    }catch(error){
+      try{await client.storage.from(PHOTO_BUCKET).remove([path]);}catch(cleanupError){}
+      throw error;
+    }
+  }
+
+  async function saveName(value, status, saveBtn, photoFile){
     const email = myEmail();
     if(!email){
       status.textContent = "Please log in first.";
@@ -29705,27 +29880,20 @@ function aoVideoCreatePeer(){
     }
 
     saveBtn.disabled = true;
-    status.textContent = "Saving…";
+    status.textContent = "Saving profile…";
     try{
       const response = await fetch(
         SUPABASE_URL + "/rest/v1/" + TABLE + "?on_conflict=email",
         {
           method:"POST",
           headers:apiHeaders({Prefer:"resolution=merge-duplicates,return=minimal"}),
-          body:JSON.stringify({
-            email:email,
-            display_name:display,
-            updated_at:new Date().toISOString()
-          })
+          body:JSON.stringify({email:email,display_name:display,updated_at:new Date().toISOString()})
         }
       );
       const body = await response.text();
       if(!response.ok){
         let detail = "";
-        try{
-          const j = body ? JSON.parse(body) : {};
-          detail = j.message || j.hint || j.details || "";
-        }catch(e){}
+        try{const j = body ? JSON.parse(body) : {}; detail = j.message || j.hint || j.details || "";}catch(e){}
         throw new Error("Could not save display name" + (detail ? ": " + detail : "."));
       }
 
@@ -29733,11 +29901,20 @@ function aoVideoCreatePeer(){
       else nameMap.delete(email);
       loadedAt = Date.now();
       applyAll();
+
+      if(photoFile){
+        status.textContent = "Uploading profile photo…";
+        await uploadProfilePhoto(email,photoFile);
+        profilePhotosLoadedAt = Date.now();
+      }
+
+      applyAll();
       closeEditor();
     }catch(error){
-      console.error("Admin display-name save failed:",error);
-      status.textContent = error && error.message ? error.message : "Could not save display name.";
+      console.error("Admin profile save failed:",error);
+      status.textContent = error && error.message ? error.message : "Could not save admin profile.";
       saveBtn.disabled = false;
+      applyAll();
     }
   }
 
@@ -29750,15 +29927,21 @@ function aoVideoCreatePeer(){
     const overlay = document.createElement("div");
     overlay.className = "ao-admin-name-overlay";
     overlay.innerHTML =
-      '<div class="ao-admin-name-card" role="dialog" aria-modal="true" aria-label="Admin display name">' +
-        '<div class="ao-admin-name-title">Your Admin Display Name</div>' +
-        '<div class="ao-admin-name-sub">This name is shown to scanners in chat and video calls. Your email remains the private/internal account ID.</div>' +
+      '<div class="ao-admin-name-card" role="dialog" aria-modal="true" aria-label="Admin display name and profile photo">' +
+        '<div class="ao-admin-name-title">Your Admin Profile</div>' +
+        '<div class="ao-admin-name-sub">Your nickname and profile photo are shown to scanners in admin selection and private chat. Your email remains the private/internal account ID.</div>' +
+        '<div class="ao-admin-photo-row">' +
+          '<div class="ao-admin-photo-frame"><img id="aoAdminPhotoPreview" alt="Profile photo preview" style="display:none"><span id="aoAdminPhotoInitial">A</span></div>' +
+          '<div class="ao-admin-photo-controls"><label for="aoAdminPhotoInput">PROFILE PHOTO</label>' +
+          '<input id="aoAdminPhotoInput" class="ao-admin-photo-input" type="file" accept="image/*">' +
+          '<small>Choose a photo up to 8 MB. It will be resized before upload.</small></div>' +
+        '</div>' +
         '<label for="aoAdminNameInput">DISPLAY NAME</label>' +
         '<input id="aoAdminNameInput" class="ao-admin-name-input" maxlength="60" autocomplete="nickname" placeholder="Example: ANAK NG CEO">' +
         '<div id="aoAdminNameStatus" class="ao-admin-name-status"></div>' +
         '<div class="ao-admin-name-actions">' +
           '<button type="button" class="ao-admin-name-cancel">Cancel</button>' +
-          '<button type="button" class="ao-admin-name-save">Save Name</button>' +
+          '<button type="button" class="ao-admin-name-save">Save Profile</button>' +
         '</div>' +
       '</div>';
 
@@ -29766,10 +29949,42 @@ function aoVideoCreatePeer(){
     editor = overlay;
 
     const input = overlay.querySelector("#aoAdminNameInput");
+    const photoInput = overlay.querySelector("#aoAdminPhotoInput");
+    const photoPreview = overlay.querySelector("#aoAdminPhotoPreview");
+    const photoInitial = overlay.querySelector("#aoAdminPhotoInitial");
     const status = overlay.querySelector("#aoAdminNameStatus");
     const save = overlay.querySelector(".ao-admin-name-save");
     const cancel = overlay.querySelector(".ao-admin-name-cancel");
+    let selectedPhoto = null;
     input.value = nameMap.get(email) || "";
+    const existingPhotoUrl = profilePhotoUrl(email);
+    const initial = String(nameFor(email)||"A").trim().charAt(0).toUpperCase() || "A";
+    photoInitial.textContent = initial;
+    if(existingPhotoUrl){photoPreview.src=existingPhotoUrl;photoPreview.style.display="block";photoInitial.style.display="none";}
+
+    photoInput.addEventListener("change",function(){
+      const file=photoInput.files && photoInput.files[0];
+      selectedPhoto=null;
+      if(overlay.__previewObjectUrl){URL.revokeObjectURL(overlay.__previewObjectUrl);overlay.__previewObjectUrl="";}
+      if(!file){
+        const current=profilePhotoUrl(email);
+        if(current){photoPreview.src=current;photoPreview.style.display="block";photoInitial.style.display="none";}
+        else{photoPreview.removeAttribute("src");photoPreview.style.display="none";photoInitial.style.display="";}
+        return;
+      }
+      if(!String(file.type||"").startsWith("image/")){
+        status.textContent="Choose an image file for your profile photo.";photoInput.value="";return;
+      }
+      if(file.size>PHOTO_MAX_BYTES){
+        status.textContent="Please choose an image smaller than 8 MB.";photoInput.value="";return;
+      }
+      selectedPhoto=file;
+      overlay.__previewObjectUrl=URL.createObjectURL(file);
+      photoPreview.src=overlay.__previewObjectUrl;
+      photoPreview.style.display="block";
+      photoInitial.style.display="none";
+      status.textContent="Photo selected. Click Save Profile to upload it.";
+    });
 
     cancel.onclick = closeEditor;
     overlay.addEventListener("click", function(event){
@@ -29779,7 +29994,7 @@ function aoVideoCreatePeer(){
       if(event.key === "Enter") save.click();
       if(event.key === "Escape") closeEditor();
     });
-    save.onclick = function(){ saveName(input.value,status,save); };
+    save.onclick = function(){ saveName(input.value,status,save,selectedPhoto); };
 
     setTimeout(function(){ input.focus(); input.select(); },30);
   }

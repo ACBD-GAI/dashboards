@@ -10198,19 +10198,26 @@ async function saveAllowedUser(){
     return;
   }
 
+  button.disabled = true;
+  button.textContent = "Checking...";
+  status.textContent = nickname ? "Verifying nickname permissions..." : "Adding user...";
+
   if(nickname && typeof window.aoValidateScannerNicknameTarget === "function"){
     try{
       await window.aoValidateScannerNicknameTarget(email,nickname);
     }catch(nicknameValidationError){
       status.textContent = nicknameValidationError?.message || "This account cannot be assigned a scanner nickname.";
+      button.disabled = false;
+      button.textContent = "Add User";
       return;
     }
   }else if(nickname && typeof window.aoValidateScannerNicknameTarget !== "function"){
     status.textContent = "Nickname service is not ready. Please refresh the dashboard and try again.";
+    button.disabled = false;
+    button.textContent = "Add User";
     return;
   }
 
-  button.disabled = true;
   button.textContent = "Saving...";
   status.textContent = "Adding user...";
 
@@ -22639,37 +22646,39 @@ function openEditAllowedUserModal(id){
   const nicknameHint=document.getElementById("editAllowedUserNicknameHint");
   const originalEmail=String(user.email||"").trim().toLowerCase();
   if(nicknameInput){
-    nicknameInput.disabled=false;
     nicknameInput.value=typeof window.aoScannerNicknameFor==="function"
       ? String(window.aoScannerNicknameFor(originalEmail)||"")
       : "";
+    nicknameInput.disabled=true;
+    nicknameInput.dataset.aoNicknamePermission="checking";
   }
-  if(nicknameHint)nicknameHint.textContent="Checking account permissions…";
+  if(nicknameHint)nicknameHint.textContent="Verifying nickname permissions…";
   if(status)status.textContent="";
   const nicknameInfoAvailable=typeof window.aoLoadScannerNicknameInfo==="function";
-  if(button){
-    button.disabled=nicknameInfoAvailable;
-    button.textContent=nicknameInfoAvailable ? "Checking account…" : "Save Changes";
-  }
+  // Keep normal email/branch editing available while nickname permissions load.
+  if(button){button.disabled=false;button.textContent="Save Changes";}
   if(nicknameInfoAvailable){
     window.aoLoadScannerNicknameInfo(originalEmail).then(info=>{
       if(String(editingAllowedUserId)!==String(user.id))return;
       if(nicknameInput){
         nicknameInput.value=String(info.nickname||"");
         nicknameInput.disabled=!!info.isAdmin;
+        nicknameInput.dataset.aoNicknamePermission=info.isAdmin ? "admin" : "scanner";
       }
       if(nicknameHint){
         nicknameHint.textContent=info.isAdmin
           ? "This account is an administrator. Its display name is managed in the admin profile editor."
           : "This nickname is assigned by an administrator and cannot be changed by the scanner user.";
       }
-      if(button){button.disabled=false;button.textContent="Save Changes";}
     }).catch(error=>{
       if(String(editingAllowedUserId)!==String(user.id))return;
-      if(nicknameHint)nicknameHint.textContent="Nickname permissions could not be verified. Refresh and try again.";
-      if(nicknameInput)nicknameInput.disabled=true;
-      if(button){button.disabled=true;button.textContent="Role Check Failed";}
+      if(nicknameHint)nicknameHint.textContent="Nickname permissions could not be verified. Nickname editing is disabled; email and branch editing remain available.";
+      if(nicknameInput){nicknameInput.disabled=true;nicknameInput.dataset.aoNicknamePermission="unverified";}
+      if(button){button.disabled=false;button.textContent="Save Changes";}
     });
+  }else{
+    if(nicknameInput){nicknameInput.dataset.aoNicknamePermission="unverified";}
+    if(nicknameHint)nicknameHint.textContent="Nickname service is unavailable. Nickname editing is disabled; email and branch editing remain available.";
   }
 
   if(modal)modal.classList.remove("hidden");
@@ -22681,7 +22690,7 @@ function closeEditAllowedUserModal(){
   const modal=document.getElementById("editAllowedUserModal");
   if(modal)modal.classList.add("hidden");
   const nicknameInput=document.getElementById("editAllowedUserNickname");
-  if(nicknameInput){nicknameInput.disabled=false;}
+  if(nicknameInput){nicknameInput.disabled=true;nicknameInput.dataset.aoNicknamePermission="unverified";}
   editingAllowedUserId="";
 }
 
@@ -22711,7 +22720,9 @@ async function saveEditedAllowedUser(){
   const oldNickname=typeof window.aoScannerNicknameFor==="function"
     ? String(window.aoScannerNicknameFor(oldEmail)||"")
     : "";
-  const nicknameNeedsSave=(email!==oldEmail)||nickname!==oldNickname;
+  const nicknamePermission=String(nicknameInput?.dataset.aoNicknamePermission||"unverified");
+  const canEditNickname=nicknamePermission==="scanner" && !!nicknameInput && !nicknameInput.disabled;
+  const nicknameNeedsSave=canEditNickname && ((email!==oldEmail)||nickname!==oldNickname);
 
   const status=document.getElementById("editAllowedUserStatus");
   const button=document.getElementById("saveEditedAllowedUserBtn");
@@ -22731,15 +22742,27 @@ async function saveEditedAllowedUser(){
     return;
   }
 
-  if(nickname && typeof window.aoValidateScannerNicknameTarget === "function"){
+  if(canEditNickname && nickname && typeof window.aoValidateScannerNicknameTarget === "function"){
+    if(button){button.disabled=true;button.textContent="Checking...";}
+    if(status)status.textContent="Verifying nickname permissions...";
     try{
       await window.aoValidateScannerNicknameTarget(email,nickname);
     }catch(nicknameValidationError){
       if(status)status.textContent=nicknameValidationError?.message || "This account cannot be assigned a scanner nickname.";
+      if(button){button.disabled=false;button.textContent="Save Changes";}
       return;
     }
-  }else if(nickname && typeof window.aoValidateScannerNicknameTarget !== "function"){
+  }else if(canEditNickname && nickname && typeof window.aoValidateScannerNicknameTarget !== "function"){
     if(status)status.textContent="Nickname service is not ready. Please refresh the dashboard and try again.";
+    if(button){button.disabled=false;button.textContent="Save Changes";}
+    return;
+  }
+
+  // If a nickname exists but role verification failed, changing the account email
+  // would strand that nickname under the old email. Require a verified retry only
+  // for that specific case; branch-only edits remain available.
+  if(email!==oldEmail && oldNickname && !canEditNickname){
+    if(status)status.textContent="The existing nickname could not be safely moved because account-role verification failed. Refresh and retry before changing this email.";
     return;
   }
 
@@ -30570,12 +30593,22 @@ function aoVideoCreatePeer(){
    */
   const TABLE = "admin_display_names";
   const CACHE_MS = 15000;
+  const ADMIN_ROLES_CACHE_MS = 30000;
+  const ADMIN_SESSION_CACHE_MS = 12000;
   let names = new Map();
   let adminEmails = new Set();
   let namesLoadedAt = 0;
   let namesPromise = null;
   let adminRolesLoaded = false;
+  let adminRolesLoadedAt = 0;
   let adminRolesPromise = null;
+  let verifiedAdminSessionKey = "";
+  let verifiedAdminSessionAt = 0;
+  let adminSessionPromise = null;
+  // One-use proof that this exact nickname target was checked immediately
+  // before the related Add/Edit User request. This avoids repeating the same
+  // session and role lookups after the server-side user save completes.
+  let nicknameValidationTicket = null;
   let editor = null;
   let panelObserver = null;
   let bodyObserver = null;
@@ -30590,17 +30623,42 @@ function aoVideoCreatePeer(){
 
   async function verifyAdminSession(){
     if(!isAdminSession()) return false;
-    try{
-      const sid = typeof sessionId !== "undefined" ? String(sessionId || "") : "";
-      const localEmail = typeof currentEmail !== "undefined" ? String(currentEmail || "").trim().toLowerCase() : "";
-      if(!sid || !localEmail || typeof loginApiGet !== "function") return false;
-      const data = await loginApiGet("checkSession",{sessionId:sid});
-      const serverEmail = String(data && data.email || "").trim().toLowerCase();
-      return !!(data && data.ok === true && data.isAdmin === true && serverEmail && serverEmail === localEmail);
-    }catch(error){
-      console.warn("Scanner nickname admin-session verification failed:",error);
-      return false;
+    const sid = typeof sessionId !== "undefined" ? String(sessionId || "") : "";
+    const localEmail = typeof currentEmail !== "undefined" ? String(currentEmail || "").trim().toLowerCase() : "";
+    if(!sid || !localEmail || typeof loginApiGet !== "function") return false;
+
+    // Reuse a very short-lived confirmation for consecutive checks in the same
+    // active session. This prevents the save flow from calling checkSession
+    // twice in a row while still regularly revalidating the administrator.
+    const key = sid + "|" + localEmail;
+    if(verifiedAdminSessionKey === key && Date.now() - verifiedAdminSessionAt < ADMIN_SESSION_CACHE_MS){
+      return true;
     }
+    if(adminSessionPromise) return adminSessionPromise;
+
+    adminSessionPromise = (async function(){
+      try{
+        const data = await loginApiGet("checkSession",{sessionId:sid});
+        const serverEmail = String(data && data.email || "").trim().toLowerCase();
+        const valid = !!(data && data.ok === true && data.isAdmin === true && serverEmail && serverEmail === localEmail);
+        if(valid){
+          verifiedAdminSessionKey = key;
+          verifiedAdminSessionAt = Date.now();
+        }else{
+          verifiedAdminSessionKey = "";
+          verifiedAdminSessionAt = 0;
+        }
+        return valid;
+      }catch(error){
+        verifiedAdminSessionKey = "";
+        verifiedAdminSessionAt = 0;
+        console.warn("Scanner nickname admin-session verification failed:",error);
+        return false;
+      }finally{
+        adminSessionPromise = null;
+      }
+    })();
+    return adminSessionPromise;
   }
 
   function esc(value){
@@ -30647,31 +30705,55 @@ function aoVideoCreatePeer(){
 
   async function requireVerifiedNicknameAdmin(){
     if(!await verifyAdminSession()) throw new Error("Your administrator session could not be verified. Please log in again.");
-    await loadAdminRoles(true);
+    // Reuse the recently loaded role list instead of fetching the full table
+    // again for every validation and subsequent save in the same workflow.
+    await loadAdminRoles(false);
     if(!adminRolesLoaded) throw new Error("Could not verify account roles. Please refresh Branch Users and try again.");
   }
 
   window.aoLoadScannerNicknameInfo = async function(email){
     const normalized = String(email || "").trim().toLowerCase();
     await requireVerifiedNicknameAdmin();
-    await loadNames(true);
+    // The add-on refreshes this cache in the background; avoid an extra REST
+    // request every time the Edit Branch User modal is opened.
+    await loadNames(false);
     return {nickname:nicknameFor(normalized),isAdmin:adminEmails.has(normalized)};
   };
 
   window.aoValidateScannerNicknameTarget = async function(email,nickname){
     const normalized = String(email || "").trim().toLowerCase();
     const name = String(nickname || "").replace(/[\r\n]+/g," ").replace(/\s+/g," ").trim().slice(0,60);
+    nicknameValidationTicket = null;
     if(!normalized) throw new Error("Enter a valid scanner email before assigning a nickname.");
     if(name.includes(" · ")) throw new Error("Please do not use the · separator in a nickname.");
     await requireVerifiedNicknameAdmin();
     if(adminEmails.has(normalized)) throw new Error("This account is an administrator. Its display name is managed in the admin profile editor.");
+    const sid = typeof sessionId !== "undefined" ? String(sessionId || "") : "";
+    const adminEmail = typeof currentEmail !== "undefined" ? String(currentEmail || "").trim().toLowerCase() : "";
+    nicknameValidationTicket = {
+      email:normalized,
+      name:name,
+      sessionKey:sid + "|" + adminEmail,
+      at:Date.now()
+    };
     return true;
   };
 
   window.aoSaveScannerNicknameFor = async function(email,nickname){
     const normalized = String(email || "").trim().toLowerCase();
     const name = String(nickname || "").replace(/[\r\n]+/g," ").replace(/\s+/g," ").trim().slice(0,60);
-    await window.aoValidateScannerNicknameTarget(normalized,name);
+    const sid = typeof sessionId !== "undefined" ? String(sessionId || "") : "";
+    const adminEmail = typeof currentEmail !== "undefined" ? String(currentEmail || "").trim().toLowerCase() : "";
+    const ticket = nicknameValidationTicket;
+    const ticketMatches = !!(ticket && ticket.email === normalized && ticket.name === name &&
+      ticket.sessionKey === sid + "|" + adminEmail && Date.now() - ticket.at <= 45000);
+    if(ticketMatches){
+      // Consume the proof once. A later save or retry must validate again.
+      nicknameValidationTicket = null;
+    }else{
+      await window.aoValidateScannerNicknameTarget(normalized,name);
+      nicknameValidationTicket = null;
+    }
     const response = await fetch(
       SUPABASE_URL + "/rest/v1/" + TABLE + "?on_conflict=email",
       {
@@ -30737,7 +30819,8 @@ function aoVideoCreatePeer(){
   }
 
   async function loadAdminRoles(force){
-    if(adminRolesLoaded && !force) return adminEmails;
+    const now = Date.now();
+    if(!force && adminRolesLoaded && now - adminRolesLoadedAt < ADMIN_ROLES_CACHE_MS) return adminEmails;
     if(adminRolesPromise && !force) return adminRolesPromise;
 
     adminRolesPromise = (async function(){
@@ -30757,8 +30840,10 @@ function aoVideoCreatePeer(){
         });
         adminEmails = next;
         adminRolesLoaded = true;
+        adminRolesLoadedAt = Date.now();
       }catch(error){
         adminRolesLoaded = false;
+        adminRolesLoadedAt = 0;
         console.warn("Scanner nickname role check failed:",error);
       }finally{
         adminRolesPromise = null;
@@ -31164,8 +31249,10 @@ function aoVideoCreatePeer(){
 
     if(!refreshTimer){
       refreshTimer = setInterval(function(){
-        loadAdminRoles(true).catch(function(){});
-        loadNames(true).catch(function(){});
+        // Refresh in the background, respecting the role/name cache windows;
+        // forced requests every 15 seconds competed with saves for network time.
+        loadAdminRoles(false).catch(function(){});
+        loadNames(false).catch(function(){});
       },CACHE_MS);
     }
 

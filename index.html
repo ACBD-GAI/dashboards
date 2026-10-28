@@ -8394,6 +8394,21 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
       </select>
     </div>
 
+    <div class="field">
+      <label>SCANNER NICKNAME (OPTIONAL)</label>
+      <input
+        id="newUserNickname"
+        class="input"
+        type="text"
+        maxlength="60"
+        autocomplete="off"
+        placeholder="Example: Mark - GAI"
+      >
+      <div id="newUserNicknameHint" class="loginStatus" style="margin-top:5px;font-size:10px;">
+        Admin-assigned display name. Leave blank to use the user's email.
+      </div>
+    </div>
+
     <div
       id="addUserStatus"
       class="loginStatus"
@@ -8633,6 +8648,21 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
         ></select>
       </div>
 
+    </div>
+
+    <div class="field">
+      <label>SCANNER NICKNAME</label>
+      <input
+        id="editAllowedUserNickname"
+        class="input"
+        type="text"
+        maxlength="60"
+        autocomplete="off"
+        placeholder="Example: Mark - GAI"
+      >
+      <div id="editAllowedUserNicknameHint" class="loginStatus" style="margin-top:5px;font-size:10px;">
+        This nickname is assigned by an administrator and cannot be changed by the scanner user.
+      </div>
     </div>
 
     <div
@@ -10080,6 +10110,11 @@ function openAddUserModal(){
     .getElementById("newUserBranch")
     .value = "";
 
+  const nicknameInput = document.getElementById("newUserNickname");
+  if(nicknameInput){ nicknameInput.value = ""; nicknameInput.disabled = false; }
+  const nicknameHint = document.getElementById("newUserNicknameHint");
+  if(nicknameHint) nicknameHint.textContent = "Admin-assigned display name. Leave blank to use the user's email.";
+
   document
     .getElementById("addUserStatus")
     .textContent = "";
@@ -10141,6 +10176,10 @@ async function saveAllowedUser(){
       .trim()
       .toUpperCase();
 
+  const nickname = String(document.getElementById("newUserNickname")?.value || "")
+    .replace(/[\r\n]+/g," ").replace(/\s+/g," ").trim().slice(0,60);
+  let nicknameSaveFailed = false;
+
   const status =
     document.getElementById("addUserStatus");
 
@@ -10156,6 +10195,18 @@ async function saveAllowedUser(){
   if(!BRANCHES.includes(branch)){
     status.textContent =
       "Select a valid allowed branch.";
+    return;
+  }
+
+  if(nickname && typeof window.aoValidateScannerNicknameTarget === "function"){
+    try{
+      await window.aoValidateScannerNicknameTarget(email,nickname);
+    }catch(nicknameValidationError){
+      status.textContent = nicknameValidationError?.message || "This account cannot be assigned a scanner nickname.";
+      return;
+    }
+  }else if(nickname && typeof window.aoValidateScannerNicknameTarget !== "function"){
+    status.textContent = "Nickname service is not ready. Please refresh the dashboard and try again.";
     return;
   }
 
@@ -10182,13 +10233,27 @@ async function saveAllowedUser(){
       );
     }
 
-    status.textContent =
-      "User added successfully.";
+    if(nickname){
+      try{
+        await window.aoSaveScannerNicknameFor(email,nickname);
+      }catch(nicknameError){
+        nicknameSaveFailed = true;
+        const detail = nicknameError?.message || "Unknown nickname error.";
+        status.textContent = "User added, but nickname was not saved: " + detail + " You can retry from Edit in Branch Users.";
+        showStatus(email + " was added to " + branch + ", but its nickname was not saved.");
+        return;
+      }
+    }
+
+    status.textContent = nickname
+      ? "User added successfully and nickname saved."
+      : "User added successfully.";
 
     showStatus(
       email +
       " added to " +
       branch +
+      (nickname ? " with nickname " + nickname : "") +
       "."
     );
 
@@ -10210,8 +10275,8 @@ async function saveAllowedUser(){
 
   }finally{
 
-    button.disabled = false;
-    button.textContent = "Add User";
+    button.disabled = !nicknameSaveFailed;
+    button.textContent = nicknameSaveFailed ? "Added — Fix Nickname in Edit" : "Add User";
 
   }
 
@@ -22499,6 +22564,9 @@ function filterAllowedUsers(){
     const id=String(user.id||"");
     const branch=String(user.branch||"").trim().toUpperCase();
     const email=String(user.email||"").trim().toLowerCase();
+    const nickname=typeof window.aoScannerNicknameFor==="function"
+      ? String(window.aoScannerNicknameFor(email)||"").trim()
+      : "";
 
     return `
       <tr>
@@ -22510,6 +22578,7 @@ function filterAllowedUsers(){
 
         <td class="allowedUserEmail">
           ${escapeHtml(email)}
+          ${nickname ? `<span class="allowedUserNickname">Nickname: ${escapeHtml(nickname)}</span>` : ""}
         </td>
 
         <td>
@@ -22566,10 +22635,41 @@ function openEditAllowedUserModal(id){
       String(user.branch||"")
     );
   }
+  const nicknameInput=document.getElementById("editAllowedUserNickname");
+  const nicknameHint=document.getElementById("editAllowedUserNicknameHint");
+  const originalEmail=String(user.email||"").trim().toLowerCase();
+  if(nicknameInput){
+    nicknameInput.disabled=false;
+    nicknameInput.value=typeof window.aoScannerNicknameFor==="function"
+      ? String(window.aoScannerNicknameFor(originalEmail)||"")
+      : "";
+  }
+  if(nicknameHint)nicknameHint.textContent="Checking account permissions…";
   if(status)status.textContent="";
+  const nicknameInfoAvailable=typeof window.aoLoadScannerNicknameInfo==="function";
   if(button){
-    button.disabled=false;
-    button.textContent="Save Changes";
+    button.disabled=nicknameInfoAvailable;
+    button.textContent=nicknameInfoAvailable ? "Checking account…" : "Save Changes";
+  }
+  if(nicknameInfoAvailable){
+    window.aoLoadScannerNicknameInfo(originalEmail).then(info=>{
+      if(String(editingAllowedUserId)!==String(user.id))return;
+      if(nicknameInput){
+        nicknameInput.value=String(info.nickname||"");
+        nicknameInput.disabled=!!info.isAdmin;
+      }
+      if(nicknameHint){
+        nicknameHint.textContent=info.isAdmin
+          ? "This account is an administrator. Its display name is managed in the admin profile editor."
+          : "This nickname is assigned by an administrator and cannot be changed by the scanner user.";
+      }
+      if(button){button.disabled=false;button.textContent="Save Changes";}
+    }).catch(error=>{
+      if(String(editingAllowedUserId)!==String(user.id))return;
+      if(nicknameHint)nicknameHint.textContent="Nickname permissions could not be verified. Refresh and try again.";
+      if(nicknameInput)nicknameInput.disabled=true;
+      if(button){button.disabled=true;button.textContent="Role Check Failed";}
+    });
   }
 
   if(modal)modal.classList.remove("hidden");
@@ -22580,6 +22680,8 @@ function openEditAllowedUserModal(id){
 function closeEditAllowedUserModal(){
   const modal=document.getElementById("editAllowedUserModal");
   if(modal)modal.classList.add("hidden");
+  const nicknameInput=document.getElementById("editAllowedUserNickname");
+  if(nicknameInput){nicknameInput.disabled=false;}
   editingAllowedUserId="";
 }
 
@@ -22601,6 +22703,15 @@ async function saveEditedAllowedUser(){
   const branch=
     String(document.getElementById("editAllowedUserBranch")?.value||"")
       .trim().toUpperCase();
+  const nicknameInput=document.getElementById("editAllowedUserNickname");
+  const nickname=String(nicknameInput?.value||"")
+    .replace(/[\r\n]+/g," ").replace(/\s+/g," ").trim().slice(0,60);
+  const currentUser=allowedUsersRows.find(x=>String(x.id)===String(editingAllowedUserId))||null;
+  const oldEmail=String(currentUser?.email||"").trim().toLowerCase();
+  const oldNickname=typeof window.aoScannerNicknameFor==="function"
+    ? String(window.aoScannerNicknameFor(oldEmail)||"")
+    : "";
+  const nicknameNeedsSave=(email!==oldEmail)||nickname!==oldNickname;
 
   const status=document.getElementById("editAllowedUserStatus");
   const button=document.getElementById("saveEditedAllowedUserBtn");
@@ -22617,6 +22728,18 @@ async function saveEditedAllowedUser(){
 
   if(!BRANCHES.includes(branch)){
     if(status)status.textContent="Select a valid branch.";
+    return;
+  }
+
+  if(nickname && typeof window.aoValidateScannerNicknameTarget === "function"){
+    try{
+      await window.aoValidateScannerNicknameTarget(email,nickname);
+    }catch(nicknameValidationError){
+      if(status)status.textContent=nicknameValidationError?.message || "This account cannot be assigned a scanner nickname.";
+      return;
+    }
+  }else if(nickname && typeof window.aoValidateScannerNicknameTarget !== "function"){
+    if(status)status.textContent="Nickname service is not ready. Please refresh the dashboard and try again.";
     return;
   }
 
@@ -22643,10 +22766,29 @@ async function saveEditedAllowedUser(){
       );
     }
 
-    if(status)status.textContent="User updated successfully.";
+    if(nicknameNeedsSave){
+      try{
+        if(email!==oldEmail){
+          if(nickname) await window.aoSaveScannerNicknameFor(email,nickname);
+          if(oldNickname) await window.aoSaveScannerNicknameFor(oldEmail,"");
+        }else{
+          await window.aoSaveScannerNicknameFor(email,nickname);
+        }
+      }catch(nicknameError){
+        const detail=nicknameError?.message || "Unknown nickname error.";
+        if(status)status.textContent="User details were saved, but the nickname was not fully saved: " + detail + " Please retry here.";
+        showStatus("User details were saved, but the scanner nickname needs attention.");
+        return;
+      }
+    }
+
+    if(status)status.textContent=nickname
+      ? "User and scanner nickname updated successfully."
+      : "User updated successfully.";
 
     showStatus(
-      email + " is now assigned to " + branch + "."
+      email + " is now assigned to " + branch +
+      (nickname ? " with nickname " + nickname : "") + "."
     );
 
     setTimeout(async()=>{
@@ -30503,6 +30645,57 @@ function aoVideoCreatePeer(){
 
   window.aoScannerNicknameFor = nicknameFor;
 
+  async function requireVerifiedNicknameAdmin(){
+    if(!await verifyAdminSession()) throw new Error("Your administrator session could not be verified. Please log in again.");
+    await loadAdminRoles(true);
+    if(!adminRolesLoaded) throw new Error("Could not verify account roles. Please refresh Branch Users and try again.");
+  }
+
+  window.aoLoadScannerNicknameInfo = async function(email){
+    const normalized = String(email || "").trim().toLowerCase();
+    await requireVerifiedNicknameAdmin();
+    await loadNames(true);
+    return {nickname:nicknameFor(normalized),isAdmin:adminEmails.has(normalized)};
+  };
+
+  window.aoValidateScannerNicknameTarget = async function(email,nickname){
+    const normalized = String(email || "").trim().toLowerCase();
+    const name = String(nickname || "").replace(/[\r\n]+/g," ").replace(/\s+/g," ").trim().slice(0,60);
+    if(!normalized) throw new Error("Enter a valid scanner email before assigning a nickname.");
+    if(name.includes(" · ")) throw new Error("Please do not use the · separator in a nickname.");
+    await requireVerifiedNicknameAdmin();
+    if(adminEmails.has(normalized)) throw new Error("This account is an administrator. Its display name is managed in the admin profile editor.");
+    return true;
+  };
+
+  window.aoSaveScannerNicknameFor = async function(email,nickname){
+    const normalized = String(email || "").trim().toLowerCase();
+    const name = String(nickname || "").replace(/[\r\n]+/g," ").replace(/\s+/g," ").trim().slice(0,60);
+    await window.aoValidateScannerNicknameTarget(normalized,name);
+    const response = await fetch(
+      SUPABASE_URL + "/rest/v1/" + TABLE + "?on_conflict=email",
+      {
+        method:"POST",
+        headers:apiHeaders({Prefer:"resolution=merge-duplicates,return=minimal"}),
+        body:JSON.stringify({email:normalized,display_name:name,updated_at:new Date().toISOString()})
+      }
+    );
+    const body = await response.text();
+    if(!response.ok){
+      let detail = "";
+      try{const parsed = body ? JSON.parse(body) : {}; detail = parsed.message || parsed.hint || parsed.details || "";}catch(error){}
+      throw new Error("Could not save nickname" + (detail ? ": " + detail : "."));
+    }
+    if(name) names.set(normalized,name); else names.delete(normalized);
+    namesLoadedAt = Date.now();
+    applyAll();
+    const modal = document.getElementById("allowedUsersModal");
+    if(modal && !modal.classList.contains("hidden") && typeof filterAllowedUsers === "function"){
+      try{filterAllowedUsers();}catch(error){}
+    }
+    return {ok:true,email:normalized,nickname:name};
+  };
+
   async function loadNames(force){
     const now = Date.now();
     if(!force && namesLoadedAt && now - namesLoadedAt < CACHE_MS){
@@ -30534,6 +30727,10 @@ function aoVideoCreatePeer(){
         namesPromise = null;
       }
       applyAll();
+      const usersModal = document.getElementById("allowedUsersModal");
+      if(usersModal && !usersModal.classList.contains("hidden") && typeof filterAllowedUsers === "function"){
+        try{filterAllowedUsers();}catch(error){}
+      }
       return names;
     })();
     return namesPromise;
@@ -30578,6 +30775,9 @@ function aoVideoCreatePeer(){
     const style = document.createElement("style");
     style.id = "aoScannerNicknameStyles";
     style.textContent = `
+      .allowedUserNickname{display:block;margin-top:4px;color:#28734f;font-size:10px;font-weight:800;line-height:1.35;overflow-wrap:anywhere;}
+      #addUserModal #newUserNickname,#editAllowedUserModal #editAllowedUserNickname{margin-top:2px;}
+      #addUserModal #newUserNickname:disabled,#editAllowedUserModal #editAllowedUserNickname:disabled{opacity:.6;cursor:not-allowed;background:#f1f5f3;}
       .ao-chat-nickname-tools{
         display:flex;align-items:center;justify-content:space-between;gap:10px;
         margin:7px 0 1px;padding:9px 10px;border:1px solid #d8e8df;
@@ -30642,36 +30842,11 @@ function aoVideoCreatePeer(){
   }
 
   function ensureTools(){
+    // Nickname management now lives in Branch Users > Add User / Edit.
+    // Do not insert controls into the chat area, so photos and messages
+    // retain their full available space.
     const existing = document.getElementById("aoChatScannerNicknameTools");
-    if(!isAdminSession()){
-      if(existing) existing.remove();
-      return;
-    }
-
-    const panel = document.getElementById("aoChatPanel");
-    const branchBox = panel && panel.querySelector(".ao-chat-branch");
-    const pair = branchBox && branchBox.querySelector(".ao-chat-branch-pair");
-    if(!branchBox || !pair) return;
-    if(existing && existing.parentElement === branchBox){
-      updateTools();
-      return;
-    }
-
-    const row = document.createElement("div");
-    row.id = "aoChatScannerNicknameTools";
-    row.className = "ao-chat-nickname-tools";
-    row.innerHTML =
-      '<div class="ao-chat-nickname-meta">' +
-        '<div id="aoChatScannerNicknameCurrent" class="ao-chat-nickname-current">Select a scanner account</div>' +
-        '<div class="ao-chat-nickname-help">Admin-assigned name · shared with the scanner chat</div>' +
-      '</div>' +
-      '<button id="aoChatScannerNicknameBtn" class="ao-chat-nickname-btn" type="button">✎ Set nickname</button>';
-
-    const search = branchBox.querySelector(".ao-chat-search-wrap");
-    branchBox.insertBefore(row,search || null);
-    const button = row.querySelector("#aoChatScannerNicknameBtn");
-    if(button) button.addEventListener("click",openEditor);
-    updateTools();
+    if(existing) existing.remove();
   }
 
   function updateTools(){
@@ -30937,6 +31112,29 @@ function aoVideoCreatePeer(){
     ensureTools();
     loadAdminRoles(false).catch(function(){});
     loadNames(true).catch(function(){});
+
+    const newEmailInput = document.getElementById("newUserEmail");
+    if(newEmailInput && !newEmailInput.dataset.aoNicknameBound){
+      newEmailInput.dataset.aoNicknameBound = "1";
+      newEmailInput.addEventListener("change",async function(){
+        const email = String(newEmailInput.value || "").trim().toLowerCase();
+        const nickInput = document.getElementById("newUserNickname");
+        const hint = document.getElementById("newUserNicknameHint");
+        if(!email || !nickInput) return;
+        try{
+          const info = await window.aoLoadScannerNicknameInfo(email);
+          if(String(newEmailInput.value || "").trim().toLowerCase() !== email) return;
+          nickInput.value = info.nickname || "";
+          nickInput.disabled = !!info.isAdmin;
+          if(hint) hint.textContent = info.isAdmin
+            ? "This account is an administrator. Use the admin profile editor to change its display name."
+            : "Admin-assigned display name. Leave blank to use the user's email.";
+        }catch(error){
+          nickInput.disabled = true;
+          if(hint) hint.textContent = "Nickname permissions could not be verified. Refresh the dashboard and try again.";
+        }
+      });
+    }
 
     const select = document.getElementById("aoChatRecipient");
     if(select){

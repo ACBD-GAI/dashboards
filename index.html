@@ -7691,155 +7691,97 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
 </style>
 
 <style id="aoCategoryPopupStyles">
-  /* Category summary button: compact, polished, and consistent with the dashboard. */
+  /* Category Summary: aligned with the dashboard's sky/blue palette. */
   .controlBtn.categorySummaryBtn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    min-height:40px;
-    padding:9px 14px;
-    border:1px solid #a9d2c7;
-    border-radius:12px;
-    color:#155e52;
-    background:linear-gradient(180deg,#f5fbf8 0%,#e4f2ec 100%);
-    box-shadow:0 3px 10px rgba(29,94,78,.08),inset 0 1px 0 rgba(255,255,255,.9);
-    font-size:11px;
-    font-weight:850;
-    letter-spacing:.01em;
-    white-space:nowrap;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:9px 14px;
+    border:1px solid #bfdbfe;border-radius:12px;color:#1d4ed8;
+    background:linear-gradient(180deg,#ffffff 0%,#eff6ff 100%);
+    box-shadow:0 3px 10px rgba(37,99,235,.08),inset 0 1px 0 rgba(255,255,255,.95);
+    font-size:11px;font-weight:850;letter-spacing:.01em;white-space:nowrap;
     transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;
   }
-  .controlBtn.categorySummaryBtn:hover{
-    color:#104e45;
-    border-color:#77b9a8;
-    background:linear-gradient(180deg,#edf8f3 0%,#d9eee5 100%);
-    box-shadow:0 7px 16px rgba(29,94,78,.13);
-    transform:translateY(-1px);
-  }
+  .controlBtn.categorySummaryBtn:hover{color:#1e40af;border-color:#93c5fd;background:linear-gradient(180deg,#eff6ff 0%,#dbeafe 100%);box-shadow:0 7px 16px rgba(37,99,235,.14);transform:translateY(-1px);}
   .controlBtn.categorySummaryBtn:active{transform:translateY(0);}
-
-  #aoCategoryPopup{
-    position:fixed;inset:0;z-index:999990;display:none;align-items:center;justify-content:center;
-    padding:clamp(8px,2vw,24px);background:rgba(12,29,27,.58);
-    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  }
+  #aoCategoryPopup{position:fixed;inset:0;z-index:999990;display:none;align-items:center;justify-content:center;padding:clamp(8px,2vw,24px);background:rgba(15,23,42,.60);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
   #aoCategoryPopup *{box-sizing:border-box;}
-  #aoCategoryPopup .ao-cat-modal{
-    width:min(1200px,100%);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;
-    border:1px solid #d5e5de;border-radius:20px;background:#f7faf8;color:#213a33;
-    box-shadow:0 26px 80px rgba(7,34,28,.30);animation:aoCatPopupIn .2s cubic-bezier(.2,.8,.2,1);
-  }
+  #aoCategoryPopup .ao-cat-modal{width:min(1240px,100%);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid #d7e5ef;border-radius:20px;background:#f8fbff;color:#102033;box-shadow:0 26px 80px rgba(15,23,42,.30);animation:aoCatPopupIn .2s cubic-bezier(.2,.8,.2,1);}
   @keyframes aoCatPopupIn{from{opacity:0;transform:translateY(9px) scale(.992)}to{opacity:1;transform:translateY(0) scale(1)}}
-  #aoCategoryPopup .ao-cat-head{
-    display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 21px;
-    background:linear-gradient(120deg,#e5f1eb,#f5f9f6);border-bottom:1px solid #d7e6df;
-  }
-  #aoCategoryPopup .ao-cat-title{color:#174d42;font-size:18px;font-weight:900;letter-spacing:-.35px;}
-  #aoCategoryPopup .ao-cat-subtitle{margin-top:4px;color:#668078;font-size:11px;line-height:1.45;}
-  #aoCategoryPopup .ao-cat-close{
-    display:inline-flex;flex:0 0 36px;align-items:center;justify-content:center;width:36px;height:36px;min-height:36px;
-    padding:0;border:1px solid #d0e0d8;border-radius:11px;background:#fff;color:#31594d;font-size:22px;line-height:1;cursor:pointer;
-    transition:background .16s ease,border-color .16s ease,transform .16s ease;
-  }
-  #aoCategoryPopup .ao-cat-close:hover{background:#e9f4ee;border-color:#9fc9b8;transform:rotate(3deg);}
+  #aoCategoryPopup .ao-cat-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 21px;background:linear-gradient(120deg,#e0f2fe,#f8fbff 72%);border-bottom:1px solid #d7e5ef;}
+  #aoCategoryPopup .ao-cat-title{color:#102a43;font-size:18px;font-weight:900;letter-spacing:-.35px;}
+  #aoCategoryPopup .ao-cat-subtitle{margin-top:4px;color:#647b91;font-size:11px;line-height:1.45;}
+  #aoCategoryPopup .ao-cat-close{display:inline-flex;flex:0 0 36px;align-items:center;justify-content:center;width:36px;height:36px;min-height:36px;padding:0;border:1px solid #cbddea;border-radius:11px;background:#fff;color:#334e68;font-size:22px;line-height:1;cursor:pointer;transition:background .16s ease,border-color .16s ease,transform .16s ease;}
+  #aoCategoryPopup .ao-cat-close:hover{background:#eff6ff;border-color:#93c5fd;transform:rotate(3deg);}
   #aoCategoryPopup .ao-cat-body{overflow:auto;padding:17px 20px 21px;}
-  #aoCategoryPopup .ao-cat-toolbar{display:flex;align-items:center;justify-content:flex-start;gap:9px;margin-bottom:13px;}
-  #aoCategoryPopup .ao-cat-pill{
-    display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #d7e6de;border-radius:10px;
-    background:#fff;color:#58756a;font-size:10px;font-weight:800;
-  }
+  #aoCategoryPopup .ao-cat-toolbar{display:flex;align-items:end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:15px;padding:12px;border:1px solid #d7e5ef;border-radius:14px;background:#fff;box-shadow:0 3px 10px rgba(15,23,42,.025);}
+  #aoCategoryPopup .ao-cat-branch-field{display:flex;align-items:center;gap:10px;min-width:min(100%,320px);color:#526b80;font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;}
+  #aoCategoryPopup .ao-cat-branch-select{width:min(360px,100%);min-height:39px;padding:8px 36px 8px 11px;border:1px solid #cbddea;border-radius:10px;outline:none;background:#fff;color:#173247;font:inherit;font-size:12px;font-weight:800;letter-spacing:0;text-transform:none;cursor:pointer;}
+  #aoCategoryPopup .ao-cat-branch-select:focus{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+  #aoCategoryPopup .ao-cat-pill{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #d7e5ef;border-radius:10px;background:#f8fbff;color:#536d83;font-size:10px;font-weight:800;}
   #aoCategoryPopup .ao-cat-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:15px;}
-  #aoCategoryPopup .ao-cat-metric{min-width:0;padding:12px 14px;border:1px solid #d8e7df;border-radius:13px;background:linear-gradient(135deg,#fff,#f0f7f3);}
-  #aoCategoryPopup .ao-cat-metric span{display:block;color:#6b8479;font-size:9px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;}
-  #aoCategoryPopup .ao-cat-metric strong{display:block;margin-top:5px;color:#1b5a4b;font-size:19px;font-weight:900;overflow-wrap:anywhere;}
-  #aoCategoryPopup .ao-cat-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 10px;color:#294c40;font-size:11px;font-weight:900;letter-spacing:.045em;text-transform:uppercase;}
-  #aoCategoryPopup #aoCategoryListCount{color:#678277;font-size:10px;font-weight:750;text-transform:none;letter-spacing:0;text-align:right;}
+  #aoCategoryPopup .ao-cat-metric{min-width:0;padding:12px 14px;border:1px solid #d7e5ef;border-radius:13px;background:linear-gradient(135deg,#fff,#f0f8ff);}
+  #aoCategoryPopup .ao-cat-metric span{display:block;color:#647b91;font-size:9px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;}
+  #aoCategoryPopup .ao-cat-metric strong{display:block;margin-top:5px;color:#1d4ed8;font-size:19px;font-weight:900;overflow-wrap:anywhere;}
+  #aoCategoryPopup .ao-cat-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 10px;color:#243b53;font-size:11px;font-weight:900;letter-spacing:.045em;text-transform:uppercase;}
+  #aoCategoryPopup #aoCategoryListCount{color:#647b91;font-size:10px;font-weight:750;text-transform:none;letter-spacing:0;text-align:right;}
   #aoCategoryPopup .ao-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px;}
-  #aoCategoryPopup .ao-cat-card{
-    display:block;width:100%;min-width:0;padding:13px;text-align:left;border:1px solid #dce8e2;border-radius:13px;
-    background:#fff;color:#24443a;cursor:pointer;transition:border-color .16s ease,background .16s ease,transform .16s ease,box-shadow .16s ease;
-  }
-  #aoCategoryPopup .ao-cat-card:hover{transform:translateY(-1px);border-color:#9cc9b8;box-shadow:0 7px 17px rgba(35,91,74,.08);}
-  #aoCategoryPopup .ao-cat-card.active{border-color:#398b75;background:linear-gradient(135deg,#e8f5ee,#f9fcfa);box-shadow:inset 0 0 0 1px rgba(57,139,117,.15);}
-  #aoCategoryPopup .ao-cat-card-name{display:block;color:#1b5547;font-weight:900;font-size:12px;overflow-wrap:anywhere;}
-  #aoCategoryPopup .ao-cat-card-meta{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:#6a8378;font-size:10px;font-weight:750;}
-  #aoCategoryPopup .ao-cat-card-total{display:block;margin-top:7px;color:#315f4e;font-size:11px;font-weight:900;}
-  #aoCategoryPopup .ao-cat-empty{padding:24px 15px;border:1px dashed #cbded3;border-radius:12px;text-align:center;color:#6b8378;background:#fff;font-size:11px;line-height:1.5;}
-  #aoCategoryPopup .ao-cat-loading{padding:22px;text-align:center;color:#55796b;font-size:12px;}
-  #aoCategoryPopup .ao-cat-detail{margin-top:19px;padding-top:17px;border-top:1px solid #dce8e2;}
-  #aoCategoryPopup .ao-cat-detail-head{display:grid;grid-template-columns:minmax(180px,.9fr) minmax(380px,1.6fr);align-items:center;gap:16px;margin-bottom:12px;}
-  #aoCategoryPopup .ao-cat-detail-title{color:#1a5849;font-size:16px;font-weight:900;overflow-wrap:anywhere;}
-  #aoCategoryPopup .ao-cat-detail-summary{margin-top:4px;color:#6b8479;font-size:10px;line-height:1.45;}
-  #aoCategoryPopup .ao-cat-detail-controls{display:grid;grid-template-columns:minmax(160px,1fr) auto;align-items:center;gap:8px;min-width:0;}
-  #aoCategoryPopup .ao-cat-record-search{
-    display:block;width:100%;min-width:0;min-height:39px;padding:9px 12px;border:1px solid #d0e0d8;border-radius:10px;
-    outline:none;background:#fff;color:#243f35;font:inherit;font-size:11px;box-shadow:0 2px 6px rgba(20,64,48,.025);
-    transition:border-color .16s ease,box-shadow .16s ease;
-  }
-  #aoCategoryPopup .ao-cat-record-search::placeholder{color:#8ba096;}
-  #aoCategoryPopup .ao-cat-record-search:focus{border-color:#68ab97;box-shadow:0 0 0 3px rgba(65,148,125,.12);}
+  #aoCategoryPopup .ao-cat-card{display:block;width:100%;min-width:0;padding:13px;text-align:left;border:1px solid #d7e5ef;border-radius:13px;background:#fff;color:#243b53;cursor:pointer;transition:border-color .16s ease,background .16s ease,transform .16s ease,box-shadow .16s ease;}
+  #aoCategoryPopup .ao-cat-card:hover{transform:translateY(-1px);border-color:#93c5fd;box-shadow:0 7px 17px rgba(37,99,235,.09);}
+  #aoCategoryPopup .ao-cat-card.active{border-color:#60a5fa;background:linear-gradient(135deg,#eff6ff,#fff);box-shadow:inset 0 0 0 1px rgba(59,130,246,.14);}
+  #aoCategoryPopup .ao-cat-card-name{display:block;color:#1e40af;font-weight:900;font-size:12px;overflow-wrap:anywhere;}
+  #aoCategoryPopup .ao-cat-card-meta{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:#647b91;font-size:10px;font-weight:750;}
+  #aoCategoryPopup .ao-cat-card-total{display:block;margin-top:7px;color:#1d4ed8;font-size:11px;font-weight:900;}
+  #aoCategoryPopup .ao-cat-empty{padding:24px 15px;border:1px dashed #cbddea;border-radius:12px;text-align:center;color:#647b91;background:#fff;font-size:11px;line-height:1.5;}
+  #aoCategoryPopup .ao-cat-loading{padding:22px;text-align:center;color:#526d85;font-size:12px;}
+  #aoCategoryPopup .ao-cat-detail{margin-top:19px;padding-top:17px;border-top:1px solid #d7e5ef;}
+  #aoCategoryPopup .ao-cat-detail-head{display:grid;grid-template-columns:minmax(180px,.75fr) minmax(520px,1.8fr);align-items:start;gap:16px;margin-bottom:12px;}
+  #aoCategoryPopup .ao-cat-detail-title{color:#1e40af;font-size:16px;font-weight:900;overflow-wrap:anywhere;}
+  #aoCategoryPopup .ao-cat-detail-summary{margin-top:4px;color:#647b91;font-size:10px;line-height:1.45;}
+  #aoCategoryPopup .ao-cat-detail-controls{display:grid;grid-template-columns:minmax(170px,1fr) auto auto auto;align-items:center;gap:8px;min-width:0;}
+  #aoCategoryPopup .ao-cat-record-search{display:block;width:100%;min-width:0;min-height:39px;padding:9px 12px;border:1px solid #cbddea;border-radius:10px;outline:none;background:#fff;color:#173247;font:inherit;font-size:11px;box-shadow:0 2px 6px rgba(15,23,42,.025);transition:border-color .16s ease,box-shadow .16s ease;}
+  #aoCategoryPopup .ao-cat-record-search::placeholder{color:#8aa0af;}
+  #aoCategoryPopup .ao-cat-record-search:focus{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
   #aoCategoryPopup .ao-cat-price-wrap{position:relative;min-width:0;}
-  #aoCategoryPopup .ao-cat-price-button{
-    display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:9px 12px;
-    border:1px solid #bdd9cd;border-radius:10px;background:#edf6f1;color:#225d4c;font-size:10px;font-weight:850;white-space:nowrap;cursor:pointer;
-    transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;
-  }
-  #aoCategoryPopup .ao-cat-price-button:hover{background:#e1f1e8;border-color:#91c7b2;}
-  #aoCategoryPopup .ao-cat-price-button[aria-expanded="true"]{border-color:#6aac97;box-shadow:0 0 0 3px rgba(65,148,125,.10);}
-  #aoCategoryPopup .ao-cat-price-dropdown{
-    position:absolute;right:0;top:calc(100% + 7px);z-index:8;width:min(330px,88vw);max-height:310px;overflow:auto;padding:9px;
-    border:1px solid #d2e2d9;border-radius:13px;background:#fff;box-shadow:0 14px 38px rgba(24,65,51,.18);
-  }
-  #aoCategoryPopup .ao-cat-price-actions{display:flex;align-items:center;gap:7px;padding:0 0 8px;margin-bottom:4px;border-bottom:1px solid #edf3ef;}
-  #aoCategoryPopup .ao-cat-price-action{
-    min-height:30px;padding:6px 9px;border:1px solid #d3e5db;border-radius:8px;background:#f6faf7;color:#346454;
-    font-size:10px;font-weight:850;cursor:pointer;transition:background .15s ease,border-color .15s ease;
-  }
-  #aoCategoryPopup .ao-cat-price-action:hover{background:#e8f4ed;border-color:#a6cdb9;}
+  #aoCategoryPopup .ao-cat-price-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:9px 12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:850;white-space:nowrap;cursor:pointer;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;}
+  #aoCategoryPopup .ao-cat-price-button:hover{background:#dbeafe;border-color:#93c5fd;}
+  #aoCategoryPopup .ao-cat-price-button[aria-expanded="true"]{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+  #aoCategoryPopup .ao-cat-price-dropdown{position:absolute;right:0;top:calc(100% + 7px);z-index:8;width:min(330px,88vw);max-height:310px;overflow:auto;padding:9px;border:1px solid #cbddea;border-radius:13px;background:#fff;box-shadow:0 14px 38px rgba(15,23,42,.18);}
+  #aoCategoryPopup .ao-cat-price-actions{display:flex;align-items:center;gap:7px;padding:0 0 8px;margin-bottom:4px;border-bottom:1px solid #e8f0f6;}
+  #aoCategoryPopup .ao-cat-price-action{min-height:30px;padding:6px 9px;border:1px solid #cbddea;border-radius:8px;background:#f8fbff;color:#245a9e;font-size:10px;font-weight:850;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
+  #aoCategoryPopup .ao-cat-price-action:hover{background:#dbeafe;border-color:#93c5fd;}
   #aoCategoryPopup .ao-cat-price-options{display:flex;flex-direction:column;gap:1px;}
-  #aoCategoryPopup .ao-cat-price-item{display:flex;align-items:flex-start;gap:9px;padding:9px 8px;border-radius:8px;color:#32584a;font-size:11px;cursor:pointer;}
-  #aoCategoryPopup .ao-cat-price-item:hover{background:#f0f7f3;}
-  #aoCategoryPopup .ao-cat-price-item input{width:16px;height:16px;min-height:0;flex:0 0 16px;margin:1px 0 0;accent-color:#25846d;}
+  #aoCategoryPopup .ao-cat-price-item{display:flex;align-items:flex-start;gap:9px;padding:9px 8px;border-radius:8px;color:#334e68;font-size:11px;cursor:pointer;}
+  #aoCategoryPopup .ao-cat-price-item:hover{background:#f0f7ff;}
+  #aoCategoryPopup .ao-cat-price-item input{width:16px;height:16px;min-height:0;flex:0 0 16px;margin:1px 0 0;accent-color:#2563eb;}
   #aoCategoryPopup .ao-cat-price-item span{flex:1;min-width:0;overflow-wrap:anywhere;}
-  #aoCategoryPopup .ao-cat-price-item small{color:#789087;font-size:10px;white-space:nowrap;}
+  #aoCategoryPopup .ao-cat-price-item small{color:#71869a;font-size:10px;white-space:nowrap;}
+  #aoCategoryPopup .ao-cat-export-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:39px;padding:8px 11px;border:1px solid #bfdbfe;border-radius:10px;background:#fff;color:#1d4ed8;font-size:10px;font-weight:850;white-space:nowrap;cursor:pointer;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;}
+  #aoCategoryPopup .ao-cat-export-btn:hover:not(:disabled){background:#eff6ff;border-color:#93c5fd;box-shadow:0 4px 10px rgba(37,99,235,.08);}
+  #aoCategoryPopup .ao-cat-export-btn:disabled{opacity:.45;cursor:not-allowed;}
   #aoCategoryPopup .ao-cat-detail-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0;}
-  #aoCategoryPopup .ao-cat-detail-metric{min-width:0;padding:9px 11px;border:1px solid #dae8e1;border-radius:10px;background:#fff;color:#6a8177;font-size:10px;line-height:1.4;}
-  #aoCategoryPopup .ao-cat-detail-metric strong{display:block;margin-top:4px;color:#1b5c4b;font-size:14px;font-weight:900;overflow-wrap:anywhere;}
-  #aoCategoryPopup .ao-cat-table-wrap{max-height:38vh;overflow:auto;border:1px solid #dce8e2;border-radius:12px;background:#fff;}
+  #aoCategoryPopup .ao-cat-detail-metric{min-width:0;padding:9px 11px;border:1px solid #d7e5ef;border-radius:10px;background:#fff;color:#647b91;font-size:10px;line-height:1.4;}
+  #aoCategoryPopup .ao-cat-detail-metric strong{display:block;margin-top:4px;color:#1d4ed8;font-size:14px;font-weight:900;overflow-wrap:anywhere;}
+  #aoCategoryPopup .ao-cat-table-wrap{max-height:38vh;overflow:auto;border:1px solid #d7e5ef;border-radius:12px;background:#fff;}
   #aoCategoryPopup .ao-cat-table{width:100%;min-width:760px;border-collapse:separate;border-spacing:0;font-size:11px;}
-  #aoCategoryPopup .ao-cat-table th{position:sticky;top:0;z-index:1;padding:10px;text-align:left;background:#e9f3ed;color:#3d6558;font-size:9px;font-weight:900;letter-spacing:.04em;border-bottom:1px solid #d5e5dc;}
-  #aoCategoryPopup .ao-cat-table td{padding:9px 10px;color:#425e53;border-bottom:1px solid #edf3ef;vertical-align:top;max-width:260px;overflow-wrap:anywhere;}
+  #aoCategoryPopup .ao-cat-table th{position:sticky;top:0;z-index:1;padding:10px;text-align:left;background:#e0f2fe;color:#1e4f7a;font-size:9px;font-weight:900;letter-spacing:.04em;border-bottom:1px solid #cbddea;}
+  #aoCategoryPopup .ao-cat-table td{padding:9px 10px;color:#334e68;border-bottom:1px solid #e8f0f6;vertical-align:top;max-width:260px;overflow-wrap:anywhere;}
   #aoCategoryPopup .ao-cat-table tr:last-child td{border-bottom:0;}
-  #aoCategoryPopup .ao-cat-price-cell{white-space:nowrap;font-weight:850;color:#286b56!important;}
-  #aoCategoryPopup .ao-cat-paging{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:11px;color:#70877e;font-size:10px;}
-  #aoCategoryPopup .ao-cat-page-btn{min-height:33px;padding:7px 11px;border:1px solid #d4e4dc;border-radius:9px;background:#fff;color:#315c4d;font-size:10px;font-weight:800;cursor:pointer;}
-  #aoCategoryPopup .ao-cat-page-btn:hover:not(:disabled){background:#eef6f1;border-color:#b1d2c2;}
+  #aoCategoryPopup .ao-cat-price-cell{white-space:nowrap;font-weight:850;color:#1d4ed8!important;}
+  #aoCategoryPopup .ao-cat-paging{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:11px;color:#647b91;font-size:10px;}
+  #aoCategoryPopup .ao-cat-page-btn{min-height:33px;padding:7px 11px;border:1px solid #cbddea;border-radius:9px;background:#fff;color:#245a9e;font-size:10px;font-weight:800;cursor:pointer;}
+  #aoCategoryPopup .ao-cat-page-btn:hover:not(:disabled){background:#eff6ff;border-color:#93c5fd;}
   #aoCategoryPopup .ao-cat-page-btn:disabled{opacity:.45;cursor:not-allowed;}
   #aoCategoryPopup .ao-cat-notice{margin:0 0 12px;padding:10px 12px;border:1px solid #f0d4a3;border-radius:11px;background:#fff8e9;color:#805b24;font-size:11px;line-height:1.5;}
+  @media(max-width:1050px){#aoCategoryPopup .ao-cat-detail-head{grid-template-columns:1fr;gap:10px;}#aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:minmax(170px,1fr) auto auto auto;}}
   @media(max-width:760px){
-    #aoCategoryPopup{padding:6px;}
-    #aoCategoryPopup .ao-cat-modal{max-height:98vh;border-radius:15px;}
-    #aoCategoryPopup .ao-cat-head{padding:13px 14px;}
-    #aoCategoryPopup .ao-cat-body{padding:12px;}
-    #aoCategoryPopup .ao-cat-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
-    #aoCategoryPopup .ao-cat-overview .ao-cat-metric:last-child{grid-column:1/-1;}
-    #aoCategoryPopup .ao-cat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
-    #aoCategoryPopup .ao-cat-card{padding:10px;}
-    #aoCategoryPopup .ao-cat-card-meta{flex-direction:column;gap:4px;}
-    #aoCategoryPopup .ao-cat-section-title{align-items:flex-start;flex-direction:column;gap:5px;}
-    #aoCategoryPopup #aoCategoryListCount{text-align:left;}
-    #aoCategoryPopup .ao-cat-detail-head{grid-template-columns:1fr;gap:10px;}
+    #aoCategoryPopup{padding:6px;}#aoCategoryPopup .ao-cat-modal{max-height:98vh;border-radius:15px;}#aoCategoryPopup .ao-cat-head{padding:13px 14px;}#aoCategoryPopup .ao-cat-body{padding:12px;}
+    #aoCategoryPopup .ao-cat-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}#aoCategoryPopup .ao-cat-overview .ao-cat-metric:last-child{grid-column:1/-1;}
+    #aoCategoryPopup .ao-cat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}#aoCategoryPopup .ao-cat-card{padding:10px;}#aoCategoryPopup .ao-cat-card-meta{flex-direction:column;gap:4px;}
+    #aoCategoryPopup .ao-cat-section-title{align-items:flex-start;flex-direction:column;gap:5px;}#aoCategoryPopup #aoCategoryListCount{text-align:left;}
+    #aoCategoryPopup .ao-cat-branch-field{align-items:flex-start;flex-direction:column;gap:6px;width:100%;}#aoCategoryPopup .ao-cat-branch-select{width:100%;}
     #aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:minmax(0,1fr) auto;}
-    #aoCategoryPopup .ao-cat-price-dropdown{left:auto;right:0;}
-    #aoCategoryPopup .ao-cat-detail-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}
+    #aoCategoryPopup .ao-cat-price-dropdown{left:auto;right:0;}#aoCategoryPopup .ao-cat-detail-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}
   }
-  @media(max-width:430px){
-    #aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:1fr;}
-    #aoCategoryPopup .ao-cat-price-button{width:100%;}
-    #aoCategoryPopup .ao-cat-price-dropdown{left:0;right:auto;width:min(330px,92vw);}
-    #aoCategoryPopup .ao-cat-paging{align-items:flex-start;flex-direction:column;}
-  }
+  @media(max-width:480px){#aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:1fr 1fr;}#aoCategoryPopup .ao-cat-record-search{grid-column:1/-1;}#aoCategoryPopup .ao-cat-price-wrap{grid-column:1/-1;}#aoCategoryPopup .ao-cat-price-button{width:100%;}#aoCategoryPopup .ao-cat-export-btn{width:100%;}#aoCategoryPopup .ao-cat-price-dropdown{left:0;right:auto;width:min(330px,92vw);}#aoCategoryPopup .ao-cat-paging{align-items:flex-start;flex-direction:column;}}
   @media(prefers-reduced-motion:reduce){#aoCategoryPopup .ao-cat-modal{animation:none;}#aoCategoryPopup .ao-cat-card,#aoCategoryPopup .ao-cat-close,#aoCategoryPopup .ao-cat-price-button,#aoCategoryPopup .ao-cat-page-btn{transition:none;}}
 </style>
 
@@ -31484,7 +31426,23 @@ function aoVideoCreatePeer(){
       return total + (price === null ? 0 : price);
     }, 0);
   }
-  function selectedBranch(){ return String(byId("branch")?.value || "ALL").trim().toUpperCase(); }
+  function selectedBranch(){ return String(byId("aoCategoryBranch")?.value || byId("branch")?.value || "ALL").trim().toUpperCase(); }
+
+  function setupPopupBranchOptions(){
+    const target = byId("aoCategoryBranch");
+    if(!target || target.options.length) return;
+    const source = byId("branch");
+    if(source && source.options.length){
+      Array.from(source.options).forEach(function(option){
+        target.add(new Option(option.textContent, option.value));
+      });
+      target.value = String(source.value || "ALL");
+    }else{
+      ["ALL","GAI","CAS","BAC","BIN","BIS","CAD","DGT","KAB","KAL","PAS","POT","SAN","TAB","TAN","TIS","TOL"].forEach(function(value){
+        target.add(new Option(value === "ALL" ? "ALL BRANCHES" : value, value));
+      });
+    }
+  }
 
   function ensurePopup(){
     if(byId("aoCategoryPopup")) return;
@@ -31502,6 +31460,7 @@ function aoVideoCreatePeer(){
         <div class="ao-cat-body">
           <div id="aoCategoryNotice" class="ao-cat-notice" style="display:none"></div>
           <div class="ao-cat-toolbar">
+            <label class="ao-cat-branch-field" for="aoCategoryBranch"><span>Branch Selection</span><select id="aoCategoryBranch" class="ao-cat-branch-select" aria-label="Branch for category summary"></select></label>
             <div class="ao-cat-pill">Inventory source: Available Stocks</div>
           </div>
           <div id="aoCategoryOverview" class="ao-cat-overview"></div>
@@ -31516,6 +31475,8 @@ function aoVideoCreatePeer(){
                   <button type="button" id="aoCategoryPriceButton" class="ao-cat-price-button" aria-expanded="false">Selling Price ▾</button>
                   <div id="aoCategoryPriceDropdown" class="ao-cat-price-dropdown" style="display:none"></div>
                 </div>
+                <button type="button" id="aoCategoryExportExcel" class="ao-cat-export-btn" title="Download all matching results as Excel" disabled>↓ Excel</button>
+                <button type="button" id="aoCategoryExportPdf" class="ao-cat-export-btn" title="Download all matching results as PDF" disabled>↓ PDF</button>
               </div>
             </div>
             <div id="aoCategoryDetailMetrics" class="ao-cat-detail-metrics"></div>
@@ -31525,7 +31486,11 @@ function aoVideoCreatePeer(){
         </div>
       </section>`;
     document.body.appendChild(overlay);
+    setupPopupBranchOptions();
     byId("aoCategoryClose").addEventListener("click", closePopup);
+    byId("aoCategoryBranch").addEventListener("change", function(){ aoOpenCategoryPopup(); });
+    byId("aoCategoryExportExcel").addEventListener("click", downloadCategorySummaryExcel);
+    byId("aoCategoryExportPdf").addEventListener("click", downloadCategorySummaryPdf);
     overlay.addEventListener("click", function(event){ if(event.target === overlay) closePopup(); });
     byId("aoCategoryRecordSearch").addEventListener("input", function(){
       categoryPage = 1;
@@ -31585,6 +31550,7 @@ function aoVideoCreatePeer(){
       return;
     }
     ensurePopup();
+    setupPopupBranchOptions();
     byId("aoCategoryPopup").style.display = "flex";
     byId("aoCategorySubtitle").textContent = "Loading available stocks for " + selectedBranch() + "…";
     byId("aoCategoryOverview").innerHTML = "";
@@ -31599,7 +31565,8 @@ function aoVideoCreatePeer(){
       let rows;
       /* Reuse the dashboard's already-loaded complete Available Stocks rows
          when no top-level search is active. This avoids a duplicate round-trip. */
-      if(!isLoading && currentSearch === "" && String(byId("sheet")?.value || "") === "stocks" && Array.isArray(currentRows)){
+      const dashboardBranch = String(byId("branch")?.value || "ALL").trim().toUpperCase();
+      if(!isLoading && currentSearch === "" && String(byId("sheet")?.value || "") === "stocks" && Array.isArray(currentRows) && branchAtOpen === dashboardBranch){
         rows = currentRows.slice();
       }else{
         rows = await loadAvailableStockRows(branchAtOpen);
@@ -31727,7 +31694,7 @@ function aoVideoCreatePeer(){
     byId("aoCategoryPriceDropdown").style.display = priceDropdownOpen ? "block" : "none";
     const actions = `<div class="ao-cat-price-actions">
       <button type="button" class="ao-cat-price-action" id="aoCategoryPriceSelectAll">Select All</button>
-      <button type="button" class="ao-cat-price-action" id="aoCategoryPriceClear">Clear Filter</button>
+      <button type="button" class="ao-cat-price-action" id="aoCategoryPriceClear" title="Uncheck all selling-price values">Clear Filter</button>
     </div>`;
     if(!options.length){
       byId("aoCategoryPriceDropdown").innerHTML = actions + '<div class="ao-cat-empty">No selling-price values found.</div>';
@@ -31745,10 +31712,8 @@ function aoVideoCreatePeer(){
     });
     const clearFilter = byId("aoCategoryPriceClear");
     if(clearFilter) clearFilter.addEventListener("click", function(){
-      // Clear filter means return to the unfiltered view: include every price and clear record search.
-      selectedPriceKeys = new Set(priceOptionsForSelected().map(option=>option.key));
-      const search = byId("aoCategoryRecordSearch");
-      if(search) search.value = "";
+      // Clear Filter means uncheck every selling-price value. Select All restores them.
+      selectedPriceKeys = new Set();
       categoryPage = 1;
       renderPriceDropdown();
       renderSelectedCategoryRows();
@@ -31799,8 +31764,15 @@ function aoVideoCreatePeer(){
       <div class="ao-cat-detail-metric">Total selling price<strong>${peso(rowsTotal(rows))}</strong></div>
       <div class="ao-cat-detail-metric">Excluded by price<strong>${(allCategoryRows.length - priceRows.length).toLocaleString("en-PH")}</strong></div>
       <div class="ao-cat-detail-metric">Hidden by search<strong>${(priceRows.length - rows.length).toLocaleString("en-PH")}</strong></div>`;
+    const excelButton = byId("aoCategoryExportExcel");
+    const pdfButton = byId("aoCategoryExportPdf");
+    if(excelButton) excelButton.disabled = rows.length === 0;
+    if(pdfButton) pdfButton.disabled = rows.length === 0;
     if(!pageRows.length){
-      byId("aoCategoryRows").innerHTML = '<div class="ao-cat-empty">No items match the selected selling-price checkboxes.</div>';
+      const noRowsMessage = selectedPriceKeys.size === 0
+        ? "No selling prices are selected. Open Selling Price and choose a value, or use Select All."
+        : "No items match the selected selling-price checkboxes and search.";
+      byId("aoCategoryRows").innerHTML = '<div class="ao-cat-empty">' + esc(noRowsMessage) + '</div>';
     }else{
       byId("aoCategoryRows").innerHTML = `<table class="ao-cat-table"><thead><tr><th>BRANCH</th><th>LENS TYPE</th><th>DESCRIPTION</th><th>TAG</th><th>SELLING PRICE</th><th>SI NO.</th><th>DATE</th></tr></thead><tbody>${pageRows.map(function(row){
         const date = row.date ? (typeof formatDateValue === "function" ? formatDateValue(row.date) || String(row.date) : String(row.date)) : "—";
@@ -31810,6 +31782,196 @@ function aoVideoCreatePeer(){
     byId("aoCategoryPageInfo").textContent = rows.length ? "Showing " + ((categoryPage-1)*PAGE_SIZE+1).toLocaleString("en-PH") + "–" + Math.min(categoryPage*PAGE_SIZE, rows.length).toLocaleString("en-PH") + " of " + rows.length.toLocaleString("en-PH") : "No matching records";
     byId("aoCategoryPrev").disabled = categoryPage <= 1;
     byId("aoCategoryNext").disabled = categoryPage >= totalPages;
+  }
+
+  function exportRecordValue(row){
+    return {
+      branch: String(row?.branch || rawValue(row, "BRANCH") || "—"),
+      category: String(rawValue(row, "CATEGORY") ?? "").trim() || "(BLANK CATEGORY)",
+      lenstype: String(row?.lenstype ?? rawValue(row, "LENSTYPE") ?? ""),
+      description: String(row?.description ?? rawValue(row, "DESCRIPTION") ?? ""),
+      tag: String(row?.tag ?? rawValue(row, "NTAGN") ?? rawValue(row, "TAG") ?? ""),
+      sellingPrice: priceKey(row) === BLANK_PRICE ? "(BLANK)" : String(row?.sellingPrice ?? rawValue(row, "SELLINGPRICE") ?? ""),
+      sellingPriceNumber: moneyNumber(rawValue(row, "SELLINGPRICE")),
+      si: String(row?.si ?? rawValue(row, "SI NO.") ?? rawValue(row, "SINO") ?? ""),
+      date: formatExportDate(row)
+    };
+  }
+  function formatExportDate(row){
+    const value = row?.date ?? rawValue(row, "DATE AND TIME") ?? rawValue(row, "DELIVERYDATE") ?? "";
+    if(!value) return "";
+    if(typeof formatDateValue === "function"){
+      try{ return String(formatDateValue(value) || value); }catch(e){}
+    }
+    return String(value);
+  }
+  function reportTimestamp(){
+    return new Intl.DateTimeFormat("en-PH", {timeZone:"Asia/Manila",year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:true}).format(new Date());
+  }
+  function reportFileTimestamp(){
+    const parts = new Intl.DateTimeFormat("en-CA", {timeZone:"Asia/Manila",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date());
+    const obj = {}; parts.forEach(p=>{if(p.type!="literal")obj[p.type]=p.value;});
+    return `${obj.year}${obj.month}${obj.day}_${obj.hour}${obj.minute}`;
+  }
+  function safeFilePart(value){
+    return String(value || "report").trim().replace(/[^a-z0-9_-]+/gi,"_").replace(/^_+|_+$/g,"").slice(0,60) || "report";
+  }
+  function currentExportRows(){
+    if(selectedCategoryKey === null) return [];
+    return selectedCategoryFilteredRows().slice();
+  }
+  function exportContext(){
+    return {
+      branch: selectedBranch(),
+      category: categoryLabel(selectedCategoryKey),
+      generated: reportTimestamp(),
+      rows: currentExportRows(),
+      search: String(byId("aoCategoryRecordSearch")?.value || "").trim(),
+      selectedPrices: priceOptionsForSelected().filter(option=>selectedPriceKeys.has(option.key)).map(option=>option.label)
+    };
+  }
+  function exportNotice(message){
+    if(typeof showStatus === "function") showStatus(message);
+    else setNotice(message);
+  }
+  function downloadCategorySummaryExcel(){
+    const context = exportContext();
+    if(!context.rows.length){ exportNotice("There are no matching category results to export. Check at least one selling price first."); return; }
+    if(!window.XLSX || !window.XLSX.utils){ exportNotice("Excel export is unavailable because the spreadsheet library has not loaded."); return; }
+    try{
+      const XLSX = window.XLSX;
+      const output = context.rows.map(exportRecordValue);
+      const header = ["BRANCH","CATEGORY","LENS TYPE","DESCRIPTION","TAG NUMBER","SELLING PRICE","SI NO.","DATE"];
+      const aoa = [
+        ["ACEBEDO OPTICAL"],
+        ["AVAILABLE STOCKS — CATEGORY SUMMARY REPORT"],
+        ["BRANCH", context.branch === "ALL" ? "ALL BRANCHES" : context.branch, "CATEGORY", context.category],
+        ["GENERATED", context.generated, "SEARCH", context.search || "(none)"],
+        ["MATCHING ITEMS", output.length, "TOTAL SELLING PRICE", rowsTotal(context.rows)],
+        ["SELECTED SELLING PRICE FILTERS", context.selectedPrices.length ? context.selectedPrices.join(", ") : "(none)"],
+        [],
+        header
+      ];
+      output.forEach(function(item){
+        aoa.push([item.branch,item.category,item.lenstype,item.description,item.tag,
+          item.sellingPriceNumber === null ? item.sellingPrice : item.sellingPriceNumber,item.si,item.date]);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws["!merges"] = [
+        {s:{r:0,c:0},e:{r:0,c:7}},
+        {s:{r:1,c:0},e:{r:1,c:7}},
+        {s:{r:5,c:1},e:{r:5,c:7}}
+      ];
+      ws["!cols"] = [{wch:12},{wch:22},{wch:18},{wch:42},{wch:20},{wch:18},{wch:18},{wch:22}];
+      ws["!rows"] = [{hpt:28},{hpt:22},{hpt:21},{hpt:21},{hpt:24},{hpt:30},{hpt:8},{hpt:24}];
+      const lastRow = aoa.length;
+      ws["!autofilter"] = {ref:`A8:H${lastRow}`};
+      ws["!freeze"] = {xSplit:0,ySplit:8,topLeftCell:"A9",activePane:"bottomLeft",state:"frozen"};
+      function styleCell(address, style){ if(ws[address]) ws[address].s = style; }
+      const navy = {font:{name:"Aptos",sz:16,bold:true,color:{rgb:"102A43"}},alignment:{vertical:"center",horizontal:"left"}};
+      const sub = {font:{name:"Aptos",sz:11,bold:true,color:{rgb:"1D4ED8"}},fill:{patternType:"solid",fgColor:{rgb:"EFF6FF"}},alignment:{vertical:"center"}};
+      const metaLabel = {font:{name:"Aptos",sz:9,bold:true,color:{rgb:"526D85"}},fill:{patternType:"solid",fgColor:{rgb:"F0F8FF"}},alignment:{vertical:"center"}};
+      const metaValue = {font:{name:"Aptos",sz:10,color:{rgb:"102033"}},alignment:{vertical:"center",wrapText:true}};
+      const tableHead = {font:{name:"Aptos",sz:10,bold:true,color:{rgb:"FFFFFF"}},fill:{patternType:"solid",fgColor:{rgb:"2563EB"}},alignment:{vertical:"center",horizontal:"left",wrapText:true},border:{bottom:{style:"medium",color:{rgb:"1D4ED8"}}}};
+      styleCell("A1",navy); styleCell("A2",sub);
+      ["A3","C3","A4","C4","A5","C5","A6"].forEach(a=>styleCell(a,metaLabel));
+      ["B3","D3","B4","D4","B5","D5"].forEach(a=>styleCell(a,metaValue));
+      styleCell("D5",Object.assign({},metaValue,{font:{name:"Aptos",sz:11,bold:true,color:{rgb:"1D4ED8"}},numFmt:'"₱"#,##0.00'}));
+      const heads = ["A8","B8","C8","D8","E8","F8","G8","H8"];
+      heads.forEach(a=>styleCell(a,tableHead));
+      for(let r=9;r<=lastRow;r++){
+        for(let c=0;c<8;c++){
+          const cell = ws[XLSX.utils.encode_cell({r:r-1,c:c})];
+          if(!cell) continue;
+          cell.s = {font:{name:"Aptos",sz:10,color:{rgb:"243B53"}},alignment:{vertical:"top",wrapText:c===3},border:{bottom:{style:"hair",color:{rgb:"D7E5EF"}}},fill:{patternType:"solid",fgColor:{rgb:(r%2===0?"F8FBFF":"FFFFFF")}}};
+          if(c===5 && typeof cell.v === "number") cell.s.numFmt='"₱"#,##0.00';
+        }
+      }
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,"Category Results");
+      const filename = `Acebedo_Category_${safeFilePart(context.branch)}_${safeFilePart(context.category)}_${reportFileTimestamp()}.xlsx`;
+      XLSX.writeFile(wb,filename);
+      exportNotice("Excel report downloaded: " + filename);
+    }catch(error){
+      console.error("Category Excel export failed:",error);
+      exportNotice("Unable to create the Excel report. " + (error?.message || "Please try again."));
+    }
+  }
+  function downloadCategorySummaryPdf(){
+    const context = exportContext();
+    if(!context.rows.length){ exportNotice("There are no matching category results to export. Check at least one selling price first."); return; }
+    const JsPDF = window.jspdf && window.jspdf.jsPDF;
+    if(!JsPDF){ exportNotice("PDF export is unavailable because the PDF library has not loaded."); return; }
+    try{
+      const doc = new JsPDF({orientation:"landscape",unit:"mm",format:"a4",compress:true});
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+      const printable = pageWidth - margin*2;
+      const widths = [17,25,22,95,28,25,26,34];
+      const sumWidths = widths.reduce((a,b)=>a+b,0);
+      const cols = widths.map(w=>w*printable/sumWidths);
+      const headers = ["BRANCH","CATEGORY","LENS TYPE","DESCRIPTION","TAG NUMBER","SELLING PRICE","SI NO.","DATE"];
+      const output = context.rows.map(exportRecordValue);
+      const generated = context.generated;
+      let y = 0;
+      function drawPageHeader(){
+        doc.setFillColor(16,42,67);doc.roundedRect(margin,7,printable,21,2,2,"F");
+        doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(14);doc.text("ACEBEDO OPTICAL",margin+6,15);
+        doc.setFontSize(9);doc.setFont("helvetica","normal");doc.text("AVAILABLE STOCKS  /  CATEGORY SUMMARY REPORT",margin+6,22);
+        doc.setTextColor(37,99,235);doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(context.branch === "ALL" ? "ALL BRANCHES" : context.branch, pageWidth-margin-5,14,{align:"right"});
+        doc.setTextColor(51,78,104);doc.setFont("helvetica","normal");doc.setFontSize(8);
+        doc.text("Category: " + String(context.category).slice(0,80),margin,34);
+        doc.text("Generated: " + generated, pageWidth-margin,34,{align:"right"});
+        doc.setFillColor(239,246,255);doc.roundedRect(margin,38,printable,9,1.5,1.5,"F");
+        doc.setTextColor(30,64,175);doc.setFont("helvetica","bold");doc.setFontSize(8);
+        doc.text("MATCHING ITEMS: " + output.length.toLocaleString("en-PH"),margin+4,43.7);
+        const totalText = "TOTAL SELLING PRICE: PHP " + rowsTotal(context.rows).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2});
+        doc.text(totalText,pageWidth-margin-4,43.7,{align:"right"});
+        if(context.search){doc.setTextColor(71,85,105);doc.setFont("helvetica","normal");doc.setFontSize(7);doc.text("Search: " + context.search.slice(0,160),margin,51);y=55;}else y=52;
+        drawTableHeader();
+      }
+      function drawTableHeader(){
+        const h=7;let x=margin;
+        doc.setFillColor(37,99,235);doc.rect(margin,y,printable,h,"F");
+        doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(6.8);
+        headers.forEach(function(label,i){doc.text(label,x+1.4,y+4.6);x+=cols[i];});
+        y+=h;
+      }
+      function drawNewPage(){doc.addPage();y=0;drawPageHeader();}
+      drawPageHeader();
+      output.forEach(function(item,index){
+        const vals=[item.branch,item.category,item.lenstype,item.description,item.tag,item.sellingPriceNumber===null?item.sellingPrice:"PHP "+item.sellingPriceNumber.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}),item.si,item.date];
+        doc.setFont("helvetica","normal");doc.setFontSize(6.8);
+        const wrapped=vals.map((val,i)=>doc.splitTextToSize(String(val==null?"":val),Math.max(8,cols[i]-3)));
+        const lineCount=Math.max(1,...wrapped.map(lines=>lines.length));
+        const rowHeight=Math.max(7,lineCount*3.1+3.5);
+        if(y+rowHeight>pageHeight-12){drawNewPage();}
+        if(index%2===0) doc.setFillColor(248,251,255); else doc.setFillColor(255,255,255);
+        doc.rect(margin,y,printable,rowHeight,"F");
+        doc.setDrawColor(215,229,239);doc.setLineWidth(.15);doc.line(margin,y+rowHeight,margin+printable,y+rowHeight);
+        let x=margin;
+        vals.forEach(function(val,i){
+          doc.setTextColor(i===5?29:51,i===5?78:78,i===5?216:104);
+          if(i===5) doc.setFont("helvetica","bold"); else doc.setFont("helvetica","normal");
+          doc.text(wrapped[i],x+1.4,y+3.2,{maxWidth:cols[i]-3});
+          x+=cols[i];
+        });
+        y+=rowHeight;
+      });
+      const pageCount=doc.internal.getNumberOfPages();
+      for(let page=1;page<=pageCount;page++){
+        doc.setPage(page);doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(100,123,145);
+        doc.text("Acebedo Optical - Category Summary",margin,pageHeight-5);
+        doc.text("Page "+page+" of "+pageCount,pageWidth-margin,pageHeight-5,{align:"right"});
+      }
+      const filename = `Acebedo_Category_${safeFilePart(context.branch)}_${safeFilePart(context.category)}_${reportFileTimestamp()}.pdf`;
+      doc.save(filename);
+      exportNotice("PDF report downloaded: " + filename);
+    }catch(error){
+      console.error("Category PDF export failed:",error);
+      exportNotice("Unable to create the PDF report. " + (error?.message || "Please try again."));
+    }
   }
 
   function updateButtonVisibility(){
@@ -31823,10 +31985,7 @@ function aoVideoCreatePeer(){
     updateButtonVisibility();
     const sheet = byId("sheet");
     if(sheet) sheet.addEventListener("change", updateButtonVisibility);
-    const branch = byId("branch");
-    if(branch) branch.addEventListener("change", function(){
-      if(byId("aoCategoryPopup")?.style.display === "flex") closePopup();
-    });
+    // The Category Summary branch is intentionally independent from the dashboard branch selector.
   }
 
   window.aoOpenCategoryPopup = aoOpenCategoryPopup;

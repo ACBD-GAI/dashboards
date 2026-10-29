@@ -7729,14 +7729,24 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
   #aoCategoryPopup .ao-cat-card.active{border-color:#60a5fa;background:linear-gradient(135deg,#eff6ff,#fff);box-shadow:inset 0 0 0 1px rgba(59,130,246,.14);}
   #aoCategoryPopup .ao-cat-card-name{display:block;color:#1e40af;font-weight:900;font-size:12px;overflow-wrap:anywhere;}
   #aoCategoryPopup .ao-cat-card-meta{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:#647b91;font-size:10px;font-weight:750;}
-  #aoCategoryPopup .ao-cat-card-total{display:block;margin-top:7px;color:#1d4ed8;font-size:11px;font-weight:900;}
+  #aoCategoryPopup .ao-cat-card-total{display:block;margin-top:9px;padding:9px 10px;border:1px solid #1e40af;border-radius:9px;background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%);color:#fff;font-size:11px;font-weight:900;line-height:1.4;box-shadow:0 4px 10px rgba(30,64,175,.18);}
+  #aoCategoryPopup .ao-cat-description-wrap{position:relative;min-width:0;}
+  #aoCategoryPopup .ao-cat-description-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:9px 12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:850;white-space:nowrap;cursor:pointer;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;}
+  #aoCategoryPopup .ao-cat-description-button:hover{background:#dbeafe;border-color:#93c5fd;}
+  #aoCategoryPopup .ao-cat-description-button[aria-expanded="true"]{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+  #aoCategoryPopup .ao-cat-description-dropdown{position:absolute;right:0;top:calc(100% + 7px);z-index:9;width:min(390px,88vw);max-height:330px;overflow:auto;padding:9px;border:1px solid #cbddea;border-radius:13px;background:#fff;box-shadow:0 14px 38px rgba(15,23,42,.18);}
+  #aoCategoryPopup .ao-cat-description-item{display:flex;align-items:flex-start;gap:9px;padding:9px 8px;border-radius:8px;color:#334e68;font-size:11px;cursor:pointer;}
+  #aoCategoryPopup .ao-cat-description-item:hover{background:#f0f7ff;}
+  #aoCategoryPopup .ao-cat-description-item input{width:16px;height:16px;min-height:0;flex:0 0 16px;margin:1px 0 0;accent-color:#2563eb;}
+  #aoCategoryPopup .ao-cat-description-item span{flex:1;min-width:0;overflow-wrap:anywhere;}
+  #aoCategoryPopup .ao-cat-description-item small{color:#71869a;font-size:10px;white-space:nowrap;}
   #aoCategoryPopup .ao-cat-empty{padding:24px 15px;border:1px dashed #cbddea;border-radius:12px;text-align:center;color:#647b91;background:#fff;font-size:11px;line-height:1.5;}
   #aoCategoryPopup .ao-cat-loading{padding:22px;text-align:center;color:#526d85;font-size:12px;}
   #aoCategoryPopup .ao-cat-detail{margin-top:19px;padding-top:17px;border-top:1px solid #d7e5ef;}
   #aoCategoryPopup .ao-cat-detail-head{display:grid;grid-template-columns:minmax(180px,.75fr) minmax(520px,1.8fr);align-items:start;gap:16px;margin-bottom:12px;}
   #aoCategoryPopup .ao-cat-detail-title{color:#1e40af;font-size:16px;font-weight:900;overflow-wrap:anywhere;}
   #aoCategoryPopup .ao-cat-detail-summary{margin-top:4px;color:#647b91;font-size:10px;line-height:1.45;}
-  #aoCategoryPopup .ao-cat-detail-controls{display:grid;grid-template-columns:minmax(170px,1fr) auto auto auto;align-items:center;gap:8px;min-width:0;}
+  #aoCategoryPopup .ao-cat-detail-controls{display:grid;grid-template-columns:minmax(190px,1fr) auto auto auto auto;align-items:center;gap:8px;min-width:0;}
   #aoCategoryPopup .ao-cat-record-search{display:block;width:100%;min-width:0;min-height:39px;padding:9px 12px;border:1px solid #cbddea;border-radius:10px;outline:none;background:#fff;color:#173247;font:inherit;font-size:11px;box-shadow:0 2px 6px rgba(15,23,42,.025);transition:border-color .16s ease,box-shadow .16s ease;}
   #aoCategoryPopup .ao-cat-record-search::placeholder{color:#8aa0af;}
   #aoCategoryPopup .ao-cat-record-search:focus{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
@@ -7757,7 +7767,7 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
   #aoCategoryPopup .ao-cat-export-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:39px;padding:8px 11px;border:1px solid #bfdbfe;border-radius:10px;background:#fff;color:#1d4ed8;font-size:10px;font-weight:850;white-space:nowrap;cursor:pointer;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;}
   #aoCategoryPopup .ao-cat-export-btn:hover:not(:disabled){background:#eff6ff;border-color:#93c5fd;box-shadow:0 4px 10px rgba(37,99,235,.08);}
   #aoCategoryPopup .ao-cat-export-btn:disabled{opacity:.45;cursor:not-allowed;}
-  #aoCategoryPopup .ao-cat-detail-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0;}
+  #aoCategoryPopup .ao-cat-detail-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0;}
   #aoCategoryPopup .ao-cat-detail-metric{min-width:0;padding:9px 11px;border:1px solid #d7e5ef;border-radius:10px;background:#fff;color:#647b91;font-size:10px;line-height:1.4;}
   #aoCategoryPopup .ao-cat-detail-metric strong{display:block;margin-top:4px;color:#1d4ed8;font-size:14px;font-weight:900;overflow-wrap:anywhere;}
   #aoCategoryPopup .ao-cat-table-wrap{max-height:38vh;overflow:auto;border:1px solid #d7e5ef;border-radius:12px;background:#fff;}
@@ -7771,7 +7781,7 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
   #aoCategoryPopup .ao-cat-page-btn:hover:not(:disabled){background:#eff6ff;border-color:#93c5fd;}
   #aoCategoryPopup .ao-cat-page-btn:disabled{opacity:.45;cursor:not-allowed;}
   #aoCategoryPopup .ao-cat-notice{margin:0 0 12px;padding:10px 12px;border:1px solid #f0d4a3;border-radius:11px;background:#fff8e9;color:#805b24;font-size:11px;line-height:1.5;}
-  @media(max-width:1050px){#aoCategoryPopup .ao-cat-detail-head{grid-template-columns:1fr;gap:10px;}#aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:minmax(170px,1fr) auto auto auto;}}
+  @media(max-width:1050px){#aoCategoryPopup .ao-cat-detail-head{grid-template-columns:1fr;gap:10px;}#aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:minmax(160px,1fr) auto auto auto auto;}#aoCategoryPopup .ao-cat-detail-metrics{grid-template-columns:repeat(3,minmax(0,1fr));}}
   @media(max-width:760px){
     #aoCategoryPopup{padding:6px;}#aoCategoryPopup .ao-cat-modal{max-height:98vh;border-radius:15px;}#aoCategoryPopup .ao-cat-head{padding:13px 14px;}#aoCategoryPopup .ao-cat-body{padding:12px;}
     #aoCategoryPopup .ao-cat-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}#aoCategoryPopup .ao-cat-overview .ao-cat-metric:last-child{grid-column:1/-1;}
@@ -7781,7 +7791,7 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
     #aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:minmax(0,1fr) auto;}
     #aoCategoryPopup .ao-cat-price-dropdown{left:auto;right:0;}#aoCategoryPopup .ao-cat-detail-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}
   }
-  @media(max-width:480px){#aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:1fr 1fr;}#aoCategoryPopup .ao-cat-record-search{grid-column:1/-1;}#aoCategoryPopup .ao-cat-price-wrap{grid-column:1/-1;}#aoCategoryPopup .ao-cat-price-button{width:100%;}#aoCategoryPopup .ao-cat-export-btn{width:100%;}#aoCategoryPopup .ao-cat-price-dropdown{left:0;right:auto;width:min(330px,92vw);}#aoCategoryPopup .ao-cat-paging{align-items:flex-start;flex-direction:column;}}
+  @media(max-width:480px){#aoCategoryPopup .ao-cat-detail-controls{grid-template-columns:1fr 1fr;}#aoCategoryPopup .ao-cat-record-search{grid-column:1/-1;}#aoCategoryPopup .ao-cat-description-wrap,#aoCategoryPopup .ao-cat-price-wrap{grid-column:1/-1;}#aoCategoryPopup .ao-cat-description-button,#aoCategoryPopup .ao-cat-price-button{width:100%;}#aoCategoryPopup .ao-cat-export-btn{width:100%;}#aoCategoryPopup .ao-cat-description-dropdown,#aoCategoryPopup .ao-cat-price-dropdown{left:0;right:auto;width:min(390px,92vw);}#aoCategoryPopup .ao-cat-paging{align-items:flex-start;flex-direction:column;}}
   @media(prefers-reduced-motion:reduce){#aoCategoryPopup .ao-cat-modal{animation:none;}#aoCategoryPopup .ao-cat-card,#aoCategoryPopup .ao-cat-close,#aoCategoryPopup .ao-cat-price-button,#aoCategoryPopup .ao-cat-page-btn{transition:none;}}
 </style>
 
@@ -31384,8 +31394,10 @@ function aoVideoCreatePeer(){
   let categoryGroups = [];
   let selectedCategoryKey = null;
   let selectedPriceKeys = new Set();
+  let selectedDescriptionKeys = new Set();
   let categoryPage = 1;
   let priceDropdownOpen = false;
+  let descriptionDropdownOpen = false;
   let isLoadingCategoryData = false;
   let loadSequence = 0;
 
@@ -31471,6 +31483,10 @@ function aoVideoCreatePeer(){
               <div><div id="aoCategoryDetailTitle" class="ao-cat-detail-title"></div><div id="aoCategoryDetailSummary" class="ao-cat-detail-summary"></div></div>
               <div class="ao-cat-detail-controls">
                 <input id="aoCategoryRecordSearch" class="ao-cat-record-search" type="search" placeholder="Search description, tag number or price…" aria-label="Search description, tag number or selling price" autocomplete="off">
+                <div class="ao-cat-description-wrap">
+                  <button type="button" id="aoCategoryDescriptionButton" class="ao-cat-description-button" aria-expanded="false">Description ▾</button>
+                  <div id="aoCategoryDescriptionDropdown" class="ao-cat-description-dropdown" style="display:none"></div>
+                </div>
                 <div class="ao-cat-price-wrap">
                   <button type="button" id="aoCategoryPriceButton" class="ao-cat-price-button" aria-expanded="false">Selling Price ▾</button>
                   <div id="aoCategoryPriceDropdown" class="ao-cat-price-dropdown" style="display:none"></div>
@@ -31498,7 +31514,13 @@ function aoVideoCreatePeer(){
     });
     byId("aoCategoryPriceButton").addEventListener("click", function(){
       priceDropdownOpen = !priceDropdownOpen;
+      if(priceDropdownOpen){ descriptionDropdownOpen = false; renderDescriptionDropdown(); }
       renderPriceDropdown();
+    });
+    byId("aoCategoryDescriptionButton").addEventListener("click", function(){
+      descriptionDropdownOpen = !descriptionDropdownOpen;
+      if(descriptionDropdownOpen){ priceDropdownOpen = false; renderPriceDropdown(); }
+      renderDescriptionDropdown();
     });
     byId("aoCategoryPrev").addEventListener("click", function(){ if(categoryPage > 1){ categoryPage--; renderSelectedCategoryRows(); } });
     byId("aoCategoryNext").addEventListener("click", function(){
@@ -31520,7 +31542,9 @@ function aoVideoCreatePeer(){
     const modal = byId("aoCategoryPopup");
     if(modal) modal.style.display = "none";
     priceDropdownOpen = false;
+    descriptionDropdownOpen = false;
     if(byId("aoCategoryPriceDropdown")) byId("aoCategoryPriceDropdown").style.display = "none";
+    if(byId("aoCategoryDescriptionDropdown")) byId("aoCategoryDescriptionDropdown").style.display = "none";
   }
 
   async function loadAvailableStockRows(branch){
@@ -31577,6 +31601,9 @@ function aoVideoCreatePeer(){
       categoryGroups = buildCategoryGroups(categoryRows);
       selectedCategoryKey = null;
       selectedPriceKeys = new Set();
+      selectedDescriptionKeys = new Set();
+      priceDropdownOpen = false;
+      descriptionDropdownOpen = false;
       categoryPage = 1;
       byId("aoCategorySubtitle").textContent = branchAtOpen === "ALL" ? "All branches · all available records" : branchAtOpen + " branch · all available records";
       renderOverview();
@@ -31651,16 +31678,91 @@ function aoVideoCreatePeer(){
     selectedCategoryKey = key;
     categoryPage = 1;
     priceDropdownOpen = false;
+    descriptionDropdownOpen = false;
     const rows = categoryRows.filter(row => categoryKey(row) === key);
     selectedPriceKeys = new Set(rows.map(priceKey));
+    selectedDescriptionKeys = new Set(rows.map(descriptionKey));
     byId("aoCategoryDetail").style.display = "block";
     byId("aoCategoryDetailTitle").textContent = categoryLabel(key);
     byId("aoCategoryRecordSearch").value = "";
     byId("aoCategoryDetailSummary").textContent = rows.length.toLocaleString("en-PH") + " available items. Search description, tag number or price; use the selling-price filter to narrow results.";
     renderCategoryCards();
     renderPriceDropdown();
+    renderDescriptionDropdown();
     renderSelectedCategoryRows();
     byId("aoCategoryDetail").scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  const BLANK_DESCRIPTION = "__AO_BLANK_DESCRIPTION__";
+  function descriptionKey(row){
+    const value = String(row?.description ?? rawValue(row, "DESCRIPTION") ?? "").trim();
+    return value ? value : BLANK_DESCRIPTION;
+  }
+  function descriptionLabel(key){ return key === BLANK_DESCRIPTION ? "(BLANK DESCRIPTION)" : key; }
+  function descriptionOptionsForSelected(){
+    const rows = categoryRows.filter(row=>categoryKey(row)===selectedCategoryKey);
+    const map = new Map();
+    rows.forEach(function(row){
+      const key = descriptionKey(row);
+      if(!map.has(key)) map.set(key, {key:key, label:descriptionLabel(key), count:0});
+      map.get(key).count++;
+    });
+    return Array.from(map.values()).sort(function(a,b){
+      if(a.key === BLANK_DESCRIPTION) return 1;
+      if(b.key === BLANK_DESCRIPTION) return -1;
+      return a.label.localeCompare(b.label, undefined, {numeric:true, sensitivity:"base"});
+    });
+  }
+  function renderDescriptionDropdown(){
+    const button = byId("aoCategoryDescriptionButton");
+    const dropdown = byId("aoCategoryDescriptionDropdown");
+    if(!button || !dropdown) return;
+    if(selectedCategoryKey === null){
+      dropdown.style.display = "none";
+      button.style.display = "none";
+      return;
+    }
+    button.style.display = "inline-flex";
+    const options = descriptionOptionsForSelected();
+    const selectedCount = options.filter(option=>selectedDescriptionKeys.has(option.key)).length;
+    button.textContent = "Description ▾ (" + selectedCount + "/" + options.length + ")";
+    button.setAttribute("aria-expanded", String(descriptionDropdownOpen));
+    dropdown.style.display = descriptionDropdownOpen ? "block" : "none";
+    const actions = `<div class="ao-cat-price-actions">
+      <button type="button" class="ao-cat-price-action" id="aoCategoryDescriptionSelectAll">Select All</button>
+      <button type="button" class="ao-cat-price-action" id="aoCategoryDescriptionClear" title="Uncheck all description values">Clear Filter</button>
+    </div>`;
+    if(!options.length){
+      dropdown.innerHTML = actions + '<div class="ao-cat-empty">No descriptions found.</div>';
+    }else{
+      dropdown.innerHTML = actions + `<div class="ao-cat-price-options">${options.map(function(option){
+        return `<label class="ao-cat-description-item"><input type="checkbox" data-description-key="${esc(option.key)}" ${selectedDescriptionKeys.has(option.key) ? "checked" : ""}><span>${esc(option.label)}</span><small>${option.count.toLocaleString("en-PH")} items</small></label>`;
+      }).join("")}</div>`;
+    }
+    const selectAll = byId("aoCategoryDescriptionSelectAll");
+    if(selectAll) selectAll.addEventListener("click", function(){
+      selectedDescriptionKeys = new Set(descriptionOptionsForSelected().map(option=>option.key));
+      categoryPage = 1;
+      renderDescriptionDropdown();
+      renderSelectedCategoryRows();
+    });
+    const clearFilter = byId("aoCategoryDescriptionClear");
+    if(clearFilter) clearFilter.addEventListener("click", function(){
+      selectedDescriptionKeys = new Set();
+      categoryPage = 1;
+      renderDescriptionDropdown();
+      renderSelectedCategoryRows();
+    });
+    dropdown.querySelectorAll("input[data-description-key]").forEach(function(input){
+      input.addEventListener("change", function(){
+        const key = input.getAttribute("data-description-key");
+        if(input.checked) selectedDescriptionKeys.add(key);
+        else selectedDescriptionKeys.delete(key);
+        categoryPage = 1;
+        renderDescriptionDropdown();
+        renderSelectedCategoryRows();
+      });
+    });
   }
 
   function priceOptionsForSelected(){
@@ -31736,6 +31838,11 @@ function aoVideoCreatePeer(){
       return categoryKey(row) === selectedCategoryKey && selectedPriceKeys.has(priceKey(row));
     });
   }
+  function selectedCategoryDescriptionRows(){
+    return selectedCategoryPriceRows().filter(function(row){
+      return selectedDescriptionKeys.has(descriptionKey(row));
+    });
+  }
   function categoryRecordMatchesSearch(row, query){
     if(!query) return true;
     const description = row?.description ?? rawValue(row, "DESCRIPTION") ?? "";
@@ -31746,13 +31853,14 @@ function aoVideoCreatePeer(){
   }
   function selectedCategoryFilteredRows(){
     const query = String(byId("aoCategoryRecordSearch")?.value || "").trim().toLocaleLowerCase();
-    return selectedCategoryPriceRows().filter(function(row){ return categoryRecordMatchesSearch(row, query); });
+    return selectedCategoryDescriptionRows().filter(function(row){ return categoryRecordMatchesSearch(row, query); });
   }
 
   function renderSelectedCategoryRows(){
     if(selectedCategoryKey === null) return;
     const allCategoryRows = categoryRows.filter(row=>categoryKey(row)===selectedCategoryKey);
     const priceRows = selectedCategoryPriceRows();
+    const descriptionRows = selectedCategoryDescriptionRows();
     const rows = selectedCategoryFilteredRows();
     const query = String(byId("aoCategoryRecordSearch")?.value || "").trim();
     const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
@@ -31763,7 +31871,8 @@ function aoVideoCreatePeer(){
       <div class="ao-cat-detail-metric">Matching items<strong>${rows.length.toLocaleString("en-PH")}</strong></div>
       <div class="ao-cat-detail-metric">Total selling price<strong>${peso(rowsTotal(rows))}</strong></div>
       <div class="ao-cat-detail-metric">Excluded by price<strong>${(allCategoryRows.length - priceRows.length).toLocaleString("en-PH")}</strong></div>
-      <div class="ao-cat-detail-metric">Hidden by search<strong>${(priceRows.length - rows.length).toLocaleString("en-PH")}</strong></div>`;
+      <div class="ao-cat-detail-metric">Excluded by description<strong>${(priceRows.length - descriptionRows.length).toLocaleString("en-PH")}</strong></div>
+      <div class="ao-cat-detail-metric">Hidden by search<strong>${(descriptionRows.length - rows.length).toLocaleString("en-PH")}</strong></div>`;
     const excelButton = byId("aoCategoryExportExcel");
     const pdfButton = byId("aoCategoryExportPdf");
     if(excelButton) excelButton.disabled = rows.length === 0;
@@ -31771,7 +31880,9 @@ function aoVideoCreatePeer(){
     if(!pageRows.length){
       const noRowsMessage = selectedPriceKeys.size === 0
         ? "No selling prices are selected. Open Selling Price and choose a value, or use Select All."
-        : "No items match the selected selling-price checkboxes and search.";
+        : (selectedDescriptionKeys.size === 0
+          ? "No descriptions are selected. Open Description and choose a value, or use Select All."
+          : "No items match the selected description, selling-price, and search filters.");
       byId("aoCategoryRows").innerHTML = '<div class="ao-cat-empty">' + esc(noRowsMessage) + '</div>';
     }else{
       byId("aoCategoryRows").innerHTML = `<table class="ao-cat-table"><thead><tr><th>BRANCH</th><th>LENS TYPE</th><th>DESCRIPTION</th><th>TAG</th><th>SELLING PRICE</th><th>SI NO.</th><th>DATE</th></tr></thead><tbody>${pageRows.map(function(row){

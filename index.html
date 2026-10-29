@@ -7729,7 +7729,7 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
   #aoCategoryPopup .ao-cat-card.active{border-color:#60a5fa;background:linear-gradient(135deg,#eff6ff,#fff);box-shadow:inset 0 0 0 1px rgba(59,130,246,.14);}
   #aoCategoryPopup .ao-cat-card-name{display:block;color:#1e40af;font-weight:900;font-size:12px;overflow-wrap:anywhere;}
   #aoCategoryPopup .ao-cat-card-meta{display:flex;justify-content:space-between;gap:8px;margin-top:9px;color:#647b91;font-size:10px;font-weight:750;}
-  #aoCategoryPopup .ao-cat-card-total{display:block;margin-top:9px;padding:9px 10px;border:1px solid #1e40af;border-radius:9px;background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%);color:#fff;font-size:11px;font-weight:900;line-height:1.4;box-shadow:0 4px 10px rgba(30,64,175,.18);}
+  #aoCategoryPopup .ao-cat-card-total{display:block;margin-top:9px;padding:9px 10px;border:1px solid #d5e0ea;border-radius:9px;background:linear-gradient(135deg,#edf3f8 0%,#e5edf5 100%);color:#34495e;font-size:11px;font-weight:850;line-height:1.4;box-shadow:0 2px 6px rgba(40,60,80,.055);}
   #aoCategoryPopup .ao-cat-description-wrap{position:relative;min-width:0;}
   #aoCategoryPopup .ao-cat-description-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:9px 12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#1d4ed8;font-size:10px;font-weight:850;white-space:nowrap;cursor:pointer;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;}
   #aoCategoryPopup .ao-cat-description-button:hover{background:#dbeafe;border-color:#93c5fd;}
@@ -7755,7 +7755,7 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
   #aoCategoryPopup .ao-cat-price-button:hover{background:#dbeafe;border-color:#93c5fd;}
   #aoCategoryPopup .ao-cat-price-button[aria-expanded="true"]{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
   #aoCategoryPopup .ao-cat-price-dropdown{position:absolute;right:0;top:calc(100% + 7px);z-index:8;width:min(330px,88vw);max-height:310px;overflow:auto;padding:9px;border:1px solid #cbddea;border-radius:13px;background:#fff;box-shadow:0 14px 38px rgba(15,23,42,.18);}
-  #aoCategoryPopup .ao-cat-price-actions{display:flex;align-items:center;gap:7px;padding:0 0 8px;margin-bottom:4px;border-bottom:1px solid #e8f0f6;}
+  #aoCategoryPopup .ao-cat-price-actions{position:sticky;top:-9px;z-index:4;display:flex;align-items:center;gap:7px;padding:9px 0 8px;margin:-9px 0 4px;border-bottom:1px solid #e8f0f6;background:#fff;box-shadow:0 5px 8px rgba(15,23,42,.035);}
   #aoCategoryPopup .ao-cat-price-action{min-height:30px;padding:6px 9px;border:1px solid #cbddea;border-radius:8px;background:#f8fbff;color:#245a9e;font-size:10px;font-weight:850;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
   #aoCategoryPopup .ao-cat-price-action:hover{background:#dbeafe;border-color:#93c5fd;}
   #aoCategoryPopup .ao-cat-price-options{display:flex;flex-direction:column;gap:1px;}
@@ -31700,7 +31700,13 @@ function aoVideoCreatePeer(){
   }
   function descriptionLabel(key){ return key === BLANK_DESCRIPTION ? "(BLANK DESCRIPTION)" : key; }
   function descriptionOptionsForSelected(){
-    const rows = categoryRows.filter(row=>categoryKey(row)===selectedCategoryKey);
+    const categoryBase = categoryRows.filter(row=>categoryKey(row)===selectedCategoryKey);
+    // When one or more prices are selected, only offer descriptions that
+    // actually occur at those prices. With no prices selected, show all
+    // category descriptions so the user can recover from Clear Filter.
+    const rows = selectedPriceKeys.size
+      ? categoryBase.filter(row=>selectedPriceKeys.has(priceKey(row)))
+      : categoryBase;
     const map = new Map();
     rows.forEach(function(row){
       const key = descriptionKey(row);
@@ -31744,6 +31750,7 @@ function aoVideoCreatePeer(){
       selectedDescriptionKeys = new Set(descriptionOptionsForSelected().map(option=>option.key));
       categoryPage = 1;
       renderDescriptionDropdown();
+      renderPriceDropdown();
       renderSelectedCategoryRows();
     });
     const clearFilter = byId("aoCategoryDescriptionClear");
@@ -31751,6 +31758,7 @@ function aoVideoCreatePeer(){
       selectedDescriptionKeys = new Set();
       categoryPage = 1;
       renderDescriptionDropdown();
+      renderPriceDropdown();
       renderSelectedCategoryRows();
     });
     dropdown.querySelectorAll("input[data-description-key]").forEach(function(input){
@@ -31760,13 +31768,20 @@ function aoVideoCreatePeer(){
         else selectedDescriptionKeys.delete(key);
         categoryPage = 1;
         renderDescriptionDropdown();
+        renderPriceDropdown();
         renderSelectedCategoryRows();
       });
     });
   }
 
   function priceOptionsForSelected(){
-    const rows = categoryRows.filter(row=>categoryKey(row)===selectedCategoryKey);
+    const categoryBase = categoryRows.filter(row=>categoryKey(row)===selectedCategoryKey);
+    // Make available price choices depend on the selected descriptions.
+    // If no descriptions are selected, show all prices so the filter can be
+    // reset without trapping the user in an empty result state.
+    const rows = selectedDescriptionKeys.size
+      ? categoryBase.filter(row=>selectedDescriptionKeys.has(descriptionKey(row)))
+      : categoryBase;
     const map = new Map();
     rows.forEach(function(row){
       const key = priceKey(row);
@@ -31810,6 +31825,7 @@ function aoVideoCreatePeer(){
       selectedPriceKeys = new Set(priceOptionsForSelected().map(option=>option.key));
       categoryPage = 1;
       renderPriceDropdown();
+      renderDescriptionDropdown();
       renderSelectedCategoryRows();
     });
     const clearFilter = byId("aoCategoryPriceClear");
@@ -31818,6 +31834,7 @@ function aoVideoCreatePeer(){
       selectedPriceKeys = new Set();
       categoryPage = 1;
       renderPriceDropdown();
+      renderDescriptionDropdown();
       renderSelectedCategoryRows();
     });
     byId("aoCategoryPriceDropdown").querySelectorAll("input[data-price-key]").forEach(function(input){
@@ -31827,6 +31844,7 @@ function aoVideoCreatePeer(){
         else selectedPriceKeys.delete(key);
         categoryPage = 1;
         renderPriceDropdown();
+        renderDescriptionDropdown();
         renderSelectedCategoryRows();
       });
     });

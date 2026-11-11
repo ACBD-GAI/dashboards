@@ -2678,6 +2678,62 @@ tbody tr:last-child td{
   border-color:#b9d7e8;
 }
 
+/* SI-number search — scoped only to the Unconfirmed branch popup. */
+.unconfirmedSIToolbar{
+  position:sticky;
+  top:-8px;
+  z-index:4;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px 10px;
+  margin:-8px -10px 8px;
+  border-bottom:1px solid #e5edf3;
+  background:#fff;
+}
+.unconfirmedSISearchWrap{
+  position:relative;
+  flex:1 1 auto;
+  min-width:0;
+}
+.unconfirmedSISearchIcon{
+  position:absolute;
+  left:11px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#648198;
+  font-size:17px;
+  line-height:1;
+  pointer-events:none;
+}
+.unconfirmedSISearchInput{
+  display:block;
+  width:100%;
+  min-width:0;
+  min-height:36px;
+  padding:0 10px 0 33px;
+  border:1px solid #c9dce8;
+  border-radius:10px;
+  outline:none;
+  background:#fff;
+  color:#173247;
+  font-size:11px;
+  font-weight:700;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.unconfirmedSISearchInput::placeholder{
+  color:#8aa0af;
+  font-weight:600;
+}
+.unconfirmedSISearchInput:focus{
+  border-color:#38aee2;
+  box-shadow:0 0 0 3px rgba(56,189,248,.10);
+}
+.unconfirmedSIToolbar .unconfirmedBackBtn{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
 /* =========================================================
    EMPTY STATE
 ========================================================= */
@@ -5585,6 +5641,10 @@ tbody tr:hover td{background:linear-gradient(90deg,rgba(21,66,113,.78),rgba(11,3
 .allowedUsersHead{border-bottom-color:rgba(127,181,237,.15);background:linear-gradient(110deg,rgba(22,50,86,.94),rgba(9,23,46,.95));}.allowedUsersToolbar{border-bottom-color:rgba(127,181,237,.12);background:rgba(7,21,42,.72);}.allowedUsersModal .modalActions{border-top-color:rgba(127,181,237,.12);background:rgba(8,23,44,.95);}
 .allowedUsersCount{border-color:rgba(94,193,255,.28);background:rgba(20,91,151,.27);color:#9edaff;}.allowedUsersList{background:rgba(6,18,36,.78);}.allowedUsersTable th{color:#9dbbdb;background:linear-gradient(180deg,rgba(27,56,91,.94),rgba(14,37,67,.94));border-bottom-color:rgba(127,181,237,.18);}.allowedUsersTable td{color:#d4e4f5;background:rgba(8,23,44,.80);border-bottom-color:rgba(116,167,221,.10);}.allowedUsersTable tr:hover td{background:rgba(17,53,91,.82);}.allowedUserBranchTag{color:#8ed0ff;background:rgba(38,119,201,.20);border-color:rgba(91,186,255,.30);}.allowedUserEmail{color:#e2f2ff;}
 .unconfirmedBranchList,.unconfirmedSIList{background:rgba(7,20,39,.92)!important;}.unconfirmedBranchRow,.unconfirmedSIRow{background:rgba(12,31,55,.82);}.unconfirmedBranchRow:hover,.unconfirmedSIRow:hover{background:rgba(22,62,103,.88);border-color:rgba(89,192,255,.32);}.unconfirmedBranchName,.unconfirmedSIName{color:#d8ebff;}.unconfirmedBranchCount{background:rgba(125,77,12,.31);border-color:rgba(255,189,81,.35);color:#ffd58a;}.unconfirmedSICount{background:rgba(21,91,151,.28);border-color:rgba(96,192,255,.33);color:#a2ddff;}.unconfirmedBranchClose{color:#9cb8d5;}.unconfirmedBackBtn{border-color:rgba(123,181,245,.24);background:rgba(14,37,68,.88);color:#bad6f1;}
+.unconfirmedSIToolbar{background:rgba(7,20,39,.98);border-bottom-color:rgba(127,181,237,.15);}
+.unconfirmedSISearchIcon{color:#9cb8d5;}
+.unconfirmedSISearchInput{border-color:rgba(123,181,245,.24);background:rgba(5,17,34,.92);color:#e2f2ff;}
+.unconfirmedSISearchInput::placeholder{color:#8caac8;}
 
 /* Queue, toast, reports, and chat retain their feature behavior but match the system. */
 #globalStatus{border-color:rgba(126,194,255,.28);background:linear-gradient(135deg,#112d55,#193a70);box-shadow:0 18px 45px rgba(0,0,0,.38),0 0 26px rgba(43,144,255,.12);}
@@ -7282,6 +7342,10 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
 .unconfirmedBranchRow,.unconfirmedSIRow{border-color:transparent;background:#fff;}
 .unconfirmedBranchRow:hover,.unconfirmedSIRow:hover{background:#f2f5fb;border-color:#d6dfec;}
 .unconfirmedBranchName,.unconfirmedSIName{color:#33445e;}.unconfirmedBranchCount{background:var(--ao-amber-soft);border-color:#f0d8a7;color:#915814;}.unconfirmedSICount{background:var(--ao-blue-soft);border-color:#d0ddfd;color:#2650ad;}
+.unconfirmedSIToolbar{background:#f8faff;border-bottom-color:#e5e9f0;}
+.unconfirmedSISearchIcon{color:#71809a;}
+.unconfirmedSISearchInput{border-color:#d5deeb;background:#fff;color:#33445e;}
+.unconfirmedSISearchInput::placeholder{color:#8a97aa;}
 
 /* Extended report and search surfaces */
 .reportPdfBtn{min-height:37px;border-radius:9px;}
@@ -12175,22 +12239,37 @@ function openUnconfirmedSIPopup(branch){
           <button type="button" class="unconfirmedBranchClose" aria-label="Close" onclick="closeUnconfirmedBranchPopup()">✕</button>
         </div>
       </div>
-      <div class="unconfirmedBranchList">
-        <div style="padding:8px 10px 4px;">
+      <div class="unconfirmedBranchList unconfirmedSIList">
+        <div class="unconfirmedSIToolbar">
           <button type="button" class="unconfirmedBackBtn" onclick="openUnconfirmedBranchPopup()">← Back to branches</button>
+          <label class="unconfirmedSISearchWrap">
+            <span class="unconfirmedSISearchIcon" aria-hidden="true">⌕</span>
+            <input
+              id="unconfirmedSISearch"
+              class="unconfirmedSISearchInput"
+              type="search"
+              placeholder="Search SI NO."
+              aria-label="Search SI numbers"
+              autocomplete="off"
+              oninput="filterUnconfirmedSIList()"
+            >
+          </label>
         </div>
-        ${items.length ? items.map(si=>`
-          <button
-            type="button"
-            class="unconfirmedSIRow"
-            onclick="goToUnconfirmedSI('${escapeHtml(branch)}', '${escapeHtml(si).replace(/'/g, "&#39;")}')"
-          >
-            <span class="unconfirmedSIName">SI NO. ${escapeHtml(si)}</span>
-            <span class="unconfirmedSICount">${formatNumber(siMap[si])}</span>
-          </button>
-        `).join("") : `
-          <div class="unconfirmedBranchEmpty">No unconfirmed SI NO. found for ${escapeHtml(branch)}.</div>
-        `}
+        <div id="unconfirmedSIItems">
+          ${items.map(si=>`
+            <button
+              type="button"
+              class="unconfirmedSIRow"
+              onclick="goToUnconfirmedSI('${escapeHtml(branch)}', '${escapeHtml(si).replace(/'/g, "&#39;")}')"
+            >
+              <span class="unconfirmedSIName">SI NO. ${escapeHtml(si)}</span>
+              <span class="unconfirmedSICount">${formatNumber(siMap[si])}</span>
+            </button>
+          `).join("")}
+        </div>
+        <div id="unconfirmedSINoResults" class="unconfirmedBranchEmpty ${items.length ? "hidden" : ""}">
+          No unconfirmed SI NO. found for ${escapeHtml(branch)}.
+        </div>
       </div>
     </div>
   `;
@@ -12202,6 +12281,62 @@ function openUnconfirmedSIPopup(branch){
   });
 
   document.body.appendChild(backdrop);
+  document.getElementById("unconfirmedSISearch")?.focus();
+}
+
+/*
+ * Filters only the SI-number buttons inside the Unconfirmed branch popup.
+ * It does not touch the dashboard's main Search or any Sold Out filters.
+ */
+function filterUnconfirmedSIList(){
+
+  const input = document.getElementById("unconfirmedSISearch");
+  const items = document.getElementById("unconfirmedSIItems");
+  const empty = document.getElementById("unconfirmedSINoResults");
+
+  if(!input || !items || !empty){
+    return;
+  }
+
+  const query = String(input.value || "")
+    .trim()
+    .toLocaleLowerCase();
+
+  const rows = Array.from(
+    items.querySelectorAll(".unconfirmedSIRow")
+  );
+
+  if(!rows.length){
+    return;
+  }
+
+  let matchCount = 0;
+
+  rows.forEach(row=>{
+    const siText = String(
+      row.querySelector(".unconfirmedSIName")?.textContent || ""
+    )
+      .replace(/^SI\s*NO\.\s*/i,"")
+      .trim()
+      .toLocaleLowerCase();
+
+    const matches = !query || siText.includes(query);
+
+    row.classList.toggle("hidden", !matches);
+
+    if(matches){
+      matchCount++;
+    }
+  });
+
+  if(matchCount === 0){
+    empty.textContent = `No SI NO. matching "${String(input.value || "").trim()}".`;
+    empty.classList.remove("hidden");
+  }else{
+    empty.textContent = "";
+    empty.classList.add("hidden");
+  }
+
 }
 
 function goToUnconfirmedBranch(branch){

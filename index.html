@@ -8225,6 +8225,7 @@ tbody tr:hover td{background:#f1f5ff;border-bottom-color:#dce6fb;}
       <div
         class="statCard unconfirmedStatCard"
         id="unconfirmedStatCard"
+        style="display:none;"
         role="button"
         tabindex="0"
         onclick="openUnconfirmedBranchPopup()"
@@ -11720,6 +11721,16 @@ function updateSoldOnlyColumns(){
   if(soldStatCard){
     soldStatCard.style.display =
       report === "sold" ? "" : "none";
+  }
+
+  /* Keep the Unconfirmed card out of Available Stocks.
+     Its existing Sold Out popup and counting functions remain unchanged. */
+  const unconfirmedCard =
+    document.getElementById("unconfirmedStatCard");
+
+  if(unconfirmedCard){
+    unconfirmedCard.style.display =
+      report === "stocks" ? "none" : "";
   }
 
   const auditFilters =
@@ -16062,107 +16073,121 @@ async function saveSoldSI(
     ).trim();
 
   if(!branch){
-
-    showStatus(
-      "Missing branch."
-    );
-
+    showStatus("Missing branch.");
     return;
-
   }
 
   if(!tag){
-
-    showStatus(
-      "Missing NTAGN."
-    );
-
+    showStatus("Missing NTAGN.");
     return;
-
   }
 
-  const row =
-    currentRows.find(
-      r =>
-        String(
-          r.branch
-        ).trim() === branch &&
-        String(
-          r.tag
-        ).trim() === tag
-    );
+  const row = currentRows.find(
+    r =>
+      String(r.branch).trim() === branch &&
+      String(r.tag).trim() === tag
+  );
 
-  const oldValue =
-    row
-      ? String(
-          row.si || ""
-        )
-      : "";
+  const oldValue = row
+    ? String(row.si ?? "").trim()
+    : "";
 
-  input.disabled =
-    true;
+  if(si === oldValue){
+    input.value = si;
+    return;
+  }
+
+  input.disabled = true;
 
   try{
 
-    const table =
-      tableName(
-        branch,
-        "sold"
-      );
-
-    const params =
-      new URLSearchParams();
+    const table = tableName(branch,"sold");
 
     /*
-     * The branch-specific table already
-     * identifies the branch.
+     * SI NO. is a group value inside one branch's Sold Out table.
+     * Find every Sold Out tag that still has the ORIGINAL SI NO.
+     * and update that group together.
      *
-     * Only NTAGN is needed.
+     * The SI NO. column contains a period, so it is deliberately
+     * NOT used as a PostgREST filter. We fetch the two needed columns
+     * and compare the original SI value in JavaScript instead.
      */
+    let rowsToUpdate = [tag];
 
-    params.set(
-      "NTAGN",
-      "eq." + tag
-    );
+    if(oldValue){
+      const soldRows = await fetchAllRowsForStats(
+        table,
+        'NTAGN,"SI NO."'
+      );
+
+      rowsToUpdate = (Array.isArray(soldRows) ? soldRows : [])
+        .filter(r => String(r?.["SI NO."] ?? "").trim() === oldValue)
+        .map(r => String(r?.NTAGN ?? "").trim())
+        .filter(Boolean);
+
+      /* Safety fallback: always include the exact edited tag. */
+      if(!rowsToUpdate.includes(tag)){
+        rowsToUpdate.push(tag);
+      }
+    }
+
+    rowsToUpdate = [...new Set(rowsToUpdate)];
+
+    /* Use one PATCH so the existing Inventory History hook records
+       this as one grouped SI-number edit, not separate edits per item. */
+    const params = new URLSearchParams();
+
+    if(rowsToUpdate.length === 1){
+      params.set("NTAGN","eq." + rowsToUpdate[0]);
+    }else{
+      const inValues = rowsToUpdate.map(value =>
+        '"' + String(value).replace(/\\/g,"\\\\").replace(/"/g,'\\"') + '"'
+      ).join(",");
+      params.set("NTAGN","in.(" + inValues + ")");
+    }
 
     await supabaseRequest(
-      table +
-      "?" +
-      params.toString(),
+      table + "?" + params.toString(),
       {
         method:"PATCH",
-
-        body:{
-          "SI NO.":si
-        },
-
+        body:{"SI NO.":si},
         prefer:"return=minimal"
       }
     );
 
-    if(row){
+    /* Keep all matching rows in the current page state synchronized. */
+    const affectedTags = new Set(rowsToUpdate);
+    currentRows.forEach(r=>{
+      if(
+        String(r.branch).trim() === branch &&
+        affectedTags.has(String(r.tag).trim())
+      ){
+        r.si = si;
+        if(r.raw){
+          r.raw["SI NO."] = si;
+        }
+      }
+    });
 
-      row.si =
-        si;
+    input.value = si;
 
-    }
+    /* Refresh the unconfirmed distinct-SI totals because the group changed. */
+    unconfirmedOverviewLoadedAt = 0;
+    loadUnconfirmedOverview(true).catch(error=>{
+      console.warn("Unable to refresh unconfirmed totals after SI edit:",error);
+    });
 
-    input.value =
-      si;
+    applySoldFilters();
 
     showStatus(
-      "Sold SI No. saved."
+      "SI No. updated for " + rowsToUpdate.length +
+      (rowsToUpdate.length === 1 ? " Sold Out item." : " Sold Out items.")
     );
 
   }catch(error){
 
-    console.error(
-      "Sold SI update failed:",
-      error
-    );
-
-    input.value =
-      oldValue;
+    console.error("Sold SI update failed:",error);
+    input.value = oldValue;
 
     showStatus(
       error?.message ||
@@ -16170,10 +16195,7 @@ async function saveSoldSI(
     );
 
   }finally{
-
-    input.disabled =
-      false;
-
+    input.disabled = false;
   }
 
 }
